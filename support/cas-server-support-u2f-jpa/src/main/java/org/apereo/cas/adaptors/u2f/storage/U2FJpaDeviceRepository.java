@@ -52,7 +52,8 @@ public class U2FJpaDeviceRepository extends BaseU2FDeviceRepository {
     @Override
     public Collection<? extends DeviceRegistration> getRegisteredDevices(final String username) {
         try {
-            val expirationDate = LocalDate.now(ZoneId.systemDefault()).minus(this.expirationTime, DateTimeUtils.toChronoUnit(this.expirationTimeUnit));
+            val expirationDate = LocalDate.now(ZoneId.systemDefault())
+                .minus(this.expirationTime, DateTimeUtils.toChronoUnit(this.expirationTimeUnit));
             return this.entityManager.createQuery(
                 SELECT_QUERY.concat("where r.username = :username and r.createdDate >= :expdate"),
                 U2FJpaDeviceRegistration.class)
@@ -64,7 +65,11 @@ public class U2FJpaDeviceRepository extends BaseU2FDeviceRepository {
                     try {
                         return DeviceRegistration.fromJson(getCipherExecutor().decode(r.getRecord()));
                     } catch (final Exception e) {
-                        LOGGER.error(e.getMessage(), e);
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.error(e.getMessage(), e);
+                        } else {
+                            LOGGER.error(e.getMessage());
+                        }
                     }
                     return null;
                 })
@@ -73,21 +78,20 @@ public class U2FJpaDeviceRepository extends BaseU2FDeviceRepository {
         } catch (final NoResultException e) {
             LOGGER.debug("No device registration was found for [{}]", username);
         } catch (final Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.error(e.getMessage(), e);
+            } else {
+                LOGGER.error(e.getMessage());
+            }
         }
         return new ArrayList<>(0);
     }
 
     @Override
     public void registerDevice(final String username, final DeviceRegistration registration) {
-        authenticateDevice(username, registration);
-    }
-
-    @Override
-    public void authenticateDevice(final String username, final DeviceRegistration registration) {
         val jpa = new U2FJpaDeviceRegistration();
         jpa.setUsername(username);
-        jpa.setRecord(getCipherExecutor().encode(registration.toJson()));
+        jpa.setRecord(getCipherExecutor().encode(registration.toJsonWithAttestationCert()));
         jpa.setCreatedDate(LocalDate.now(ZoneId.systemDefault()));
         this.entityManager.merge(jpa);
     }
@@ -107,7 +111,11 @@ public class U2FJpaDeviceRepository extends BaseU2FDeviceRepository {
                 .setParameter("expdate", expirationDate)
                 .executeUpdate();
         } catch (final Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.error(e.getMessage(), e);
+            } else {
+                LOGGER.error(e.getMessage());
+            }
         }
     }
 
@@ -116,7 +124,11 @@ public class U2FJpaDeviceRepository extends BaseU2FDeviceRepository {
         try {
             this.entityManager.createQuery(DELETE_QUERY).executeUpdate();
         } catch (final Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.error(e.getMessage(), e);
+            } else {
+                LOGGER.error(e.getMessage());
+            }
         }
     }
 }

@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.HashMap;
 
@@ -44,10 +45,10 @@ import static org.junit.jupiter.api.Assertions.*;
 },
     properties = {
         "cas.ticket.registry.memcached.servers=localhost:11211",
-        "cas.ticket.registry.memcached.failureMode=Redistribute",
-        "cas.ticket.registry.memcached.locatorType=ARRAY_MOD",
-        "cas.ticket.registry.memcached.hashAlgorithm=FNV1A_64_HASH",
-        "cas.ticket.registry.memcached.kryoRegistrationRequired=true"
+        "cas.ticket.registry.memcached.failure-mode=Redistribute",
+        "cas.ticket.registry.memcached.locator-type=ARRAY_MOD",
+        "cas.ticket.registry.memcached.hash-algorithm=FNV1A_64_HASH",
+        "cas.ticket.registry.memcached.kryo-registration-required=true"
     })
 @EnabledIfPortOpen(port = 11211)
 @Tag("Memcached")
@@ -85,6 +86,7 @@ public class MemcachedTicketRegistryTests extends BaseTicketRegistryTests {
     }
 
     @TestConfiguration("MemcachedTicketRegistryTestConfiguration")
+    @Lazy(false)
     public static class MemcachedTicketRegistryTestConfiguration implements ComponentSerializationPlanConfigurer {
         @Override
         public void configureComponentSerializationPlan(final ComponentSerializationPlan plan) {

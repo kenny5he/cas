@@ -2,6 +2,7 @@ package org.apereo.cas.oidc.config;
 
 import org.apereo.cas.CentralAuthenticationService;
 import org.apereo.cas.audit.AuditableExecution;
+import org.apereo.cas.authentication.AuthenticationEventExecutionPlan;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionStrategy;
 import org.apereo.cas.authentication.AuthenticationSystemSupport;
@@ -230,6 +231,10 @@ public class OidcConfiguration implements WebMvcConfigurer {
     @Autowired
     @Qualifier("oauthCasAuthenticationBuilder")
     private ObjectProvider<OAuth20CasAuthenticationBuilder> authenticationBuilder;
+
+    @Autowired
+    @Qualifier("authenticationEventExecutionPlan")
+    private ObjectProvider<AuthenticationEventExecutionPlan> authenticationEventExecutionPlan;
 
     @Autowired
     @Qualifier("warnCookieGenerator")
@@ -467,7 +472,7 @@ public class OidcConfiguration implements WebMvcConfigurer {
     @Bean
     public OidcAccessTokenEndpointController oidcAccessTokenController() {
         val context = buildConfigurationContext();
-        return new OidcAccessTokenEndpointController(context);
+        return new OidcAccessTokenEndpointController(context, accessTokenGrantAuditableRequestExtractor.getObject());
     }
 
     @ConditionalOnMissingBean(name = "clientRegistrationRequestSerializer")
@@ -499,13 +504,20 @@ public class OidcConfiguration implements WebMvcConfigurer {
         return new OidcJwksEndpointController(context, oidcJsonWebKeystoreGeneratorService());
     }
 
-    @Autowired
     @RefreshScope
     @Bean
-    public OidcWellKnownEndpointController oidcWellKnownController(@Qualifier("oidcServerDiscoverySettingsFactory") final OidcServerDiscoverySettings discoverySettings) {
+    @Autowired
+    public OidcWellKnownEndpointController oidcWellKnownController(@Qualifier("oidcWebFingerDiscoveryService")
+                                                                   final OidcWebFingerDiscoveryService oidcWebFingerDiscoveryService) {
         val context = buildConfigurationContext();
-        return new OidcWellKnownEndpointController(
-            context, new OidcWebFingerDiscoveryService(oidcWebFingerUserInfoRepository(), discoverySettings));
+        return new OidcWellKnownEndpointController(context, oidcWebFingerDiscoveryService);
+    }
+
+    @RefreshScope
+    @Bean
+    public OidcWebFingerDiscoveryService oidcWebFingerDiscoveryService(@Qualifier("oidcServerDiscoverySettingsFactory")
+                                                                        final OidcServerDiscoverySettings discoverySettings) {
+        return new OidcWebFingerDiscoveryService(oidcWebFingerUserInfoRepository(), discoverySettings);
     }
 
     @Bean
@@ -571,6 +583,7 @@ public class OidcConfiguration implements WebMvcConfigurer {
             .casProperties(casProperties)
             .ticketRegistry(ticketRegistry.getObject())
             .applicationContext(applicationContext)
+            .authenticationEventExecutionPlan(authenticationEventExecutionPlan.getObject())
             .build();
 
         val r = new DefaultMultifactorAuthenticationProviderWebflowEventResolver(context, oidcMultifactorAuthenticationTrigger());
@@ -842,7 +855,6 @@ public class OidcConfiguration implements WebMvcConfigurer {
             .accessTokenExpirationPolicy(accessTokenExpirationPolicy.getObject())
             .deviceTokenExpirationPolicy(deviceTokenExpirationPolicy.getObject())
             .accessTokenGrantRequestValidators(oauthTokenRequestValidators.getObject())
-            .accessTokenGrantAuditableRequestExtractor(accessTokenGrantAuditableRequestExtractor.getObject())
             .userProfileDataCreator(oidcUserProfileDataCreator())
             .userProfileViewRenderer(oidcUserProfileViewRenderer())
             .oAuthCodeFactory(defaultOAuthCodeFactory.getObject())

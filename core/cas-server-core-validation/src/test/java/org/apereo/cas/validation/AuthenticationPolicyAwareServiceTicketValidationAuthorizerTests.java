@@ -36,6 +36,7 @@ import org.apereo.cas.logout.config.CasCoreLogoutConfiguration;
 import org.apereo.cas.services.ServicesManager;
 
 import lombok.val;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -82,6 +84,7 @@ import static org.mockito.Mockito.*;
     CasWebApplicationServiceFactoryConfiguration.class,
     MailSenderAutoConfiguration.class
 })
+@Tag("Simple")
 public class AuthenticationPolicyAwareServiceTicketValidationAuthorizerTests {
     @Autowired
     @Qualifier("servicesManager")
@@ -173,7 +176,7 @@ public class AuthenticationPolicyAwareServiceTicketValidationAuthorizerTests {
         val handler = getAcceptUsersAuthenticationHandler();
         val handlers = List.of(getTestOtpAuthenticationHandler(), handler, getSimpleTestAuthenticationHandler());
         val service = CoreAuthenticationTestUtils.getService("https://example.com/high/");
-        val authz = getAuthorizer(new RequiredHandlerAuthenticationPolicy(handler.getName(), true), handlers);
+        val authz = getAuthorizer(new RequiredHandlerAuthenticationPolicy(Set.of(handler.getName()), true), handlers);
         val map = (Map) Map.of(
             new UsernamePasswordCredential(), handler,
             getOtpCredential(), getTestOtpAuthenticationHandler());

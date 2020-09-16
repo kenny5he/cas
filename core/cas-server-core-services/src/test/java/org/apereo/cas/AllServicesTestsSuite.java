@@ -28,22 +28,26 @@ import org.apereo.cas.services.PrincipalAttributeRegisteredServiceUsernameProvid
 import org.apereo.cas.services.RefuseRegisteredServiceProxyPolicyTests;
 import org.apereo.cas.services.RegexMatchingRegisteredServiceProxyPolicyTests;
 import org.apereo.cas.services.RegexRegisteredServiceTests;
+import org.apereo.cas.services.RegisteredServiceAccessStrategyUtilsTests;
 import org.apereo.cas.services.RegisteredServiceAuthenticationHandlerResolverTests;
 import org.apereo.cas.services.RegisteredServiceAuthenticationPolicyResolverTests;
 import org.apereo.cas.services.RegisteredServicePublicKeyImplTests;
 import org.apereo.cas.services.RegisteredServicesEventListenerTests;
 import org.apereo.cas.services.RemoteEndpointServiceAccessStrategyTests;
+import org.apereo.cas.services.ReturnEncryptedAttributeReleasePolicyTests;
 import org.apereo.cas.services.ScriptedRegisteredServiceUsernameProviderTests;
 import org.apereo.cas.services.SimpleServiceTests;
 import org.apereo.cas.services.TimeBasedRegisteredServiceAccessStrategyTests;
 import org.apereo.cas.services.UnauthorizedProxyingExceptionTests;
 import org.apereo.cas.services.UnauthorizedServiceExceptionTests;
 import org.apereo.cas.services.UnauthorizedSsoServiceExceptionTests;
+import org.apereo.cas.services.support.RegisteredServiceChainingAttributeFilterTests;
 import org.apereo.cas.services.support.RegisteredServiceMappedRegexAttributeFilterTests;
 import org.apereo.cas.services.support.RegisteredServiceMutantRegexAttributeFilterTests;
 import org.apereo.cas.services.support.RegisteredServiceRegexAttributeFilterTests;
 import org.apereo.cas.services.support.RegisteredServiceScriptedAttributeFilterTests;
-import org.apereo.cas.util.services.DefaultRegisteredServiceJsonSerializerTests;
+import org.apereo.cas.services.util.RegisteredServiceJsonSerializerTests;
+import org.apereo.cas.services.util.RegisteredServiceYamlSerializerTests;
 
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.platform.suite.api.SelectClasses;
@@ -94,7 +98,11 @@ import org.junit.runner.RunWith;
     WebApplicationServiceFactoryTests.class,
     DefaultRegisteredServiceAuthenticationPolicyTests.class,
     UnauthorizedProxyingExceptionTests.class,
+    ReturnEncryptedAttributeReleasePolicyTests.class,
     UnauthorizedServiceExceptionTests.class,
+    RegisteredServiceChainingAttributeFilterTests.class,
+    RegisteredServiceAccessStrategyUtilsTests.class,
+    RegisteredServiceYamlSerializerTests.class,
     RegisteredServiceAuthenticationPolicyResolverTests.class,
     UnauthorizedSsoServiceExceptionTests.class,
     GroovyRegisteredServiceMultifactorPolicyTests.class,
@@ -102,7 +110,7 @@ import org.junit.runner.RunWith;
     RegisteredServiceScriptedAttributeFilterTests.class,
     GroovyRegisteredServiceAccessStrategyTests.class,
     ChainingServicesManagerTests.class,
-    DefaultRegisteredServiceJsonSerializerTests.class
+    RegisteredServiceJsonSerializerTests.class
 })
 @RunWith(JUnitPlatform.class)
 public class AllServicesTestsSuite {

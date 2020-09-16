@@ -197,6 +197,7 @@ public class CasSupportActionsConfiguration {
             .registeredServiceAccessStrategyEnforcer(registeredServiceAccessStrategyEnforcer.getObject())
             .casProperties(casProperties)
             .ticketRegistry(ticketRegistry.getObject())
+            .authenticationEventExecutionPlan(authenticationEventExecutionPlan.getObject())
             .applicationContext(applicationContext)
             .build();
         return new CreateTicketGrantingTicketAction(context);
@@ -215,7 +216,7 @@ public class CasSupportActionsConfiguration {
     @Bean
     @RefreshScope
     public Action initializeLoginAction() {
-        return new InitializeLoginAction(servicesManager.getObject());
+        return new InitializeLoginAction(servicesManager.getObject(), casProperties);
     }
 
     @RefreshScope

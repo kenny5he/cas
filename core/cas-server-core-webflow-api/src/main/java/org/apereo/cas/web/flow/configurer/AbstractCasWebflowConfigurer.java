@@ -431,6 +431,19 @@ public abstract class AbstractCasWebflowConfigurer implements CasWebflowConfigur
     }
 
     /**
+     * Create transition for state transition.
+     *
+     * @param flow            the flow
+     * @param stateId         the state id
+     * @param criteriaOutcome the criteria outcome
+     * @param targetState     the target state
+     * @return the transition
+     */
+    public Transition createTransitionForState(final Flow flow, final String stateId, final String criteriaOutcome, final String targetState) {
+        return createTransitionForState(getTransitionableState(flow, stateId), criteriaOutcome, targetState, false);
+    }
+
+    /**
      * Add transition to action state.
      *
      * @param state           the action state
@@ -565,7 +578,7 @@ public abstract class AbstractCasWebflowConfigurer implements CasWebflowConfigur
      *
      * @param flow    the flow
      * @param stateId the state id
-     * @return the boolean
+     * @return true/false
      */
     public boolean containsSubflowState(final Flow flow, final String stateId) {
         return containsFlowState(flow, stateId) && getState(flow, stateId, SubflowState.class) != null;
@@ -576,7 +589,7 @@ public abstract class AbstractCasWebflowConfigurer implements CasWebflowConfigur
      *
      * @param state      the state
      * @param transition the transition
-     * @return the boolean
+     * @return true/false
      */
     public boolean containsTransition(final TransitionableState state, final String transition) {
         if (state == null) {

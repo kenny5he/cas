@@ -1,6 +1,8 @@
 package org.apereo.cas.services.support;
 
 import org.apereo.cas.authentication.principal.Principal;
+import org.apereo.cas.config.CasCoreUtilConfiguration;
+import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.services.RegisteredService;
 import org.apereo.cas.services.RegisteredServiceAttributeFilter;
 import org.apereo.cas.services.RegisteredServiceTestUtils;
@@ -11,9 +13,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +37,12 @@ import static org.mockito.Mockito.*;
  * @author Misagh Moayyed
  * @since 4.0.0
  */
+@SpringBootTest(classes = {
+    RefreshAutoConfiguration.class,
+    CasCoreUtilConfiguration.class
+})
+@EnableConfigurationProperties(CasConfigurationProperties.class)
+@Tag("Simple")
 public class RegisteredServiceRegexAttributeFilterTests {
 
     private static final File JSON_FILE = new File(FileUtils.getTempDirectoryPath(), "registeredServiceRegexAttributeFilter.json");

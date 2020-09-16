@@ -23,6 +23,7 @@ import org.apereo.cas.config.CasCoreWebConfiguration;
 import org.apereo.cas.config.CasDefaultServiceTicketIdGeneratorsConfiguration;
 import org.apereo.cas.config.CasOAuth20AuthenticationServiceSelectionStrategyConfiguration;
 import org.apereo.cas.config.CasOAuth20Configuration;
+import org.apereo.cas.config.CasOAuth20EndpointsConfiguration;
 import org.apereo.cas.config.CasOAuth20ThrottleConfiguration;
 import org.apereo.cas.config.CasPersonDirectoryTestConfiguration;
 import org.apereo.cas.config.CasRegisteredServicesTestConfiguration;
@@ -34,6 +35,7 @@ import org.apereo.cas.logout.config.CasCoreLogoutConfiguration;
 import org.apereo.cas.mock.MockTicketGrantingTicket;
 import org.apereo.cas.oidc.config.OidcConfiguration;
 import org.apereo.cas.oidc.discovery.OidcServerDiscoverySettings;
+import org.apereo.cas.oidc.discovery.webfinger.OidcWebFingerDiscoveryService;
 import org.apereo.cas.oidc.dynareg.OidcClientRegistrationResponseTests;
 import org.apereo.cas.oidc.jwks.OidcJsonWebKeystoreGeneratorService;
 import org.apereo.cas.services.OidcRegisteredService;
@@ -88,6 +90,7 @@ import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.webflow.execution.Action;
 
 import java.time.ZoneOffset;
@@ -134,6 +137,7 @@ import static org.mockito.Mockito.*;
     CasCoreAuthenticationSupportConfiguration.class,
     CasCoreServicesAuthenticationConfiguration.class,
     CasOAuth20Configuration.class,
+    CasOAuth20EndpointsConfiguration.class,
     OidcClientRegistrationResponseTests.class,
     CasThrottlingConfiguration.class,
     CasOAuth20ThrottleConfiguration.class,
@@ -158,6 +162,14 @@ public abstract class AbstractOidcTests {
 
     @Autowired
     protected ResourceLoader resourceLoader;
+
+    @Autowired
+    @Qualifier("oauthInterceptor")
+    protected HandlerInterceptorAdapter oauthInterceptor;
+
+    @Autowired
+    @Qualifier("oidcWebFingerDiscoveryService")
+    protected OidcWebFingerDiscoveryService oidcWebFingerDiscoveryService;
 
     @Autowired
     @Qualifier("oidcImplicitIdTokenAndTokenCallbackUrlBuilder")

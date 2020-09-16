@@ -34,7 +34,9 @@ public class U2FRedisDeviceRepository extends BaseU2FDeviceRepository {
     public static final String CAS_U2F_PREFIX = U2FRedisDeviceRepository.class.getSimpleName() + ':';
 
     private final transient RedisTemplate redisTemplate;
+
     private final long expirationTime;
+
     private final TimeUnit expirationTimeUnit;
 
     public U2FRedisDeviceRepository(final LoadingCache<String, String> requestStorage,
@@ -47,10 +49,23 @@ public class U2FRedisDeviceRepository extends BaseU2FDeviceRepository {
         this.redisTemplate = redisTemplate;
     }
 
+    private static String getPatternRedisKey() {
+        return CAS_U2F_PREFIX + '*';
+    }
+
+    private static String buildRedisKeyForRecord(final U2FDeviceRegistration record) {
+        return CAS_U2F_PREFIX + record.getUsername() + ':' + record.getId();
+    }
+
+    private static String buildRedisKeyForUser(final String username) {
+        return CAS_U2F_PREFIX + username + ":*";
+    }
+
     @Override
     public Collection<? extends DeviceRegistration> getRegisteredDevices(final String username) {
         try {
-            val expirationDate = LocalDate.now(ZoneId.systemDefault()).minus(this.expirationTime, DateTimeUtils.toChronoUnit(this.expirationTimeUnit));
+            val expirationDate = LocalDate.now(ZoneId.systemDefault())
+                .minus(this.expirationTime, DateTimeUtils.toChronoUnit(this.expirationTimeUnit));
             val keys = (Set<String>) this.redisTemplate.keys(buildRedisKeyForUser(username));
             if (keys != null) {
                 return keys
@@ -67,7 +82,11 @@ public class U2FRedisDeviceRepository extends BaseU2FDeviceRepository {
                             }
                             LOGGER.warn("Unable to to decode device registration for record id [{}]", r.getId());
                         } catch (final Exception e) {
-                            LOGGER.error(e.getMessage(), e);
+                            if (LOGGER.isDebugEnabled()) {
+                                LOGGER.error(e.getMessage(), e);
+                            } else {
+                                LOGGER.error(e.getMessage());
+                            }
                         }
                         return null;
                     })
@@ -75,21 +94,20 @@ public class U2FRedisDeviceRepository extends BaseU2FDeviceRepository {
                     .collect(Collectors.toList());
             }
         } catch (final Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.error(e.getMessage(), e);
+            } else {
+                LOGGER.error(e.getMessage());
+            }
         }
         return new ArrayList<>(0);
     }
 
     @Override
     public void registerDevice(final String username, final DeviceRegistration registration) {
-        authenticateDevice(username, registration);
-    }
-
-    @Override
-    public void authenticateDevice(final String username, final DeviceRegistration registration) {
         val record = new U2FDeviceRegistration();
         record.setUsername(username);
-        record.setRecord(getCipherExecutor().encode(registration.toJson()));
+        record.setRecord(getCipherExecutor().encode(registration.toJsonWithAttestationCert()));
         record.setCreatedDate(LocalDate.now(ZoneId.systemDefault()));
         val redisKey = buildRedisKeyForRecord(record);
         this.redisTemplate.boundValueOps(redisKey).set(record);
@@ -115,31 +133,20 @@ public class U2FRedisDeviceRepository extends BaseU2FDeviceRepository {
                 .collect(Collectors.toList());
             this.redisTemplate.delete(expiredKeys);
         } catch (final Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.error(e.getMessage(), e);
+            } else {
+                LOGGER.error(e.getMessage());
+            }
         }
     }
 
     @Override
     public void removeAll() {
-        val keys = (Set<String>) this.redisTemplate.keys(getRedisKeys());
-        if (keys != null) {
-            this.redisTemplate.delete(keys);
-        }
-    }
-
-    private static String getPatternRedisKey() {
-        return CAS_U2F_PREFIX + '*';
+        this.redisTemplate.delete(getRedisKeys());
     }
 
     private Set<String> getRedisKeys() {
         return this.redisTemplate.keys(getPatternRedisKey());
-    }
-
-    private static String buildRedisKeyForRecord(final U2FDeviceRegistration record) {
-        return CAS_U2F_PREFIX + record.getUsername() + ':' + record.getId();
-    }
-
-    private static String buildRedisKeyForUser(final String username) {
-        return CAS_U2F_PREFIX + username + ":*";
     }
 }

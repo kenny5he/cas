@@ -28,6 +28,7 @@ import org.apereo.cas.couchdb.surrogate.CouchDbSurrogateAuthorization;
 import org.apereo.cas.couchdb.surrogate.SurrogateAuthorizationCouchDbRepository;
 import org.apereo.cas.logout.config.CasCoreLogoutConfiguration;
 import org.apereo.cas.services.web.config.CasThemesConfiguration;
+import org.apereo.cas.util.junit.EnabledIfPortOpen;
 import org.apereo.cas.web.config.CasCookieConfiguration;
 import org.apereo.cas.web.flow.config.CasCoreWebflowConfiguration;
 import org.apereo.cas.web.flow.config.CasWebflowContextConfiguration;
@@ -79,10 +80,11 @@ import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
     CasCoreTicketIdGeneratorsConfiguration.class,
     CasCoreTicketsConfiguration.class
     }, properties = {
-        "cas.authn.surrogate.couchDb.username=cas",
-        "cas.authn.surrogate.couchdb.password=password"
+        "cas.authn.surrogate.couch-db.username=cas",
+        "cas.authn.surrogate.couch-db.password=password"
     })
 @Getter
+@EnabledIfPortOpen(port = 5984)
 public class SurrogateCouchDbAuthenticationTests extends BaseSurrogateAuthenticationServiceTests {
 
     @Autowired

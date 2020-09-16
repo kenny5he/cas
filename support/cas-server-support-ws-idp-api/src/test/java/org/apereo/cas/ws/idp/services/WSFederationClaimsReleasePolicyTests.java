@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -25,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Misagh Moayyed
  * @since 5.2.0
  */
+@Tag("Simple")
 public class WSFederationClaimsReleasePolicyTests {
     private static final File JSON_FILE = new File(FileUtils.getTempDirectoryPath(), "WSFederationClaimsReleasePolicyTests.json");
     private static final ObjectMapper MAPPER = new ObjectMapper().findAndRegisterModules();
@@ -79,6 +81,10 @@ public class WSFederationClaimsReleasePolicyTests {
         assertSame(2, results.size());
         assertTrue(results.containsKey(WSFederationClaims.COMMON_NAME.getUri()));
         assertTrue(results.containsKey(WSFederationClaims.EMAIL_ADDRESS.getUri()));
+        val commonNameValue = results.get(WSFederationClaims.COMMON_NAME.getUri());
+        assertEquals(CollectionUtils.wrapArrayList("casuser"), commonNameValue);
+        val emailAddressValue = results.get(WSFederationClaims.EMAIL_ADDRESS.getUri());
+        assertEquals(CollectionUtils.wrapArrayList("cas@example.org"), emailAddressValue);
     }
 
     @Test

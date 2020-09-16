@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.springframework.beans.factory.DisposableBean;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -30,16 +31,23 @@ import java.util.stream.Collectors;
 @Slf4j
 @Getter
 @Setter
-public class U2FCouchDbDeviceRepository extends BaseU2FDeviceRepository {
+public class U2FCouchDbDeviceRepository extends BaseU2FDeviceRepository implements DisposableBean {
 
     private final U2FDeviceRegistrationCouchDbRepository couchDb;
-    private final long expirationTime;
-    private final TimeUnit expirationTimeUnit;
-    private boolean asynchronous;
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    public U2FCouchDbDeviceRepository(final LoadingCache<String, String> requestStorage, final U2FDeviceRegistrationCouchDbRepository couchDb,
-                                      final long expirationTime, final TimeUnit expirationTimeUnit, final boolean asynchronous) {
+    private final long expirationTime;
+
+    private final TimeUnit expirationTimeUnit;
+
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor(
+        r -> new Thread(r, "U2FCouchDbDeviceRepositoryThread"));
+
+    private boolean asynchronous;
+
+    public U2FCouchDbDeviceRepository(final LoadingCache<String, String> requestStorage,
+                                      final U2FDeviceRegistrationCouchDbRepository couchDb,
+                                      final long expirationTime, final TimeUnit expirationTimeUnit,
+                                      final boolean asynchronous) {
         super(requestStorage);
         this.couchDb = couchDb;
         this.expirationTime = expirationTime;
@@ -64,14 +72,9 @@ public class U2FCouchDbDeviceRepository extends BaseU2FDeviceRepository {
 
     @Override
     public void registerDevice(final String username, final DeviceRegistration registration) {
-        authenticateDevice(username, registration);
-    }
-
-    @Override
-    public void authenticateDevice(final String username, final DeviceRegistration registration) {
         val record = new U2FDeviceRegistration();
         record.setUsername(username);
-        record.setRecord(getCipherExecutor().encode(registration.toJson()));
+        record.setRecord(getCipherExecutor().encode(registration.toJsonWithAttestationCert()));
         record.setCreatedDate(LocalDate.now(ZoneId.systemDefault()));
         if (asynchronous) {
             this.executorService.execute(() -> couchDb.add(new CouchDbU2FDeviceRegistration(record)));
@@ -103,5 +106,10 @@ public class U2FCouchDbDeviceRepository extends BaseU2FDeviceRepository {
         } else {
             couchDb.deleteAll();
         }
+    }
+
+    @Override
+    public void destroy() {
+        this.executorService.shutdown();
     }
 }

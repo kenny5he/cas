@@ -309,7 +309,7 @@ public class EncodingUtils {
      * Is json web key boolean.
      *
      * @param key the key
-     * @return the boolean
+     * @return true/false
      */
     public boolean isJsonWebKey(final String key) {
         try {
@@ -564,11 +564,11 @@ public class EncodingUtils {
      */
     @SneakyThrows
     public static String decryptJwtValue(final Key secretKeyEncryptionKey, final String value) {
-        val jwe = new JsonWebEncryption();
-        jwe.setKey(secretKeyEncryptionKey);
-        jwe.setCompactSerialization(value);
-        LOGGER.trace("Decrypting value...");
         try {
+            val jwe = new JsonWebEncryption();
+            jwe.setKey(secretKeyEncryptionKey);
+            jwe.setCompactSerialization(value);
+            LOGGER.trace("Decrypting value...");
             return jwe.getPayload();
         } catch (final Exception e) {
             if (LOGGER.isTraceEnabled()) {
@@ -581,7 +581,7 @@ public class EncodingUtils {
     /**
      * Is jce installed ?
      *
-     * @return the boolean
+     * @return true/false
      */
     public static boolean isJceInstalled() {
         try {

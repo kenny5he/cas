@@ -35,6 +35,7 @@ import org.apereo.cas.logout.config.CasCoreLogoutConfiguration;
 import org.apereo.cas.support.saml.services.SamlRegisteredService;
 import org.apereo.cas.support.saml.services.idp.metadata.SamlMetadataDocument;
 import org.apereo.cas.support.saml.services.idp.metadata.cache.resolver.SamlRegisteredServiceMetadataResolver;
+import org.apereo.cas.util.junit.EnabledIfPortOpen;
 import org.apereo.cas.validation.config.CasCoreValidationConfiguration;
 import org.apereo.cas.web.config.CasCookieConfiguration;
 import org.apereo.cas.web.flow.config.CasCoreWebflowConfiguration;
@@ -104,13 +105,14 @@ import static org.junit.jupiter.api.Assertions.*;
     CasPersonDirectoryConfiguration.class,
     CasCoreUtilConfiguration.class},
     properties = {
-        "cas.authn.samlIdp.metadata.location=classpath:",
-        "cas.authn.samlIdp.metadata.couchDb.dbName=saml_resolver",
-        "cas.authn.samlIdp.metadata.couchDb.username=cas",
-        "cas.authn.samlIdp.metadata.couchdb.password=password"
+        "cas.authn.saml-idp.metadata.location=classpath:",
+        "cas.authn.saml-idp.metadata.couch-db.db-name=saml_resolver",
+        "cas.authn.saml-idp.metadata.couch-db.username=cas",
+        "cas.authn.saml-idp.metadata.couch-db.password=password"
     })
 @EnableConfigurationProperties(CasConfigurationProperties.class)
 @EnableTransactionManagement(proxyTargetClass = true)
+@EnabledIfPortOpen(port = 5984)
 public class CouchDbSamlRegisteredServiceMetadataResolverTests {
     @Autowired
     @Qualifier("couchDbSamlRegisteredServiceMetadataResolver")

@@ -680,6 +680,17 @@ public class WebUtils {
     }
 
     /**
+     * Gets recaptcha site key.
+     *
+     * @param context the context
+     * @return the recaptcha site key
+     */
+    public static String getRecaptchaSiteKey(final RequestContext context) {
+        val flowScope = context.getFlowScope();
+        return flowScope.get("recaptchaSiteKey", String.class);
+    }
+
+    /**
      * Put static authentication into flow scope.
      *
      * @param context the context
@@ -733,7 +744,7 @@ public class WebUtils {
      * Is remember me authentication enabled ?.
      *
      * @param context the context
-     * @return the boolean
+     * @return true/false
      */
     public static Boolean isRememberMeAuthenticationEnabled(final RequestContext context) {
         return context.getFlowScope().getBoolean("rememberMeAuthenticationEnabled", Boolean.FALSE);
@@ -940,7 +951,7 @@ public class WebUtils {
      * Has passwordless authentication account.
      *
      * @param requestContext the request context
-     * @return the boolean
+     * @return true/false
      */
     public static boolean hasPasswordlessAuthenticationAccount(final RequestContext requestContext) {
         return requestContext.getFlowScope().contains("passwordlessAccount");
@@ -960,7 +971,7 @@ public class WebUtils {
      * Has request surrogate authentication request.
      *
      * @param requestContext the request context
-     * @return the boolean
+     * @return true/false
      */
     public static boolean hasRequestSurrogateAuthenticationRequest(final RequestContext requestContext) {
         return requestContext.getFlowScope().getBoolean("requestSurrogateAccount", Boolean.FALSE);
@@ -1009,7 +1020,7 @@ public class WebUtils {
      * Put graphical user authentication enabled.
      *
      * @param requestContext the request context
-     * @return the boolean
+     * @return true/false
      */
     public static boolean isGraphicalUserAuthenticationEnabled(final RequestContext requestContext) {
         return BooleanUtils.isTrue(requestContext.getFlowScope().get("guaEnabled", Boolean.class));
@@ -1029,7 +1040,7 @@ public class WebUtils {
      * Contains graphical user authentication username.
      *
      * @param requestContext the request context
-     * @return the boolean
+     * @return true/false
      */
     public static boolean containsGraphicalUserAuthenticationUsername(final RequestContext requestContext) {
         return requestContext.getFlowScope().contains("guaUsername");
@@ -1049,7 +1060,7 @@ public class WebUtils {
      * Contains graphical user authentication image boolean.
      *
      * @param requestContext the request context
-     * @return the boolean
+     * @return true/false
      */
     public static boolean containsGraphicalUserAuthenticationImage(final RequestContext requestContext) {
         return requestContext.getFlowScope().contains("guaUserImage");
@@ -1174,7 +1185,7 @@ public class WebUtils {
      * Is cas login form viewable.
      *
      * @param context the context
-     * @return the boolean
+     * @return true/false
      */
     public static boolean isCasLoginFormViewable(final RequestContext context) {
         return context.getFlowScope().getBoolean("casLoginFormViewable", Boolean.TRUE);
@@ -1279,10 +1290,31 @@ public class WebUtils {
 
     /**
      * Get the mfa provider id from flow scope.
+     *
      * @param context request context
      * @return provider id
      */
     public static String getMultifactorAuthenticationProviderById(final RequestContext context) {
         return context.getFlowScope().get(CasWebflowConstants.VAR_ID_MFA_PROVIDER_ID, String.class);
+    }
+
+    /**
+     * Put selectable multifactor authentication providers.
+     *
+     * @param requestContext the request context
+     * @param mfaProviders   the mfa providers
+     */
+    public static void putSelectableMultifactorAuthenticationProviders(final RequestContext requestContext, final List<String> mfaProviders) {
+        requestContext.getViewScope().put("mfaSelectableProviders", mfaProviders);
+    }
+
+    /**
+     * Gets selectable multifactor authentication providers.
+     *
+     * @param requestContext the request context
+     * @return the selectable multifactor authentication providers
+     */
+    public static List<String> getSelectableMultifactorAuthenticationProviders(final RequestContext requestContext) {
+        return requestContext.getViewScope().get("mfaSelectableProviders", List.class);
     }
 }

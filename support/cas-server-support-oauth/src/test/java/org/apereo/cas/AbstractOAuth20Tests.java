@@ -30,6 +30,7 @@ import org.apereo.cas.config.CasDefaultServiceTicketIdGeneratorsConfiguration;
 import org.apereo.cas.config.CasOAuth20AuthenticationServiceSelectionStrategyConfiguration;
 import org.apereo.cas.config.CasOAuth20ComponentSerializationConfiguration;
 import org.apereo.cas.config.CasOAuth20Configuration;
+import org.apereo.cas.config.CasOAuth20EndpointsConfiguration;
 import org.apereo.cas.config.CasOAuth20ThrottleConfiguration;
 import org.apereo.cas.config.CasPersonDirectoryConfiguration;
 import org.apereo.cas.config.CasThrottlingConfiguration;
@@ -55,6 +56,7 @@ import org.apereo.cas.support.oauth.web.response.accesstoken.ext.AccessTokenRequ
 import org.apereo.cas.support.oauth.web.response.accesstoken.response.OAuth20AccessTokenResponseGenerator;
 import org.apereo.cas.support.oauth.web.response.accesstoken.response.OAuth20AccessTokenResponseResult;
 import org.apereo.cas.support.oauth.web.response.accesstoken.response.OAuth20JwtAccessTokenEncoder;
+import org.apereo.cas.support.oauth.web.response.callback.OAuth20AuthorizationResponseBuilder;
 import org.apereo.cas.ticket.ExpirationPolicy;
 import org.apereo.cas.ticket.ExpirationPolicyBuilder;
 import org.apereo.cas.ticket.Ticket;
@@ -80,6 +82,7 @@ import org.apereo.cas.web.config.CasCookieConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -98,6 +101,7 @@ import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -160,6 +164,7 @@ import static org.mockito.Mockito.*;
     CasOAuth20AuthenticationServiceSelectionStrategyConfiguration.class,
     CasOAuth20ComponentSerializationConfiguration.class,
     CasOAuth20Configuration.class,
+    CasOAuth20EndpointsConfiguration.class,
     CasOAuth20ThrottleConfiguration.class
 })
 @DirtiesContext
@@ -167,6 +172,7 @@ import static org.mockito.Mockito.*;
 @EnableTransactionManagement(proxyTargetClass = true)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @Tag("OAuth")
+@Slf4j
 public abstract class AbstractOAuth20Tests {
 
     public static final ObjectMapper MAPPER = new ObjectMapper()
@@ -227,7 +233,7 @@ public abstract class AbstractOAuth20Tests {
 
     @Autowired
     @Qualifier("accessTokenController")
-    protected OAuth20AccessTokenEndpointController controller;
+    protected OAuth20AccessTokenEndpointController accessTokenController;
 
     @Autowired
     @Qualifier("accessTokenResponseGenerator")
@@ -242,8 +248,16 @@ public abstract class AbstractOAuth20Tests {
     protected OAuth20DeviceUserCodeApprovalEndpointController deviceController;
 
     @Autowired
+    @Qualifier("oauthResourceOwnerCredentialsResponseBuilder")
+    protected OAuth20AuthorizationResponseBuilder oauthResourceOwnerCredentialsResponseBuilder;
+
+    @Autowired
     @Qualifier("servicesManager")
     protected ServicesManager servicesManager;
+
+    @Autowired
+    @Qualifier("centralAuthenticationService")
+    protected CentralAuthenticationService centralAuthenticationService;
 
     @Autowired
     @Qualifier("requiresAuthenticationAccessTokenInterceptor")
@@ -338,15 +352,15 @@ public abstract class AbstractOAuth20Tests {
                                                                  final String clientId,
                                                                  final String secret,
                                                                  final Set<OAuth20GrantTypes> grantTypes) {
-        val registeredServiceImpl = new OAuthRegisteredService();
-        registeredServiceImpl.setName("The registered service name");
-        registeredServiceImpl.setServiceId(serviceId);
-        registeredServiceImpl.setClientId(clientId);
-        registeredServiceImpl.setClientSecret(secret);
-        registeredServiceImpl.setAttributeReleasePolicy(new ReturnAllAttributeReleasePolicy());
-        registeredServiceImpl.setSupportedGrantTypes(
+        val service = new OAuthRegisteredService();
+        service.setName("The registered service name");
+        service.setServiceId(serviceId);
+        service.setClientId(clientId);
+        service.setClientSecret(secret);
+        service.setAttributeReleasePolicy(new ReturnAllAttributeReleasePolicy());
+        service.setSupportedGrantTypes(
             grantTypes.stream().map(OAuth20GrantTypes::getType).collect(Collectors.toCollection(HashSet::new)));
-        return registeredServiceImpl;
+        return service;
     }
 
     protected static Principal createPrincipal() {
@@ -398,8 +412,7 @@ public abstract class AbstractOAuth20Tests {
     }
 
     protected void clearAllServices() {
-        val col = servicesManager.getAllServices();
-        col.forEach(r -> servicesManager.delete(r.getId()));
+        servicesManager.deleteAll();
         servicesManager.load();
     }
 
@@ -416,14 +429,16 @@ public abstract class AbstractOAuth20Tests {
 
         val principal = createPrincipal();
         val code = addCode(principal, service);
-
+        LOGGER.debug("Added code [{}] for principal [{}]", code, principal);
+        
         val mockRequest = new MockHttpServletRequest(HttpMethod.GET.name(), CONTEXT + OAuth20Constants.ACCESS_TOKEN_URL);
         mockRequest.setParameter(OAuth20Constants.REDIRECT_URI, REDIRECT_URI);
         mockRequest.setParameter(OAuth20Constants.GRANT_TYPE, OAuth20GrantTypes.AUTHORIZATION_CODE.name().toLowerCase());
         val auth = CLIENT_ID + ':' + CLIENT_SECRET;
         val value = EncodingUtils.encodeBase64(auth.getBytes(StandardCharsets.UTF_8));
-        mockRequest.addHeader(HttpConstants.AUTHORIZATION_HEADER, HttpConstants.BASIC_HEADER_PREFIX + value);
-
+        val header = HttpConstants.BASIC_HEADER_PREFIX + value;
+        mockRequest.addHeader(HttpConstants.AUTHORIZATION_HEADER, header);
+        LOGGER.debug("Created header [{}] for client id [{}]", header, CLIENT_ID);
         mockRequest.setParameter(OAuth20Constants.CLIENT_ID, CLIENT_ID);
         mockRequest.setParameter(OAuth20Constants.CLIENT_SECRET, CLIENT_SECRET);
 
@@ -433,13 +448,16 @@ public abstract class AbstractOAuth20Tests {
 
         mockRequest.setParameter(OAuth20Constants.CODE, code.getId());
         val mockResponse = new MockHttpServletResponse();
+
+        LOGGER.debug("Invoking authentication interceptor...");
         requiresAuthenticationInterceptor.preHandle(mockRequest, mockResponse, null);
-        val mv = controller.handleRequest(mockRequest, mockResponse);
+
+        LOGGER.debug("Submitting access token request...");
+        val mv = accessTokenController.handleRequest(mockRequest, mockResponse);
         assertNull(this.ticketRegistry.getTicket(code.getId()));
         assertEquals(HttpStatus.SC_OK, mockResponse.getStatus());
 
         var refreshTokenId = StringUtils.EMPTY;
-
         val model = mv.getModel();
         assertTrue(model.containsKey(OAuth20Constants.ACCESS_TOKEN));
 
@@ -537,7 +555,7 @@ public abstract class AbstractOAuth20Tests {
         mockRequest.setParameter(OAuth20Constants.REFRESH_TOKEN, refreshToken.getId());
         val mockResponse = new MockHttpServletResponse();
         requiresAuthenticationInterceptor.preHandle(mockRequest, mockResponse, null);
-        val mv = controller.handleRequest(mockRequest, mockResponse);
+        val mv = accessTokenController.handleRequest(mockRequest, mockResponse);
         assertEquals(HttpStatus.SC_OK, mockResponse.getStatus());
 
         assertTrue(mv.getModel().containsKey(OAuth20Constants.ACCESS_TOKEN));
@@ -591,6 +609,7 @@ public abstract class AbstractOAuth20Tests {
     }
 
     @TestConfiguration("OAuth20TestConfiguration")
+    @Lazy(false)
     public static class OAuth20TestConfiguration implements ComponentSerializationPlanConfigurer, InitializingBean {
         @Autowired
         protected ApplicationContext applicationContext;

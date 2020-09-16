@@ -1,5 +1,6 @@
 package org.apereo.cas.adaptors.cassandra.services;
 
+import org.apereo.cas.config.CasCoreHttpConfiguration;
 import org.apereo.cas.config.CasCoreServicesConfiguration;
 import org.apereo.cas.config.CasCoreUtilConfiguration;
 import org.apereo.cas.config.CassandraServiceRegistryConfiguration;
@@ -26,9 +27,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
     CassandraServiceRegistryConfiguration.class,
     CasCoreServicesConfiguration.class,
     CasCoreUtilConfiguration.class,
+    CasCoreHttpConfiguration.class,
     RefreshAutoConfiguration.class
 },
-    properties = "cas.serviceRegistry.cassandra.keyspace=cas")
+    properties = {
+        "cas.service-registry.cassandra.local-dc=datacenter1",
+        "cas.service-registry.cassandra.keyspace=cas"
+    })
 @EnableConfigurationProperties(CasConfigurationProperties.class)
 @EnableScheduling
 @Tag("Cassandra")

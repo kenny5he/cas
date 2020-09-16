@@ -2,6 +2,7 @@ package org.apereo.cas.otp.config;
 
 import org.apereo.cas.CentralAuthenticationService;
 import org.apereo.cas.audit.AuditableExecution;
+import org.apereo.cas.authentication.AuthenticationEventExecutionPlan;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
 import org.apereo.cas.authentication.AuthenticationSystemSupport;
 import org.apereo.cas.authentication.OneTimeToken;
@@ -51,6 +52,7 @@ public class OneTimeTokenAuthenticationConfiguration {
     private static final int EXPIRE_TOKENS_IN_SECONDS = 30;
 
     private static final int INITIAL_CACHE_SIZE = 50;
+
     private static final long MAX_CACHE_SIZE = 1_000_000;
 
     @Autowired
@@ -91,6 +93,10 @@ public class OneTimeTokenAuthenticationConfiguration {
     @Qualifier("ticketRegistry")
     private ObjectProvider<TicketRegistry> ticketRegistry;
 
+    @Autowired
+    @Qualifier("authenticationEventExecutionPlan")
+    private ObjectProvider<AuthenticationEventExecutionPlan> authenticationEventExecutionPlan;
+    
     @Bean
     @RefreshScope
     public CasWebflowEventResolver oneTimeTokenAuthenticationWebflowEventResolver() {
@@ -105,6 +111,7 @@ public class OneTimeTokenAuthenticationConfiguration {
             .casProperties(casProperties)
             .ticketRegistry(ticketRegistry.getObject())
             .applicationContext(applicationContext)
+            .authenticationEventExecutionPlan(authenticationEventExecutionPlan.getObject())
             .build();
 
         return new OneTimeTokenAuthenticationWebflowEventResolver(context);

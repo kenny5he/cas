@@ -12,6 +12,7 @@ import org.apereo.cas.services.ServicesManager;
 
 import lombok.SneakyThrows;
 import lombok.val;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
@@ -21,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,6 +35,7 @@ import static org.mockito.Mockito.*;
  * @since 4.0.0
  */
 @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+@Tag("Simple")
 public class PolicyBasedAuthenticationManagerTests {
     private static final String HANDLER_A = "HandlerA";
 
@@ -251,7 +254,7 @@ public class PolicyBasedAuthenticationManagerTests {
         map.put(newMockHandler(HANDLER_B, false), null);
 
         val authenticationExecutionPlan = getAuthenticationExecutionPlan(map);
-        authenticationExecutionPlan.registerAuthenticationPolicy(new RequiredHandlerAuthenticationPolicy(HANDLER_A, true));
+        authenticationExecutionPlan.registerAuthenticationPolicy(new RequiredHandlerAuthenticationPolicy(Set.of(HANDLER_A), true));
         val manager = new PolicyBasedAuthenticationManager(authenticationExecutionPlan, false,
             mock(ConfigurableApplicationContext.class));
 

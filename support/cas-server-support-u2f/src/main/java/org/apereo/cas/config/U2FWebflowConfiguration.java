@@ -10,6 +10,7 @@ import org.apereo.cas.adaptors.u2f.web.flow.U2FMultifactorWebflowConfigurer;
 import org.apereo.cas.adaptors.u2f.web.flow.U2FStartAuthenticationAction;
 import org.apereo.cas.adaptors.u2f.web.flow.U2FStartRegistrationAction;
 import org.apereo.cas.audit.AuditableExecution;
+import org.apereo.cas.authentication.AuthenticationEventExecutionPlan;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
 import org.apereo.cas.authentication.AuthenticationSystemSupport;
 import org.apereo.cas.configuration.CasConfigurationProperties;
@@ -24,12 +25,14 @@ import org.apereo.cas.web.flow.resolver.CasWebflowEventResolver;
 import org.apereo.cas.web.flow.resolver.impl.CasWebflowEventResolutionConfigurationContext;
 import org.apereo.cas.web.flow.util.MultifactorAuthenticationWebflowUtils;
 
+import com.yubico.u2f.U2F;
 import lombok.val;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -75,6 +78,10 @@ public class U2FWebflowConfiguration {
     private ObjectProvider<CentralAuthenticationService> centralAuthenticationService;
 
     @Autowired
+    @Qualifier("authenticationEventExecutionPlan")
+    private ObjectProvider<AuthenticationEventExecutionPlan> authenticationEventExecutionPlan;
+
+    @Autowired
     @Qualifier("defaultAuthenticationSystemSupport")
     private ObjectProvider<AuthenticationSystemSupport> authenticationSystemSupport;
 
@@ -98,6 +105,10 @@ public class U2FWebflowConfiguration {
     @Qualifier("ticketRegistry")
     private ObjectProvider<TicketRegistry> ticketRegistry;
 
+    @Autowired
+    @Qualifier("u2fService")
+    private ObjectProvider<U2F> u2fService;
+
     @Bean
     public FlowDefinitionRegistry u2fFlowRegistry() {
         val builder = new FlowDefinitionRegistryBuilder(this.applicationContext, flowBuilderServices.getObject());
@@ -108,6 +119,7 @@ public class U2FWebflowConfiguration {
 
     @ConditionalOnMissingBean(name = "u2fAuthenticationWebflowAction")
     @Bean
+    @RefreshScope
     public Action u2fAuthenticationWebflowAction() {
         return new U2FAuthenticationWebflowAction(u2fAuthenticationWebflowEventResolver());
     }
@@ -124,30 +136,38 @@ public class U2FWebflowConfiguration {
 
     @ConditionalOnMissingBean(name = "u2fStartAuthenticationAction")
     @Bean
+    @RefreshScope
     public Action u2fStartAuthenticationAction() {
-        return new U2FStartAuthenticationAction(casProperties.getServer().getName(), u2fDeviceRepository.getObject());
+        return new U2FStartAuthenticationAction(u2fService.getObject(),
+            casProperties.getServer().getName(),
+            u2fDeviceRepository.getObject());
     }
 
     @ConditionalOnMissingBean(name = "u2fStartRegistrationAction")
     @Bean
+    @RefreshScope
     public Action u2fStartRegistrationAction() {
-        return new U2FStartRegistrationAction(casProperties.getServer().getName(), u2fDeviceRepository.getObject());
+        return new U2FStartRegistrationAction(u2fService.getObject(),
+            casProperties.getServer().getName(), u2fDeviceRepository.getObject());
     }
 
     @ConditionalOnMissingBean(name = "u2fCheckAccountRegistrationAction")
     @Bean
+    @RefreshScope
     public Action u2fCheckAccountRegistrationAction() {
         return new U2FAccountCheckRegistrationAction(u2fDeviceRepository.getObject());
     }
 
     @ConditionalOnMissingBean(name = "u2fSaveAccountRegistrationAction")
     @Bean
+    @RefreshScope
     public Action u2fSaveAccountRegistrationAction() {
-        return new U2FAccountSaveRegistrationAction(u2fDeviceRepository.getObject());
+        return new U2FAccountSaveRegistrationAction(u2fService.getObject(), u2fDeviceRepository.getObject());
     }
 
     @ConditionalOnMissingBean(name = "u2fAuthenticationWebflowEventResolver")
     @Bean
+    @RefreshScope
     public CasWebflowEventResolver u2fAuthenticationWebflowEventResolver() {
         val context = CasWebflowEventResolutionConfigurationContext.builder()
             .authenticationSystemSupport(authenticationSystemSupport.getObject())
@@ -160,6 +180,7 @@ public class U2FWebflowConfiguration {
             .casProperties(casProperties)
             .ticketRegistry(ticketRegistry.getObject())
             .applicationContext(applicationContext)
+            .authenticationEventExecutionPlan(authenticationEventExecutionPlan.getObject())
             .build();
 
         return new U2FAuthenticationWebflowEventResolver(context);

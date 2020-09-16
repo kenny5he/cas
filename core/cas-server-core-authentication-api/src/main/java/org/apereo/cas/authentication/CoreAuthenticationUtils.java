@@ -7,7 +7,6 @@ import org.apereo.cas.authentication.policy.GroovyScriptAuthenticationPolicy;
 import org.apereo.cas.authentication.policy.NotPreventedAuthenticationPolicy;
 import org.apereo.cas.authentication.policy.RequiredHandlerAuthenticationPolicy;
 import org.apereo.cas.authentication.policy.RestfulAuthenticationPolicy;
-import org.apereo.cas.authentication.policy.UniquePrincipalAuthenticationPolicy;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.authentication.principal.PrincipalResolver;
@@ -331,7 +330,9 @@ public class CoreAuthenticationUtils {
     public static Collection<AuthenticationPolicy> newAuthenticationPolicy(final AuthenticationPolicyProperties policyProps) {
         if (policyProps.getReq().isEnabled()) {
             LOGGER.trace("Activating authentication policy [{}]", RequiredHandlerAuthenticationPolicy.class.getSimpleName());
-            return CollectionUtils.wrapList(new RequiredHandlerAuthenticationPolicy(policyProps.getReq().getHandlerName(), policyProps.getReq().isTryAll()));
+            val requiredHandlerNames = org.springframework.util.StringUtils.commaDelimitedListToSet(policyProps.getReq().getHandlerName());
+            var policy = new RequiredHandlerAuthenticationPolicy(requiredHandlerNames, policyProps.getReq().isTryAll());
+            return CollectionUtils.wrapList(policy);
         }
 
         if (policyProps.getAllHandlers().isEnabled()) {
@@ -347,11 +348,6 @@ public class CoreAuthenticationUtils {
         if (policyProps.getNotPrevented().isEnabled()) {
             LOGGER.trace("Activating authentication policy [{}]", NotPreventedAuthenticationPolicy.class.getSimpleName());
             return CollectionUtils.wrapList(new NotPreventedAuthenticationPolicy());
-        }
-
-        if (policyProps.getUniquePrincipal().isEnabled()) {
-            LOGGER.trace("Activating authentication policy [{}]", UniquePrincipalAuthenticationPolicy.class.getSimpleName());
-            return CollectionUtils.wrapList(new UniquePrincipalAuthenticationPolicy());
         }
 
         if (!policyProps.getGroovy().isEmpty()) {

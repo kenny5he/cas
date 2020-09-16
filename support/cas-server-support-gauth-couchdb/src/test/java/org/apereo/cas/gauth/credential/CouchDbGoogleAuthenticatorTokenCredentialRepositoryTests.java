@@ -86,9 +86,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
     CasCoreWebConfiguration.class},
     properties = {
         "cas.authn.mfa.gauth.crypto.enabled=false",
-        "cas.authn.mfa.gauth.couchDb.username=cas",
-        "cas.authn.mfa.gauth.couchDb.dbName=gauth_credential",
-        "cas.authn.mfa.gauth.couchdb.password=password"
+        "cas.authn.mfa.gauth.couch-db.username=cas",
+        "cas.authn.mfa.gauth.couch-db.db-name=gauth_credential",
+        "cas.authn.mfa.gauth.couch-db.password=password"
     })
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableScheduling
@@ -109,13 +109,17 @@ public class CouchDbGoogleAuthenticatorTokenCredentialRepositoryTests extends Ba
     private GoogleAuthenticatorAccountCouchDbRepository couchDbRepository;
 
     @BeforeEach
-    public void setUp() {
+    @Override
+    public void initialize() {
         couchDbFactory.getCouchDbInstance().createDatabaseIfNotExists(couchDbFactory.getCouchDbConnector().getDatabaseName());
         couchDbRepository.initStandardDesignDocument();
+        super.initialize();
     }
 
     @AfterEach
-    public void tearDown() {
+    @Override
+    public void afterEach() {
+        super.afterEach();
         couchDbFactory.getCouchDbInstance().deleteDatabase(couchDbFactory.getCouchDbConnector().getDatabaseName());
     }
 }

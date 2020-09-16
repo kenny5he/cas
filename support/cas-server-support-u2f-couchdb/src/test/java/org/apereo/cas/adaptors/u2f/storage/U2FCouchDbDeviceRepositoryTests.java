@@ -34,9 +34,9 @@ import static org.junit.jupiter.api.Assertions.*;
     U2FConfiguration.class,
     RefreshAutoConfiguration.class},
     properties = {
-        "cas.authn.mfa.u2f.couchDb.asynchronous=false",
-        "cas.authn.mfa.u2f.couchDb.username=cas",
-        "cas.authn.mfa.u2f.couchdb.password=password"
+        "cas.authn.mfa.u2f.couch-db.asynchronous=false",
+        "cas.authn.mfa.u2f.couch-db.username=cas",
+        "cas.authn.mfa.u2f.couch-db.password=password"
     })
 @Getter
 @EnabledIfPortOpen(port = 5984)
@@ -61,6 +61,7 @@ public class U2FCouchDbDeviceRepositoryTests extends AbstractU2FDeviceRepository
 
     @AfterEach
     public void tearDown() {
+        deviceRepository.removeAll();
         couchDbRepository.deleteAll();
         couchDbFactory.getCouchDbInstance().deleteDatabase(couchDbFactory.getCouchDbConnector().getDatabaseName());
     }

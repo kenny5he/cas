@@ -6,11 +6,11 @@ import org.apereo.cas.support.oauth.OAuth20Constants;
 import org.apereo.cas.support.oauth.util.OAuth20Utils;
 import org.apereo.cas.support.oauth.web.endpoints.BaseOAuth20Controller;
 import org.apereo.cas.support.oauth.web.endpoints.OAuth20ConfigurationContext;
+import org.apereo.cas.util.EncodingUtils;
 
 import lombok.SneakyThrows;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.View;
@@ -19,7 +19,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.util.Optional;
 
 /**
@@ -43,7 +42,7 @@ public class OidcLogoutEndpointController extends BaseOAuth20Controller {
      * @param response              the response
      * @return the response entity
      */
-    @GetMapping(value = '/' + OidcConstants.BASE_OIDC_URL + '/' + OidcConstants.LOGOUT_URL, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = '/' + OidcConstants.BASE_OIDC_URL + '/' + OidcConstants.LOGOUT_URL)
     @SneakyThrows
     public View handleRequestInternal(@RequestParam(value = "post_logout_redirect_uri", required = false) final String postLogoutRedirectUrl,
                                       @RequestParam(value = "state", required = false) final String state,
@@ -86,12 +85,28 @@ public class OidcLogoutEndpointController extends BaseOAuth20Controller {
     private View getLogoutRedirectView(final String state, final String redirectUrl) {
         val builder = UriComponentsBuilder.fromHttpUrl(getOAuthConfigurationContext().getCasProperties().getServer().getLogoutUrl());
         if (StringUtils.isNotBlank(redirectUrl)) {
-            builder.queryParam(getOAuthConfigurationContext().getCasProperties().getLogout().getRedirectParameter(), redirectUrl);
+            val logout = getOAuthConfigurationContext().getCasProperties().getLogout();
+            builder.queryParam(logout.getRedirectParameter(), constructRedirectUrl(redirectUrl, state));
         }
         if (StringUtils.isNotBlank(state)) {
             builder.queryParam(OAuth20Constants.STATE, state);
         }
         val logoutUrl = builder.build().toUriString();
         return new RedirectView(logoutUrl);
+    }
+
+    /**
+     * Constructs the URL to use to redirect to the calling server.
+     *
+     * @param redirectUrl the actual service's url.
+     * @param state       whether we should send.
+     * @return the fully constructed redirect url.
+     */
+    private static String constructRedirectUrl(final String redirectUrl, final String state) {
+        var builder = UriComponentsBuilder.fromHttpUrl(redirectUrl);
+        if (StringUtils.isNotBlank(state)) {
+            builder.queryParam(OAuth20Constants.STATE, state);
+        }
+        return EncodingUtils.urlEncode(builder.build().toUriString());
     }
 }

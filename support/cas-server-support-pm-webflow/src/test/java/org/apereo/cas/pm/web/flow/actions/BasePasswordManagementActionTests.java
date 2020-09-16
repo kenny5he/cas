@@ -75,12 +75,12 @@ import org.springframework.webflow.execution.Action;
 }, properties = {
     "spring.mail.host=localhost",
     "spring.mail.port=25000",
-
+    
     "cas.authn.pm.enabled=true",
     "cas.authn.pm.groovy.location=classpath:PasswordManagementService.groovy",
     "cas.authn.pm.reset.mail.from=cas@example.org",
 
-    "cas.authn.pm.reset.securityQuestionsEnabled=true"
+    "cas.authn.pm.reset.security-questions-enabled=true"
 })
 @EnableConfigurationProperties(CasConfigurationProperties.class)
 public class BasePasswordManagementActionTests {

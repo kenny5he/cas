@@ -13,6 +13,7 @@ import org.apereo.cas.util.crypto.CipherExecutor;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.yubico.u2f.U2F;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -59,8 +60,15 @@ public class U2FConfiguration {
         return new U2FDeviceRepositoryCleanerScheduler(storage);
     }
 
+    @ConditionalOnMissingBean(name = "u2fService")
+    @Bean
+    public U2F u2fService() {
+        return new U2F();
+    }
+
     @ConditionalOnMissingBean(name = "u2fDeviceRepository")
     @Bean
+    @RefreshScope
     public U2FDeviceRepository u2fDeviceRepository() {
         val u2f = casProperties.getAuthn().getMfa().getU2f();
 
@@ -95,6 +103,7 @@ public class U2FConfiguration {
 
     @Bean
     @RefreshScope
+    @ConditionalOnMissingBean(name = "u2fRegistrationRecordCipherExecutor")
     public CipherExecutor u2fRegistrationRecordCipherExecutor() {
         val crypto = casProperties.getAuthn().getMfa().getU2f().getCrypto();
         if (crypto.isEnabled()) {
@@ -114,8 +123,8 @@ public class U2FConfiguration {
     public static class U2FDeviceRepositoryCleanerScheduler {
         private final U2FDeviceRepository repository;
 
-        @Scheduled(initialDelayString = "${cas.authn.mfa.u2f.cleaner.schedule.startDelay:PT20S}",
-            fixedDelayString = "${cas.authn.mfa.u2f.cleaner.schedule.repeatInterval:PT15M}")
+        @Scheduled(initialDelayString = "${cas.authn.mfa.u2f.cleaner.schedule.start-delay:PT20S}",
+            fixedDelayString = "${cas.authn.mfa.u2f.cleaner.schedule.repeat-interval:PT15M}")
         public void run() {
             LOGGER.debug("Starting to clean expired U2F devices from repository");
             this.repository.clean();

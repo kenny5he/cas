@@ -1,7 +1,9 @@
 package org.apereo.cas.adaptors.u2f.storage;
 
+import org.apereo.cas.config.CasCoreHttpConfiguration;
 import org.apereo.cas.config.U2FConfiguration;
 import org.apereo.cas.config.U2FMongoDbConfiguration;
+import org.apereo.cas.util.junit.EnabledIfPortOpen;
 
 import lombok.Getter;
 import org.junit.jupiter.api.Tag;
@@ -21,11 +23,14 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 5.2.0
  */
 @Tag("MongoDb")
+@EnabledIfPortOpen(port = 27017)
 @SpringBootTest(classes = {
     U2FMongoDbConfiguration.class,
     U2FConfiguration.class,
+    CasCoreHttpConfiguration.class,
     AopAutoConfiguration.class,
-    RefreshAutoConfiguration.class},
+    RefreshAutoConfiguration.class
+},
     properties = {
         "cas.authn.mfa.u2f.mongo.databaseName=mfa-trusted",
         "cas.authn.mfa.u2f.mongo.host=localhost",

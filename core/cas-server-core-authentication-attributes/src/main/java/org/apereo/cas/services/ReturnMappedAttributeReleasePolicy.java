@@ -59,7 +59,6 @@ public class ReturnMappedAttributeReleasePolicy extends AbstractRegisteredServic
     @JsonCreator
     public ReturnMappedAttributeReleasePolicy(@JsonProperty("allowedAttributes") final Map<String, Object> attributes) {
         this.allowedAttributes = attributes;
-        initializeWatchableScriptIfNeeded();
     }
 
     /**
@@ -92,7 +91,11 @@ public class ReturnMappedAttributeReleasePolicy extends AbstractRegisteredServic
                             val resource = ResourceUtils.getRawResourceFrom(scriptPath);
                             attributeScriptCache.put(mappedAttributeName, new WatchableGroovyScriptResource(resource));
                         } catch (final Exception e) {
-                            LOGGER.error(e.getMessage(), e);
+                            if (LOGGER.isDebugEnabled()) {
+                                LOGGER.error(e.getMessage(), e);
+                            } else {
+                                LOGGER.error(e.getMessage());
+                            }
                         }
                     }
                 }

@@ -68,7 +68,11 @@ public class RestResourceUtils {
 
             return new ResponseEntity<>(MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(errorsMap), HttpStatus.UNAUTHORIZED);
         } catch (final JsonProcessingException exception) {
-            LOGGER.error(e.getMessage(), e);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.error(e.getMessage(), e);
+            } else {
+                LOGGER.error(e.getMessage());
+            }
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -79,7 +83,7 @@ public class RestResourceUtils {
                                                 final Throwable ex) {
         val authnMsg = StringUtils.defaultIfBlank(ex.getMessage(), "Authentication Failure: " + authnhandlerErrors.getMessage());
         val authnBundleMsg = getTranslatedMessageForExceptionClass(ex.getClass().getSimpleName(), request, applicationContext);
-        return String.format("%s:%s:%s", ex.getClass().getSimpleName(), authnMsg, authnBundleMsg);
+        return String.format("%s:%s", authnMsg, authnBundleMsg);
     }
 
     private String getTranslatedMessageForExceptionClass(final String className,

@@ -42,6 +42,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -84,13 +85,13 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
     RefreshAutoConfiguration.class,
     CasCoreWebConfiguration.class},
     properties = {
-        "cas.authn.mfa.gauth.mongo.userId=root",
+        "cas.authn.mfa.gauth.mongo.user-id=root",
         "cas.authn.mfa.gauth.mongo.password=secret",
         "cas.authn.mfa.gauth.mongo.host=localhost",
         "cas.authn.mfa.gauth.mongo.port=27017",
-        "cas.authn.mfa.gauth.mongo.authenticationDatabaseName=admin",
-        "cas.authn.mfa.gauth.mongo.dropCollection=true",
-        "cas.authn.mfa.gauth.mongo.databaseName=gauth-token",
+        "cas.authn.mfa.gauth.mongo.authentication-database-name=admin",
+        "cas.authn.mfa.gauth.mongo.drop-collection=true",
+        "cas.authn.mfa.gauth.mongo.database-name=gauth-token",
         "cas.authn.mfa.gauth.crypto.enabled=false"
     })
 @EnableTransactionManagement(proxyTargetClass = true)
@@ -106,6 +107,7 @@ public class GoogleAuthenticatorMongoDbTokenRepositoryTests extends BaseOneTimeT
     }
 
     @TestConfiguration("MongoTestConfiguration")
+    @Lazy(false)
     public static class MongoTestConfiguration implements InitializingBean {
         @Autowired
         protected ApplicationContext applicationContext;

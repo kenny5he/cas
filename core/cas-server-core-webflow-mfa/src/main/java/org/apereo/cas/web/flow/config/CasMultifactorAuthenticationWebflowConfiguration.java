@@ -2,6 +2,7 @@ package org.apereo.cas.web.flow.config;
 
 import org.apereo.cas.CentralAuthenticationService;
 import org.apereo.cas.audit.AuditableExecution;
+import org.apereo.cas.authentication.AuthenticationEventExecutionPlan;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
 import org.apereo.cas.authentication.AuthenticationSystemSupport;
 import org.apereo.cas.authentication.DefaultMultifactorAuthenticationProviderResolver;
@@ -103,6 +104,10 @@ public class CasMultifactorAuthenticationWebflowConfiguration {
     private ObjectProvider<CentralAuthenticationService> centralAuthenticationService;
 
     @Autowired
+    @Qualifier("authenticationEventExecutionPlan")
+    private ObjectProvider<AuthenticationEventExecutionPlan> authenticationEventExecutionPlan;
+
+    @Autowired
     @Qualifier("defaultAuthenticationSystemSupport")
     private ObjectProvider<AuthenticationSystemSupport> authenticationSystemSupport;
 
@@ -143,7 +148,7 @@ public class CasMultifactorAuthenticationWebflowConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = "multifactorAuthenticationProviderResolver")
     public MultifactorAuthenticationProviderResolver multifactorAuthenticationProviderResolver() {
-        return new DefaultMultifactorAuthenticationProviderResolver(multifactorAuthenticationProviderSelector());
+        return new DefaultMultifactorAuthenticationProviderResolver();
     }
 
     @ConditionalOnMissingBean(name = "adaptiveAuthenticationPolicyWebflowEventResolver")
@@ -445,11 +450,13 @@ public class CasMultifactorAuthenticationWebflowConfiguration {
     }
 
     @Bean
+    @RefreshScope
     @ConditionalOnMissingBean(name = "multifactorProviderSelectedAction")
     public Action multifactorProviderSelectedAction() {
         return new MultifactorProviderSelectedAction();
     }
 
+    @RefreshScope
     @Bean
     @ConditionalOnMissingBean(name = "prepareMultifactorProviderSelectionAction")
     public Action prepareMultifactorProviderSelectionAction() {
@@ -469,6 +476,7 @@ public class CasMultifactorAuthenticationWebflowConfiguration {
             .ticketRegistry(ticketRegistry.getObject())
             .applicationContext(applicationContext)
             .ticketGrantingTicketCookieGenerator(ticketGrantingTicketCookieGenerator.getObject())
+            .authenticationEventExecutionPlan(authenticationEventExecutionPlan.getObject())
             .build();
     }
 }
