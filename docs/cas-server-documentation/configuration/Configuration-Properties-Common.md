@@ -224,7 +224,7 @@ The following common properties configure cookie generator support in CAS.
 
 ```properties
 # ${configurationKey}.path=
-# ${configurationKey}.maxAge=-1
+# ${configurationKey}.max-age=-1
 # ${configurationKey}.domain=
 # ${configurationKey}.name=
 # ${configurationKey}.secure=true
@@ -497,6 +497,7 @@ The following options related to Hazelcast support in CAS apply equally to a num
 
 # ${configurationKey}.license-key=
 # ${configurationKey}.enable-compression=false
+# ${configurationKey}.enable-management-center-scripting=true
 ```
 
 More advanced Hazelcast configuration settings are listed below, given the component's *configuration key*:
@@ -1142,7 +1143,7 @@ to an external OpenID Connect provider such as Azure AD, given the provider's *c
 # ${configurationKey}.connect-timeout=PT5S
 # ${configurationKey}.expire-session-with-token=false
 # ${configurationKey}.token-expiration-advance=0
-
+# ${configurationKey}.disable-pkce=false
 ```
 
 ## LDAP Connection Settings
@@ -1268,6 +1269,20 @@ The following LDAP validators can be used to test connection health status:
 #${configurationKey}.hostname-verifier=DEFAULT|ANY
 ```
 
+### LDAP SSL Trust Managers
+
+Trust managers are responsible for managing the trust material that is used when making LDAP trust decisions, 
+and for deciding whether credentials presented by a peer should be accepted.
+
+| Type                    | Description
+|-------------------------|------------------------------------
+| `DEFAULT`               | Default option to enable and force the default JVM trust managers.
+| `ANY`                   | Trust any client or server.
+
+```properties
+#${configurationKey}.trust-manager=DEFAULT|ANY
+```
+
 ### LDAP Types
 
 A number of components/features in CAS allow you to explicitly indicate a `type` for the LDAP server, specially in cases where CAS needs to update an attribute, etc in LDAP (i.e. consent, password management, etc). The relevant setting would be:
@@ -1353,3 +1368,14 @@ The following types are supported:
 | `PRIMARY_GROUP` | Constructs the primary group SID and then searches for that group and puts it's DN in the 'memberOf' attribute of the original search entry. 
 | `RANGE_ENTRY` |  Rewrites attributes returned from Active Directory to include all values by performing additional searches.
 | `RECURSIVE_ENTRY` | This recursively searches based on a supplied attribute and merges those results into the original entry.
+
+### LDAP Multiple Base DNs
+
+There may be scenarios where different parts of a single LDAP tree could be considered as base-dns. Rather than duplicating 
+the LDAP configuration block for each individual base-dn, each entry can be specified and joined together using a special delimiter character.
+The user DN is retrieved using the combination of all base-dn and DN resolvers in the order defined. DN resolution should fail if multiple DNs 
+are found. Otherwise the first DN found is returned.
+
+```properties
+# ${configurationKey}.base-dn=subtreeA,dc=example,dc=net|subtreeC,dc=example,dc=net
+```

@@ -1225,6 +1225,7 @@ Retrieve attributes from a JDBC source. Database settings for this feature are a
 # cas.authn.attribute-repository.jdbc[0].require-all-attributes=true
 # cas.authn.attribute-repository.jdbc[0].case-canonicalization=NONE|LOWER|UPPER
 # cas.authn.attribute-repository.jdbc[0].query-type=OR|AND
+# cas.authn.attribute-repository.jdbc[0].case-insensitive-query-attributes=username
 
 # Used only when there is a mapping of many rows to one user
 # cas.authn.attribute-repository.jdbc[0].column-mappings.column-attr-name1=columnAttrValue1
@@ -2959,6 +2960,16 @@ Additionally, tokens can be managed via REST using the following settings:
 # cas.authn.mfa.gauth.mongo.token-collection=MongoDbGoogleAuthenticatorTokenRepository
 ```
 
+#### Google Authenticator LDAP
+
+LDAP settings for this feature are available [here](Configuration-Properties-Common.html#ldap-connection-settings) under the configuration key `cas.authn.mfa.gauth.ldap`. 
+
+The following settings are additionally available for this feature:
+
+```properties
+# cas.authn.mfa.gauth.ldap.account-attribute-name=gauthRecord
+```
+
 #### Google Authenticator Redis
 
  Configuration settings for this feature are available [here](Configuration-Properties-Common.html#redis-configuration) 
@@ -3312,8 +3323,8 @@ settings for this feature are available [here](Configuration-Properties-Common.h
 ### SAML Logout
 
 ```properties
-# cas.authn.saml-idp.logout.forceSignedLogoutRequests=true
-# cas.authn.saml-idp.logout.singleLogoutCallbacksDisabled=false
+# cas.authn.saml-idp.logout.force-signed-logout-requests=true
+# cas.authn.saml-idp.logout.single-logout-callbacks-disabled=false
 ```
 
 ### SAML Algorithms & Security
@@ -4368,7 +4379,7 @@ Works with git repository to fetch and manage service registry definitions.
 
 ```properties
 # cas.service-registry.git.repository-url=https://github.com/repository
-# cas.service-registry.git.branches-to-clone=master
+# cas.service-registry.git.root-directory=
 # cas.service-registry.git.active-branch=master
 # cas.service-registry.git.sign-commits=false
 # cas.service-registry.git.username=
@@ -4671,6 +4682,7 @@ To learn more about this topic, [please review this guide](../ticketing/Ehcache-
 # cas.ticket.registry.ehcache3.resource-pool-name=cas-ticket-pool
 # cas.ticket.registry.ehcache3.resource-pool-size=15MB
 # cas.ticket.registry.ehcache3.root-directory=/tmp/cas/ehcache3
+# cas.ticket.registry.ehcache3.persist-on-disk=true
 # cas.ticket.registry.ehcache3.cluster-connection-timeout=150
 # cas.ticket.registry.ehcache3.cluster-read-write-timeout=5
 # cas.ticket.registry.ehcache3.clustered-cache-consistency=STRONG
@@ -5300,7 +5312,7 @@ To learn more about this topic, [please review this guide](../installation/Servi
 # spring.cloud.consul.host=localhost
 
 # spring.cloud.consul.discovery.health-check-path=<health-endpoint-url>
-# spring.cloud.consul.discovery.health-check-path=15s
+# spring.cloud.consul.discovery.health-check-interval=15s
 # spring.cloud.consul.discovery.instance-id=${spring.application.name}:${random.value}
 
 # spring.cloud.consul.discovery.heartbeat.enabled=true

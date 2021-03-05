@@ -27,6 +27,7 @@ import lombok.val;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apereo.services.persondir.IPersonAttributeDao;
 import org.apereo.services.persondir.support.AbstractAggregatingDefaultQueryPersonAttributeDao;
 import org.apereo.services.persondir.support.CachingPersonAttributeDaoImpl;
@@ -41,6 +42,7 @@ import org.apereo.services.persondir.support.jdbc.AbstractJdbcPersonAttributeDao
 import org.apereo.services.persondir.support.jdbc.MultiRowJdbcPersonAttributeDao;
 import org.apereo.services.persondir.support.jdbc.SingleRowJdbcPersonAttributeDao;
 import org.apereo.services.persondir.support.ldap.LdaptivePersonAttributeDao;
+import org.apereo.services.persondir.util.CaseCanonicalizationMode;
 import org.jooq.lambda.Unchecked;
 import org.ldaptive.handler.LdapEntryHandler;
 import org.ldaptive.handler.SearchResultHandler;
@@ -228,8 +230,24 @@ public class CasPersonDirectoryConfiguration {
         }
     }
 
+    private static AbstractJdbcPersonAttributeDao configureJdbcPersonAttributeDao(
+        final AbstractJdbcPersonAttributeDao dao, final JdbcPrincipalAttributesProperties jdbc) {
+
+        val attributes = jdbc.getCaseInsensitiveQueryAttributes();
+        val results = CollectionUtils.convertDirectedListToMap(attributes);
+
+        dao.setCaseInsensitiveQueryAttributes(results
+            .entrySet()
+            .stream()
+            .map(entry -> Pair.of(entry.getKey(),
+                StringUtils.isBlank(entry.getValue())
+                    ? jdbc.getCaseCanonicalization()
+                    : CaseCanonicalizationMode.valueOf(entry.getValue().toUpperCase())))
+            .collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
+        return dao;
+    }
+
     @ConditionalOnClass(value = JpaBeans.class)
-    @ConditionalOnProperty(name = "cas.authn.attribute-repository.jdbc[0].sql")
     @Configuration("CasPersonDirectoryJdbcConfiguration")
     public class CasPersonDirectoryJdbcConfiguration implements PersonDirectoryAttributeRepositoryPlanConfigurer {
 
@@ -270,10 +288,11 @@ public class CasPersonDirectoryConfiguration {
         private AbstractJdbcPersonAttributeDao createJdbcPersonAttributeDao(final JdbcPrincipalAttributesProperties jdbc) {
             if (jdbc.isSingleRow()) {
                 LOGGER.debug("Configured single-row JDBC attribute repository for [{}]", jdbc.getUrl());
-                return new SingleRowJdbcPersonAttributeDao(
-                    JpaBeans.newDataSource(jdbc),
-                    jdbc.getSql()
-                );
+                return configureJdbcPersonAttributeDao(
+                    new SingleRowJdbcPersonAttributeDao(
+                        JpaBeans.newDataSource(jdbc),
+                        jdbc.getSql()
+                    ), jdbc);
             }
             LOGGER.debug("Configured multi-row JDBC attribute repository for [{}]", jdbc.getUrl());
             val jdbcDao = new MultiRowJdbcPersonAttributeDao(
@@ -282,11 +301,10 @@ public class CasPersonDirectoryConfiguration {
             );
             LOGGER.debug("Configured multi-row JDBC column mappings for [{}] are [{}]", jdbc.getUrl(), jdbc.getColumnMappings());
             jdbcDao.setNameValueColumnMappings(jdbc.getColumnMappings());
-            return jdbcDao;
+            return configureJdbcPersonAttributeDao(jdbcDao, jdbc);
         }
     }
 
-    @ConditionalOnProperty(name = "cas.authn.attribute-repository.ldap[0].ldap-url")
     @Configuration("CasPersonDirectoryLdapConfiguration")
     public class CasPersonDirectoryLdapConfiguration implements PersonDirectoryAttributeRepositoryPlanConfigurer {
 
@@ -360,7 +378,6 @@ public class CasPersonDirectoryConfiguration {
         }
     }
 
-    @ConditionalOnProperty(name = "cas.authn.attribute-repository.rest[0].url")
     @Configuration("CasPersonDirectoryRestConfiguration")
     public class CasPersonDirectoryRestConfiguration implements PersonDirectoryAttributeRepositoryPlanConfigurer {
         @ConditionalOnMissingBean(name = "restfulAttributeRepositories")
@@ -429,7 +446,6 @@ public class CasPersonDirectoryConfiguration {
         }
     }
 
-    @ConditionalOnProperty(name = "cas.authn.attribute-repository.script[0].location")
     @Configuration("CasPersonDirectoryScriptedConfiguration")
     @Deprecated(since = "6.2.0")
     public class CasPersonDirectoryScriptedConfiguration implements PersonDirectoryAttributeRepositoryPlanConfigurer {
@@ -462,7 +478,7 @@ public class CasPersonDirectoryConfiguration {
     }
 
     @ConditionalOnProperty(name = "cas.authn.attribute-repository.json[0].location")
-    @Configuration("CasPersonDirectoryRestConfiguration")
+    @Configuration("CasPersonDirectoryJsonConfiguration")
     public class CasPersonDirectoryJsonConfiguration implements PersonDirectoryAttributeRepositoryPlanConfigurer {
 
         @ConditionalOnMissingBean(name = "jsonAttributeRepositories")
