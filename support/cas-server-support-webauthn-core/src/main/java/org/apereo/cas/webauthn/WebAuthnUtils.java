@@ -1,7 +1,7 @@
 package org.apereo.cas.webauthn;
 
+import module java.base;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -12,6 +12,7 @@ import com.yubico.webauthn.RegisteredCredential;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 
+
 /**
  * This is {@link WebAuthnUtils}.
  *
@@ -20,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 @UtilityClass
 public class WebAuthnUtils {
+
     private static final ObjectMapper MAPPER = JacksonCodecs
         .json()
         .addMixIn(CredentialRegistration.class, CredentialRegistrationMixin.class)
@@ -27,7 +29,6 @@ public class WebAuthnUtils {
         .addMixIn(RegisteredCredential.class, RegisteredCredentialMixin.class)
         .addMixIn(RegisteredCredential.RegisteredCredentialBuilder.class, RegisteredCredentialBuilderMixin.class)
         .findAndRegisterModules()
-        .setDefaultPrettyPrinter(new DefaultPrettyPrinter())
         .setSerializationInclusion(JsonInclude.Include.NON_NULL)
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 

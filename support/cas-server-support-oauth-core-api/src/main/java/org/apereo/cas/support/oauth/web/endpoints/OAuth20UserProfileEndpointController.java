@@ -1,5 +1,6 @@
 package org.apereo.cas.support.oauth.web.endpoints;
 
+import module java.base;
 import org.apereo.cas.support.oauth.OAuth20Constants;
 import org.apereo.cas.support.oauth.util.OAuth20Utils;
 import org.apereo.cas.ticket.TicketGrantingTicket;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jspecify.annotations.NonNull;
 import org.pac4j.core.context.HttpConstants;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,8 +24,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Locale;
-import java.util.Map;
 
 /**
  * This controller returns a profile for the authenticated user
@@ -56,8 +56,8 @@ public class OAuth20UserProfileEndpointController<T extends OAuth20Configuration
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handle user profile request",
         parameters = @Parameter(name = "access_token", in = ParameterIn.QUERY, required = true, description = "Access token"))
-    public ResponseEntity<String> handlePostRequest(final HttpServletRequest request,
-                                                    final HttpServletResponse response) throws Exception {
+    public ResponseEntity<@NonNull String> handlePostRequest(final HttpServletRequest request,
+                                                             final HttpServletResponse response) throws Exception {
         return handleGetRequest(request, response);
     }
 
@@ -73,8 +73,8 @@ public class OAuth20UserProfileEndpointController<T extends OAuth20Configuration
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handle user profile request",
         parameters = @Parameter(name = "access_token", in = ParameterIn.QUERY, required = true, description = "Access token"))
-    public ResponseEntity<String> handleGetRequest(final HttpServletRequest request,
-                                                   final HttpServletResponse response) throws Exception {
+    public ResponseEntity<@NonNull String> handleGetRequest(final HttpServletRequest request,
+                                                            final HttpServletResponse response) throws Exception {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         val accessTokenResult = FunctionUtils.doAndHandle(() -> getAccessTokenFromRequest(request));
         if (accessTokenResult == null) {
@@ -122,7 +122,7 @@ public class OAuth20UserProfileEndpointController<T extends OAuth20Configuration
                 ticketRegistry.deleteTicket(accessTokenTicket.getId());
             } else {
                 ticketRegistry.updateTicket(accessTokenTicket);
-                FunctionUtils.doAndHandle(__ -> {
+                FunctionUtils.doAndHandle(_ -> {
                     val tgt = ticketRegistry.getTicket(accessTokenTicket.getTicketGrantingTicket().getId(), TicketGrantingTicket.class);
                     ticketRegistry.updateTicket(tgt.update());
                 });

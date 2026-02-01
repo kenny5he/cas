@@ -1,11 +1,11 @@
 package org.apereo.cas.authentication.principal;
 
+import module java.base;
 import org.apereo.cas.configuration.model.RestEndpointProperties;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,14 +14,12 @@ import org.apache.commons.io.IOUtils;
 import org.apache.hc.core5.http.HttpEntityContainer;
 import org.apache.hc.core5.http.HttpResponse;
 import org.hjson.JsonValue;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import java.io.Serial;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link RestfulPrincipalFactory}.
@@ -42,7 +40,7 @@ public class RestfulPrincipalFactory extends DefaultPrincipalFactory {
     private final RestEndpointProperties properties;
 
     @Override
-    public Principal createPrincipal(final String id, final Map<String, List<Object>> attributes) throws Throwable {
+    public @Nullable Principal createPrincipal(final String id, final Map<String, List<Object>> attributes) throws Throwable {
         HttpResponse response = null;
         try {
             val current = super.createPrincipal(id, attributes);
@@ -58,6 +56,7 @@ public class RestfulPrincipalFactory extends DefaultPrincipalFactory {
                 .url(properties.getUrl())
                 .entity(entity)
                 .headers(headers)
+                .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                 .build();
             response = HttpUtils.execute(exec);
             if (response != null && response.getCode() == HttpStatus.OK.value()) {

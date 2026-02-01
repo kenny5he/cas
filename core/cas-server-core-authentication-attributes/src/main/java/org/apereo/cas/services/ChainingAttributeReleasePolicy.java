@@ -1,28 +1,23 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.authentication.CoreAuthenticationUtils;
 import org.apereo.cas.authentication.principal.ChainingPrincipalAttributesRepository;
 import org.apereo.cas.authentication.principal.RegisteredServicePrincipalAttributesRepository;
 import org.apereo.cas.configuration.model.core.authentication.PrincipalAttributesCoreProperties;
 import org.apereo.cas.services.consent.ChainingRegisteredServiceConsentPolicy;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jooq.lambda.Unchecked;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import java.io.Serial;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link ChainingAttributeReleasePolicy}.
@@ -35,11 +30,13 @@ import java.util.stream.Collectors;
 @Getter
 @Slf4j
 @EqualsAndHashCode
+@NoArgsConstructor
 public class ChainingAttributeReleasePolicy implements RegisteredServiceChainingAttributeReleasePolicy {
 
     @Serial
     private static final long serialVersionUID = 3795054936775326709L;
 
+    @JsonSetter(nulls = Nulls.DEFAULT)
     private List<RegisteredServiceAttributeReleasePolicy> policies = new ArrayList<>();
 
     private PrincipalAttributesCoreProperties.MergingStrategyTypes mergingPolicy =

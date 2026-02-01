@@ -1,9 +1,9 @@
 package org.apereo.cas.logging;
 
+import module java.base;
 import org.apereo.cas.aws.ChainingAWSCredentialsProvider;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.function.FunctionUtils;
-
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -23,14 +23,6 @@ import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.MessageAttributeValue;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 /**
  * This is {@link SQSAppender}.
  *
@@ -38,6 +30,7 @@ import java.util.stream.Collectors;
  * @since 6.4.0
  */
 @Plugin(name = "SQSAppender", category = "Core", elementType = "appender", printObject = true)
+@SuppressWarnings("NullAway.Init")
 public class SQSAppender extends AbstractAppender implements Serializable {
     @Serial
     private static final long serialVersionUID = 1144758913028847477L;
@@ -152,7 +145,7 @@ public class SQSAppender extends AbstractAppender implements Serializable {
             .messageBody(message)
             .messageAttributes(context)
             .build();
-        FunctionUtils.doUnchecked(__ -> sqsAsyncClient.sendMessage(request).get());
+        FunctionUtils.doUnchecked(_ -> sqsAsyncClient.sendMessage(request).get());
     }
 
     @Override

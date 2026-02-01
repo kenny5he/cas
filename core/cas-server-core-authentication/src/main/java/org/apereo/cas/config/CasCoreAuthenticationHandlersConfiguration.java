@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.authentication.AcceptUsersAuthenticationHandler;
 import org.apereo.cas.authentication.AuthenticationEventExecutionPlanConfigurer;
 import org.apereo.cas.authentication.AuthenticationHandler;
@@ -20,6 +21,7 @@ import org.apereo.cas.authentication.support.password.PasswordPolicyContext;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.services.ServicesManager;
+import org.apereo.cas.util.RegexUtils;
 import org.apereo.cas.util.ResourceUtils;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.http.HttpClient;
@@ -30,6 +32,7 @@ import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -39,12 +42,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This is {@link CasCoreAuthenticationHandlersConfiguration}.
@@ -134,7 +131,7 @@ class CasCoreAuthenticationHandlersConfiguration {
             val accept = casProperties.getAuthn().getAccept();
             val usersProperty = accept.getUsers();
             if (accept.isEnabled() && StringUtils.isNotBlank(usersProperty) && usersProperty.contains("::")) {
-                val pattern = Pattern.compile("::");
+                val pattern = RegexUtils.createPattern("::");
                 return Stream.of(usersProperty.split(","))
                     .map(pattern::split)
                     .collect(Collectors.toMap(userAndPassword -> userAndPassword[0], userAndPassword -> userAndPassword[1]));
@@ -221,11 +218,11 @@ class CasCoreAuthenticationHandlersConfiguration {
             final ServicesManager servicesManager,
             final CasConfigurationProperties casProperties,
             @Qualifier(PrincipalResolver.BEAN_NAME_ATTRIBUTE_REPOSITORY)
-            final ObjectProvider<PersonAttributeDao> attributeRepository,
+            final ObjectProvider<@NonNull PersonAttributeDao> attributeRepository,
             @Qualifier("jaasPrincipalFactory")
             final PrincipalFactory jaasPrincipalFactory,
             @Qualifier(AttributeRepositoryResolver.BEAN_NAME)
-            final ObjectProvider<AttributeRepositoryResolver> attributeRepositoryResolver) {
+            final ObjectProvider<@NonNull AttributeRepositoryResolver> attributeRepositoryResolver) {
             val personDirectory = casProperties.getPersonDirectory();
             return BeanContainer.of(casProperties.getAuthn().getJaas()
                 .stream()
@@ -261,7 +258,7 @@ class CasCoreAuthenticationHandlersConfiguration {
                     handler.setRealm(jaas.getRealm());
                     handler.setPasswordEncoder(PasswordEncoderUtils.newPasswordEncoder(jaas.getPasswordEncoder(), applicationContext));
 
-                    FunctionUtils.doIfNotBlank(jaas.getLoginConfigType(), __ -> handler.setLoginConfigType(jaas.getLoginConfigType()));
+                    FunctionUtils.doIfNotBlank(jaas.getLoginConfigType(), _ -> handler.setLoginConfigType(jaas.getLoginConfigType()));
 
                     if (StringUtils.isNotBlank(jaas.getLoginConfigurationFile())) {
                         val file = FunctionUtils.doAndHandle(() -> ResourceUtils.getResourceFrom(jaas.getLoginConfigurationFile()).getFile());

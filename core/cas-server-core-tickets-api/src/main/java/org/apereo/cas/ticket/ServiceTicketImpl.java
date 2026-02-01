@@ -1,23 +1,24 @@
 package org.apereo.cas.ticket;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.ticket.proxy.ProxyGrantingTicket;
-
+import org.apereo.cas.ticket.tracking.TicketTrackingPolicy;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.Nulls;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
-import java.io.Serial;
-import java.util.Objects;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Domain object representing a Service Ticket. A service ticket grants specific
@@ -34,6 +35,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @Getter
 @Accessors(chain = true)
+@SuppressWarnings("NullAway.Init")
 public class ServiceTicketImpl extends AbstractTicket
     implements ServiceTicket, RenewableServiceTicket, ProxyGrantingTicketIssuerTicket {
 
@@ -41,6 +43,7 @@ public class ServiceTicketImpl extends AbstractTicket
     private static final long serialVersionUID = -4223319704861765405L;
 
     @JsonProperty("ticketGrantingTicket")
+    @Nullable
     private TicketGrantingTicket ticketGrantingTicket;
 
     @JsonProperty("authentication")
@@ -48,27 +51,32 @@ public class ServiceTicketImpl extends AbstractTicket
 
     private Service service;
 
+    @JsonSetter(nulls = Nulls.SKIP)
     private boolean fromNewLogin;
 
+    @JsonSetter(nulls = Nulls.SKIP)
     private Boolean grantedTicketAlready = Boolean.FALSE;
 
     @JsonCreator
     public ServiceTicketImpl(
         @JsonProperty("id") final @NonNull String id,
-        @JsonProperty("ticketGrantingTicket") final TicketGrantingTicket ticket,
+        @Nullable @JsonProperty("ticketGrantingTicket") final TicketGrantingTicket ticket,
         @JsonProperty("service") final @NonNull Service service,
-        @JsonProperty("credentialProvided") final boolean credentialProvided,
+        @JsonProperty("credentialProvided")
+        @JsonSetter(nulls = Nulls.SKIP)
+        final boolean credentialProvided,
         @JsonProperty("expirationPolicy") final ExpirationPolicy policy) {
         super(id, policy);
         this.ticketGrantingTicket = ticket;
-        this.service = service;
+        this.service = Objects.requireNonNull(service);
         this.fromNewLogin = credentialProvided || (ticket != null && ticket.getCountOfUses() == 0);
     }
 
     @Override
     public ProxyGrantingTicket grantProxyGrantingTicket(
         final @NonNull String id, final @NonNull Authentication authentication,
-        final ExpirationPolicy expirationPolicy) throws AbstractTicketException {
+        final ExpirationPolicy expirationPolicy,
+        final TicketTrackingPolicy proxyGrantingTicketTrackingPolicy) throws AbstractTicketException {
         if (this.grantedTicketAlready) {
             LOGGER.warn("Service ticket [{}] issued for service [{}] has already allotted a proxy-granting ticket", getId(), service.getId());
             throw new InvalidProxyGrantingTicketForServiceTicketException(service);
@@ -76,9 +84,7 @@ public class ServiceTicketImpl extends AbstractTicket
         this.grantedTicketAlready = Boolean.TRUE;
         val proxyGrantingTicket = new ProxyGrantingTicketImpl(id, service, ticketGrantingTicket, authentication, expirationPolicy);
         proxyGrantingTicket.setTenantId(service.getTenant());
-        if (ticketGrantingTicket != null) {
-            ticketGrantingTicket.getProxyGrantingTickets().put(proxyGrantingTicket.getId(), service);
-        }
+        proxyGrantingTicketTrackingPolicy.trackTicket(ticketGrantingTicket, proxyGrantingTicket, service);
         return proxyGrantingTicket;
     }
 

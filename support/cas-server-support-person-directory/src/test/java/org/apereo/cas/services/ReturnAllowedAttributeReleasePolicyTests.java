@@ -1,5 +1,6 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.authentication.attribute.CaseCanonicalizationMode;
 import org.apereo.cas.config.CasCoreAuditAutoConfiguration;
@@ -25,7 +26,6 @@ import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.RandomUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.boot.SpringBootTestAutoConfigurations;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
@@ -48,16 +48,9 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import java.io.IOException;
-import java.io.Serial;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
+import tools.jackson.databind.ObjectMapper;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.params.provider.Arguments.*;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.*;
 
 /**
@@ -182,6 +175,11 @@ class ReturnAllowedAttributeReleasePolicyTests {
             MAPPER.writeValue(jsonFile, policyWritten);
             val policyRead = MAPPER.readValue(jsonFile, ReturnAllowedAttributeReleasePolicy.class);
             assertEquals(policyWritten, policyRead);
+
+            val p1 = new ReturnAllowedAttributeReleasePolicy();
+            p1.setAuthorizedToReleaseAuthenticationAttributes(false);
+            val p2 = MAPPER.readValue(MAPPER.writeValueAsString(p1), ReturnAllowedAttributeReleasePolicy.class);
+            assertEquals(p1, p2);
         }
 
         @Test

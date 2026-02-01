@@ -21,6 +21,15 @@ function randomWord() {
     return `${n1}_${n2}`;
 }
 
+function generateRandom(length = 12) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
 function copyClipboard(element) {
     element.select();
     element.setSelectionRange(0, 99999);
@@ -28,13 +37,23 @@ function copyClipboard(element) {
 }
 
 function getLastTwoWords(str) {
+    if (!str) {
+        return "";
+    }
     const parts = str.split(".");
     return parts.slice(-2).join(".");
 }
 
 function getLastWord(str) {
-    const parts = str.split(".");
-    return parts.slice(-1).join(".");
+    if (str) {
+        const parts = str.split(".");
+        return parts.slice(-1).join(".");
+    }
+    return "";
+}
+
+function capitalize(str) {
+    return str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
 }
 
 function formatDateYearMonthDayHourMinute(date) {
@@ -47,22 +66,35 @@ function formatDateYearMonthDayHourMinute(date) {
     return `${year}-${month}-${day} ${hours}:${minutes}`;
 }
 
-function formatDateYearMonthDay(date) {
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = (d.getMonth() + 1).toString().padStart(2, "0");
-    const day = d.getDate().toString().padStart(2, "0");
+function formatDateYearMonthDay(givenDate) {
+    const date = new Date(givenDate);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
     return `${year}-${month}-${day}`;
 }
 
 function toKebabCase(str) {
     return str
-        .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-        .replace(/[^a-zA-Z0-9.[\]]+/g, '-')
-        .replace(/^-+|-+$/g, '')
+        .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+        .replace(/[^a-zA-Z0-9.[\]]+/g, "-")
+        .replace(/^-+|-+$/g, "")
         .toLowerCase();
 }
 
+function isNumeric(str) {
+    return (typeof str === "string" && str.trim() !== "" && !isNaN(str)) || typeof str === "number";
+}
+
+function copyToClipboard(str) {
+    navigator.clipboard.writeText(str)
+        .then(() => {
+            console.log("Copied!");
+        })
+        .catch(err => {
+            console.error("Failed to copy: ", err);
+        });
+}
 
 function camelcaseToTitleCase(str) {
     return str
@@ -101,6 +133,26 @@ function flattenJSON(data) {
     return result;
 }
 
+function base64Encode(str) {
+    return btoa(
+        encodeURIComponent(str)
+            .replace(/%([0-9A-F]{2})/g, (_, p1) =>
+                String.fromCharCode(`0x${p1}`)
+            )
+    );
+}
+
+function base64Decode(base64) {
+    return decodeURIComponent(
+        atob(base64)
+            .split("")
+            .map(c =>
+                `%${c.charCodeAt(0).toString(16).padStart(2, "0")}`
+            )
+            .join("")
+    );
+}
+
 function convertMemoryToGB(memoryStr) {
     const units = {
         B: 1,
@@ -115,6 +167,15 @@ function convertMemoryToGB(memoryStr) {
     const unit = match[3].toUpperCase();
     const bytes = value * units[unit];
     return bytes / units.GB;
+}
+
+function isValidRegex(str) {
+    try {
+        new RegExp(str);
+        return true;
+    } catch (e) {
+        return false;
+    }
 }
 
 function isValidURL(str) {
@@ -164,7 +225,7 @@ function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
     if (parts.length === 2) {
-        return parts.pop().split(';').shift();
+        return parts.pop().split(";").shift();
     }
     return null;
 }
@@ -187,7 +248,7 @@ function preserveAnchorTagOnForm() {
 
 function preventFormResubmission() {
     $("form").submit(() => {
-        const dataDisableSubmitValue = $(this).attr('data-disable-submit');
+        const dataDisableSubmitValue = $(this).attr("data-disable-submit");
         if (dataDisableSubmitValue) {
             $(":submit").attr("disabled", true);
         }
@@ -197,6 +258,30 @@ function preventFormResubmission() {
         }
         return true;
     });
+}
+
+function captureAndStoreUsername() {
+    const $panel = $("#publicWorkstationSwitchButtonPanel");
+
+    if ($panel.length > 0 && $panel.is(":visible")) {
+        console.log("Public workstation mode is enabled; skipping username capture.");
+        return;
+    }
+    
+    $("form").submit(function () {
+        const username = $(this).find('input[name="username"]').val();
+        if (username) {
+            localStorage.setItem("username", username);
+        }
+        return true;
+    });
+    const savedUsername = localStorage.getItem("username");
+    $("#fm1 label[for='username']").removeClass("highlight-username");
+    if (savedUsername) {
+        $("#fm1 input[name='username']").val(savedUsername);
+        $("#fm1 input[name='password']").focus();
+        $("#fm1 label[for='username']").addClass("highlight-username");
+    }
 }
 
 function writeToLocalStorage(browserStorage) {
@@ -296,28 +381,44 @@ function resourceLoadedSuccessfully() {
         $("#fm1 input[name=\"username\"],[name=\"password\"]").trigger("input");
         $("#fm1 input[name=\"username\"]").focus();
 
-        $(".reveal-password").on("click", function(ev) {
+        if (rememberUsername && rememberUsername === "true") {
+            captureAndStoreUsername();
+        }
+
+        $(".reveal-password").on("click", function (ev) {
             ev.preventDefault();
 
-            const btn  = $(this);
-            const pwd  = $(".pwd");
+            const btn = $(this);
+            const pwd = $(".pwd");
             const icon = $(".reveal-password-icon");
 
             if (pwd.attr("type") === "text") {
                 pwd.attr("type", "password");
                 icon.removeClass("mdi-eye-off").addClass("mdi-eye");
-                btn.attr('aria-pressed', false);
+                btn.attr("aria-pressed", false);
             } else {
                 pwd.attr("type", "text");
                 icon.removeClass("mdi-eye").addClass("mdi-eye-off");
-                btn.attr('aria-pressed', true);
+                btn.attr("aria-pressed", true);
             }
         });
 
-        if (typeof hljs !== 'undefined') {
+        if (typeof hljs !== "undefined") {
             hljs.highlightAll();
         }
     });
+}
+
+function captureFingerprint(fieldName = "deviceFingerprint") {
+    if (typeof FingerprintJS !== "undefined") {
+        (async () => {
+            const fp = await FingerprintJS.load();
+            const result = await fp.get();
+            const fingerprint = result.visitorId;
+            console.log("Captured device fingerprint:", fingerprint);
+            $(`[name="${fieldName}"]`).val(fingerprint);
+        })();
+    }
 }
 
 function autoHideElement(id, timeout = 1500) {
@@ -330,7 +431,7 @@ function autoHideElement(id, timeout = 1500) {
     setTimeout(hideElement, timeout);
 }
 
-function initializeAceEditor(id, mode="json") {
+function initializeAceEditor(id, mode = "json") {
     ace.require("ace/ext/language_tools");
     const beautify = ace.require("ace/ext/beautify");
     const editor = ace.edit(id);

@@ -1,12 +1,9 @@
 package org.apereo.cas.otp.repository.credentials;
 
+import module java.base;
 import org.apereo.cas.authentication.OneTimeTokenAccount;
 import org.apereo.cas.util.serialization.BaseJacksonSerializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import java.io.Serial;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * This is {@link OneTimeTokenAccountSerializer}.
@@ -19,6 +16,6 @@ public class OneTimeTokenAccountSerializer extends BaseJacksonSerializer<Map<Str
     private static final long serialVersionUID = 1466569521275630254L;
 
     public OneTimeTokenAccountSerializer(final ConfigurableApplicationContext applicationContext) {
-        super(applicationContext, HashMap.class);
+        super(applicationContext, Map.class);
     }
 }

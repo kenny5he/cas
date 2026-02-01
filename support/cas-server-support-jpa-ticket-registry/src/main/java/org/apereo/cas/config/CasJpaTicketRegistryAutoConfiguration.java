@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.configuration.support.CloseableDataSource;
@@ -23,14 +24,15 @@ import org.apereo.cas.util.spring.beans.BeanSupplier;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import lombok.val;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.integration.IntegrationDataSourceScriptDatabaseInitializer;
-import org.springframework.boot.autoconfigure.integration.IntegrationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.integration.autoconfigure.IntegrationDataSourceScriptDatabaseInitializer;
+import org.springframework.boot.integration.autoconfigure.IntegrationJdbcProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -45,7 +47,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionOperations;
 import org.springframework.transaction.support.TransactionTemplate;
 import jakarta.persistence.EntityManagerFactory;
-import java.util.function.Function;
 
 /**
  * This this {@link CasJpaTicketRegistryAutoConfiguration}.
@@ -98,7 +99,7 @@ public class CasJpaTicketRegistryAutoConfiguration {
 
         @Bean
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-        public FactoryBean<EntityManagerFactory> ticketEntityManagerFactory(
+        public FactoryBean<@NonNull EntityManagerFactory> ticketEntityManagerFactory(
             final CasConfigurationProperties casProperties,
             final ConfigurableApplicationContext applicationContext,
             @Qualifier("dataSourceTicket")
@@ -153,12 +154,12 @@ public class CasJpaTicketRegistryAutoConfiguration {
             return new CasTicketCatalogConfigurationValuesProvider() {
                 @Override
                 public Function<ConfigurableApplicationContext, Boolean> getProxyGrantingTicketCascadeRemovals() {
-                    return __ -> Boolean.TRUE;
+                    return _ -> Boolean.TRUE;
                 }
 
                 @Override
                 public Function<ConfigurableApplicationContext, Boolean> getTicketGrantingTicketCascadeRemovals() {
-                    return __ -> Boolean.TRUE;
+                    return _ -> Boolean.TRUE;
                 }
             };
         }
@@ -168,7 +169,7 @@ public class CasJpaTicketRegistryAutoConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public TransactionOperations jpaTicketRegistryTransactionTemplate(
             final ConfigurableApplicationContext applicationContext,
-            @Qualifier("ticketTransactionManager")
+            @Qualifier(TicketRegistry.TICKET_TRANSACTION_MANAGER)
             final PlatformTransactionManager ticketTransactionManager,
             final CasConfigurationProperties casProperties) {
             return BeanSupplier.of(TransactionOperations.class)
@@ -214,18 +215,18 @@ public class CasJpaTicketRegistryAutoConfiguration {
     @EnableConfigurationProperties(CasConfigurationProperties.class)
     @ConditionalOnFeatureEnabled(feature = CasFeatureModule.FeatureCatalog.TicketRegistryLocking, module = "jpa")
     static class JpaTicketRegistryLockingConfiguration {
-        private static final BeanCondition CONDITION = BeanCondition.on("cas.ticket.registry.core.enable-locking").isTrue().evenIfMissing();
+        private static final BeanCondition CONDITION_LOCKING = BeanCondition.on("cas.ticket.registry.core.enable-locking").isTrue().evenIfMissing();
 
         @Bean
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public org.springframework.integration.jdbc.lock.LockRepository jdbcLockRepository(
-            @Qualifier("ticketTransactionManager")
+            @Qualifier(TicketRegistry.TICKET_TRANSACTION_MANAGER)
             final PlatformTransactionManager ticketTransactionManager,
             final ConfigurableApplicationContext applicationContext,
             @Qualifier("dataSourceTicket")
             final CloseableDataSource dataSourceTicket) {
             return BeanSupplier.of(org.springframework.integration.jdbc.lock.LockRepository.class)
-                .when(CONDITION.given(applicationContext.getEnvironment()))
+                .when(CONDITION_LOCKING.given(applicationContext.getEnvironment()))
                 .supply(() -> {
                     val repo = new org.springframework.integration.jdbc.lock.DefaultLockRepository(dataSourceTicket);
                     repo.setApplicationContext(applicationContext);
@@ -245,7 +246,7 @@ public class CasJpaTicketRegistryAutoConfiguration {
             @Qualifier("jdbcLockRepository")
             final org.springframework.integration.jdbc.lock.LockRepository jdbcLockRepository) {
             return BeanSupplier.of(LockRegistry.class)
-                .when(CONDITION.given(applicationContext.getEnvironment()))
+                .when(CONDITION_LOCKING.given(applicationContext.getEnvironment()))
                 .supply(() -> new JdbcLockRegistry(jdbcLockRepository))
                 .otherwiseProxy()
                 .get();
@@ -258,7 +259,7 @@ public class CasJpaTicketRegistryAutoConfiguration {
             @Qualifier("jdbcLockRegistry")
             final LockRegistry jdbcLockRegistry) {
             return BeanSupplier.of(LockRepository.class)
-                .when(CONDITION.given(applicationContext.getEnvironment()))
+                .when(CONDITION_LOCKING.given(applicationContext.getEnvironment()))
                 .supply(() -> new DefaultLockRepository(jdbcLockRegistry))
                 .otherwise(LockRepository::noOp)
                 .get();
@@ -270,10 +271,11 @@ public class CasJpaTicketRegistryAutoConfiguration {
             final ConfigurableApplicationContext applicationContext,
             @Qualifier("dataSourceTicket")
             final CloseableDataSource dataSourceTicket,
-            final IntegrationProperties properties) {
+            final IntegrationJdbcProperties properties) {
             return BeanSupplier.of(InitializingBean.class)
-                .when(CONDITION.given(applicationContext.getEnvironment()))
-                .supply(() -> new IntegrationDataSourceScriptDatabaseInitializer(dataSourceTicket, properties.getJdbc()))
+                .when(CONDITION_LOCKING.given(applicationContext.getEnvironment()))
+                .supply(() -> new IntegrationDataSourceScriptDatabaseInitializer(
+                    dataSourceTicket, properties))
                 .otherwiseProxy()
                 .get();
         }

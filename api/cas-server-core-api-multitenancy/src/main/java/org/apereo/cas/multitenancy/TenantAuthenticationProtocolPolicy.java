@@ -1,8 +1,8 @@
 package org.apereo.cas.multitenancy;
 
+import module java.base;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import java.io.Serializable;
-import java.util.Set;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This is {@link TenantAuthenticationProtocolPolicy}.
@@ -20,5 +20,5 @@ public interface TenantAuthenticationProtocolPolicy extends Serializable {
      *
      * @return collection of supported protocol versions.
      */
-    Set<String> getSupportedProtocols();
+    @Nullable Set<String> getSupportedProtocols();
 }

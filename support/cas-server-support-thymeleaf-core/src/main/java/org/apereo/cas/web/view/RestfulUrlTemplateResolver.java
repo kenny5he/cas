@@ -1,10 +1,12 @@
 package org.apereo.cas.web.view;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.LoggingUtils;
 import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpRequestUtils;
 import org.apereo.cas.util.http.HttpUtils;
+import org.apereo.cas.web.theme.ThemeResolver;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.io.IOUtils;
@@ -13,15 +15,10 @@ import org.apache.hc.core5.http.HttpEntityContainer;
 import org.apache.hc.core5.http.HttpResponse;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.templateresource.ITemplateResource;
 import org.thymeleaf.templateresource.StringTemplateResource;
-import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
 
 /**
  * This is {@link RestfulUrlTemplateResolver}.
@@ -73,6 +70,8 @@ public class RestfulUrlTemplateResolver extends ThemeFileTemplateResolver {
                 .url(rest.getUrl())
                 .headers(headers)
                 .parameters(queryParams.toSingleValueMap())
+                .maximumRetryAttempts(rest.getMaximumRetryAttempts())
+                .maximumRetryAttempts(rest.getMaximumRetryAttempts())
                 .build();
             response = HttpUtils.execute(exec);
             val statusCode = response.getCode();

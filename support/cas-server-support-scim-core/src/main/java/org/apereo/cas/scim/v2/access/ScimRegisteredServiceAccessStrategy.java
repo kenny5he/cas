@@ -1,20 +1,17 @@
 package org.apereo.cas.scim.v2.access;
 
+import module java.base;
 import org.apereo.cas.scim.v2.ScimService;
 import org.apereo.cas.services.BaseRegisteredServiceAccessStrategy;
 import org.apereo.cas.services.RegisteredServiceAccessStrategyRequest;
 import org.apereo.cas.services.util.RegisteredServiceAccessStrategyEvaluator;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import java.io.Serial;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * This is {@link ScimRegisteredServiceAccessStrategy}.
@@ -35,6 +32,7 @@ public class ScimRegisteredServiceAccessStrategy extends BaseRegisteredServiceAc
      * Collection of required attributes
      * for this service to proceed.
      */
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private Map<String, Set<String>> requiredAttributes = new HashMap<>();
 
     @Override

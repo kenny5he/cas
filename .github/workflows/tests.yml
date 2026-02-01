@@ -21,10 +21,10 @@ env:
   AZURE_AD_TENANT: ${{ secrets.AZURE_AD_TENANT }}
   AZURE_AD_DOMAIN: ${{ secrets.AZURE_AD_DOMAIN }}
   PERMIT_IO_API_KEY: ${{ secrets.PERMIT_IO_API_KEY }}
-  JDK_CURRENT: 21
+  JDK_CURRENT: 25
   JDK_DISTRIBUTION: "corretto"
   RETRY_ATTEMPTS: 2
-  RETRY_MINUTES: 40
+  RETRY_MINUTES: 45
   CATEGORY_REGEX: ".*"
 ##########################################################################
 
@@ -61,14 +61,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JDK_CURRENT }}
           distribution: ${{ env.JDK_DISTRIBUTION }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Initialize
         run: ls ./ci && find ./ci -type f -name "*.sh" -exec chmod +x "{}" \; && ./ci/init-build.sh
@@ -82,14 +82,14 @@ jobs:
       categories: ${{ steps.get-categories.outputs.categories }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JDK_CURRENT }}
           distribution: ${{ env.JDK_DISTRIBUTION }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - id: print-categories
         run: ./gradlew --build-cache --configure-on-demand --no-daemon -q testCategories
@@ -109,14 +109,14 @@ jobs:
     name: ${{ matrix.category }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JDK_CURRENT }}
           distribution: ${{ env.JDK_DISTRIBUTION }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
       - name: Initialize
         run: find ./ci -type f -name "*.sh" -exec chmod +x "{}" \; && ./ci/init-build.sh
         shell: bash
@@ -176,7 +176,7 @@ jobs:
           verbose: true
           fail_ci_if_error: false
       - name: Upload Coverage Report
-        uses: "actions/upload-artifact@v4"
+        uses: "actions/upload-artifact@v6"
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
         with:
           name: "cas-tests-${{ matrix.category }}.coverage"
@@ -189,17 +189,17 @@ jobs:
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule')
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JDK_CURRENT }}
           distribution: ${{ env.JDK_DISTRIBUTION }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Download coverage files
-        uses: "actions/download-artifact@v5"
+        uses: "actions/download-artifact@v7"
         with:
           path: "reports"
       - name: Collect Coverage Files

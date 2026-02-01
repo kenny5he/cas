@@ -1,13 +1,13 @@
 package org.apereo.cas.support.saml;
 
+import module java.base;
 import org.apereo.cas.util.function.FunctionUtils;
-
 import com.codahale.metrics.MetricRegistry;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.shibboleth.shared.xml.ParserPool;
 import org.apache.velocity.app.VelocityEngine;
+import org.jspecify.annotations.NonNull;
 import org.opensaml.core.config.ConfigurationService;
 import org.opensaml.core.config.InitializationService;
 import org.opensaml.core.xml.XMLObject;
@@ -54,7 +54,7 @@ public class DefaultOpenSamlConfigBean implements OpenSamlConfigBean {
         this.velocityEngine = velocityEngine;
         this.applicationContext = applicationContext;
         
-        FunctionUtils.doUnchecked(__ -> {
+        FunctionUtils.doUnchecked(_ -> {
             LOGGER.trace("Initializing OpenSaml configuration...");
             InitializationService.initialize();
         });

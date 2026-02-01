@@ -1,15 +1,12 @@
 package org.apereo.inspektr.common.web;
 
+import module java.base;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
-import jakarta.annotation.Nonnull;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -133,7 +130,7 @@ class ClientInfoTests {
         }
     }
 
-    @Nonnull
+    @NonNull
     private static MockHttpServletRequest getHttpServletRequest() {
         val request = new MockHttpServletRequest();
         request.setRemoteAddr("185.86.151.11");

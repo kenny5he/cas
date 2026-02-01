@@ -1,5 +1,6 @@
 package org.apereo.cas.support.oauth.web.response.accesstoken.ext;
 
+import module java.base;
 import org.apereo.cas.audit.AuditableContext;
 import org.apereo.cas.authentication.DefaultAuthenticationResult;
 import org.apereo.cas.services.UnauthorizedServiceException;
@@ -8,16 +9,14 @@ import org.apereo.cas.support.oauth.OAuth20GrantTypes;
 import org.apereo.cas.support.oauth.OAuth20ResponseTypes;
 import org.apereo.cas.support.oauth.util.OAuth20Utils;
 import org.apereo.cas.support.oauth.web.endpoints.OAuth20ConfigurationContext;
-
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.pac4j.core.context.CallContext;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.profile.ProfileManager;
 import org.springframework.beans.factory.ObjectProvider;
-
-import java.util.Objects;
 
 /**
  * This is {@link AccessTokenPasswordGrantRequestExtractor}.
@@ -27,7 +26,7 @@ import java.util.Objects;
  */
 @Slf4j
 public class AccessTokenPasswordGrantRequestExtractor extends BaseAccessTokenGrantRequestExtractor<OAuth20ConfigurationContext> {
-    public AccessTokenPasswordGrantRequestExtractor(final ObjectProvider<OAuth20ConfigurationContext> oAuthConfigurationContext) {
+    public AccessTokenPasswordGrantRequestExtractor(final ObjectProvider<@NonNull OAuth20ConfigurationContext> oAuthConfigurationContext) {
         super(oAuthConfigurationContext);
     }
     @Override

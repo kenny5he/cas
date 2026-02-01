@@ -1,26 +1,23 @@
 package org.apereo.cas.web.report;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationEventExecutionPlan;
 import org.apereo.cas.authentication.AuthenticationHandler;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.web.BaseCasActuatorEndpoint;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.endpoint.Access;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.annotation.Selector;
 import org.springframework.http.MediaType;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link RegisteredAuthenticationHandlersEndpoint}.
@@ -31,11 +28,11 @@ import java.util.stream.Collectors;
 @Endpoint(id = "authenticationHandlers", defaultAccess = Access.NONE)
 public class RegisteredAuthenticationHandlersEndpoint extends BaseCasActuatorEndpoint {
 
-    private final ObjectProvider<AuthenticationEventExecutionPlan> authenticationEventExecutionPlan;
+    private final ObjectProvider<@NonNull AuthenticationEventExecutionPlan> authenticationEventExecutionPlan;
 
     public RegisteredAuthenticationHandlersEndpoint(
         final CasConfigurationProperties casProperties,
-        final ObjectProvider<AuthenticationEventExecutionPlan> authenticationEventExecutionPlan) {
+        final ObjectProvider<@NonNull AuthenticationEventExecutionPlan> authenticationEventExecutionPlan) {
 
         super(casProperties);
         this.authenticationEventExecutionPlan = authenticationEventExecutionPlan;
@@ -69,7 +66,7 @@ public class RegisteredAuthenticationHandlersEndpoint extends BaseCasActuatorEnd
         MEDIA_TYPE_SPRING_BOOT_V2_JSON,
         MEDIA_TYPE_CAS_YAML
     })
-    public AuthenticationHandlerDetails fetchAuthnHandler(@Selector final String name) {
+    public @Nullable AuthenticationHandlerDetails fetchAuthnHandler(@Selector final String name) {
         return authenticationEventExecutionPlan.getObject()
             .resolveAuthenticationHandlers()
             .stream()
@@ -82,7 +79,9 @@ public class RegisteredAuthenticationHandlersEndpoint extends BaseCasActuatorEnd
     private static AuthenticationHandlerDetails buildHandlerDetails(final AuthenticationHandler handler) {
         return AuthenticationHandlerDetails.builder()
             .name(handler.getName())
-            .type(handler.getClass().getName())
+            .type(AopUtils.isAopProxy(handler)
+                ? AopUtils.getTargetClass(handler).getName()
+                : handler.getClass().getName())
             .order(handler.getOrder())
             .state(handler.getState().name())
             .build();

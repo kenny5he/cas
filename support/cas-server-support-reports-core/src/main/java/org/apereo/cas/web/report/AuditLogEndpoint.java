@@ -1,5 +1,6 @@
 package org.apereo.cas.web.report;
 
+import module java.base;
 import org.apereo.cas.audit.AuditTrailExecutionPlan;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.support.Beans;
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apereo.inspektr.audit.AuditActionContext;
 import org.apereo.inspektr.audit.AuditTrailManager;
 import org.apereo.inspektr.common.spi.AuditActionDateProvider;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.endpoint.Access;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
@@ -20,10 +22,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * Controller to handle the logging dashboard requests.
@@ -35,12 +33,12 @@ import java.util.stream.Stream;
 @Slf4j
 public class AuditLogEndpoint extends BaseCasRestActuatorEndpoint {
 
-    private final ObjectProvider<AuditTrailExecutionPlan> auditTrailManager;
-    private final ObjectProvider<AuditActionDateProvider> auditActionDateProvider;
+    private final ObjectProvider<@NonNull AuditTrailExecutionPlan> auditTrailManager;
+    private final ObjectProvider<@NonNull AuditActionDateProvider> auditActionDateProvider;
 
-    public AuditLogEndpoint(final ObjectProvider<AuditTrailExecutionPlan> auditTrailManager,
+    public AuditLogEndpoint(final ObjectProvider<@NonNull AuditTrailExecutionPlan> auditTrailManager,
                             final ConfigurableApplicationContext applicationContext,
-                            final ObjectProvider<AuditActionDateProvider> auditActionDateProvider,
+                            final ObjectProvider<@NonNull AuditActionDateProvider> auditActionDateProvider,
                             final CasConfigurationProperties casProperties) {
         super(casProperties, applicationContext);
         this.auditActionDateProvider = auditActionDateProvider;

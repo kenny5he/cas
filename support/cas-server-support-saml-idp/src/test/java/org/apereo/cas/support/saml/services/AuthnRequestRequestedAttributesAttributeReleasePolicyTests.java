@@ -1,5 +1,6 @@
 package org.apereo.cas.support.saml.services;
 
+import module java.base;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.services.RegisteredServiceAttributeReleasePolicyContext;
 import org.apereo.cas.support.saml.BaseSamlIdPConfigurationTests;
@@ -10,7 +11,6 @@ import org.apereo.cas.support.saml.idp.SamlIdPSessionManager;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.http.HttpRequestUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -27,11 +27,8 @@ import org.pac4j.saml.context.SAML2MessageContext;
 import org.pac4j.saml.sso.impl.SAML2AuthnRequestBuilder;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.TestPropertySource;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.NotNull;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -42,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @Tag("SAMLAttributes")
 @TestPropertySource(properties = {
+    "cas.authn.saml-idp.core.session-replication.cookie.crypto.enabled=true",
     "cas.authn.saml-idp.core.session-replication.cookie.auto-configure-cookie-path=true",
     "cas.authn.saml-idp.core.session-storage-type=TICKET_REGISTRY",
     "cas.authn.saml-idp.core.entity-id=https://cas.example.org/idp",
@@ -61,7 +59,7 @@ class AuthnRequestRequestedAttributesAttributeReleasePolicyTests extends BaseSam
     }
 
     @Test
-    void verifySerializationToJson() throws IOException {
+    void verifySerializationToJson() {
         val filter = new AuthnRequestRequestedAttributesAttributeReleasePolicy();
         filter.setUseFriendlyName(true);
         MAPPER.writeValue(JSON_FILE, filter);

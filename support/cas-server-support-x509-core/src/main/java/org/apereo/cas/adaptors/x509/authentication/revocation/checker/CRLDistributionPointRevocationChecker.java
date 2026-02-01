@@ -1,5 +1,6 @@
 package org.apereo.cas.adaptors.x509.authentication.revocation.checker;
 
+import module java.base;
 import org.apereo.cas.adaptors.x509.authentication.CRLFetcher;
 import org.apereo.cas.adaptors.x509.authentication.ResourceCRLFetcher;
 import org.apereo.cas.adaptors.x509.authentication.revocation.policy.RevocationPolicy;
@@ -15,19 +16,9 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.cryptacular.x509.ExtensionReader;
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.io.ByteArrayResource;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.IntStream;
 
 /**
  * Performs CRL-based revocation checking by consulting resources defined in
@@ -44,19 +35,19 @@ import java.util.stream.IntStream;
 @Slf4j
 public class CRLDistributionPointRevocationChecker extends AbstractCRLRevocationChecker {
 
-    private final Cache<URI, byte[]> crlCache;
+    private final Cache<@NonNull URI, byte[]> crlCache;
 
     private final CRLFetcher fetcher;
 
     private final boolean throwOnFetchFailure;
 
-    public CRLDistributionPointRevocationChecker(final Cache<URI, byte[]> crlCache,
+    public CRLDistributionPointRevocationChecker(final Cache<@NonNull URI, byte[]> crlCache,
                                                  final RevocationPolicy<X509CRL> expiredCRLPolicy,
                                                  final RevocationPolicy<Void> unavailableCRLPolicy) {
         this(crlCache, expiredCRLPolicy, unavailableCRLPolicy, false);
     }
 
-    public CRLDistributionPointRevocationChecker(final Cache<URI, byte[]> crlCache,
+    public CRLDistributionPointRevocationChecker(final Cache<@NonNull URI, byte[]> crlCache,
                                                  final RevocationPolicy<X509CRL> expiredCRLPolicy,
                                                  final RevocationPolicy<Void> unavailableCRLPolicy,
                                                  final boolean throwOnFetchFailure) {
@@ -65,7 +56,7 @@ public class CRLDistributionPointRevocationChecker extends AbstractCRLRevocation
 
     public CRLDistributionPointRevocationChecker(final boolean checkAll, final RevocationPolicy<Void> unavailableCRLPolicy,
                                                  final RevocationPolicy<X509CRL> expiredCRLPolicy,
-                                                 final Cache<URI, byte[]> crlCache,
+                                                 final Cache<@NonNull URI, byte[]> crlCache,
                                                  final CRLFetcher fetcher, final boolean throwOnFetchFailure) {
         super(checkAll, unavailableCRLPolicy, expiredCRLPolicy);
         this.crlCache = crlCache;

@@ -1,5 +1,6 @@
 package org.apereo.cas.adaptors.duo.web;
 
+import module java.base;
 import org.apereo.cas.adaptors.duo.DuoSecurityUserAccount;
 import org.apereo.cas.adaptors.duo.authn.DuoSecurityMultifactorAuthenticationProvider;
 import org.apereo.cas.configuration.CasConfigurationProperties;
@@ -24,10 +25,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * This is {@link DuoSecurityAdminApiEndpoint}.
@@ -120,7 +117,9 @@ public class DuoSecurityAdminApiEndpoint extends BaseCasRestActuatorEndpoint {
      * @param account    the account
      * @return the response entity
      */
-    @PutMapping(path = "/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = "/{username}",
+        consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE},
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Update Duo Security user account from Duo Admin API", parameters = {
         @Parameter(name = "username", required = true, in = ParameterIn.PATH, description = "The username to update"),
         @Parameter(name = "providerId", description = "The multifactor authentication provider id defined in CAS settings")

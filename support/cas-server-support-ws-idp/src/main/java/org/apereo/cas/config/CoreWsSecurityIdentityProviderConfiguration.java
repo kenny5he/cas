@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.CentralAuthenticationService;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionStrategy;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionStrategyConfigurer;
@@ -14,6 +15,7 @@ import org.apereo.cas.services.CasRegisteredService;
 import org.apereo.cas.services.ServiceRegistryExecutionPlanConfigurer;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.services.ServicesManagerRegisteredServiceLocator;
+import org.apereo.cas.services.StartsWithRegisteredServiceMatchingStrategy;
 import org.apereo.cas.ticket.TicketFactory;
 import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.ticket.registry.TicketRegistrySupport;
@@ -50,8 +52,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.Ordered;
-import java.util.HashSet;
-import java.util.List;
 
 /**
  * This is {@link CoreWsSecurityIdentityProviderConfiguration}.
@@ -107,10 +107,14 @@ class CoreWsSecurityIdentityProviderConfiguration {
 
         @Bean
         public Service wsFederationCallbackService(
+            final CasConfigurationProperties casProperties,
             @Qualifier(WebApplicationService.BEAN_NAME_FACTORY)
             final ServiceFactory<WebApplicationService> webApplicationServiceFactory) {
-            return webApplicationServiceFactory
-                .createService(WSFederationConstants.ENDPOINT_FEDERATION_REQUEST_CALLBACK);
+            val service = casProperties.getServer()
+                .getPrefix()
+                .concat(WSFederationConstants.ENDPOINT_FEDERATION_REQUEST_CALLBACK);
+            LOGGER.debug("Locating WS-Federation callback service at [{}]", service);
+            return webApplicationServiceFactory.createService(service);
         }
 
         @Bean
@@ -118,6 +122,7 @@ class CoreWsSecurityIdentityProviderConfiguration {
         @ConditionalOnMissingBean(name = "wsFederationServiceRegistryExecutionPlanConfigurer")
         public ServiceRegistryExecutionPlanConfigurer wsFederationServiceRegistryExecutionPlanConfigurer(
             final ConfigurableApplicationContext applicationContext,
+            final CasConfigurationProperties casProperties,
             @Qualifier("wsFederationCallbackService")
             final Service wsFederationCallbackService) {
             return plan -> {
@@ -128,6 +133,9 @@ class CoreWsSecurityIdentityProviderConfiguration {
                 service.setName(service.getClass().getSimpleName());
                 service.setDescription("WS-Federation Authentication Request");
                 service.setServiceId(wsFederationCallbackService.getId().concat(".+"));
+                val matchingStrategy = new StartsWithRegisteredServiceMatchingStrategy()
+                    .setExpectedUrl(casProperties.getServer().getPrefix());
+                service.setMatchingStrategy(matchingStrategy);
                 service.markAsInternal();
                 LOGGER.debug("Saving callback service [{}] into the registry", service.getServiceId());
                 plan.registerServiceRegistry(new WSFederationServiceRegistry(applicationContext, service));

@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.authentication.CoreAuthenticationUtils;
 import org.apereo.cas.authentication.attribute.AbstractAggregatingDefaultQueryPersonAttributeDao;
 import org.apereo.cas.authentication.attribute.AttributeDefinitionStore;
@@ -31,6 +32,7 @@ import org.apereo.cas.web.report.CasPersonDirectoryEndpoint;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,14 +46,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link CasPersonDirectoryConfiguration}.
@@ -74,9 +68,9 @@ class CasPersonDirectoryConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public CasPersonDirectoryEndpoint casPersonDirectoryEndpoint(
             @Qualifier("cachingAttributeRepository")
-            final ObjectProvider<PersonAttributeDao> cachingAttributeRepository,
+            final ObjectProvider<@NonNull PersonAttributeDao> cachingAttributeRepository,
             @Qualifier(PersonDirectoryAttributeRepositoryPlan.BEAN_NAME)
-            final ObjectProvider<PersonDirectoryAttributeRepositoryPlan> attributeRepositoryPlan,
+            final ObjectProvider<@NonNull PersonDirectoryAttributeRepositoryPlan> attributeRepositoryPlan,
             final ConfigurableApplicationContext applicationContext,
             final CasConfigurationProperties casProperties) {
             return new CasPersonDirectoryEndpoint(casProperties, applicationContext,
@@ -143,7 +137,7 @@ class CasPersonDirectoryConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public PersonDirectoryAttributeRepositoryPlan personDirectoryAttributeRepositoryPlan(
             final List<PersonDirectoryAttributeRepositoryPlanConfigurer> configurers,
-            final ObjectProvider<List<PersonDirectoryAttributeRepositoryCustomizer>> customizers) {
+            final ObjectProvider<@NonNull List<PersonDirectoryAttributeRepositoryCustomizer>> customizers) {
             val plan = new DefaultPersonDirectoryAttributeRepositoryPlan(
                 Optional.ofNullable(customizers.getIfAvailable()).orElseGet(ArrayList::new));
             configurers.forEach(cfg -> cfg.configureAttributeRepositoryPlan(plan));

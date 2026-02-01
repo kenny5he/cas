@@ -1,20 +1,22 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
-import org.apereo.cas.services.web.CasThymeleafOutputTemplateHandler;
+import org.apereo.cas.services.web.CasThymeleafPostProcessorDialect;
 import org.apereo.cas.services.web.CasThymeleafTemplatesDirector;
 import org.apereo.cas.services.web.CasThymeleafViewResolverConfigurer;
 import org.apereo.cas.services.web.ThemeBasedViewResolver;
 import org.apereo.cas.services.web.ThemeViewResolver;
 import org.apereo.cas.services.web.ThemeViewResolverFactory;
-import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.InetAddressUtils;
 import org.apereo.cas.util.LoggingUtils;
 import org.apereo.cas.util.spring.beans.BeanSupplier;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import org.apereo.cas.validation.CasProtocolViewFactory;
 import org.apereo.cas.web.flow.CasWebflowExecutionPlan;
+import org.apereo.cas.web.theme.ThemeResolver;
+import org.apereo.cas.web.theme.ThemeSource;
 import org.apereo.cas.web.view.CasProtocolMustacheViewFactory;
 import org.apereo.cas.web.view.CasProtocolThymeleafViewFactory;
 import org.apereo.cas.web.view.CasThymeleafExpressionDialect;
@@ -27,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -34,12 +37,12 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.mustache.MustacheAutoConfiguration;
-import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration;
-import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafProperties;
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.servlet.view.MustacheViewResolver;
+import org.springframework.boot.mustache.autoconfigure.MustacheAutoConfiguration;
+import org.springframework.boot.mustache.servlet.view.MustacheViewResolver;
+import org.springframework.boot.thymeleaf.autoconfigure.ThymeleafAutoConfiguration;
+import org.springframework.boot.thymeleaf.autoconfigure.ThymeleafProperties;
+import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -47,15 +50,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
-import org.springframework.ui.context.ThemeSource;
 import org.springframework.util.MimeType;
 import org.springframework.util.ResourceUtils;
-import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.thymeleaf.dialect.IDialect;
-import org.thymeleaf.dialect.IPostProcessorDialect;
-import org.thymeleaf.postprocessor.IPostProcessor;
-import org.thymeleaf.postprocessor.PostProcessor;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.spring6.view.AbstractThymeleafView;
 import org.thymeleaf.spring6.view.ThymeleafViewResolver;
@@ -65,10 +63,6 @@ import org.thymeleaf.templateresolver.AbstractTemplateResolver;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.FileTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * This is {@link CasThymeleafAutoConfiguration}.
@@ -110,16 +104,6 @@ public class CasThymeleafAutoConfiguration {
             thymeleafView.addStaticVariable("host", InetAddressUtils.getCasServerHostName());
         }
 
-    }
-
-    private static String appendCharset(final MimeType type, final String charset) {
-        if (type.getCharset() != null) {
-            return type.toString();
-        }
-        val parameters = new LinkedHashMap<String, String>();
-        parameters.put("charset", charset);
-        parameters.putAll(type.getParameters());
-        return new MimeType(type, parameters).toString();
     }
 
     private static void configureTemplateViewResolver(final AbstractConfigurableTemplateResolver resolver,
@@ -264,8 +248,8 @@ public class CasThymeleafAutoConfiguration {
         @Bean
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public SpringTemplateEngine templateEngine(final ThymeleafProperties thymeleafProperties,
-                                                   final ObjectProvider<ITemplateResolver> templateResolvers,
-                                                   final ObjectProvider<IDialect> dialects) {
+                                                   final ObjectProvider<@NonNull ITemplateResolver> templateResolvers,
+                                                   final ObjectProvider<@NonNull IDialect> dialects) {
             val engine = new SpringTemplateEngine();
             engine.setEnableSpringELCompiler(thymeleafProperties.isEnableSpringElCompiler());
             engine.setRenderHiddenMarkersBeforeCheckboxes(thymeleafProperties.isRenderHiddenMarkersBeforeCheckboxes());
@@ -317,23 +301,8 @@ public class CasThymeleafAutoConfiguration {
             resolver.setViewNames(thymeleafProperties.getViewNames());
             resolver.setContentType(appendCharset(thymeleafProperties.getServlet().getContentType(), resolver.getCharacterEncoding()));
             if (!springTemplateEngine.isInitialized()) {
-                springTemplateEngine.addDialect(new IPostProcessorDialect() {
-
-                    @Override
-                    public int getDialectPostProcessorPrecedence() {
-                        return Integer.MAX_VALUE;
-                    }
-
-                    @Override
-                    public Set<IPostProcessor> getPostProcessors() {
-                        return CollectionUtils.wrapSet(new PostProcessor(TemplateMode.parse(thymeleafProperties.getMode()), CasThymeleafOutputTemplateHandler.class, Integer.MAX_VALUE));
-                    }
-
-                    @Override
-                    public String getName() {
-                        return CasThymeleafOutputTemplateHandler.class.getSimpleName();
-                    }
-                });
+                val temlateMode = TemplateMode.parse(thymeleafProperties.getMode());
+                springTemplateEngine.addDialect(new CasThymeleafPostProcessorDialect(temlateMode));
             }
             resolver.setTemplateEngine(springTemplateEngine);
             thymeleafViewResolverConfigurers
@@ -348,8 +317,18 @@ public class CasThymeleafAutoConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public IDialect casThymeleafExpressionDialect(
             @Qualifier("casThymeleafTemplatesDirector")
-            final ObjectProvider<CasThymeleafTemplatesDirector> casThymeleafTemplatesDirector) {
+            final ObjectProvider<@NonNull CasThymeleafTemplatesDirector> casThymeleafTemplatesDirector) {
             return new CasThymeleafExpressionDialect(casThymeleafTemplatesDirector);
+        }
+
+        private static String appendCharset(final MimeType type, final String charset) {
+            if (type.getCharset() != null) {
+                return type.toString();
+            }
+            val parameters = new LinkedHashMap<String, String>();
+            parameters.put("charset", charset);
+            parameters.putAll(type.getParameters());
+            return new MimeType(type, parameters).toString();
         }
     }
 }

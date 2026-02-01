@@ -1,16 +1,16 @@
 package org.apereo.cas.adaptors.yubikey.registry;
 
+import module java.base;
 import org.apereo.cas.adaptors.yubikey.YubiKeyAccount;
 import org.apereo.cas.adaptors.yubikey.YubiKeyAccountValidator;
 import org.apereo.cas.adaptors.yubikey.YubiKeyDeviceRegistrationRequest;
 import org.apereo.cas.adaptors.yubikey.YubiKeyRegisteredDevice;
 import org.apereo.cas.configuration.model.support.mfa.yubikey.YubiKeyRestfulMultifactorProperties;
 import org.apereo.cas.util.CollectionUtils;
+import org.apereo.cas.util.LoggingUtils;
 import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.io.IOUtils;
@@ -21,10 +21,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link RestfulYubiKeyAccountRegistry}.
@@ -74,11 +72,12 @@ public class RestfulYubiKeyAccountRegistry extends BaseYubiKeyAccountRegistry {
                 .url(restProperties.getUrl())
                 .headers(headers)
                 .entity(MAPPER.writeValueAsString(account))
+                .maximumRetryAttempts(restProperties.getMaximumRetryAttempts())
                 .build();
             response = HttpUtils.execute(exec);
             return response != null && HttpStatus.valueOf(response.getCode()).is2xxSuccessful();
         } catch (final Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            LoggingUtils.error(LOGGER, e);
         } finally {
             HttpUtils.close(response);
         }
@@ -97,6 +96,7 @@ public class RestfulYubiKeyAccountRegistry extends BaseYubiKeyAccountRegistry {
                 .basicAuthUsername(restProperties.getBasicAuthUsername())
                 .method(HttpMethod.DELETE)
                 .headers(restProperties.getHeaders())
+                .maximumRetryAttempts(restProperties.getMaximumRetryAttempts())
                 .url(url)
                 .build();
 
@@ -116,6 +116,7 @@ public class RestfulYubiKeyAccountRegistry extends BaseYubiKeyAccountRegistry {
                 .basicAuthUsername(restProperties.getBasicAuthUsername())
                 .method(HttpMethod.DELETE)
                 .headers(restProperties.getHeaders())
+                .maximumRetryAttempts(restProperties.getMaximumRetryAttempts())
                 .url(url)
                 .build();
             response = HttpUtils.execute(exec);
@@ -134,6 +135,7 @@ public class RestfulYubiKeyAccountRegistry extends BaseYubiKeyAccountRegistry {
                 .method(HttpMethod.DELETE)
                 .url(restProperties.getUrl())
                 .headers(restProperties.getHeaders())
+                .maximumRetryAttempts(restProperties.getMaximumRetryAttempts())
                 .build();
             response = HttpUtils.execute(exec);
         } finally {
@@ -152,6 +154,7 @@ public class RestfulYubiKeyAccountRegistry extends BaseYubiKeyAccountRegistry {
                 .method(HttpMethod.GET)
                 .url(url)
                 .headers(restProperties.getHeaders())
+                .maximumRetryAttempts(restProperties.getMaximumRetryAttempts())
                 .build();
             response = HttpUtils.execute(exec);
             if (response != null) {
@@ -164,7 +167,7 @@ public class RestfulYubiKeyAccountRegistry extends BaseYubiKeyAccountRegistry {
                 }
             }
         } catch (final Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            LoggingUtils.error(LOGGER, e);
         } finally {
             HttpUtils.close(response);
         }
@@ -194,7 +197,7 @@ public class RestfulYubiKeyAccountRegistry extends BaseYubiKeyAccountRegistry {
                 }
             }
         } catch (final Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            LoggingUtils.error(LOGGER, e);
         } finally {
             HttpUtils.close(response);
         }

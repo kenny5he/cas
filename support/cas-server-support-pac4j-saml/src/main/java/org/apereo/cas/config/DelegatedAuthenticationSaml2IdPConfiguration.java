@@ -1,11 +1,12 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.authentication.adaptive.geo.GeoLocationService;
 import org.apereo.cas.authentication.principal.ServiceFactory;
 import org.apereo.cas.authentication.principal.WebApplicationService;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
-import org.apereo.cas.configuration.model.support.interrupt.InterruptCookieProperties;
+import org.apereo.cas.configuration.model.support.pac4j.Pac4jDelegatedAuthenticationProperties;
 import org.apereo.cas.multitenancy.TenantExtractor;
 import org.apereo.cas.pac4j.client.DelegatedIdentityProviders;
 import org.apereo.cas.services.ServicesManager;
@@ -26,6 +27,7 @@ import org.apereo.cas.web.support.CookieUtils;
 import org.apereo.cas.web.support.mgmr.DefaultCasCookieValueManager;
 import org.apereo.cas.web.support.mgmr.DefaultCookieSameSitePolicy;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -99,7 +101,7 @@ class DelegatedAuthenticationSaml2IdPConfiguration {
         @Qualifier(TenantExtractor.BEAN_NAME)
         final TenantExtractor tenantExtractor,
         @Qualifier(GeoLocationService.BEAN_NAME)
-        final ObjectProvider<GeoLocationService> geoLocationService,
+        final ObjectProvider<@NonNull GeoLocationService> geoLocationService,
         @Qualifier("delegatedClientDistributedSessionCookieCipherExecutor")
         final CipherExecutor delegatedClientDistributedSessionCookieCipherExecutor,
         final CasConfigurationProperties casProperties) {
@@ -112,7 +114,7 @@ class DelegatedAuthenticationSaml2IdPConfiguration {
         logoutRequestCookie.setName("Saml2LogoutRequest");
 
         val cipherExecutorResolver = new DefaultCipherExecutorResolver(delegatedClientDistributedSessionCookieCipherExecutor, tenantExtractor,
-            InterruptCookieProperties.class, bindingContext -> {
+            Pac4jDelegatedAuthenticationProperties.class, bindingContext -> {
             val properties = bindingContext.value();
             val crypto = properties.getAuthn().getPac4j().getCore().getSessionReplication().getCookie().getCrypto();
             return CipherExecutorUtils.newStringCipherExecutor(crypto, DelegatedClientAuthenticationDistributedSessionCookieCipherExecutor.class);

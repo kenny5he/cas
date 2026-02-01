@@ -1,14 +1,13 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.configuration.support.ExpressionLanguageCapable;
 import org.apereo.cas.util.LoggingUtils;
-import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.SpringExpressionLanguageValueResolver;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,10 +24,7 @@ import org.apache.hc.core5.http.HttpResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import java.io.Serial;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link PermifyRegisteredServiceAccessStrategy}.
@@ -153,7 +149,7 @@ public class PermifyRegisteredServiceAccessStrategy extends BaseRegisteredServic
          * @return the string
          */
         public String toJson() {
-            return FunctionUtils.doUnchecked(() -> MAPPER.writeValueAsString(this));
+            return MAPPER.writeValueAsString(this);
         }
     }
 }

@@ -1,22 +1,15 @@
 package org.apereo.cas.uma.web.controllers.resource;
 
+import module java.base;
 import org.apereo.cas.support.oauth.util.OAuth20Utils;
 import org.apereo.cas.uma.ticket.resource.ResourceSet;
-import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.val;
 import org.pac4j.core.profile.UserProfile;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link UmaResourceRegistrationRequest}.
@@ -73,6 +66,6 @@ public class UmaResourceRegistrationRequest implements Serializable {
      */
     @JsonIgnore
     public String toJson() {
-        return FunctionUtils.doUnchecked(() -> MAPPER.writeValueAsString(this));
+        return MAPPER.writeValueAsString(this);
     }
 }

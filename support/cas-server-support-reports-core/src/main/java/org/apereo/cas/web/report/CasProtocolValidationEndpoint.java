@@ -1,5 +1,6 @@
 package org.apereo.cas.web.report;
 
+import module java.base;
 import org.apereo.cas.CasViewConstants;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.DefaultAuthenticationBuilder;
@@ -28,13 +29,11 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+import org.springframework.web.servlet.view.json.JacksonJsonView;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * This is {@link CasProtocolValidationEndpoint}.
@@ -156,7 +155,7 @@ public class CasProtocolValidationEndpoint extends BaseCasRestActuatorEndpoint {
         modelAndView.addObject(CasViewConstants.MODEL_ATTRIBUTE_NAME_SERVICE, selectedService);
         modelAndView.addObject(CasViewConstants.MODEL_ATTRIBUTE_REGISTERED_SERVICE, registeredService);
 
-        val requestWrapper = new ContentCachingRequestWrapper(request);
+        val requestWrapper = new ContentCachingRequestWrapper(request, 0);
         val responseWrapper = new ContentCachingResponseWrapper(response);
         try {
             Objects.requireNonNull(modelAndView.getView()).render(modelAndView.getModel(), requestWrapper, responseWrapper);
@@ -164,7 +163,7 @@ public class CasProtocolValidationEndpoint extends BaseCasRestActuatorEndpoint {
             val responseArray = responseWrapper.getContentAsByteArray();
             val output = new String(responseArray, responseWrapper.getCharacterEncoding());
             modelAndView.addObject("response", output);
-            modelAndView.setView(new MappingJackson2JsonView());
+            modelAndView.setView(new JacksonJsonView());
             modelAndView.setStatus(HttpStatus.OK);
         }
         return modelAndView;

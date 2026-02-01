@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.audit.AuditActionResolvers;
 import org.apereo.cas.audit.AuditResourceResolvers;
 import org.apereo.cas.audit.AuditTrailRecordResolutionPlanConfigurer;
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apereo.inspektr.audit.spi.AuditActionResolver;
 import org.apereo.inspektr.audit.spi.AuditResourceResolver;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
@@ -40,7 +42,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import java.util.List;
 
 /**
  * This is {@link CasConsentCoreAutoConfiguration}.
@@ -183,9 +184,9 @@ public class CasConsentCoreAutoConfiguration {
         public AttributeConsentReportEndpoint attributeConsentReportEndpoint(
             final ConfigurableApplicationContext applicationContext,
             @Qualifier(ConsentEngine.BEAN_NAME)
-            final ObjectProvider<ConsentEngine> consentEngine,
+            final ObjectProvider<@NonNull ConsentEngine> consentEngine,
             @Qualifier(ConsentRepository.BEAN_NAME)
-            final ObjectProvider<ConsentRepository> consentRepository,
+            final ObjectProvider<@NonNull ConsentRepository> consentRepository,
             final CasConfigurationProperties casProperties) {
             return new AttributeConsentReportEndpoint(casProperties, applicationContext, consentRepository, consentEngine);
         }

@@ -1,10 +1,9 @@
 package org.apereo.cas.authentication.principal;
 
+import module java.base;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.apache.commons.lang3.StringUtils;
-
-import java.io.Serializable;
-import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Generates a unique consistent Id based on the principal.
@@ -42,7 +41,7 @@ public interface PersistentIdGenerator extends Serializable {
      * @param service   the service for which the id may be generated.
      * @return the generated persistent id.
      */
-    String generate(Principal principal, String service);
+    String generate(Principal principal, @Nullable String service);
 
     /**
      * Generates a PersistentId based on some algorithm plus the principal.

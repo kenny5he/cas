@@ -1,18 +1,16 @@
 package org.apereo.cas.services.web;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.ResourceUtils;
+import org.apereo.cas.web.theme.ResourceBundleThemeSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.Strings;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.StaticMessageSource;
-import org.springframework.ui.context.support.ResourceBundleThemeSource;
-import jakarta.annotation.Nonnull;
-import java.io.IOException;
-import java.util.Locale;
-import java.util.Properties;
 
 /**
  * This is {@link AggregateCasThemeSource} which merges all the theme resource bundles that it can find.
@@ -25,10 +23,10 @@ import java.util.Properties;
 public class AggregateCasThemeSource extends ResourceBundleThemeSource {
     private final CasConfigurationProperties casProperties;
 
-    @Nonnull
+    @NonNull
     @Override
     protected MessageSource createMessageSource(
-        @Nonnull
+        @NonNull
         final String basename) {
         val source = new StaticMessageSource();
         source.setParentMessageSource(super.createMessageSource(basename));

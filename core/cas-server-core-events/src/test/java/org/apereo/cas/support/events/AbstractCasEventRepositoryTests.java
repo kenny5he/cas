@@ -1,5 +1,6 @@
 package org.apereo.cas.support.events;
 
+import module java.base;
 import org.apereo.cas.authentication.adaptive.geo.GeoLocationRequest;
 import org.apereo.cas.config.CasCoreAuthenticationAutoConfiguration;
 import org.apereo.cas.config.CasCoreEventsAutoConfiguration;
@@ -19,9 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -33,9 +31,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public abstract class AbstractCasEventRepositoryTests {
 
     @Test
-    protected void verifyLoadOps() throws Throwable {
+    protected void verifyLoadOps() {
         val eventRepository = getEventRepository();
-        eventRepository.withTransaction(Unchecked.consumer(__ -> {
+        eventRepository.withTransaction(Unchecked.consumer(_ -> {
             eventRepository.removeAll();
 
             val dto1 = getCasEvent("example1");
@@ -57,9 +55,9 @@ public abstract class AbstractCasEventRepositoryTests {
     }
 
     @Test
-    protected void verifySave() throws Throwable {
+    protected void verifySave() {
         val eventRepository = getEventRepository();
-        eventRepository.withTransaction(Unchecked.consumer(__ -> {
+        eventRepository.withTransaction(Unchecked.consumer(_ -> {
             eventRepository.removeAll();
 
             val dto1 = getCasEvent("casuser");

@@ -1,9 +1,11 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.ticket.TicketCatalog;
 import org.apereo.cas.ticket.proxy.ProxyGrantingTicket;
+import org.apereo.cas.util.RegexUtils;
 import org.apereo.cas.util.feature.CasRuntimeModuleLoader;
 import org.apereo.cas.util.feature.DefaultCasRuntimeModuleLoader;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
@@ -15,8 +17,8 @@ import org.apereo.cas.util.text.DefaultMessageSanitizer;
 import org.apereo.cas.util.text.MessageSanitationContributor;
 import org.apereo.cas.util.text.MessageSanitizer;
 import org.apereo.cas.util.text.TicketCatalogMessageSanitationContributor;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,14 +37,8 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.validation.beanvalidation.BeanValidationPostProcessor;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.validation.MessageInterpolator;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link CasCoreUtilConfiguration}.
@@ -107,12 +103,12 @@ class CasCoreUtilConfiguration {
         }
 
         @Bean
-        public static Converter<ZonedDateTime, String> zonedDateTimeToStringConverter() {
+        public static Converter<@NonNull ZonedDateTime, @NonNull String> zonedDateTimeToStringConverter() {
             return new Converters.ZonedDateTimeToStringConverter();
         }
 
         @Bean
-        public static Converter<String, Resource> stringToResourceConverter() {
+        public static Converter<@NonNull String, @NonNull Resource> stringToResourceConverter() {
             return new Converters.StringToResourceConverter();
         }
 
@@ -158,7 +154,7 @@ class CasCoreUtilConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         @ConditionalOnMissingBean(name = "ticketCatalogMessageSanitationContributor")
         public MessageSanitationContributor defaultMessageSanitationContributor(
-            @Qualifier(TicketCatalog.BEAN_NAME) final ObjectProvider<TicketCatalog> ticketCatalog) {
+            @Qualifier(TicketCatalog.BEAN_NAME) final ObjectProvider<@NonNull TicketCatalog> ticketCatalog) {
             return new TicketCatalogMessageSanitationContributor(ticketCatalog);
         }
 
@@ -179,7 +175,7 @@ class CasCoreUtilConfiguration {
                 .filter(Objects::nonNull)
                 .flatMap(List::stream)
                 .collect(Collectors.joining("|"));
-            val pattern = Pattern.compile("(?:(?:" + prefixes + ")-\\d+-)([\\w.-]+)");
+            val pattern = RegexUtils.createPattern("(?:(?:" + prefixes + ")-\\d+-)([\\w.-]+)");
             return new DefaultMessageSanitizer(pattern);
         }
     }

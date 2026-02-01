@@ -1,5 +1,6 @@
 package org.apereo.cas.support.events.dao.filter;
 
+import module java.base;
 import org.apereo.cas.support.events.CasEventRepositoryFilter;
 import org.apereo.cas.support.events.dao.CasEvent;
 import org.apereo.cas.util.scripting.ExecutableCompiledScript;
@@ -27,7 +28,7 @@ public class GroovyCasEventRepositoryFilter implements CasEventRepositoryFilter,
     @Override
     public boolean shouldSaveEvent(final CasEvent event) throws Throwable {
         val args = new Object[]{event, LOGGER};
-        return watchableScript.execute("shouldSaveEvent", Boolean.class, args);
+        return Boolean.TRUE.equals(watchableScript.execute("shouldSaveEvent", Boolean.class, args));
     }
 
     @Override

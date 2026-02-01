@@ -1,16 +1,12 @@
 package org.apereo.cas.entity;
 
+import module java.base;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import jakarta.annotation.Nonnull;
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This is {@link SamlIdentityProviderEntity}.
@@ -52,7 +48,7 @@ public class SamlIdentityProviderEntity implements Serializable, Comparable<Saml
     private String entityID;
 
     @Override
-    public int compareTo(@Nonnull final SamlIdentityProviderEntity entity) {
+    public int compareTo(@NonNull final SamlIdentityProviderEntity entity) {
         return Comparator.comparing(SamlIdentityProviderEntity::getEntityID).compare(this, entity);
     }
 }

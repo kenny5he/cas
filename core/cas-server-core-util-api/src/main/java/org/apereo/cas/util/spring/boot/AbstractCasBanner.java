@@ -1,17 +1,13 @@
 package org.apereo.cas.util.spring.boot;
 
+import module java.base;
 import org.apereo.cas.util.AsciiArtUtils;
 import org.apereo.cas.util.CasVersion;
 import org.apereo.cas.util.SystemUtils;
-
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.env.Environment;
-
-import java.io.PrintStream;
-import java.util.Collections;
-import java.util.Formatter;
-import java.util.ServiceLoader;
 
 /**
  * This is {@link AbstractCasBanner}.
@@ -29,20 +25,17 @@ public abstract class AbstractCasBanner implements CasBanner {
         Collections.nCopies(SEPARATOR_REPEAT_COUNT, SEPARATOR_CHAR));
 
     @Override
-    public void printBanner(final Environment environment, final Class<?> sourceClass, final PrintStream out) {
+    public void printBanner(final @NonNull Environment environment, final Class<?> sourceClass, final @NonNull PrintStream out) {
         AsciiArtUtils.printAsciiArt(out, getTitle(), collectEnvironmentInfo(environment, sourceClass));
     }
 
     @Override
     public String getTitle() {
         return """
-                ____  ____    ___  ____     ___   ___          __   ____  _____
-               /    T|    \\  /  _]|    \\   /  _] /   \\        /  ] /    T/ ___/
-              Y  o  ||  o  )/  [_ |  D  ) /  [_ Y     Y      /  / Y  o  (   \\_\s
-              |     ||   _/Y    _]|    / Y    _]|  O  |     /  /  |     |\\__  T
-              |  _  ||  |  |   [_ |    \\ |   [_ |     |    /   \\_ |  _  |/  \\ |
-              |  |  ||  |  |     T|  .  Y|     Tl     !    \\     ||  |  |\\    |
-              l__j__jl__j  l_____jl__j\\_jl_____j \\___/      \\____jl__j__j \\___j
+              __   ____  ____  ____  ____  __      ___   __   ____\s
+             / _\\ (  _ \\(  __)(  _ \\(  __)/  \\    / __) / _\\ / ___)
+            /    \\ ) __/ ) _)  )   / ) _)(  O )  ( (__ /    \\\\___ \\
+            \\_/\\_/(__)  (____)(__\\_)(____)\\__/    \\___)\\_/\\_/(____/
             """;
     }
 

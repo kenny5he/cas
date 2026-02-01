@@ -1,9 +1,10 @@
 package org.apereo.cas.uma.discovery;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
-
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
@@ -13,7 +14,7 @@ import org.springframework.beans.factory.FactoryBean;
  * @since 6.0.0
  */
 @RequiredArgsConstructor
-public class UmaServerDiscoverySettingsFactory implements FactoryBean<UmaServerDiscoverySettings> {
+public class UmaServerDiscoverySettingsFactory implements FactoryBean<@NonNull UmaServerDiscoverySettings> {
     private final CasConfigurationProperties casProperties;
 
     @Override

@@ -1,9 +1,9 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.test.CasTestExtension;
 import org.apereo.cas.util.spring.boot.SpringBootTestAutoConfigurations;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.query.extractor.ValueCollector;
 import lombok.val;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
@@ -14,9 +14,8 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.session.MapSession;
+import org.springframework.session.SessionRepository;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
  * This is {@link HazelcastSessionConfigurationTests}.
@@ -38,11 +37,22 @@ class HazelcastSessionConfigurationTests {
     @Qualifier("hazelcastInstance")
     private HazelcastInstance hazelcastInstance;
 
+    @Autowired
+    @Qualifier("sessionRepository")
+    private SessionRepository sessionRepository;
+
     @Test
     void verifyOperation() {
         assertNotNull(hazelcastInstance);
-        val extractor = new HazelcastSessionPrincipalNameExtractor();
-        assertDoesNotThrow(() -> extractor.extract(new MapSession(), "casuser", mock(ValueCollector.class)));
+        assertNotNull(sessionRepository);
+        val session = sessionRepository.createSession();
+        assertNotNull(session);
+        sessionRepository.save(session);
+        val result = sessionRepository.findById(session.getId());
+        assertNotNull(result);
+        sessionRepository.deleteById(session.getId());
+        val deleted = sessionRepository.findById(session.getId());
+        assertNull(deleted);
     }
 
     @AfterEach

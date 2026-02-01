@@ -1,21 +1,16 @@
 package org.apereo.cas.web;
 
+import module java.base;
 import org.apereo.cas.CasProtocolConstants;
 import org.apereo.cas.authentication.principal.WebApplicationService;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.validation.ValidationResponseType;
-
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
-
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.function.Function;
 
 /**
  * This is {@link ServiceValidationViewFactory}.
@@ -117,17 +112,7 @@ public class ServiceValidationViewFactory {
     public View getSuccessView(final String type) {
         return getView(type).getKey();
     }
-
-    /**
-     * Gets success view.
-     *
-     * @param type the type
-     * @return the success view
-     */
-    public View getSuccessView(final Class type) {
-        return getView(type.getSimpleName()).getKey();
-    }
-
+    
     /**
      * Gets view.
      *
@@ -136,16 +121,6 @@ public class ServiceValidationViewFactory {
      */
     public View getFailureView(final String type) {
         return getView(type).getValue();
-    }
-
-    /**
-     * Gets failure view.
-     *
-     * @param type the type
-     * @return the failure view
-     */
-    public View getFailureView(final Class type) {
-        return getView(type.getSimpleName()).getValue();
     }
 
     /**
@@ -177,7 +152,7 @@ public class ServiceValidationViewFactory {
         val format = request.getParameter(CasProtocolConstants.PARAMETER_FORMAT);
         final Function<String, ValidationResponseType> func = FunctionUtils.doIf(StringUtils::isNotBlank,
             t -> ValidationResponseType.valueOf(t.toUpperCase(Locale.ENGLISH)),
-            __ -> service != null ? service.getFormat() : ValidationResponseType.XML);
+            _ -> service != null ? service.getFormat() : ValidationResponseType.XML);
         return func.apply(format);
     }
 }

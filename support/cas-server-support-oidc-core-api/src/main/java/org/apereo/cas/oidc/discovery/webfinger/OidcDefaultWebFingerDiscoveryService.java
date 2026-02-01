@@ -1,5 +1,6 @@
 package org.apereo.cas.oidc.discovery.webfinger;
 
+import module java.base;
 import org.apereo.cas.configuration.model.support.oidc.OidcWebFingerProperties;
 import org.apereo.cas.oidc.OidcConstants;
 import org.apereo.cas.oidc.discovery.OidcServerDiscoverySettings;
@@ -11,14 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * This is {@link OidcDefaultWebFingerDiscoveryService}.
@@ -52,7 +50,7 @@ public class OidcDefaultWebFingerDiscoveryService implements OidcWebFingerDiscov
     private final OidcWebFingerProperties properties;
 
     @Override
-    public ResponseEntity<Map> handleRequest(final String resource, final String rel) throws Throwable {
+    public ResponseEntity<@NonNull Map> handleRequest(final String resource, final String rel) throws Throwable {
         if (StringUtils.isNotBlank(rel) && !OidcConstants.WEBFINGER_REL.equalsIgnoreCase(rel)) {
             LOGGER.warn("Handling discovery request for a non-standard OIDC relation [{}]", rel);
         }

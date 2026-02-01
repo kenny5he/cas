@@ -1,5 +1,6 @@
 package org.apereo.cas.oidc.token.ciba;
 
+import module java.base;
 import org.apereo.cas.oidc.OidcConfigurationContext;
 import org.apereo.cas.oidc.OidcConstants;
 import org.apereo.cas.oidc.ticket.OidcCibaRequest;
@@ -13,12 +14,12 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.BooleanUtils;
+import org.jspecify.annotations.NonNull;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.UserProfile;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.Ordered;
-import java.util.Locale;
 
 /**
  * This is {@link OidcAccessTokenCibaGrantRequestValidator}.
@@ -31,7 +32,7 @@ import java.util.Locale;
 public class OidcAccessTokenCibaGrantRequestValidator extends BaseOAuth20TokenRequestValidator<OidcConfigurationContext> {
     private final int order = Ordered.LOWEST_PRECEDENCE;
 
-    public OidcAccessTokenCibaGrantRequestValidator(final ObjectProvider<OidcConfigurationContext> configurationContext) {
+    public OidcAccessTokenCibaGrantRequestValidator(final ObjectProvider<@NonNull OidcConfigurationContext> configurationContext) {
         super(configurationContext);
     }
 

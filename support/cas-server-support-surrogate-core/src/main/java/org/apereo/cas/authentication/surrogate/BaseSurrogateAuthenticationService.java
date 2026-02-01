@@ -1,5 +1,6 @@
 package org.apereo.cas.authentication.surrogate;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.configuration.CasConfigurationProperties;
@@ -11,7 +12,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.context.ConfigurableApplicationContext;
-import java.util.Optional;
 
 /**
  * This is {@link BaseSurrogateAuthenticationService}.
@@ -37,7 +37,7 @@ public abstract class BaseSurrogateAuthenticationService implements SurrogateAut
     }
 
     protected boolean isServiceAuthorizedForImpersonation(final Principal principal,
-                                                          final Optional<? extends Service> givenService) throws Throwable {
+                                                          final Optional<? extends Service> givenService) {
         if (givenService.isPresent()) {
             val service = givenService.get();
             val registeredService = servicesManager.findServiceBy(service);

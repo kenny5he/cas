@@ -1,20 +1,17 @@
 package org.apereo.cas.ticket;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
-
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This is {@link TransientSessionTicketImpl}, issued when a delegated authentication
@@ -31,6 +28,7 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+@SuppressWarnings("NullAway.Init")
 public class TransientSessionTicketImpl extends AbstractTicket implements TransientSessionTicket {
     @Serial
     private static final long serialVersionUID = 7839186396717950243L;
@@ -41,7 +39,9 @@ public class TransientSessionTicketImpl extends AbstractTicket implements Transi
     private Service service;
     
     public TransientSessionTicketImpl(final String id, final ExpirationPolicy expirationPolicy,
-                                      final Service service, final Map<String, Serializable> properties) {
+                                      final Service service,
+                                      @JsonSetter(nulls = Nulls.AS_EMPTY)
+                                      final Map<String, Serializable> properties) {
         super(id, expirationPolicy);
         this.service = service;
         setProperties(new HashMap<>(properties));

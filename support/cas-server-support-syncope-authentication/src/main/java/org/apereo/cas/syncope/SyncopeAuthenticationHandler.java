@@ -1,5 +1,6 @@
 package org.apereo.cas.syncope;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationHandlerExecutionResult;
 import org.apereo.cas.authentication.credential.UsernamePasswordCredential;
 import org.apereo.cas.authentication.exceptions.AccountDisabledException;
@@ -14,8 +15,6 @@ import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.SpringExpressionLanguageValueResolver;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.Strings;
@@ -23,10 +22,10 @@ import org.apache.hc.core5.http.HttpEntityContainer;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpMethod;
-import javax.security.auth.login.FailedLoginException;
-import java.util.ArrayList;
-import java.util.Optional;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link SyncopeAuthenticationHandler}.
@@ -55,11 +54,11 @@ public class SyncopeAuthenticationHandler extends AbstractUsernamePasswordAuthen
 
     @Override
     protected AuthenticationHandlerExecutionResult authenticateUsernamePasswordInternal(
-        final UsernamePasswordCredential credential, final String originalPassword) throws Throwable {
+        final UsernamePasswordCredential credential, @Nullable final String originalPassword) throws Throwable {
         val result = authenticateSyncopeUser(credential);
         if (result.isPresent()) {
             val user = result.get();
-            LOGGER.debug("Received user object as [{}]", user);
+            LOGGER.debug("Received Syncope user object as [{}]", user);
             if (user.has("suspended") && user.get("suspended").asBoolean()) {
                 throw new AccountDisabledException(
                     "Could not authenticate forbidden account for " + credential.getUsername());
@@ -71,7 +70,7 @@ public class SyncopeAuthenticationHandler extends AbstractUsernamePasswordAuthen
             val principalAttributes = SyncopeUtils.convertFromUserEntity(user, properties.getAttributeMappings());
             val name = properties.getAttributeMappings().getOrDefault("domain", "syncopeDomain");
             principalAttributes.put(name, CollectionUtils.wrapList(syncopeDomain));
-            val principal = principalFactory.createPrincipal(user.get("username").asText(), principalAttributes);
+            val principal = principalFactory.createPrincipal(user.get("username").asString(), principalAttributes);
             return createHandlerResult(credential, principal, new ArrayList<>());
         }
         throw new FailedLoginException("Could not authenticate account for " + credential.getUsername());

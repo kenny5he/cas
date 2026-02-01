@@ -1,5 +1,6 @@
 package org.apereo.cas.logging;
 
+import module java.base;
 import com.google.cloud.spring.logging.StackdriverTraceConstants;
 import com.google.cloud.spring.logging.extractors.CloudTraceIdExtractor;
 import com.google.cloud.spring.logging.extractors.TraceIdExtractor;
@@ -7,10 +8,10 @@ import lombok.Getter;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.ThreadContext;
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.servlet.HandlerInterceptor;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -34,9 +35,9 @@ public class GoogleCloudLoggingWebInterceptor implements HandlerInterceptor {
     private final TraceIdExtractor traceIdExtractor = new CloudTraceIdExtractor();
 
     @Override
-    public boolean preHandle(final HttpServletRequest httpServletRequest,
-                             final HttpServletResponse httpServletResponse,
-                             final Object handler) {
+    public boolean preHandle(final @NonNull HttpServletRequest httpServletRequest,
+                             final @NonNull HttpServletResponse httpServletResponse,
+                             final @NonNull Object handler) {
         val traceId = StringUtils.defaultIfBlank(
             traceIdExtractor.extractTraceIdFromRequest(httpServletRequest),
             httpServletRequest.getHeader(HEADER_B3_TRACE_ID));

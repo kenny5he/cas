@@ -1,14 +1,11 @@
 package org.apereo.cas.configuration.model.support.saml.idp.metadata;
 
+import module java.base;
 import org.apereo.cas.configuration.support.DurationCapable;
 import org.apereo.cas.configuration.support.RequiresModule;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * This is {@link CoreSamlMetadataProperties}.
@@ -97,7 +94,7 @@ public class CoreSamlMetadataProperties implements Serializable {
 
     /**
      * When attempting to resolve metadata from sources, particularly URLs,
-     * this setting controls the number of retry attempts that CAS should execute
+     * this setting controls the number of <strong>retry attempts</strong> that CAS should execute
      * when metadata resolution fails. Setting this value to a zero or negative value
      * will disable the retry policy.
      */

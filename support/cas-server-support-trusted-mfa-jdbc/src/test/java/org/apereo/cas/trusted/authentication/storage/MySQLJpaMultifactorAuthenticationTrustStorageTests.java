@@ -1,7 +1,7 @@
 package org.apereo.cas.trusted.authentication.storage;
 
+import module java.base;
 import org.apereo.cas.util.junit.EnabledIfListeningOnPort;
-
 import org.junit.jupiter.api.Tag;
 import org.springframework.test.context.TestPropertySource;
 
@@ -17,7 +17,7 @@ import org.springframework.test.context.TestPropertySource;
     "cas.authn.mfa.trusted.jpa.user=root",
     "cas.authn.mfa.trusted.jpa.password=password",
     "cas.authn.mfa.trusted.jpa.driver-class=com.mysql.cj.jdbc.Driver",
-    "cas.authn.mfa.trusted.jpa.url=jdbc:mysql://localhost:3306/mysql?allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useSSL=FALSE",
+    "cas.authn.mfa.trusted.jpa.url=jdbc:mysql://localhost:3306/cas?allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useSSL=FALSE",
     "cas.authn.mfa.trusted.jpa.dialect=org.hibernate.dialect.MySQLDialect"
 })
 @EnabledIfListeningOnPort(port = 3306)

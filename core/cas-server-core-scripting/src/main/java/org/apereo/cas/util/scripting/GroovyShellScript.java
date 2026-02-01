@@ -1,5 +1,6 @@
 package org.apereo.cas.util.scripting;
 
+import module java.base;
 import org.apereo.cas.util.LoggingUtils;
 import org.apereo.cas.util.concurrent.CasReentrantLock;
 import groovy.lang.Binding;
@@ -10,11 +11,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This is {@link GroovyShellScript}.
@@ -32,10 +31,11 @@ public class GroovyShellScript implements ExecutableCompiledScript {
     private final CasReentrantLock lock = new CasReentrantLock();
     private final String script;
 
+    @Nullable
     private Script compiledScript;
 
     @Override
-    public <T> T execute(final Object[] args, final Class<T> clazz) throws Throwable {
+    public <T> @Nullable T execute(final Object[] args, final Class<T> clazz) throws Throwable {
         return execute(args, clazz, true);
     }
 
@@ -45,7 +45,7 @@ public class GroovyShellScript implements ExecutableCompiledScript {
     }
 
     @Override
-    public <T> T execute(final Object[] args, final Class<T> clazz, final boolean failOnError) {
+    public <T> @Nullable T execute(final Object[] args, final Class<T> clazz, final boolean failOnError) {
         if (lock.tryLock()) {
             try {
                 LOGGER.trace("Beginning to execute script [{}]", this);
@@ -76,7 +76,7 @@ public class GroovyShellScript implements ExecutableCompiledScript {
     }
 
     @Override
-    public <T> T execute(final String methodName, final Class<T> clazz, final Object... args) throws Throwable {
+    public <T> @Nullable T execute(final String methodName, final Class<T> clazz, final Object... args) throws Throwable {
         return execute(args, clazz);
     }
 

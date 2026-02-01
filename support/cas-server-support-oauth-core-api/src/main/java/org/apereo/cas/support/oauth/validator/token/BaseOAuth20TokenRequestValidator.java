@@ -1,5 +1,6 @@
 package org.apereo.cas.support.oauth.validator.token;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.support.oauth.OAuth20Constants;
 import org.apereo.cas.support.oauth.OAuth20GrantTypes;
@@ -16,13 +17,13 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.UserProfile;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpMethod;
-import java.util.Locale;
 
 /**
  * This is {@link BaseOAuth20TokenRequestValidator}.
@@ -35,7 +36,7 @@ import java.util.Locale;
 @Getter
 @Setter
 public abstract class BaseOAuth20TokenRequestValidator<T extends OAuth20ConfigurationContext> implements OAuth20TokenRequestValidator {
-    private final ObjectProvider<T> configurationContext;
+    private final ObjectProvider<@NonNull T> configurationContext;
 
     private int order = Ordered.LOWEST_PRECEDENCE;
 
@@ -60,7 +61,7 @@ public abstract class BaseOAuth20TokenRequestValidator<T extends OAuth20Configur
         }
 
         val manager = new ProfileManager(context, getConfigurationContext().getObject().getSessionStore());
-        val profile = manager.getProfile();
+        val profile = extractUserProfile(context, manager);
         if (profile.isEmpty()) {
             LOGGER.warn("Could not locate authenticated profile for this request. Request is not authenticated");
             return false;
@@ -71,6 +72,10 @@ public abstract class BaseOAuth20TokenRequestValidator<T extends OAuth20Configur
         }
         val userProfile = profile.get();
         return validateInternal(context, grantType, manager, userProfile);
+    }
+
+    protected Optional<UserProfile> extractUserProfile(final WebContext context, final ProfileManager manager) {
+        return manager.getProfile();
     }
 
     @Override

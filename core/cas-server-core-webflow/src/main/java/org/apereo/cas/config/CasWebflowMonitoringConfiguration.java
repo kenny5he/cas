@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.monitor.ExecutableObserver;
@@ -11,10 +12,11 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.actuate.autoconfigure.tracing.ConditionalOnEnabledTracing;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.micrometer.tracing.autoconfigure.ConditionalOnEnabledTracingExport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -36,18 +38,18 @@ import jakarta.servlet.http.HttpServletRequest;
 })
 @EnableAspectJAutoProxy
 @Lazy(false)
-@ConditionalOnEnabledTracing
+@ConditionalOnEnabledTracingExport
 class CasWebflowMonitoringConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = "casWebflowMonitoringAspect")
-    public CasWebflowMonitoringAspect casWebflowMonitoringAspect(final ObjectProvider<ExecutableObserver> observer) {
+    public CasWebflowMonitoringAspect casWebflowMonitoringAspect(final ObjectProvider<@NonNull ExecutableObserver> observer) {
         return new CasWebflowMonitoringAspect(observer);
     }
 
     @Aspect
     @Slf4j
     @SuppressWarnings("UnusedMethod")
-    record CasWebflowMonitoringAspect(ObjectProvider<ExecutableObserver> observerProvider) {
+    record CasWebflowMonitoringAspect(ObjectProvider<@NonNull ExecutableObserver> observerProvider) {
 
         @Around("allComponentsThatAreWebflowExecutors()")
         public Object aroundWebflowOperations(final ProceedingJoinPoint joinPoint) throws Throwable {

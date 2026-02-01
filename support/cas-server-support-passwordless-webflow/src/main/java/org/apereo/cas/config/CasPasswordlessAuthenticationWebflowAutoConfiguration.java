@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.api.PasswordlessRequestParser;
 import org.apereo.cas.api.PasswordlessTokenRepository;
 import org.apereo.cas.api.PasswordlessUserAccount;
@@ -54,6 +55,7 @@ import org.apereo.cas.web.flow.delegation.PasswordlessDetermineDelegatedAuthenti
 import org.apereo.cas.web.flow.resolver.CasDelegatingWebflowEventResolver;
 import org.apereo.cas.web.flow.resolver.CasWebflowEventResolver;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -68,7 +70,6 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.webflow.definition.registry.FlowDefinitionRegistry;
 import org.springframework.webflow.engine.builder.support.FlowBuilderServices;
 import org.springframework.webflow.execution.Action;
-import java.util.List;
 
 /**
  * This is {@link CasPasswordlessAuthenticationWebflowAutoConfiguration}.
@@ -212,7 +213,7 @@ public class CasPasswordlessAuthenticationWebflowAutoConfiguration {
             final CasConfigurationProperties casProperties,
             final ConfigurableApplicationContext applicationContext,
             @Qualifier(DelegatedClientIdentityProviderConfigurationProducer.BEAN_NAME)
-            final ObjectProvider<DelegatedClientIdentityProviderConfigurationProducer> delegatedClientIdentityProviderConfigurationProducer,
+            final ObjectProvider<@NonNull DelegatedClientIdentityProviderConfigurationProducer> delegatedClientIdentityProviderConfigurationProducer,
             @Qualifier(PasswordlessUserAccountStore.BEAN_NAME)
             final PasswordlessUserAccountStore passwordlessUserAccountStore) {
             return WebflowActionBeanSupplier.builder()
@@ -390,7 +391,7 @@ public class CasPasswordlessAuthenticationWebflowAutoConfiguration {
             final MultifactorAuthenticationTriggerSelectionStrategy multifactorTriggerSelectionStrategy,
             final ConfigurableApplicationContext applicationContext,
             @Qualifier(DelegatedClientIdentityProviderConfigurationProducer.BEAN_NAME)
-            final ObjectProvider<DelegatedClientIdentityProviderConfigurationProducer> pp,
+            final ObjectProvider<@NonNull DelegatedClientIdentityProviderConfigurationProducer> pp,
             final CasConfigurationProperties casProperties) {
             return WebflowActionBeanSupplier.builder()
                 .withApplicationContext(applicationContext)

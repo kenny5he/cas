@@ -1,11 +1,11 @@
 package org.apereo.cas.uma.web.controllers.resource;
 
+import module java.base;
 import org.apereo.cas.support.oauth.OAuth20Constants;
 import org.apereo.cas.uma.UmaConfigurationContext;
 import org.apereo.cas.uma.web.controllers.BaseUmaEndpointController;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.LoggingUtils;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -20,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -61,13 +60,13 @@ public class UmaUpdateResourceSetRegistrationEndpointController extends BaseUmaE
 
             if (StringUtils.isBlank(newResource.getName()) || newResource.getScopes().isEmpty() || newResource.getId() != id) {
                 val model = buildResponseEntityErrorModel(HttpStatus.NOT_FOUND, "Provided resource-set body is missing required fields");
-                return new ResponseEntity(model, model, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(model, HttpStatus.BAD_REQUEST);
             }
 
             val resourceSetResult = getUmaConfigurationContext().getUmaResourceSetRepository().getById(id);
             if (resourceSetResult.isEmpty()) {
                 val model = buildResponseEntityErrorModel(HttpStatus.NOT_FOUND, "Requested resource-set cannot be found");
-                return new ResponseEntity(model, model, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(model, HttpStatus.BAD_REQUEST);
             }
             val resourceSet = resourceSetResult.get();
             resourceSet.validate(profileResult);

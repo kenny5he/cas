@@ -1,16 +1,14 @@
 package org.apereo.cas.persondir;
 
+import module java.base;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.io.Resource;
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.Map;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * A convenient wrapper around {@code ComplexStubPersonAttributeDao} that reads the configuration for its <i>backingMap</i>

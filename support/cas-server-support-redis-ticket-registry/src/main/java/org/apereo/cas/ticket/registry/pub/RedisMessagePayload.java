@@ -1,16 +1,13 @@
 package org.apereo.cas.ticket.registry.pub;
 
+import module java.base;
 import org.apereo.cas.util.PublisherIdentifier;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.With;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * This is {@link RedisMessagePayload}.

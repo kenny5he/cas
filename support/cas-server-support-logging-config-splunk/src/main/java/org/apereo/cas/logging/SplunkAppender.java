@@ -1,6 +1,6 @@
 package org.apereo.cas.logging;
 
-import lombok.NonNull;
+import module java.base;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +15,7 @@ import org.apache.logging.log4j.core.config.plugins.PluginConfiguration;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This is {@link SplunkAppender}.

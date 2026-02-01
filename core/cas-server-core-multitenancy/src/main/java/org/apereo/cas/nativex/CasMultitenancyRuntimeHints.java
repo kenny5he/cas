@@ -1,5 +1,6 @@
 package org.apereo.cas.nativex;
 
+import module java.base;
 import org.apereo.cas.multitenancy.TenantAuthenticationPolicy;
 import org.apereo.cas.multitenancy.TenantAuthenticationProtocolPolicy;
 import org.apereo.cas.multitenancy.TenantDefinition;
@@ -8,6 +9,7 @@ import org.apereo.cas.multitenancy.TenantExtractor;
 import org.apereo.cas.multitenancy.TenantUserInterfacePolicy;
 import org.apereo.cas.multitenancy.TenantsManager;
 import org.apereo.cas.util.nativex.CasRuntimeHintsRegistrar;
+import org.jspecify.annotations.Nullable;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -20,7 +22,7 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class CasMultitenancyRuntimeHints implements CasRuntimeHintsRegistrar {
     @Override
-    public void registerHints(final RuntimeHints hints, final ClassLoader classLoader) {
+    public void registerHints(final RuntimeHints hints, final @Nullable ClassLoader classLoader) {
         registerSerializationHints(hints, classLoader, TenantDefinition.class);
         registerReflectionHints(hints, TenantDefinition.class);
 

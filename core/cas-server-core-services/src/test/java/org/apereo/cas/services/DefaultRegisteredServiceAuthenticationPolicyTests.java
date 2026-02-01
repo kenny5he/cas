@@ -1,17 +1,12 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.util.RandomUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import java.nio.file.Files;
-import java.util.Set;
-import java.util.UUID;
-
+import tools.jackson.databind.ObjectMapper;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -23,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Tag("RegisteredService")
 class DefaultRegisteredServiceAuthenticationPolicyTests {
     private static final ObjectMapper MAPPER = JacksonObjectMapperFactory.builder()
-        .defaultTypingEnabled(false).build().toObjectMapper();
+        .defaultTypingEnabled(true).build().toObjectMapper();
 
     private static void verify(final RegisteredServiceAuthenticationPolicyCriteria criteria) throws Exception {
         val jsonFile = Files.createTempFile(RandomUtils.randomAlphabetic(8), ".json").toFile();

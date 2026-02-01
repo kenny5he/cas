@@ -1,13 +1,11 @@
 package org.apereo.cas.support.events;
 
+import module java.base;
 import org.apereo.cas.configuration.model.core.events.DynamoDbEventsProperties;
 import org.apereo.cas.dynamodb.DynamoDbQueryBuilder;
 import org.apereo.cas.dynamodb.DynamoDbTableUtils;
 import org.apereo.cas.support.events.dao.CasEvent;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,13 +19,8 @@ import software.amazon.awssdk.services.dynamodb.model.KeySchemaElement;
 import software.amazon.awssdk.services.dynamodb.model.KeyType;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
-
-import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link DynamoDbCasEventsFacilitator}.
@@ -44,7 +37,7 @@ public class DynamoDbCasEventsFacilitator {
     private final DynamoDbEventsProperties dynamoDbProperties;
     private final DynamoDbClient amazonDynamoDBClient;
 
-    private static Map<String, AttributeValue> buildTableAttributeValuesMap(final CasEvent record) throws Exception {
+    private static Map<String, AttributeValue> buildTableAttributeValuesMap(final CasEvent record) {
         val values = new HashMap<String, AttributeValue>();
         values.put(ColumnNames.PRINCIPAL.getColumnName(), AttributeValue.builder().s(record.getPrincipalId()).build());
         values.put(ColumnNames.ID.getColumnName(), AttributeValue.builder().n(String.valueOf(record.getId())).build());
@@ -56,7 +49,8 @@ public class DynamoDbCasEventsFacilitator {
         return values;
     }
 
-    private static CasEvent extractAttributeValuesFrom(final Map<String, AttributeValue> item) throws Exception {
+    @SuppressWarnings("NullAway")
+    private static CasEvent extractAttributeValuesFrom(final Map<String, AttributeValue> item) {
         val principal = item.get(ColumnNames.PRINCIPAL.getColumnName()).s();
         val id = Long.valueOf(item.get(ColumnNames.ID.getColumnName()).n());
         val type = item.get(ColumnNames.TYPE.getColumnName()).s();
@@ -85,9 +79,8 @@ public class DynamoDbCasEventsFacilitator {
      *
      * @param record the record
      * @return the cas event
-     * @throws Exception the exception
      */
-    public CasEvent save(final CasEvent record) throws Exception {
+    public CasEvent save(final CasEvent record) {
         val values = buildTableAttributeValuesMap(record);
         val putItemRequest = PutItemRequest.builder().tableName(dynamoDbProperties.getTableName()).item(values).build();
         LOGGER.debug("Submitting put request [{}] for record [{}]", putItemRequest, record);

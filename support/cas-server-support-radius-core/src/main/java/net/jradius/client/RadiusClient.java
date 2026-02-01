@@ -1,5 +1,6 @@
 package net.jradius.client;
 
+import module java.base;
 import lombok.val;
 import net.jradius.client.auth.CHAPAuthenticator;
 import net.jradius.client.auth.EAPMD5Authenticator;
@@ -14,17 +15,8 @@ import net.jradius.packet.AccessChallenge;
 import net.jradius.packet.AccessRequest;
 import net.jradius.packet.RadiusRequest;
 import net.jradius.packet.RadiusResponse;
-
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * This is {@link RadiusClient}.
@@ -93,14 +85,13 @@ public class RadiusClient {
 
         protocolName = protocolName.toLowerCase(Locale.ENGLISH);
 
-        Class<?> c = authenticators.get(protocolName);
-
-        if (c == null) {
+        val authenticatorClass = authenticators.get(protocolName);
+        if (authenticatorClass == null) {
             return null;
         }
 
         try {
-            auth = (RadiusAuthenticator) c.getConstructor().newInstance();
+            auth = (RadiusAuthenticator) authenticatorClass.getConstructor().newInstance();
         } catch (final Exception e) {
             RadiusLog.error("Invalid auth protocol", e);
             return null;

@@ -1,18 +1,20 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.monitor.HazelcastHealthIndicator;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import com.hazelcast.core.HazelcastInstance;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
-import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.health.autoconfigure.contributor.ConditionalOnEnabledHealthIndicator;
+import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -34,7 +36,7 @@ public class CasHazelcastMonitorAutoConfiguration {
     public HealthIndicator hazelcastHealthIndicator(
         final CasConfigurationProperties casProperties,
         @Qualifier("casTicketRegistryHazelcastInstance")
-        final ObjectProvider<HazelcastInstance> casTicketRegistryHazelcastInstance) {
+        final ObjectProvider<@NonNull HazelcastInstance> casTicketRegistryHazelcastInstance) {
         val warn = casProperties.getMonitor().getWarn();
         return new HazelcastHealthIndicator(warn.getEvictionThreshold(),
             warn.getThreshold(), casTicketRegistryHazelcastInstance);

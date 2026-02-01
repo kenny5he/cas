@@ -1,8 +1,8 @@
 package org.apereo.cas.pm;
 
+import module java.base;
 import org.apereo.cas.authentication.credential.UsernamePasswordCredential;
 import org.apereo.cas.util.junit.EnabledIfListeningOnPort;
-
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apereo.inspektr.common.web.ClientInfo;
@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.TestPropertySource;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -24,7 +23,8 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @Tag("ActiveDirectory")
 @TestPropertySource(properties = {
-    "cas.authn.pm.reset.sms.attributeName=telephoneNumber",
+    "cas.authn.pm.reset.sms.attribute-name=telephoneNumber",
+    "cas.authn.pm.core.enabled=true",
     "cas.authn.pm.ldap[0].ldap-url=ldaps://localhost:10636",
     "cas.authn.pm.ldap[0].bind-dn=CN=admin,CN=Users,DC=cas,DC=example,DC=org",
     "cas.authn.pm.ldap[0].bind-credential=P@ssw0rd",

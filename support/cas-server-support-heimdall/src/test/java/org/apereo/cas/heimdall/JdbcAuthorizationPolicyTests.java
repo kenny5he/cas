@@ -1,5 +1,6 @@
 package org.apereo.cas.heimdall;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.heimdall.authorizer.repository.AuthorizableResourceRepository;
 import org.apereo.cas.heimdall.authorizer.resource.policy.JdbcAuthorizationPolicy;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -40,7 +40,7 @@ class JdbcAuthorizationPolicyTests {
     @Test
     void verifyOperation() throws Throwable {
         val strategy = new JdbcAuthorizationPolicy();
-        strategy.setUrl("jdbc:mysql://localhost:3306/mysql?allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useSSL=FALSE");
+        strategy.setUrl("jdbc:mysql://localhost:3306/cas?allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useSSL=FALSE");
         strategy.setUsername("root");
         strategy.setPassword("password");
         strategy.setQuery("SELECT authorized FROM policies WHERE uri = :uri AND method = :method AND namespace = :namespace");

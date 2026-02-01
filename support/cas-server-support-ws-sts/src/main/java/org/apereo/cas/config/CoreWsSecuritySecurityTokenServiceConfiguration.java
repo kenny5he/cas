@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionStrategy;
 import org.apereo.cas.authentication.CasSSLContext;
 import org.apereo.cas.authentication.DefaultSecurityTokenServiceTokenFetcher;
@@ -69,6 +70,7 @@ import org.apache.cxf.ws.security.sts.provider.operation.ValidateOperation;
 import org.apache.cxf.ws.security.tokenstore.MemoryTokenStore;
 import org.apache.cxf.ws.security.tokenstore.TokenStore;
 import org.apache.wss4j.dom.validate.Validator;
+import org.jspecify.annotations.NonNull;
 import org.opensaml.saml.saml2.core.NameIDType;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -80,11 +82,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.ScopedProxyMode;
 import jakarta.xml.ws.WebServiceContext;
-import javax.net.ssl.HostnameVerifier;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 /**
  * This is {@link CoreWsSecuritySecurityTokenServiceConfiguration}.
@@ -188,7 +185,7 @@ class CoreWsSecuritySecurityTokenServiceConfiguration {
             val subProvider = new DefaultSubjectProvider();
 
             FunctionUtils.doIfNotBlank(wsfed.getSubjectNameQualifier(),
-                __ -> subProvider.setSubjectNameQualifier(wsfed.getSubjectNameQualifier()));
+                _ -> subProvider.setSubjectNameQualifier(wsfed.getSubjectNameQualifier()));
             switch (wsfed.getSubjectNameIdFormat().trim().toLowerCase(Locale.ENGLISH)) {
                 case "email" -> subProvider.setSubjectNameIDFormat(NameIDType.EMAIL);
                 case "entity" -> subProvider.setSubjectNameIDFormat(NameIDType.ENTITY);
@@ -403,7 +400,7 @@ class CoreWsSecuritySecurityTokenServiceConfiguration {
     static class CoreWsSecuritySecurityTokenServiceWebConfiguration {
         @ConditionalOnMissingBean(name = "cxfServlet")
         @Bean
-        public ServletRegistrationBean<CXFServlet> cxfServlet() {
+        public ServletRegistrationBean<@NonNull CXFServlet> cxfServlet() {
             val bean = new ServletRegistrationBean();
             bean.setEnabled(true);
             bean.setName("cxfServletSecurityTokenService");

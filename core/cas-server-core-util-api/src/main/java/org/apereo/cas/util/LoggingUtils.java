@@ -1,5 +1,6 @@
 package org.apereo.cas.util;
 
+import module java.base;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.logging.DefaultLogMessageSummarizer;
 import lombok.experimental.UtilityClass;
@@ -8,9 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.Map;
-import java.util.Objects;
-import java.util.ServiceLoader;
 
 /**
  * This is {@link LoggingUtils}.
@@ -116,8 +114,8 @@ public class LoggingUtils {
      */
     public static void error(final Logger logger, final String msg, final Throwable throwable) {
         FunctionUtils.doIf(LOG_MESSAGE_SUMMARIZER.shouldSummarize(logger),
-                __ -> logger.error(LOG_MESSAGE_SUMMARIZER.summarizeStackTrace(msg, throwable)),
-                __ -> logger.error(msg, throwable))
+                _ -> logger.error(LOG_MESSAGE_SUMMARIZER.summarizeStackTrace(msg, throwable)),
+                _ -> logger.error(msg, throwable))
             .accept(throwable);
     }
 
@@ -152,8 +150,8 @@ public class LoggingUtils {
      */
     public static void warn(final Logger logger, final String message, final Throwable throwable) {
         FunctionUtils.doIf(LOG_MESSAGE_SUMMARIZER.shouldSummarize(logger),
-                __ -> logger.warn(LOG_MESSAGE_SUMMARIZER.summarizeStackTrace(message, throwable)),
-                __ -> logger.warn(message, throwable))
+                _ -> logger.warn(LOG_MESSAGE_SUMMARIZER.summarizeStackTrace(message, throwable)),
+                _ -> logger.warn(message, throwable))
             .accept(throwable);
     }
 

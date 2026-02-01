@@ -1,9 +1,10 @@
 package org.apereo.cas.services;
 
-import org.apereo.cas.config.CasConfigurationModifiedEvent;
-
+import module java.base;
+import org.apereo.cas.support.events.config.CasConfigurationModifiedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEvent;
@@ -17,7 +18,7 @@ import org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEven
 @Slf4j
 @RequiredArgsConstructor
 public class DefaultServiceRegistryInitializerEventListener implements ServiceRegistryInitializerEventListener {
-    private final ObjectProvider<ServiceRegistryInitializer> serviceRegistryInitializer;
+    private final ObjectProvider<@NonNull ServiceRegistryInitializer> serviceRegistryInitializer;
 
     @Override
     public void handleRefreshScopeRefreshedEvent(final RefreshScopeRefreshedEvent event) {

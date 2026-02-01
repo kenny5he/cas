@@ -1,5 +1,6 @@
 package org.apereo.cas.pm;
 
+import module java.base;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,9 +9,8 @@ import lombok.Getter;
 import lombok.ToString;
 import lombok.With;
 import lombok.experimental.SuperBuilder;
+import org.jspecify.annotations.NonNull;
 import org.springframework.util.LinkedMultiValueMap;
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * This is {@link PasswordManagementQuery}.
@@ -35,10 +35,10 @@ public class PasswordManagementQuery implements Serializable {
     private final String phoneNumber;
 
     @Builder.Default
-    private final LinkedMultiValueMap<String, String> securityQuestions = new LinkedMultiValueMap<>();
+    private final LinkedMultiValueMap<@NonNull String, @NonNull String> securityQuestions = new LinkedMultiValueMap<>();
 
     @Builder.Default
-    private final LinkedMultiValueMap<String, Object> record = new LinkedMultiValueMap<>();
+    private final LinkedMultiValueMap<@NonNull String, @NonNull Object> record = new LinkedMultiValueMap<>();
 
     /**
      * Find attribute.

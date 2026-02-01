@@ -1,5 +1,6 @@
 package org.apereo.cas.hibernate;
 
+import module java.base;
 import org.apereo.cas.configuration.model.support.jpa.AbstractJpaProperties;
 import org.apereo.cas.configuration.model.support.jpa.DatabaseProperties;
 import org.apereo.cas.configuration.support.JpaBeans;
@@ -20,6 +21,7 @@ import org.hibernate.cfg.SchemaToolingSettings;
 import org.hibernate.cfg.StatisticsSettings;
 import org.hibernate.cfg.TransactionSettings;
 import org.hibernate.query.Query;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -28,10 +30,6 @@ import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.spi.PersistenceProvider;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.util.Properties;
-import java.util.stream.Stream;
 
 /**
  * This is {@link CasHibernateJpaBeanFactory}.
@@ -52,8 +50,8 @@ public class CasHibernateJpaBeanFactory implements JpaBeanFactory {
     }
 
     @Override
-    public FactoryBean<EntityManagerFactory> newEntityManagerFactoryBean(final JpaConfigurationContext config,
-                                                                         final AbstractJpaProperties jpaProperties) {
+    public FactoryBean<@NonNull EntityManagerFactory> newEntityManagerFactoryBean(final JpaConfigurationContext config,
+                                                                                  final AbstractJpaProperties jpaProperties) {
         val properties = new Properties();
         properties.put(JdbcSettings.DIALECT, jpaProperties.getDialect());
         properties.put(SchemaToolingSettings.HBM2DDL_AUTO, jpaProperties.getDdlAuto());
@@ -76,7 +74,7 @@ public class CasHibernateJpaBeanFactory implements JpaBeanFactory {
         properties.put(JdbcSettings.STATEMENT_FETCH_SIZE, jpaProperties.getFetchSize());
 
         FunctionUtils.doIfNotNull(jpaProperties.getPhysicalNamingStrategyClassName(),
-            __ -> {
+            _ -> {
                 val clazz = ClassUtils.getClass(JpaBeans.class.getClassLoader(), jpaProperties.getPhysicalNamingStrategyClassName());
                 val namingStrategy = (PhysicalNamingStrategy) clazz.getDeclaredConstructor().newInstance();
                 if (namingStrategy instanceof final ApplicationContextAware aware) {

@@ -3,6 +3,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicBoolean;
+import module java.base;
 
 /**
  * This is {@link CheckMissingTestTagAnnotation}.
@@ -11,7 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @since 6.3.0
  */
 public class CheckMissingTestTagAnnotation {
-    public static void main(final String[] args) throws Exception {
+    void main(final String[] args) throws Exception {
         checkPattern(args[0]);
     }
 

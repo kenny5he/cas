@@ -1,14 +1,11 @@
 package org.apereo.cas.configuration.model.support.replication;
 
+import module java.base;
 import org.apereo.cas.configuration.support.RequiresModule;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * This is the properties for the session replication.
@@ -37,7 +34,7 @@ public class SessionReplicationProperties implements Serializable {
      * @deprecated since 7.3.0
      */
     @Deprecated(since = "7.3.0", forRemoval = true)
-    private boolean replicateSessions = true;
+    private boolean replicateSessions;
 
     /**
      * Cookie setting for session replication.

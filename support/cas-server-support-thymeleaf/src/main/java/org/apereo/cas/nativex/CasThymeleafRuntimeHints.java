@@ -1,11 +1,13 @@
 package org.apereo.cas.nativex;
 
+import module java.base;
 import org.apereo.cas.services.web.CasThymeleafOutputTemplateHandler;
 import org.apereo.cas.services.web.CasThymeleafTemplatesDirector;
 import org.apereo.cas.services.web.ThemeViewResolverFactory;
 import org.apereo.cas.util.nativex.CasRuntimeHintsRegistrar;
 import org.apereo.cas.web.view.CasMustacheView;
 import org.apereo.cas.web.view.CasThymeleafView;
+import org.jspecify.annotations.Nullable;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.context.ApplicationContextAware;
 import org.thymeleaf.DialectConfiguration;
@@ -17,7 +19,6 @@ import org.thymeleaf.standard.expression.FragmentExpression;
 import org.thymeleaf.standard.processor.StandardTextTagProcessor;
 import org.thymeleaf.standard.processor.StandardXmlNsTagProcessor;
 import org.thymeleaf.templatemode.TemplateMode;
-import java.util.List;
 
 /**
  * This is {@link CasThymeleafRuntimeHints}.
@@ -27,7 +28,7 @@ import java.util.List;
  */
 public class CasThymeleafRuntimeHints implements CasRuntimeHintsRegistrar {
     @Override
-    public void registerHints(final RuntimeHints hints, final ClassLoader classLoader) {
+    public void registerHints(final RuntimeHints hints, final @Nullable ClassLoader classLoader) {
         hints.resources()
             .registerPattern("cas-theme-*")
             .registerResourceBundle("messages");

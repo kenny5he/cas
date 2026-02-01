@@ -1,5 +1,6 @@
 package org.apereo.cas.support.saml.web.idp.web;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.MultifactorAuthenticationProvider;
 import org.apereo.cas.authentication.MultifactorAuthenticationTrigger;
@@ -17,6 +18,7 @@ import org.apereo.cas.util.http.HttpRequestUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.saml.common.binding.SAMLBindingSupport;
 import org.opensaml.saml.saml2.core.AuthnRequest;
@@ -24,9 +26,6 @@ import org.pac4j.jee.context.JEEContext;
 import org.springframework.beans.factory.ObjectProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * This is {@link SamlIdPMultifactorAuthenticationTrigger}.
@@ -36,7 +35,7 @@ import java.util.Optional;
  */
 @RequiredArgsConstructor
 public class SamlIdPMultifactorAuthenticationTrigger implements MultifactorAuthenticationTrigger {
-    private final ObjectProvider<SamlProfileHandlerConfigurationContext> contextProvider;
+    private final ObjectProvider<@NonNull SamlProfileHandlerConfigurationContext> contextProvider;
 
     @Override
     public Optional<MultifactorAuthenticationProvider> isActivated(final Authentication authentication,

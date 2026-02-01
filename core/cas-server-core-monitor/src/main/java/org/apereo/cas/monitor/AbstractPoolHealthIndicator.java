@@ -1,18 +1,14 @@
 package org.apereo.cas.monitor;
 
+import module java.base;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.boot.actuate.health.AbstractHealthIndicator;
-import org.springframework.boot.actuate.health.Health;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import org.springframework.boot.health.contributor.AbstractHealthIndicator;
+import org.springframework.boot.health.contributor.Health;
 
 /**
  * Describes a monitor that observes a pool of resources.
@@ -61,7 +57,7 @@ public abstract class AbstractPoolHealthIndicator extends AbstractHealthIndicato
             LOGGER.trace(e.getMessage(), e);
         }
         poolBuilder
-            .withDetail("message", message)
+            .withDetail("message", StringUtils.defaultIfBlank(message, "N/A"))
             .withDetail("name", getClass().getSimpleName())
             .withDetail("activeCount", getActiveCount())
             .withDetail("idleCount", getIdleCount());

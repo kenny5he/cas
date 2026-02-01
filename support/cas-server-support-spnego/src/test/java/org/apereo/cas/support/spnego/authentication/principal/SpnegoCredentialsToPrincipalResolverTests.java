@@ -1,5 +1,6 @@
 package org.apereo.cas.support.spnego.authentication.principal;
 
+import module java.base;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.authentication.CoreAuthenticationUtils;
 import org.apereo.cas.authentication.attribute.AttributeDefinitionStore;
@@ -20,11 +21,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
-import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -34,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @Tag("Spnego")
 @SpringBootTest(classes = RefreshAutoConfiguration.class)
-@ExtendWith(CasTestExtension.class)
+@ExtendWith({CasTestExtension.class, MockitoExtension.class})
 class SpnegoCredentialsToPrincipalResolverTests {
     private SpnegoPrincipalResolver resolver;
 

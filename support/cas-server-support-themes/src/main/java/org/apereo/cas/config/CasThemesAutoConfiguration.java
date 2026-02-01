@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
@@ -16,34 +17,34 @@ import org.apereo.cas.util.ResourceUtils;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import org.apereo.cas.web.support.CookieThemeResolver;
+import org.apereo.cas.web.theme.FixedThemeResolver;
+import org.apereo.cas.web.theme.SessionThemeResolver;
+import org.apereo.cas.web.theme.ThemeResolver;
+import org.apereo.cas.web.theme.ThemeSource;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.Strings;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafProperties;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.thymeleaf.autoconfigure.ThymeleafProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.Resource;
-import org.springframework.ui.context.ThemeSource;
-import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.ContentVersionStrategy;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
-import org.springframework.web.servlet.theme.FixedThemeResolver;
-import org.springframework.web.servlet.theme.SessionThemeResolver;
-import jakarta.annotation.Nonnull;
 
 /**
  * This is {@link CasThemesAutoConfiguration}.
@@ -62,23 +63,22 @@ public class CasThemesAutoConfiguration {
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     public ThemeSource themeSource(final CasConfigurationProperties casProperties) {
-        if (casProperties.getView().getThemeSourceType() == ViewProperties.ThemeSourceTypes.AGGREGATE) {
-            return new AggregateCasThemeSource(casProperties);
-        }
-        return new DefaultCasThemeSource(casProperties);
+        return casProperties.getView().getThemeSourceType() == ViewProperties.ThemeSourceTypes.AGGREGATE
+            ? new AggregateCasThemeSource(casProperties)
+            : new DefaultCasThemeSource(casProperties);
     }
     
     @ConditionalOnMissingBean(name = "casThemeResolver")
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     public ThemeResolver themeResolver(
-        final ObjectProvider<CasConfigurationProperties> casProperties,
+        final ObjectProvider<@NonNull CasConfigurationProperties> casProperties,
         @Qualifier(TenantExtractor.BEAN_NAME)
-        final ObjectProvider<TenantExtractor> tenantExtractor,
+        final ObjectProvider<@NonNull TenantExtractor> tenantExtractor,
         @Qualifier(AuthenticationServiceSelectionPlan.BEAN_NAME)
-        final ObjectProvider<AuthenticationServiceSelectionPlan> authenticationRequestServiceSelectionStrategies,
+        final ObjectProvider<@NonNull AuthenticationServiceSelectionPlan> authenticationRequestServiceSelectionStrategies,
         @Qualifier(ServicesManager.BEAN_NAME)
-        final ObjectProvider<ServicesManager> servicesManager) {
+        final ObjectProvider<@NonNull ServicesManager> servicesManager) {
 
         val defaultThemeName = casProperties.getObject().getTheme().getDefaultThemeName();
         val fixedResolver = new FixedThemeResolver();
@@ -125,7 +125,7 @@ public class CasThemesAutoConfiguration {
         return new WebMvcConfigurer() {
             @Override
             public void addResourceHandlers(
-                @Nonnull
+                @NonNull
                 final ResourceHandlerRegistry registry) {
                 val templatePrefixes = casProperties.getView().getTemplatePrefixes();
                 if (!templatePrefixes.isEmpty()) {

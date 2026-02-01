@@ -6,7 +6,7 @@ category: Planning
 
 {% include variables.html %}
 
-# 7.3.0-RC2 Release Notes
+# 8.0.0-RC2 Release Notes
 
 We strongly recommend that you take advantage of the release candidates as they come out. Waiting for a `GA` release is only going to set
 you up for unpleasant surprises. A `GA` is [a tag and nothing more](https://apereo.github.io/2017/03/08/the-myth-of-ga-rel/). Note
@@ -36,17 +36,12 @@ maintenance and release planning, especially when it comes to addressing critica
 
 ## System Requirements
 
-The JDK baseline requirement for this CAS release is and **MUST** be JDK `21`. All compatible distributions
+The JDK baseline requirement for this CAS release is and **MUST** be JDK `25`. All compatible distributions
 such as Amazon Corretto, Zulu, Eclipse Temurin, etc should work and are implicitly supported.
 
 ## New & Noteworthy
 
 The following items are new improvements and enhancements presented in this release.
-
-### Spring Boot 3.5
-
-The migration of the entire codebase to Spring Boot `3.5` is now complete and CAS is now running
-on Spring Boot `3.5.x`. 
 
 ### OpenRewrite Recipes
 
@@ -63,54 +58,57 @@ to build and verify Graal VM native images and we plan to extend the coverage to
 ### Testing Strategy
 
 The collection of end-to-end [browser tests based on Puppeteer](../../developer/Test-Process.html) continue to grow to cover more use cases
-and scenarios. At the moment, total number of jobs stands at approximately `519` distinct scenarios. The overall
+and scenarios. At the moment, total number of jobs stands at approximately `532` distinct scenarios. The overall
 test coverage of the CAS codebase is approximately `94%`. Furthermore, a large number of test categories that group internal unit tests
 are now configured to run with parallelism enabled.
+                                                                                                                            
+### Session Replication
 
-### Java 24
+Crypto operations that support generating cookies for *deprecated session replication capabilities* are now turned off by default
+to avoid generating keys. Furthermore, the session replication capabilities that are not based on the
+[ticket registry](../webflow/Webflow-Customization-Sessions-ServerSide-TicketRegistry.html) are now turned off 
+by default. If you are using the deprecated legacy session replication features, you MUST explicitly 
+turn on these features by setting the following properties:
 
-As described, the JDK baseline requirement for this CAS release is and **MUST** be JDK `21`. CAS is now able to
-build and run using Java `24`. Once more, remember that the baseline requirement will remain unchanged
-and this is just a preparatory step to ensure CAS is ready for the next version of Java.
- 
-### Multitenancy
+```properties
+cas.x.y.z.session-replication.replicate-sessions=true
+cas.x.y.z.session-replication.cookie.crypto.enabled=true
+```
 
-Multitenancy support is improved to support attribute resolution per each tenant. Supported modules include:
+Remember to substitute `x.y.z` with the appropriate session replication 
+module version you are using (i.e. `oauth`, `saml-idp`, etc).
 
-- [REST](../integration/Attribute-Resolution-REST.html)
-- [Stub](../integration/Attribute-Resolution-Stub.html)
-- [LDAP](../integration/Attribute-Resolution-LDAP.html)
-- [Apache Syncope](../integration/Attribute-Resolution-Syncope.html)
-      
-Furthermore, tenant properties now support [CAS configuration security](../configuration/Configuration-Properties-Security-CAS.html) 
-and [Spring expression language](../configuration/Configuration-Spring-Expressions.html).
-      
-There is dedicated routing support to allow CAS to route requests to the appropriate tenant
-internally based on the `Host` http header, in scenarios where CAS is deployed behind a reverse proxy.
+### Palantir Admin Dashboard
+
+[Palantir Admin Console](../installation/Admin-Dashboard.html) received significant changes across the board
+to handle and support more actuator endpoints, when it comes to adding external identity providers, retrieving
+user sessions, listing multifactor authentication providers, etc.
+
+### Spring Boot 4
+
+CAS is now built with Spring Boot `4.1.x`. This is a major platform upgrade that affects almost all aspects of the codebase
+including many of the third-party core libraries used by CAS as well as some CAS functionality.
+     
+#### Spring Cloud Bus w/ AMQP
+
+Support for [Spring Cloud Bus with AMQP](../configuration/Configuration-Management-Clustered-AMQP.html) is 
+not yet quite compatible with Spring Boot `4.1.x`. We will reintroduce this support in a future release 
+once compatibility is restored.
+
+### JSpecify & NullAway
+
+CAS codebase is now annotated with [JSpecify](https://jspecify.dev/) annotations to indicate nullness contracts on method parameters,
+return types and fields. We will gradually extend the coverage of such annotations across the entire codebase in future releases
+and will integrate the Gradle build tool with tools such as [NullAway](https://github.com/uber/NullAway) to prevent nullness contract violations
+during compile time.
+
+### SpringBoot Admin
+
+Support for [SpringBoot Admin](../monitoring/Configuring-SpringBootAdmin.html) is now compatible with Spring Boot `4.x`.
 
 ## Other Stuff
-        
-- A new [Heimdall authorization policy](../authorization/Heimdall-Authorization-Overview.html) for SQL databases.
-- We have laid the groundwork to begin supporting OpenID Connect federations. Support for this topic will gradually mature as federations begin to operate and remain functional. 
-- Apache Tomcat's `RewriteValve` can be added as an engine valve.
-- A visual representation of the CAS authentication flows, as a state diagram, is now available in the [Palantir admin console](../installation/Admin-Dashboard.html).
-- CAS is publishing events internally when webflow actions are executed. Such events are recorded into the [CAS event repository](../authentication/Configuring-Authentication-Events.html) and are also available in the [Palantir admin console](../installation/Admin-Dashboard.html).
-- Redis integration tests are upgraded to use the latest Redis `8.0` server.
-- Apache Syncope integration tests are upgraded to use the latest Syncope `4.0` server.
-- Support for [ACME Integration](../integration/ACME-Integration.html) is deprecated.
-- [GitHub Actions CI workflows](https://github.com/apereo/cas/actions) check for code spelling mistakes and typos.
-- [Redis ticket registry](../ticketing/Redis-Ticket-Registry.html) is to tuned to apply an LZ4 compression routine to stored documents.
-- The CAS server host name can be accessed via the user interface and is displayed in the footer.
-- The usage criteria of a ticket-granting ticket is updated when OpenID Connect access tokens are exchanged for a user profile.
-- Activation of [Remember-Me functionality](../authentication/Configuring-SSO-Cookie.html) now explicitly looks for the `rememberMe` parameter in the request with a truthy value.
-- [Puppeteer tests](../../developer/Test-Process.html) have the ability to verify CAS functionality using an external Apache Tomcat server.
-- The entire CAS configuration catalog is indexed and published online to offer [search functionality](../configuration/Configuration-Properties.html).
-- The [BlackDot IP Intelligence](../mfa/Adaptive-Authentication-IP-Intelligence.html) functionality is corrected to create the correct component instance.
-- Webflow transitions for multifactor device registration requests are re-organized to allow for this functionality in the [user account profile](../registration/Account-Management-Overview.html).
-- [User account profile](../registration/Account-Management-Overview.html) gains the ability to delete registered multifactor authentication devices.
-- CAS endpoints are grouped and tagged for better visibility in the [Swagger UI](../integration/Swagger-Integration.html).
-- A large collection of documentation improvements and fixes to remove typos and grammatical errors.
-- Using advanced static analysis tools, a large number of leaking IO streams are closed properly.
-- CAS documentation is built with YJIT enabled, and the build time is cut down by approximately 6 minutes.
-- When processing logout requests for OpenID Connect, the `iss` claim of the ID token hint is now cross-checked against the `idTokenIssuer` property of the registered client application.
-- A series of small user interface improvements to assist with accessibility and usability.
+  
+- Compiled valid regular expressions are now cached to improve performance across the board.
+- Continued efforts using advanced code analysis techniques to remove potential memory leaks and improve system performance.
+- CAS is now upgraded to use `jQuery` version `4.0.0`.
+- Integration tests have switched to use MySQL `9.6.x`.

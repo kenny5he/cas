@@ -1,5 +1,6 @@
 package org.apereo.cas.sba;
 
+import module java.base;
 import org.apereo.cas.config.CasCoreWebAutoConfiguration;
 import org.apereo.cas.config.CasSpringBootAdminAutoConfiguration;
 import org.apereo.cas.configuration.CasConfigurationProperties;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,9 +34,7 @@ import static org.mockito.Mockito.*;
 @Tag("WebApp")
 @SpringBootTestAutoConfigurations
 @SpringBootTest(classes = {
-    WebClientAutoConfiguration.class,
     AdminServerAutoConfiguration.class,
-
     SpringBootAdminClientAutoConfiguration.class,
     CasCoreWebAutoConfiguration.class,
     CasSpringBootAdminAutoConfiguration.class

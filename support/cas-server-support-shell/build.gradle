@@ -8,7 +8,7 @@ ext {
         aliases: ["shell"],
         selectable: false
     ]
-    publishable = false
+    publishable = rootProject.publishSnapshots
 }
 
 apply from: rootProject.file("gradle/springboot.gradle")
@@ -51,7 +51,10 @@ dependencies {
     implementation libraries.opensaml
     implementation libraries.dropwizard
     implementation libraries.javaparser
+    implementation libraries.hibernatevalidator
 
+    testImplementation libraries.springshelltests
+    
     runtimeOnly project(":support:cas-server-support-jdbc-drivers")
 
     testImplementation project(":core:cas-server-core-scripting")

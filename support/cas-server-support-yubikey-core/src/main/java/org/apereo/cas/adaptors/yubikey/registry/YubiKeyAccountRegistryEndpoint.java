@@ -1,18 +1,19 @@
 package org.apereo.cas.adaptors.yubikey.registry;
 
+import module java.base;
 import org.apereo.cas.adaptors.yubikey.YubiKeyAccount;
 import org.apereo.cas.adaptors.yubikey.YubiKeyAccountRegistry;
 import org.apereo.cas.adaptors.yubikey.YubiKeyDeviceRegistrationRequest;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.CompressionUtils;
 import org.apereo.cas.web.BaseCasRestActuatorEndpoint;
-import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.io.IOUtils;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.endpoint.Access;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
@@ -28,11 +29,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import tools.jackson.core.type.TypeReference;
 import jakarta.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.Collection;
-import java.util.Objects;
 
 /**
  * This is {@link YubiKeyAccountRegistryEndpoint}.
@@ -43,11 +41,11 @@ import java.util.Objects;
 @Endpoint(id = "yubikeyAccountRepository", defaultAccess = Access.NONE)
 @Slf4j
 public class YubiKeyAccountRegistryEndpoint extends BaseCasRestActuatorEndpoint {
-    private final ObjectProvider<YubiKeyAccountRegistry> registry;
+    private final ObjectProvider<@NonNull YubiKeyAccountRegistry> registry;
 
     public YubiKeyAccountRegistryEndpoint(final CasConfigurationProperties casProperties,
                                           final ConfigurableApplicationContext applicationContext,
-                                          final ObjectProvider<YubiKeyAccountRegistry> registry) {
+                                          final ObjectProvider<@NonNull YubiKeyAccountRegistry> registry) {
         super(casProperties, applicationContext);
         this.registry = registry;
     }
@@ -106,7 +104,7 @@ public class YubiKeyAccountRegistryEndpoint extends BaseCasRestActuatorEndpoint 
     @GetMapping(path = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseBody
     @Operation(summary = "Export all Yubikey accounts as a zip file")
-    public ResponseEntity<Resource> export() {
+    public ResponseEntity<@NonNull Resource> export() {
         val accounts = registry.getObject().getAccounts();
         val resource = CompressionUtils.toZipFile(accounts.stream(),
             Unchecked.function(entry -> {

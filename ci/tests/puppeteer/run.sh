@@ -52,32 +52,6 @@ function printred() {
   printf "🔥  ${RED}$1${ENDCOLOR}\n"
 }
 
-function progressbar() {
-  current="$1"
-  total="$2"
-
-  bar_size=60
-  bar_char_done="#"
-  bar_char_todo="-"
-  bar_percentage_scale=2
-
-  # calculate the progress in percentage
-  percent=$(bc <<<"scale=$bar_percentage_scale; 100 * $current / $total")
-  # The number of done and todo characters
-  done=$(bc <<<"scale=0; $bar_size * $percent / 100")
-  todo=$(bc <<<"scale=0; $bar_size - $done")
-
-  # build the done and todo sub-bars
-  done_sub_bar=$(printf "%${done}s" | tr " " "${bar_char_done}")
-  todo_sub_bar=$(printf "%${todo}s" | tr " " "${bar_char_todo}")
-
-  # output the bar
-  echo -ne "\rProgress: [${done_sub_bar}${todo_sub_bar}] ${percent}%"
-  if [ $total -eq $current ]; then
-    echo -e "\n"
-  fi
-}
-
 function downloadAndRunExternalTomcat() {
   local casWebApp="$1"
   shift
@@ -188,11 +162,12 @@ function downloadAndRunExternalTomcat() {
 }
 
 function sleepfor() {
-  tasks_in_total="$1"
-  for current_task in $(seq "$tasks_in_total"); do
-    sleep 1
-    progressbar "$current_task" "$tasks_in_total"
-  done
+  if [ -n "$CI" ]; then
+    echo "Waiting for task to complete..."
+    sleep "$1"
+  else
+    gum spin --spinner dot --title "Waiting for task to complete..." -- sleep "$1"
+  fi
 }
 
 function fetchCasVersion() {
@@ -387,6 +362,12 @@ function validateScenario() {
     exit 1
   fi
 
+  scenarioEnabled=$(jq -j '.enabled // empty' "${config}")
+  if [[ "${scenarioEnabled}" == "false" ]]; then
+    printred "Test scenario ${scenario##*/} is not enabled. Review the scenario configuration at ${config} and re-enable the test."
+    exit 0
+  fi
+     
   requiredEnvVars=$(jq -j '.conditions.env // empty' "${config}")
   if [[ ! -z ${requiredEnvVars} ]]; then
     echo "Checking for required environment variables"
@@ -429,7 +410,8 @@ function validateScenario() {
     exit 1
   fi
 
-  cdsEnabled=$(jq -j 'if .requirements.cds.enabled == "" or .requirements.cds.enabled == null or .requirements.cds.enabled == true then true else false end' "${config}")
+  launchEnabled=$(jq -j 'if .requirements.launch.enabled == "" or .requirements.launch.enabled == null or .requirements.launch.enabled == true then true else false end' "${config}")
+  aotEnabled=$(jq -j 'if .requirements.aot.enabled == "" or .requirements.aot.enabled == null or .requirements.aot.enabled == true then true else false end' "${config}")
 
   scenarioName=${scenario##*/}
   enabled=$(jq -j '.enabled' "${config}")
@@ -628,8 +610,8 @@ function buildAndRun() {
     rm -rf ${targetArtifact}
     BUILD_COMMAND=$(printf '%s' \
       "./gradlew ${BUILD_TASKS} -DskipSpringBootDevTools=true -DskipNestedConfigMetadataGen=true \
--x check -x test -x javadoc --build-cache --configure-on-demand --parallel\
-${BUILD_SCRIPT:+ $BUILD_SCRIPT}${DAEMON:+ $DAEMON} -DskipBootifulLaunchScript=true \
+-x check -x test -x javadoc --quiet --build-cache --configure-on-demand --parallel\
+${BUILD_SCRIPT:+ $BUILD_SCRIPT}${DAEMON:+ $DAEMON} \
 -DcasModules="${dependencies}" --no-watch-fs --max-workers=8 ${BUILDFLAGS:+ $BUILDFLAGS}")
     printcyan "Executing build command in the ${BUILD_SPAWN}:\n➡️  ${BUILD_COMMAND}"
 
@@ -662,6 +644,7 @@ ${BUILD_SCRIPT:+ $BUILD_SCRIPT}${DAEMON:+ $DAEMON} -DskipBootifulLaunchScript=tr
         fi
         echo -n '.'
         sleepfor 60
+        cat build.log
       done
       wait $pid
       if [ $? -ne 0 ]; then
@@ -707,6 +690,7 @@ ${BUILD_SCRIPT:+ $BUILD_SCRIPT}${DAEMON:+ $DAEMON} -DskipBootifulLaunchScript=tr
     cp $keystore "$dockerContextDirectory"
 
     javaVersion=($(cat $PWD/gradle.properties | grep "sourceCompatibility" | cut -d= -f2))
+    printgreen "Using Java version: ${javaVersion} for Docker build"
     buildArguments="--build-arg JAVA_VERSION=${javaVersion} "
     buildArguments+="--build-arg SCENARIO_FOLDER=${SCENARIO_FOLDER} "
     buildArguments+="--build-arg SCENARIO_PATH=${SCENARIO_PATH} "
@@ -718,10 +702,10 @@ ${BUILD_SCRIPT:+ $BUILD_SCRIPT}${DAEMON:+ $DAEMON} -DskipBootifulLaunchScript=tr
       buildArguments+="--build-arg \"$env\" "
     done
     #  ls -al $dockerContextDirectory
-    #  echo $buildArguments
+    printcyan "Docker build arguments are: $buildArguments"
 
     docker build \
-      "$buildArguments" \
+      $buildArguments \
       --file "$dockerContextDirectory/Dockerfile" \
       -t cas-"${scenarioName}":latest \
       "$dockerContextDirectory"
@@ -843,10 +827,16 @@ ${BUILD_SCRIPT:+ $BUILD_SCRIPT}${DAEMON:+ $DAEMON} -DskipBootifulLaunchScript=tr
 
         if [[ "$DEBUG" == "true" ]]; then
           printgreen "Remote debugging is enabled on port $DEBUG_PORT"
-          runArgs="${runArgs} -Xrunjdwp:transport=dt_socket,address=$DEBUG_PORT,server=y,suspend=$DEBUG_SUSPEND"
+          if [[ "$DEBUG_SUSPEND" == "y" ]]; then
+            printyellow "Remote debugging will suspend JVM until debugger is attached to port $DEBUG_PORT"
+          fi
+          runArgs="${runArgs} -Xrunjdwp:transport=dt_socket,address=*:$DEBUG_PORT,server=y,suspend=$DEBUG_SUSPEND"
         fi
         runArgs="${runArgs} -XX:TieredStopAtLevel=1 "
-        printcyan "Launching CAS instance #${c} with properties [${properties}], system properties [${systemProperties}], run arguments [${runArgs}] and dependencies [${dependencies}]"
+
+        if [[ "${launchEnabled}" == "true" ]]; then
+          printcyan "Launching CAS instance #${c} with properties [${properties}], system properties [${systemProperties}], run arguments [${runArgs}] and dependencies [${dependencies}]"
+        fi
 
         springAppJson=$(jq -j '.SPRING_APPLICATION_JSON // empty' "${config}")
         [ -n "${springAppJson}" ] && export SPRING_APPLICATION_JSON=${springAppJson}
@@ -855,124 +845,126 @@ ${BUILD_SCRIPT:+ $BUILD_SCRIPT}${DAEMON:+ $DAEMON} -DskipBootifulLaunchScript=tr
         rm -rf "$TMPDIR/keystore.jwks"
         rm -rf "$TMPDIR/cas"
 
-        if [[ "${NATIVE_RUN}" == "true" ]]; then
-          printcyan "Launching CAS instance #${c} under port ${serverPort} from ${targetArtifact}"
-          ${targetArtifact} \
-            -Dcom.sun.net.ssl.checkRevocation=false \
-            -Dlog.console.stacktraces=true \
-            -DaotSpringActiveProfiles=none \
-            $systemProperties \
-            --cas.http-client.allow-local-urls=true \
-            --spring.main.lazy-initialization=false \
-            --spring.devtools.restart.enabled=false \
-            --management.endpoints.web.discovery.enabled=true \
-            --server.port=${serverPort} \
-            --spring.profiles.active=none \
-            --server.ssl.key-store="$keystore" ${properties} &
-        elif [[ "${buildDockerImage}" == "true" ]]; then
-          printcyan "Launching docker container cas-${scenarioName}:latest"
-          docker run -d --rm \
-            --name="cas-${scenarioName}" \
-            -e SPRING_APPLICATION_JSON=${springAppJson} \
-            -e SERVER_PORT=${serverPort} \
-            -e RUN_ARGS="${runArgs}" \
-            -e CAS_PROPERTIES="${properties}" \
-            -p ${serverPort}:${serverPort} \
-            -p 5005:5005 \
-            -p 8080:8080 \
-            cas-${scenarioName}:latest
-          docker logs -f cas-${scenarioName} 2>/dev/null &
-        else
-          casArtifactToRun="$PWD/cas.${projectType}"
-          if [[ "${cdsEnabled}" == "true" && "${serverType:-external}" != "external" ]]; then
-            printgreen "The scenario ${scenarioName} will run with CDS"
-            rm -rf ${PWD}/cas 2>/dev/null
-            printcyan "Extracting CAS to ${PWD}/cas"
-            java -Djarmode=tools -jar "$PWD"/cas.${projectType} extract >/dev/null 2>&1
-            printcyan "Launching CAS from ${PWD}/cas/cas.${projectType} to perform a training run"
-            java -XX:ArchiveClassesAtExit=${PWD}/cas/cas.jsa -Dspring.context.exit=onRefresh -jar ${PWD}/cas/cas.${projectType} >/dev/null 2>&1
-            printcyan "Generated archive cache file ${PWD}/cas/cas.jsa"
-            runArgs="${runArgs} -XX:SharedArchiveFile=${PWD}/cas/cas.jsa"
-            casArtifactToRun="${PWD}/cas/cas.${projectType}"
-          else
-            printcyan "The scenario ${scenarioName} will run without CDS"
-          fi
-
-          if [[ "${serverType:-external}" == "external" ]]; then
-            downloadAndRunExternalTomcat "$casArtifactToRun" \
-              "${runArgs}" \
-              -Dlog.console.stacktraces=true \
-              $systemProperties \
+        if [[ "${launchEnabled}" == "true" ]]; then
+          if [[ "${NATIVE_RUN}" == "true" ]]; then
+            printcyan "Launching CAS instance #${c} under port ${serverPort} from ${targetArtifact}"
+            ${targetArtifact} \
               -Dcom.sun.net.ssl.checkRevocation=false \
+              -Dlog.console.stacktraces=true \
+              -DaotSpringActiveProfiles=none \
+              $systemProperties \
               --spring.main.lazy-initialization=false \
-              --spring.profiles.active=none \
-              --cas.http-client.allow-local-urls=true \
               --spring.devtools.restart.enabled=false \
               --management.endpoints.web.discovery.enabled=true \
-              --cas.audit.engine.enabled=true \
-              --cas.audit.slf4j.use-single-line=true \
-              ${properties}
-          else
-            printcyan "Launching CAS instance #${c} under port ${serverPort} from ${casArtifactToRun}"
-            java ${runArgs} \
-              -Dlog.console.stacktraces=true \
-              $systemProperties \
-              -jar "${casArtifactToRun}" \
-              -Dcom.sun.net.ssl.checkRevocation=false \
               --server.port=${serverPort} \
-              --spring.main.lazy-initialization=false \
-              --cas.http-client.allow-local-urls=true \
               --spring.profiles.active=none \
-              --spring.devtools.restart.enabled=false \
-              --management.endpoints.web.discovery.enabled=true \
-              --server.ssl.key-store="$keystore" \
-              --cas.audit.engine.enabled=true \
-              --cas.audit.slf4j.use-single-line=true \
-              ${properties} &
+              --server.ssl.key-store="$keystore" ${properties} &
+          elif [[ "${buildDockerImage}" == "true" ]]; then
+            printcyan "Launching docker container cas-${scenarioName}:latest"
+            docker run -d --rm \
+              --name="cas-${scenarioName}" \
+              -e SPRING_APPLICATION_JSON=${springAppJson} \
+              -e SERVER_PORT=${serverPort} \
+              -e RUN_ARGS="${runArgs}" \
+              -e CAS_PROPERTIES="${properties}" \
+              -p ${serverPort}:${serverPort} \
+              -p 5000:5000 \
+              -p 5005:5005 \
+              -p 8080:8080 \
+              cas-${scenarioName}:latest
+            docker logs -f cas-${scenarioName} 2>/dev/null &
+          else
+            casArtifactToRun="$PWD/cas.${projectType}"
+            if [[ "${aotEnabled}" == "true" && "${serverType:-external}" != "external" ]]; then
+              printgreen "The scenario ${scenarioName} will run with AOT"
+              rm -rf ${PWD}/cas 2>/dev/null
+              printcyan "Extracting CAS to ${PWD}/cas"
+              java ${runArgs//suspend=y/suspend=n} -Djarmode=tools -jar "$PWD"/cas.${projectType} extract >/dev/null 2>&1
+              printcyan "Launching CAS from ${PWD}/cas/cas.${projectType} to perform a training run"
+              java ${runArgs//suspend=y/suspend=n} -XX:AOTCacheOutput=${PWD}/cas/cas.aot -Dspring.context.exit=onRefresh -jar ${PWD}/cas/cas.${projectType} >/dev/null 2>&1
+              printcyan "Generated archive cache file ${PWD}/cas/cas.aot"
+              runArgs="${runArgs} -XX:AOTCache=${PWD}/cas/cas.aot"
+              casArtifactToRun="${PWD}/cas/cas.${projectType}"
+            else
+              printcyan "The scenario ${scenarioName} will run without AOT"
+            fi
+
+            if [[ "${serverType:-external}" == "external" ]]; then
+              downloadAndRunExternalTomcat "$casArtifactToRun" \
+                "${runArgs}" \
+                -Dlog.console.stacktraces=true \
+                $systemProperties \
+                -Dcom.sun.net.ssl.checkRevocation=false \
+                --spring.main.lazy-initialization=false \
+                --spring.profiles.active=none \
+                --spring.devtools.restart.enabled=false \
+                --management.endpoints.web.discovery.enabled=true \
+                --cas.audit.engine.enabled=true \
+                --cas.audit.slf4j.use-single-line=true \
+                ${properties}
+            else
+              printcyan "Launching CAS instance #${c} under port ${serverPort} from ${casArtifactToRun}"
+              java ${runArgs} \
+                -Dlog.console.stacktraces=true \
+                $systemProperties \
+                -jar "${casArtifactToRun}" \
+                -Dcom.sun.net.ssl.checkRevocation=false \
+                --server.port=${serverPort} \
+                --spring.main.lazy-initialization=false \
+                --spring.profiles.active=none \
+                --spring.devtools.restart.enabled=false \
+                --management.endpoints.web.discovery.enabled=true \
+                --server.ssl.key-store="$keystore" \
+                --cas.audit.engine.enabled=true \
+                --cas.audit.slf4j.use-single-line=true \
+                ${properties} &
+            fi
           fi
-        fi
 
-        if [[ "${serverType:-external}" != "external" ]]; then
-          pid=$!
-          printcyan "Waiting for CAS instance #${c} under process id ${pid}"
-        fi
+          if [[ "${serverType:-external}" != "external" ]]; then
+            pid=$!
+            printcyan "Waiting for CAS instance #${c} under process id ${pid}"
+          fi
 
-        casLogin="https://localhost:${serverPort}/cas/login"
+          casLogin="https://localhost:${serverPort}/cas/login"
+          healthCheckUrls=$(jq -r '.healthcheck?.urls[]?' "${config}" 2>/dev/null)
+          if [[ -n "$healthCheckUrls" ]]; then
+            url_array=()
+            while IFS= read -r url; do
+              url_array+=("$url")
+            done <<<"$healthCheckUrls"
 
-        healthCheckUrls=$(jq -r '.healthcheck?.urls[]?' "${config}" 2>/dev/null)
-        if [[ -n "$healthCheckUrls" ]]; then
-          url_array=()
-          while IFS= read -r url; do
-            url_array+=("$url")
-          done <<<"$healthCheckUrls"
-
-          for url in "${url_array[@]}"; do
-            printcyan "Checking healthcheck url: $url"
-            until curl -I -k --connect-timeout 10 --output /dev/null --silent --fail "$url"; do
+            for url in "${url_array[@]}"; do
+              printcyan "Checking healthcheck url: $url"
+              until curl -I -k --connect-timeout 10 --output /dev/null --silent --fail "$url"; do
+                echo -n '.'
+                sleep 2
+              done
+            done
+          else
+            printcyan "No healthcheck urls found; using $casLogin instead..."
+            until curl -I -k --connect-timeout 10 --output /dev/null --silent --fail $casLogin; do
               echo -n '.'
               sleep 2
             done
-          done
-        else
-          printcyan "No healthcheck urls found"
-          until curl -I -k --connect-timeout 10 --output /dev/null --silent --fail $casLogin; do
-            echo -n '.'
-            sleep 2
-          done
-        fi
-        printcyan "CAS server ${casLogin} is up and running under process id ${pid}"
+          fi
+          printcyan "CAS server ${casLogin} is up and running under process id ${pid}"
 
-        if [[ "${serverType:-external}" != "external" ]]; then
-          processIds+=($pid)
-          serverPort=$((serverPort + 1))
-          if [[ "$DEBUG" == "true" ]]; then
-            DEBUG_PORT=$((DEBUG_PORT + 1))
+          if [[ "${serverType:-external}" != "external" ]]; then
+            processIds+=($pid)
+            serverPort=$((serverPort + 1))
+            if [[ "$DEBUG" == "true" ]]; then
+              DEBUG_PORT=$((DEBUG_PORT + 1))
+            fi
+          else
+            echo "**********************************"
+            cat "${CATALINA_HOME}/logs/catalina.out"
+            echo "**********************************"
           fi
         else
-          echo "**********************************"
-          cat "${CATALINA_HOME}/logs/catalina.out"
-          echo "**********************************"
+          printyellow "Launch is disabled for scenario ${scenarioName}; skipping starting CAS instance."
         fi
+        
       fi
     done
 

@@ -1,5 +1,6 @@
 package org.apereo.cas.support.saml.idp.metadata;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.dynamodb.DynamoDbQueryBuilder;
 import org.apereo.cas.dynamodb.DynamoDbTableUtils;
@@ -11,14 +12,11 @@ import org.apereo.cas.util.crypto.CipherExecutor;
 import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.ConfigurableApplicationContext;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.ComparisonOperator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * This is {@link DynamoDbSamlIdPMetadataLocator}.
@@ -33,7 +31,7 @@ public class DynamoDbSamlIdPMetadataLocator extends AbstractSamlIdPMetadataLocat
     private final CasConfigurationProperties casProperties;
 
     public DynamoDbSamlIdPMetadataLocator(final CipherExecutor<String, String> metadataCipherExecutor,
-                                          final Cache<String, SamlIdPMetadataDocument> metadataCache,
+                                          final Cache<@NonNull String, SamlIdPMetadataDocument> metadataCache,
                                           final DynamoDbClient dynamoDbClient,
                                           final ConfigurableApplicationContext applicationContext,
                                           final CasConfigurationProperties casProperties) {

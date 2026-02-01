@@ -1,5 +1,6 @@
 package org.apereo.cas.web.support.mgmr;
 
+import module java.base;
 import org.apereo.cas.multitenancy.TenantExtractor;
 import org.apereo.cas.util.crypto.CipherExecutor;
 import org.apereo.cas.util.crypto.CipherExecutorResolver;
@@ -11,9 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * Provides basic encryption/decryption support for cookie values.
@@ -43,7 +43,7 @@ public class EncryptedCookieValueManager implements CookieValueManager {
     }
 
     @Override
-    public String obtainCookieValue(final String cookie, final HttpServletRequest request) {
+    public @Nullable String obtainCookieValue(final String cookie, final HttpServletRequest request) {
         val decoded = determineCipherExecutor(request).decode(cookie, ArrayUtils.EMPTY_OBJECT_ARRAY);
         if (decoded == null) {
             LOGGER.trace("Could not decode cookie value [{}] for cookie", cookie);

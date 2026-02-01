@@ -1,8 +1,11 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.services.util.RegisteredServiceAccessStrategyEvaluator;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,11 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.ObjectUtils;
 import jakarta.persistence.PostLoad;
-import java.io.Serial;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * This is {@link DefaultRegisteredServiceAccessStrategy}
@@ -75,6 +73,7 @@ public class DefaultRegisteredServiceAccessStrategy extends BaseRegisteredServic
      * Collection of required attributes
      * for this service to proceed.
      */
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     protected Map<String, Set<String>> requiredAttributes = new HashMap<>();
 
     /**
@@ -82,6 +81,7 @@ public class DefaultRegisteredServiceAccessStrategy extends BaseRegisteredServic
      * that will be rejected which will cause this
      * policy to refuse access.
      */
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     protected Map<String, Set<String>> rejectedAttributes = new HashMap<>();
 
     /**

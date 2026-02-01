@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.registry;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.configuration.model.support.hazelcast.HazelcastTicketRegistryProperties;
 import org.apereo.cas.monitor.Monitorable;
@@ -15,23 +16,12 @@ import org.apereo.cas.util.function.FunctionUtils;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 import com.hazelcast.query.Predicates;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ConfigurableApplicationContext;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * Hazelcast-based implementation of a {@link TicketRegistry}.
@@ -218,6 +208,23 @@ public class HazelcastTicketRegistry extends AbstractTicketRegistry implements A
     }
 
     @Override
+    public long deleteTicketsFor(final String principalId) {
+        if (properties.getCore().isEnableJet()) {
+            return ticketCatalog.findAll()
+                .stream()
+                .mapToLong(ticketDefinition -> {
+                    val sql = String.format("DELETE FROM %s WHERE principal=?", ticketDefinition.getProperties().getStorageName());
+                    LOGGER.debug("Executing SQL query [{}]", sql);
+                    try (val _ = hazelcastInstance.getSql().execute(sql, digestIdentifier(principalId))) {
+                        return 1;
+                    }
+                })
+                .sum();
+        }
+        return super.deleteTicketsFor(principalId);
+    }
+
+    @Override
     public Stream<? extends Ticket> getSessionsWithAttributes(final Map<String, List<Object>> queryAttributes) {
         if (properties.getCore().isEnableJet()) {
             val md = ticketCatalog.find(TicketGrantingTicket.PREFIX);
@@ -274,12 +281,12 @@ public class HazelcastTicketRegistry extends AbstractTicketRegistry implements A
             .limit(criteria.getCount())
             .map(this::decodeTicket);
     }
-    
+
     /**
      * Make sure we shutdown HazelCast when the context is destroyed.
      */
     public void shutdown() {
-        FunctionUtils.doAndHandle(__ -> {
+        FunctionUtils.doAndHandle(_ -> {
             LOGGER.info("Shutting down Hazelcast instance [{}]", hazelcastInstance.getConfig().getInstanceName());
             hazelcastInstance.shutdown();
         });
@@ -302,7 +309,8 @@ public class HazelcastTicketRegistry extends AbstractTicketRegistry implements A
     }
 
     private IMap<String, HazelcastTicketDocument> getTicketMapInstance(
-        @NonNull final String mapName) {
+        @NonNull
+        final String mapName) {
         return FunctionUtils.doAndHandle(() -> {
             val inst = hazelcastInstance.<String, HazelcastTicketDocument>getMap(mapName);
             LOGGER.debug("Located Hazelcast map instance [{}]", mapName);

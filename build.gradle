@@ -9,6 +9,9 @@ buildscript {
         gradlePluginPortal()
         maven {
             url = "https://repo.spring.io/milestone"
+            content {
+                includeGroupByRegex ".*springframework.*"
+            }
             mavenContent { releasesOnly() }
         }
     }
@@ -20,15 +23,17 @@ buildscript {
         classpath libs.gradle.plugin.versions
         classpath libs.gradle.plugin.native
         classpath libs.gradle.plugin.errorprone
+        classpath libs.gradle.plugin.nullaway
         classpath libs.gradle.plugin.sonarqube
         classpath libs.gradle.plugin.nmcp
-        classpath libs.gradle.plugin.nexus
     }
 }
 
 ext {
-    srcTagMap = new ConcurrentHashMap<File, Set<String>>()
+    ci = System.getenv("CI") || providers.systemProperty("CI").present
     
+    srcTagMap = new ConcurrentHashMap<File, Set<String>>()
+
     repositoryUsername = providers.systemProperty("repositoryUsername").getOrElse(System.getenv("REPOSITORY_USER"))
     repositoryPassword = providers.systemProperty("repositoryPassword").getOrElse(System.getenv("REPOSITORY_PWD"))
 
@@ -46,22 +51,18 @@ ext {
 
     skipArtifactSigning = providers.systemProperty("skipArtifactSigning").present
     terminateCompilerOnWarning = providers.systemProperty("terminateCompilerOnWarning").getOrElse("true") == "true"
+    skipNullAway = providers.systemProperty("skipNullAway").getOrElse("false") == "true"
 
     enableRemoteDebugging = providers.systemProperty("enableRemoteDebugging").present
     remoteDebuggingSuspend = providers.systemProperty("remoteDebuggingSuspend").getOrElse("false") == "true" ? "y" : "n"
     generateGitProperties = publishFlag || providers.systemProperty("generateGitProperties").present
     generateTimestamps = publishFlag || providers.systemProperty("generateTimestamps").present
-    
-    skipBootifulLaunchScript = providers.systemProperty("skipBootifulLaunchScript").present
 
-    ci = System.getenv("CI") || providers.systemProperty("CI").present
 
     excludedFilesFromTestCoverage = [
         '**/docs/**',
         '**/org/springframework/**',
         '**/soap/generated/**',
-        '**/com/duosecurity/**',
-        '**/org/apereo/inspektr/**',
         '**/net/jradius/**',
         '**/com/yubico/**',
         '**/saml/sts/SamlToken**',
@@ -79,26 +80,7 @@ def isArtifactSigningRequired = {
     publishReleases && !skipArtifactSigning
 }
 
-if (publishSnapshots) {
-    apply plugin: "io.github.gradle-nexus.publish-plugin"
-    nexusPublishing {
-        packageGroup = "org.apereo"
-        repositories {
-            sonatype {
-                stagingProfileId = "11d1ddbbdeae9d"
-                username = "${repositoryUsername}"
-                password = "${repositoryPassword}"
-                snapshotRepositoryUrl.set(uri("${snapshotsRepositoryUrl}"))
-            }
-        }
-        clientTimeout = java.time.Duration.ofSeconds(120)
-        connectTimeout = java.time.Duration.ofSeconds(120)
-        transitionCheckOptions {
-            maxRetries.set(100)
-            delayBetween.set(java.time.Duration.ofSeconds(60))
-        }
-    }
-} else if (publishReleases) {
+if (publishReleases || publishSnapshots) {
     apply plugin: "com.gradleup.nmcp.aggregation"
     nmcpAggregation {
         centralPortal {
@@ -106,8 +88,9 @@ if (publishSnapshots) {
             password = "${repositoryPassword}"
             publicationName = "Apereo CAS Release ${project.version}"
             publishingType = "AUTOMATIC"
-            validationTimeout = java.time.Duration.of(30, java.time.temporal.ChronoUnit.MINUTES)
-            publishingTimeout = java.time.Duration.of(120, java.time.temporal.ChronoUnit.MINUTES)
+            validationTimeout.set(Duration.ZERO)
+            publishingTimeout.set(Duration.ZERO)
+            uploadSnapshotsParallelism.set(4)
         }
         publishAllProjectsProbablyBreakingProjectIsolation()
     }
@@ -124,10 +107,12 @@ if (!providers.systemProperty("skipSonarqube").present) {
         def token = providers.systemProperty("SONARCLOUD_TOKEN")
                 .getOrElse(System.getenv("SONARCLOUD_TOKEN"))
 
+        def projectKey = "${sonarOrganization}_${sonarProjectName}"
         properties {
             property "sonar.host.url", "$sonarHostUrl"
             property "sonar.organization", "$sonarOrganization"
             property "sonar.projectName", "$sonarProjectName"
+            property "sonar.projectKey", "$projectKey"
             property "sonar.sourceEncoding", "UTF-8"
             property "sonar.java.source", project.targetCompatibility
             property "sonar.token", token
@@ -188,6 +173,9 @@ allprojects {
     java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(project.targetCompatibility)
+            if (!ci) {
+                vendor = JvmVendorSpec.JETBRAINS
+            }
         }
     }
 
@@ -223,6 +211,7 @@ subprojects {
 
     if (!rootProject.skipErrorProneCompiler) {
         apply plugin: "net.ltgt.errorprone"
+        apply plugin: "net.ltgt.nullaway"
     }
     apply from: rootProject.file("gradle/tests.gradle")
 
@@ -343,6 +332,7 @@ subprojects {
         }
 
         it.options.fork = true
+        it.options.forkOptions.jvmArgs << '--sun-misc-unsafe-memory-access=allow'
         it.options.incremental = true
 
         def casCompilerArgs = ["-parameters", '-Xlint:-removal']
@@ -356,9 +346,28 @@ subprojects {
             it.options.errorprone.disableWarningsInGeneratedCode = true
             it.options.errorprone.errorproneArgs = [
                                                     '-Xep:JavaUtilDate:OFF',
+                                                    '-Xep:RequireExplicitNullMarking:OFF',
                                                     '-Xep:BooleanLiteral:OFF',
                                                     '-Xep:StringConcatToTextBlock:OFF',
-                                                    '-Xep:AddressSelection:OFF']
+                                                    '-Xep:AddressSelection:OFF'
+                                                   ]
+            def taskName = it.name
+            it.options.errorprone.nullaway {
+                if (rootProject.skipNullAway || taskName.equals("compileTestJava")) {
+                    disable()
+                } else {
+                    jspecifyMode = true
+                    handleTestAssertionLibraries = true
+                    suggestSuppressions = true
+                    checkOptionalEmptiness = true
+                    if (rootProject.ext.terminateCompilerOnWarning) {
+                        error()
+                    } else {
+                        warn()
+                    }
+                }
+            }
+
             casCompilerArgs.add("-XDcompilePolicy=byfile")
             casCompilerArgs.add("-XDshould-stop.ifError=FLOW")
         }
@@ -434,20 +443,24 @@ subprojects {
         api libraries.springintegration
         api libraries.springwebflow
         api libraries.jakarta
+        api libraries.jspecify
         
         compileOnly libraries.jakartapersistence
 
         annotationProcessor libraries.springindexer
 
         if (!providers.systemProperty("skipErrorProneCompiler").present) {
-            errorprone "com.google.errorprone:error_prone_core:${libs.versions.errorprone.get()}"
+            errorprone libs.errorprone
+            errorprone libs.nullaway
         }
 
         testImplementation libraries.tests
         testImplementation libraries.log4j
         testImplementation libraries.hibernatevalidator
         testImplementation libraries.jakartapersistence
-
+        testImplementation libraries.thymeleaf
+        testImplementation libraries.springboottomcat
+        
         runtimeOnly libraries.httpclient4
 
         jvmAgents(libs.mockito.core) {
@@ -458,6 +471,12 @@ subprojects {
         }
 
         javadocClasspath project(path: project.path, configuration: 'compileClasspath')
+    }
+
+    if (!providers.systemProperty("skipErrorProneCompiler").present) {
+        nullaway {
+            onlyNullMarked = true
+        }
     }
 }
 
@@ -609,6 +628,26 @@ tasks.register('generateProjectModulesMetadata') {
         println "Published project modules to ${outputFile}"
     }
 }
+
+tasks.register('verifyDependencyVersions') { t ->
+    def catalogFile = rootProject.layout.projectDirectory
+            .file('gradle/libs.versions.toml')
+            .asFile
+    inputs.file(catalogFile).withPathSensitivity(PathSensitivity.RELATIVE)
+
+    doLast {
+        def snapshotLines = []
+        catalogFile.eachLine { line, lineNumber ->
+            if (line =~ /(?i)SNAPSHOT/) {
+                snapshotLines << "${lineNumber}: ${line.trim()}"
+            }
+        }
+        if (!snapshotLines.empty) {
+            throw new GradleException("SNAPSHOT versions found in ${catalogFile}:\n" + snapshotLines.collect { "\t - $it" }.join('\n'))
+        }
+    }
+}
+
 
 boolean projectShouldBePublished(Project project) {
     def publishable = project.hasProperty("publishable") ? project.publishable : true

@@ -1,7 +1,7 @@
 package org.apereo.cas.apm;
 
+import module java.base;
 import org.apereo.cas.util.app.ApplicationEntrypointInitializer;
-
 import co.elastic.apm.attach.ElasticApmAttacher;
 import lombok.val;
 import org.apache.commons.lang3.BooleanUtils;
@@ -23,7 +23,7 @@ public class ElasticApmAgentInitializer implements ApplicationEntrypointInitiali
             System.getenv(SETTING_ELASTIC_APM_AGENT_ENABLED)), "true");
         if (BooleanUtils.toBoolean(apmEnabled)) {
             //CHECKSTYLE:OFF
-            System.out.println("Attaching Elastic APM Agent...");
+            IO.println("Attaching Elastic APM Agent...");
             //CHECKSTYLE:ON
             ElasticApmAttacher.attach();
         }

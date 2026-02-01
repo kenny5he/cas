@@ -1,20 +1,19 @@
 package org.apereo.cas.util.http;
 
+import module java.base;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.With;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpMethod;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link HttpExecutionRequest}.
@@ -75,7 +74,6 @@ public class HttpExecutionRequest {
         return StringUtils.isNotBlank(bearerToken);
     }
 
-
     /**
      * Convert this record into JSON.
      *
@@ -86,5 +84,16 @@ public class HttpExecutionRequest {
     public HttpExecutionRequest body(final Object body) {
         return withEntity(FunctionUtils.doUnchecked(
             () -> MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(body)));
+    }
+
+    /**
+     * Without retry http execution request.
+     *
+     * @return the http execution request
+     */
+    @JsonIgnore
+    @CanIgnoreReturnValue
+    public HttpExecutionRequest withoutRetry() {
+        return withMaximumRetryAttempts(0);
     }
 }

@@ -1,12 +1,10 @@
 package org.apereo.cas.support.events.audit;
 
+import module java.base;
 import org.apereo.cas.support.events.AbstractCasEvent;
-
 import lombok.Getter;
 import org.apereo.inspektr.audit.AuditActionContext;
 import org.apereo.inspektr.common.web.ClientInfo;
-
-import java.io.Serial;
 
 /**
  * This is {@link CasAuditActionContextRecordedEvent}.
@@ -22,12 +20,6 @@ public class CasAuditActionContextRecordedEvent extends AbstractCasEvent {
 
     private final AuditActionContext auditActionContext;
 
-    /**
-     * Instantiates a new CAS audit action context recorded event.
-     *
-     * @param source             the source
-     * @param auditActionContext the audit action context
-     */
     public CasAuditActionContextRecordedEvent(final Object source, final AuditActionContext auditActionContext, final ClientInfo clientInfo) {
         super(source, clientInfo);
         this.auditActionContext = auditActionContext;

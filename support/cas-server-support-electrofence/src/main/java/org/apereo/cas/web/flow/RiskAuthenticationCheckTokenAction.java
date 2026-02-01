@@ -1,5 +1,6 @@
 package org.apereo.cas.web.flow;
 
+import module java.base;
 import org.apereo.cas.authentication.adaptive.geo.GeoLocationService;
 import org.apereo.cas.authentication.principal.PrincipalResolver;
 import org.apereo.cas.authentication.principal.ServiceFactory;
@@ -21,12 +22,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apereo.inspektr.common.web.ClientInfoHolder;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDateTime;
 
 /**
  * This is {@link RiskAuthenticationCheckTokenAction}.
@@ -52,7 +52,7 @@ public class RiskAuthenticationCheckTokenAction extends BaseCasWebflowAction {
 
     protected final CipherExecutor riskVerificationCipherExecutor;
 
-    protected final ObjectProvider<GeoLocationService> geoLocationService;
+    protected final ObjectProvider<@NonNull GeoLocationService> geoLocationService;
 
     protected final CasConfigurationProperties casProperties;
 
@@ -61,7 +61,7 @@ public class RiskAuthenticationCheckTokenAction extends BaseCasWebflowAction {
     protected final TenantExtractor tenantExtractor;
 
     @Override
-    protected Event doExecuteInternal(final RequestContext requestContext) throws Throwable {
+    protected @Nullable Event doExecuteInternal(final RequestContext requestContext) throws Throwable {
         try {
             val applicationContext = requestContext.getActiveFlow().getApplicationContext();
             val riskToken = requestContext.getRequestParameters().getRequired(PARAMETER_NAME_RISK_TOKEN);

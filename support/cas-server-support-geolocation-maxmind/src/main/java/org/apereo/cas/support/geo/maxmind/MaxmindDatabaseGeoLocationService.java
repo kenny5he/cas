@@ -1,5 +1,6 @@
 package org.apereo.cas.support.geo.maxmind;
 
+import module java.base;
 import org.apereo.cas.authentication.adaptive.geo.GeoLocationResponse;
 import org.apereo.cas.configuration.model.support.geo.maxmind.MaxmindProperties;
 import org.apereo.cas.support.geo.AbstractGeoLocationService;
@@ -15,10 +16,7 @@ import lombok.With;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
-import java.net.InetAddress;
-import java.net.ProxySelector;
-import java.time.Duration;
-import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This is {@link MaxmindDatabaseGeoLocationService} that reads geo data
@@ -32,6 +30,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @AllArgsConstructor
 @With
+@SuppressWarnings("NullAway.Init")
 public class MaxmindDatabaseGeoLocationService extends AbstractGeoLocationService {
     protected final MaxmindProperties properties;
 
@@ -39,32 +38,32 @@ public class MaxmindDatabaseGeoLocationService extends AbstractGeoLocationServic
 
     protected DatabaseReader countryDatabaseReader;
 
+    @Nullable
     protected WebServiceClient webServiceClient;
 
     @Override
-    public GeoLocationResponse locate(final InetAddress address) {
+    public @Nullable GeoLocationResponse locate(final InetAddress address) {
         try {
             val location = new GeoLocationResponse();
-            FunctionUtils.doIfNotNull(cityDatabaseReader, __ -> {
+            FunctionUtils.doIfNotNull(cityDatabaseReader, _ -> {
                 val response = cityDatabaseReader.city(address);
-                location.addAddress(response.getCity().getName());
+                location.addAddress(response.city().name());
                 collectGeographicalPosition(location, response);
             });
 
-            FunctionUtils.doIfNotNull(countryDatabaseReader, __ -> {
+            FunctionUtils.doIfNotNull(countryDatabaseReader, _ -> {
                 val response = countryDatabaseReader.country(address);
-                location.addAddress(response.getCountry().getName());
+                location.addAddress(response.country().name());
             });
 
             if (location.getAddresses().isEmpty() && properties.getAccountId() > 0 && StringUtils.isNotBlank(properties.getLicenseKey())) {
-                try (val client = buildWebServiceClient()) {
-                    val cityResponse = client.city(address);
-                    location.addAddress(cityResponse.getCity().getName());
-                    collectGeographicalPosition(location, cityResponse);
+                val client = buildWebServiceClient();
+                val cityResponse = client.city(address);
+                location.addAddress(cityResponse.city().name());
+                collectGeographicalPosition(location, cityResponse);
 
-                    val countryResponse = client.country(address);
-                    location.addAddress(countryResponse.getCountry().getName());
-                }
+                val countryResponse = client.country(address);
+                location.addAddress(countryResponse.country().name());
             }
 
             LOGGER.debug("Geo location for [{}] is calculated as [{}]", address, location);
@@ -78,7 +77,7 @@ public class MaxmindDatabaseGeoLocationService extends AbstractGeoLocationServic
     }
 
     @Override
-    public GeoLocationResponse locate(final Double latitude, final Double longitude) {
+    public @Nullable GeoLocationResponse locate(final Double latitude, final Double longitude) {
         LOGGER.warn("Geo-locating an address by latitude/longitude [{}]/[{}] is not supported", latitude, longitude);
         return null;
     }
@@ -94,13 +93,13 @@ public class MaxmindDatabaseGeoLocationService extends AbstractGeoLocationServic
 
     private static void collectGeographicalPosition(final GeoLocationResponse location,
                                                     final CityResponse response) {
-        val loc = response.getLocation();
+        val loc = response.location();
         if (loc != null) {
-            if (loc.getLatitude() != null) {
-                location.setLatitude(loc.getLatitude());
+            if (loc.latitude() != null) {
+                location.setLatitude(loc.latitude());
             }
-            if (loc.getLongitude() != null) {
-                location.setLongitude(loc.getLongitude());
+            if (loc.longitude() != null) {
+                location.setLongitude(loc.longitude());
             }
         }
     }

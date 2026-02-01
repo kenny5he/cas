@@ -1,6 +1,9 @@
 package org.apereo.cas.authentication.attribute;
 
+import module java.base;
+import module java.sql;
 import org.apereo.cas.authentication.principal.attribute.PersonAttributes;
+import org.apereo.cas.util.RegexUtils;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,15 +12,8 @@ import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import java.io.Serial;
+import org.jspecify.annotations.Nullable;
 import java.sql.Array;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
-import java.util.UUID;
-import java.util.regex.Pattern;
 
 /**
  * Represents a simple person with its attributes.
@@ -46,7 +42,7 @@ public class SimplePersonAttributes implements PersonAttributes {
         this.attributes = buildImmutableAttributeMap(attributes);
         this.name = name;
     }
-    
+
     public SimplePersonAttributes(final Map<String, List<Object>> attributes) {
         this.attributes = buildImmutableAttributeMap(attributes);
         this.name = attributes.containsKey("username")
@@ -89,7 +85,7 @@ public class SimplePersonAttributes implements PersonAttributes {
 
     protected Map<String, List<Object>> buildImmutableAttributeMap(final Map<String, List<Object>> attributes) {
         val valueBuilder = new TreeMap<String, List<Object>>(String.CASE_INSENSITIVE_ORDER);
-        val arrayPattern = Pattern.compile("\\{(.*)\\}");
+        val arrayPattern = RegexUtils.createPattern("\\{(.*)\\}");
         for (val attrEntry : attributes.entrySet()) {
             val key = attrEntry.getKey();
             var value = attrEntry.getValue().stream().filter(Objects::nonNull).toList();
@@ -115,7 +111,7 @@ public class SimplePersonAttributes implements PersonAttributes {
 
     @Override
     @JsonIgnore
-    public Object getAttributeValue(final String name) {
+    public @Nullable Object getAttributeValue(final String name) {
         val values = this.attributes.get(name);
         if (values == null || values.isEmpty()) {
             return null;
@@ -125,7 +121,7 @@ public class SimplePersonAttributes implements PersonAttributes {
 
     @Override
     @JsonIgnore
-    public List<Object> getAttributeValues(final String name) {
+    public @Nullable List<Object> getAttributeValues(final String name) {
         return this.attributes.get(name);
     }
 }

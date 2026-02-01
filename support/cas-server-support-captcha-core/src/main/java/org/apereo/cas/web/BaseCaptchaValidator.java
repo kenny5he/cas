@@ -1,11 +1,12 @@
 package org.apereo.cas.web;
 
+import module java.base;
 import org.apereo.cas.configuration.model.support.captcha.GoogleRecaptchaProperties;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.LoggingUtils;
 import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,12 +15,13 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.HttpEntityContainer;
 import org.apache.hc.core5.http.HttpResponse;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
 
 /**
  * This is {@link BaseCaptchaValidator}.
@@ -31,7 +33,8 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 @Slf4j
 public abstract class BaseCaptchaValidator implements CaptchaValidator {
-    protected static final ObjectMapper MAPPER = new ObjectMapper().findAndRegisterModules();
+    protected static final ObjectMapper MAPPER = JacksonObjectMapperFactory.builder()
+        .defaultTypingEnabled(false).build().toObjectMapper();
 
     protected final GoogleRecaptchaProperties recaptchaProperties;
 
@@ -56,7 +59,7 @@ public abstract class BaseCaptchaValidator implements CaptchaValidator {
         return request.getParameter(getRecaptchaResponseParameterName());
     }
     
-    protected HttpResponse executeCaptchaVerification(final String recaptchaResponse, final String userAgent) {
+    protected @Nullable HttpResponse executeCaptchaVerification(final String recaptchaResponse, final String userAgent) {
         val headers = CollectionUtils.<String, String>wrap(
             HttpHeaders.USER_AGENT, userAgent,
             HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE,

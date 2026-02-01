@@ -1,5 +1,6 @@
 package org.apereo.cas.jdbc;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationManager;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.config.CasCoreAuthenticationAutoConfiguration;
@@ -56,9 +57,7 @@ import static org.junit.jupiter.api.Assertions.*;
         "cas.authn.jdbc.query[0].driver-class=org.hsqldb.jdbcDriver",
         "cas.authn.jdbc.query[0].url=jdbc:hsqldb:mem:cas-hsql-authn-db",
         "cas.authn.jdbc.query[0].dialect=org.hibernate.dialect.HSQLDialect",
-        "cas.authn.jdbc.query[0].field-user=uid",
         "cas.authn.jdbc.query[0].field-password=psw",
-        "cas.authn.jdbc.query[0].table-users=custom_users_table",
 
         "cas.authn.jdbc.search[0].order=1000",
         

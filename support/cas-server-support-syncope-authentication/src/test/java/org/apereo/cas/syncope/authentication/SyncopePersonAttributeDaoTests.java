@@ -1,5 +1,6 @@
 package org.apereo.cas.syncope.authentication;
 
+import module java.base;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.authentication.principal.PrincipalResolver;
 import org.apereo.cas.authentication.principal.attribute.PersonAttributeDao;
@@ -19,8 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
-import java.util.List;
-import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -123,7 +122,7 @@ class SyncopePersonAttributeDaoTests {
         void verifyUserIsFound() throws Throwable {
             val result = MAPPER.createObjectNode();
             result.putArray("result").add(user());
-            try (val webserver = startMockSever(result, HttpStatus.OK, 8095)) {
+            try (val _ = startMockSever(result, HttpStatus.OK, 8095)) {
                 assertFalse(syncopePersonAttributeDaos.toList().isEmpty());
                 assertFalse(attributeRepository.getPeople(Map.of("username", List.of("casuser"))).isEmpty());
 
@@ -138,7 +137,7 @@ class SyncopePersonAttributeDaoTests {
         void verifyUserIsNotFound() throws Throwable {
             val result = MAPPER.createObjectNode();
             result.putArray("result");
-            try (val webserver = startMockSever(result, HttpStatus.OK, 8095)) {
+            try (val _ = startMockSever(result, HttpStatus.OK, 8095)) {
                 val people = attributeRepository.getPeopleWithMultivaluedAttributes(
                     Map.of("anotherProp", List.of("casuser")), PersonAttributeDaoFilter.alwaysChoose());
                 assertTrue(people.isEmpty());
@@ -149,7 +148,7 @@ class SyncopePersonAttributeDaoTests {
         void verifySyncopeDown() throws Throwable {
             val result = MAPPER.createObjectNode();
             result.putArray("result").add(user());
-            try (val __ = startMockSever(result, HttpStatus.INTERNAL_SERVER_ERROR, 8095)) {
+            try (val _ = startMockSever(result, HttpStatus.INTERNAL_SERVER_ERROR, 8095)) {
                 val first = syncopePersonAttributeDaos.first();
                 val results = first.getPeople(Map.of("username", List.of("casuser")), PersonAttributeDaoFilter.alwaysChoose());
                 assertTrue(results.iterator().next().getAttributes().isEmpty());

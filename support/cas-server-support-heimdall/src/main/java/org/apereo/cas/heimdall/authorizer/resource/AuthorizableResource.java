@@ -1,9 +1,12 @@
 package org.apereo.cas.heimdall.authorizer.resource;
 
+import module java.base;
 import org.apereo.cas.heimdall.authorizer.resource.policy.ResourceAuthorizationPolicy;
 import org.apereo.cas.util.serialization.PatternJsonDeserializer;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.annotation.Nulls;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -11,13 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * This is {@link AuthorizableResource}.
@@ -26,6 +23,7 @@ import java.util.regex.Pattern;
  * @since 7.2.0
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Getter
 @Setter
 @EqualsAndHashCode
@@ -44,8 +42,10 @@ public class AuthorizableResource implements Serializable {
 
     private String method;
 
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private List<ResourceAuthorizationPolicy> policies = new ArrayList<>();
 
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private Map<String, Object> properties = new HashMap<>();
 
     private boolean enforceAllPolicies;

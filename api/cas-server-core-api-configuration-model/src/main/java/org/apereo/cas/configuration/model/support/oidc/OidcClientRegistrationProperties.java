@@ -1,14 +1,11 @@
 package org.apereo.cas.configuration.model.support.oidc;
 
+import module java.base;
 import org.apereo.cas.configuration.support.DurationCapable;
 import org.apereo.cas.configuration.support.RequiresModule;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * This is {@link OidcClientRegistrationProperties}.
@@ -48,6 +45,11 @@ public class OidcClientRegistrationProperties implements Serializable {
      */
     private String initialAccessTokenUser;
 
+    /**
+     * Whether dynamic client registration is enabled or not.
+     */
+    private boolean dynamicClientRegistrationEnabled = true;
+    
     /**
      * The password used in a basic-auth scheme to request an initial access token
      * that would then be used to dynamically register clients

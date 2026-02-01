@@ -1,5 +1,6 @@
 package org.apereo.cas.web.flow.login;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.AuthenticationEventExecutionPlan;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
@@ -20,20 +21,17 @@ import org.apereo.cas.web.flow.actions.BaseCasWebflowAction;
 import org.apereo.cas.web.support.ArgumentExtractor;
 import org.apereo.cas.web.support.CookieUtils;
 import org.apereo.cas.web.support.WebUtils;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.apereo.inspektr.common.web.ClientInfoHolder;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Class to automatically set the paths for the CookieGenerators.
@@ -78,7 +76,7 @@ public class InitialFlowSetupAction extends BaseCasWebflowAction {
     }
 
     @Override
-    protected Event doExecuteInternal(final RequestContext context) throws Throwable {
+    protected @Nullable Event doExecuteInternal(final RequestContext context) throws Throwable {
         configureCookieGenerators(context);
         configureWebflowForPostParameters(context);
         configureWebflowForCustomFields(context);
@@ -91,7 +89,7 @@ public class InitialFlowSetupAction extends BaseCasWebflowAction {
         return success();
     }
 
-    protected String configureWebflowForTicketGrantingTicket(final RequestContext context) {
+    protected @Nullable String configureWebflowForTicketGrantingTicket(final RequestContext context) {
         val request = WebUtils.getHttpServletRequestFromExternalWebflowContext(context);
         val ticketGrantingTicketId = ticketGrantingTicketCookieGenerator.retrieveCookieValue(request);
         LOGGER.trace("Retrieved the ticket-granting ticket identifier in the login webflow: [{}]", ticketGrantingTicketId);
@@ -147,7 +145,7 @@ public class InitialFlowSetupAction extends BaseCasWebflowAction {
         }
     }
 
-    protected void configureWebflowForSsoParticipation(final RequestContext context, final String ticketGrantingTicketId) throws Throwable {
+    protected void configureWebflowForSsoParticipation(final RequestContext context, @Nullable final String ticketGrantingTicketId) throws Throwable {
         val request = WebUtils.getHttpServletRequestFromExternalWebflowContext(context);
         val response = WebUtils.getHttpServletResponseFromExternalWebflowContext(context);
 
@@ -185,6 +183,7 @@ public class InitialFlowSetupAction extends BaseCasWebflowAction {
         context.getFlowScope().put("httpRequestSecure", request.isSecure());
         context.getFlowScope().put("httpRequestMethod", request.getMethod());
         context.getFlowScope().put("httpRequestHeaders", HttpRequestUtils.getRequestHeaders(request));
+        context.getFlowScope().put("clientInfo", ClientInfoHolder.getClientInfo());
     }
 
     protected List<String> determineAuthenticationHandlersForSourceSelection(final RequestContext context) {

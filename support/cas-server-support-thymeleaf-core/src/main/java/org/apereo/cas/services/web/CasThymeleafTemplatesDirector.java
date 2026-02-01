@@ -1,22 +1,17 @@
 package org.apereo.cas.services.web;
 
+import module java.base;
 import org.apereo.cas.util.http.HttpRequestUtils;
 import org.apereo.cas.web.flow.CasWebflowExecutionPlan;
 import org.apereo.cas.web.support.WebUtils;
+import org.apereo.cas.web.theme.ThemeResolver;
+import org.apereo.cas.web.theme.ThemeSource;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.ui.context.ThemeSource;
-import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.webflow.execution.RequestContextHolder;
 import org.thymeleaf.context.WebEngineContext;
 import org.thymeleaf.util.EvaluationUtils;
-import java.net.URL;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * This is {@link CasThymeleafTemplatesDirector}.

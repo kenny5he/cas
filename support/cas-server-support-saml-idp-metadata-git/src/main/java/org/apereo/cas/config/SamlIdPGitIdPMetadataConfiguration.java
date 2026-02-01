@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.git.GitRepository;
@@ -19,6 +20,7 @@ import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -106,7 +108,7 @@ class SamlIdPGitIdPMetadataConfiguration {
         final CipherExecutor samlIdPMetadataGeneratorCipherExecutor,
         final ConfigurableApplicationContext applicationContext,
         @Qualifier("samlIdPMetadataCache")
-        final Cache<String, SamlIdPMetadataDocument> samlIdPMetadataCache,
+        final Cache<@NonNull String, SamlIdPMetadataDocument> samlIdPMetadataCache,
         @Qualifier("gitIdPMetadataRepositoryInstance")
         final GitRepository gitIdPMetadataRepositoryInstance) {
         return BeanSupplier.of(SamlIdPMetadataLocator.class)

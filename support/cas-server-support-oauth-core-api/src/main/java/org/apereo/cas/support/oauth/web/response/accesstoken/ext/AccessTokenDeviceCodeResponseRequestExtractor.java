@@ -1,15 +1,16 @@
 package org.apereo.cas.support.oauth.web.response.accesstoken.ext;
 
+import module java.base;
 import org.apereo.cas.audit.AuditableContext;
 import org.apereo.cas.support.oauth.OAuth20Constants;
 import org.apereo.cas.support.oauth.OAuth20GrantTypes;
 import org.apereo.cas.support.oauth.OAuth20ResponseTypes;
 import org.apereo.cas.support.oauth.util.OAuth20Utils;
 import org.apereo.cas.support.oauth.web.endpoints.OAuth20ConfigurationContext;
-
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.profile.AnonymousProfile;
 import org.springframework.beans.factory.ObjectProvider;
@@ -22,7 +23,7 @@ import org.springframework.beans.factory.ObjectProvider;
  */
 @Slf4j
 public class AccessTokenDeviceCodeResponseRequestExtractor extends BaseAccessTokenGrantRequestExtractor<OAuth20ConfigurationContext> {
-    public AccessTokenDeviceCodeResponseRequestExtractor(final ObjectProvider<OAuth20ConfigurationContext> oAuthConfigurationContext) {
+    public AccessTokenDeviceCodeResponseRequestExtractor(final ObjectProvider<@NonNull OAuth20ConfigurationContext> oAuthConfigurationContext) {
         super(oAuthConfigurationContext);
     }
 
@@ -41,8 +42,8 @@ public class AccessTokenDeviceCodeResponseRequestExtractor extends BaseAccessTok
         val service = configurationContext.getAuthenticationBuilder().buildService(registeredService, context, false);
 
         LOGGER.debug("Authenticating the OAuth request indicated by [{}]", service);
-        val authentication = configurationContext.getAuthenticationBuilder().build(new AnonymousProfile(),
-            registeredService, context, service);
+        val authentication = configurationContext.getAuthenticationBuilder()
+            .build(new AnonymousProfile(), registeredService, context, service);
 
         val audit = AuditableContext.builder()
             .service(service)

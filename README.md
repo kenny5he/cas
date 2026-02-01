@@ -37,8 +37,8 @@ There is no need for special ceremony to create separate issues. The pull reques
 | Version                                                                                    | Reference                                        |
 |--------------------------------------------------------------------------------------------|--------------------------------------------------|
 | ![](https://img.shields.io/badge/Development-WIP-blue.svg?style=for-the-badge&logo=github) | [Link](https://apereo.github.io/cas/development) |
+| ![](https://img.shields.io/badge/7.3.x-Current-green.svg?style=for-the-badge&logo=github)  | [Link](https://apereo.github.io/cas/7.3.x)       |
 | ![](https://img.shields.io/badge/7.2.x-Current-green.svg?style=for-the-badge&logo=github)  | [Link](https://apereo.github.io/cas/7.2.x)       |
-| ![](https://img.shields.io/badge/7.1.x-Current-green.svg?style=for-the-badge&logo=github)  | [Link](https://apereo.github.io/cas/7.1.x)       |
 
 Additional resources are available as follows:
 
@@ -62,8 +62,8 @@ We recommend that you review [this page][gettingstarted] to get started with you
 
 The following features are supported by the CAS project:
 
-* CAS v1, v2 and v3 Protocol
-* SAML v1 and v2 Protocol
+* CAS v1, v2 and v3 Protocols
+* SAML v1 and v2 Protocols
 * OAuth v2 Protocol
 * OpenID Connect Protocol
 * WS-Federation Passive Requester Protocol
@@ -108,7 +108,6 @@ Commercial support options may be [found here][cassupport].
 [gettingstarted]: https://apereo.github.io/cas/development/planning/Getting-Started.html
 [overlay]: https://apereo.github.io/cas/development/installation/WAR-Overlay-Installation.html
 [contribute]: https://apereo.github.io/cas/developer/Contributor-Guidelines.html
-[cassonatype]: https://oss.sonatype.org/content/repositories/snapshots/org/apereo/cas/
 [casmavencentral]: https://search.maven.org/search?q=g:org.apereo.cas
 [releasenotes]: https://github.com/apereo/cas/releases
 [cassupport]: https://apereo.github.io/cas/Support.html

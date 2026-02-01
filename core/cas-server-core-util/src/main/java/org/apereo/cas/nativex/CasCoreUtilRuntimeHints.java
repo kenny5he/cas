@@ -1,5 +1,7 @@
 package org.apereo.cas.nativex;
 
+import module java.base;
+import module java.sql;
 import org.apereo.cas.configuration.support.TriStateBoolean;
 import org.apereo.cas.util.CasVersion;
 import org.apereo.cas.util.LogMessageSummarizer;
@@ -7,11 +9,13 @@ import org.apereo.cas.util.crypto.CipherExecutor;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.nativex.CasRuntimeHintsRegistrar;
 import org.apereo.cas.util.serialization.ComponentSerializationPlanConfigurer;
+import org.apereo.cas.util.serialization.MapContentDeserializer;
 import org.apereo.cas.util.spring.RestActuatorEndpointFilter;
 import org.apereo.cas.util.thread.Cleanable;
 import com.fasterxml.jackson.annotation.ObjectIdGenerator;
 import lombok.val;
 import org.apache.commons.lang3.ClassUtils;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
@@ -25,58 +29,9 @@ import org.springframework.context.event.DefaultEventListenerFactory;
 import org.springframework.context.event.EventListenerMethodProcessor;
 import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
 import org.springframework.web.cors.CorsConfigurationSource;
+import tools.jackson.databind.jsontype.NamedType;
 import java.lang.module.Configuration;
-import java.lang.module.ResolvedModule;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.net.URI;
-import java.net.URL;
-import java.sql.ResultSet;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Queue;
-import java.util.ServiceLoader;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TimeZone;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.Vector;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 /**
  * This is {@link CasCoreUtilRuntimeHints}.
@@ -87,7 +42,7 @@ import java.util.function.Supplier;
 public class CasCoreUtilRuntimeHints implements CasRuntimeHintsRegistrar {
 
     @Override
-    public void registerHints(final RuntimeHints hints, final ClassLoader classLoader) {
+    public void registerHints(final RuntimeHints hints, final @Nullable ClassLoader classLoader) {
         hints.resources().registerType(CasVersion.class);
 
         registerProxyHints(hints, List.of(
@@ -149,7 +104,9 @@ public class CasCoreUtilRuntimeHints implements CasRuntimeHintsRegistrar {
             Locale.class
         ));
 
-        registerReflectionHintsForPublicElements(hints, List.of(System.class));
+        registerReflectionHintsForPublicElements(hints,
+            List.of(System.class, ExecutorService.class, Executor.class)
+        );
         
         registerReflectionHintsForDeclaredElements(hints, List.of(
             HashMap.class,
@@ -157,7 +114,8 @@ public class CasCoreUtilRuntimeHints implements CasRuntimeHintsRegistrar {
             TypeReference.of("java.time.Ser")
         ));
 
-        registerReflectionHintsForIntrospectedPublicElements(hints, List.of(
+        registerReflectionHintsForPublicElements(hints, List.of(
+            NamedType.class,
             TypeReference.of("java.util.LinkedHashMap$Entry"),
             TypeReference.of("java.util.TreeMap$Entry")
         ));
@@ -169,6 +127,7 @@ public class CasCoreUtilRuntimeHints implements CasRuntimeHintsRegistrar {
 
         registerReflectionHintsForConstructors(hints,
             List.of(
+                MapContentDeserializer.class,
                 TriStateBoolean.Deserializer.class,
                 PersistenceAnnotationBeanPostProcessor.class,
                 ConfigurationClassPostProcessor.class,
@@ -191,18 +150,19 @@ public class CasCoreUtilRuntimeHints implements CasRuntimeHintsRegistrar {
         registerReflectionHintsForPublicElements(hints, findSubclassesInPackage(CipherExecutor.class, "org.apereo.cas"));
 
         registerCaffeineHints(hints);
-        FunctionUtils.doAndHandle(__ -> {
+        
+        FunctionUtils.doAndHandle(_ -> {
             val clazz = ClassUtils.getClass("nonapi.io.github.classgraph.classloaderhandler.ClassLoaderHandler", false);
             registerReflectionHints(hints, findSubclassesInPackage(clazz, "nonapi.io.github.classgraph.classloaderhandler"));
         });
     }
     
     private void registerCaffeineHints(final RuntimeHints hints) {
-        FunctionUtils.doAndHandle(__ -> {
+        FunctionUtils.doAndHandle(_ -> {
             var clazz = ClassUtils.getClass("com.github.benmanes.caffeine.cache.Node", false);
-            registerReflectionHintsForConstructors(hints, findSubclassesInPackage(clazz, "com.github.benmanes.caffeine.cache"));
+            registerReflectionHintsForDeclaredAndPublicElements(hints, findSubclassesInPackage(clazz, "com.github.benmanes.caffeine.cache"));
             clazz = ClassUtils.getClass("com.github.benmanes.caffeine.cache.LocalCache", false);
-            registerReflectionHintsForConstructors(hints, findSubclassesInPackage(clazz, "com.github.benmanes.caffeine.cache"));
+            registerReflectionHintsForDeclaredAndPublicElements(hints, findSubclassesInPackage(clazz, "com.github.benmanes.caffeine.cache"));
         });
     }
 

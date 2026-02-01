@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.monitor.ExecutableObserver;
@@ -9,10 +10,11 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.actuate.autoconfigure.tracing.ConditionalOnEnabledTracing;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.micrometer.tracing.autoconfigure.ConditionalOnEnabledTracingExport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -30,18 +32,18 @@ import org.springframework.context.annotation.Lazy;
 })
 @Configuration(value = "CasCoreServicesMonitoringConfiguration", proxyBeanMethods = false)
 @Lazy(false)
-@ConditionalOnEnabledTracing
+@ConditionalOnEnabledTracingExport
 class CasCoreServicesMonitoringConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = "servicesManagerMonitoringAspect")
-    public ServicesManagerMonitoringAspect servicesManagerMonitoringAspect(final ObjectProvider<ExecutableObserver> observer) {
+    public ServicesManagerMonitoringAspect servicesManagerMonitoringAspect(final ObjectProvider<@NonNull ExecutableObserver> observer) {
         return new ServicesManagerMonitoringAspect(observer);
     }
 
     @Aspect
     @Slf4j
     @SuppressWarnings("UnusedMethod")
-    record ServicesManagerMonitoringAspect(ObjectProvider<ExecutableObserver> observerProvider) {
+    record ServicesManagerMonitoringAspect(ObjectProvider<@NonNull ExecutableObserver> observerProvider) {
 
         @Around("allComponentsInServiceManagementNamespace()")
         public Object aroundServiceManagementOperations(final ProceedingJoinPoint joinPoint) throws Throwable {

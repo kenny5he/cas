@@ -1,16 +1,12 @@
 package org.apereo.cas.uma.web.controllers.authz;
 
-import org.apereo.cas.util.function.FunctionUtils;
+import module java.base;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.experimental.Accessors;
-
-import java.io.Serial;
-import java.io.Serializable;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link UmaAuthorizationRequest}.
@@ -49,6 +45,6 @@ public class UmaAuthorizationRequest implements Serializable {
      */
     @JsonIgnore
     public String toJson() {
-        return FunctionUtils.doUnchecked(() -> MAPPER.writeValueAsString(this));
+        return MAPPER.writeValueAsString(this);
     }
 }

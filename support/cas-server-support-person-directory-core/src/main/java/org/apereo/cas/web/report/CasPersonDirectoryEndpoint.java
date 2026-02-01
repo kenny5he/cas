@@ -1,5 +1,6 @@
 package org.apereo.cas.web.report;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.attribute.PersonAttributeDao;
 import org.apereo.cas.authentication.principal.attribute.PersonAttributes;
 import org.apereo.cas.configuration.CasConfigurationProperties;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.endpoint.Access;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
@@ -18,9 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * This is {@link CasPersonDirectoryEndpoint}.
@@ -30,14 +29,14 @@ import java.util.Objects;
  */
 @Endpoint(id = "personDirectory", defaultAccess = Access.NONE)
 public class CasPersonDirectoryEndpoint extends BaseCasRestActuatorEndpoint {
-    private final ObjectProvider<PersonAttributeDao> cachingAttributeRepository;
-    private final ObjectProvider<PersonDirectoryAttributeRepositoryPlan> attributeRepositoryPlan;
+    private final ObjectProvider<@NonNull PersonAttributeDao> cachingAttributeRepository;
+    private final ObjectProvider<@NonNull PersonDirectoryAttributeRepositoryPlan> attributeRepositoryPlan;
 
     public CasPersonDirectoryEndpoint(
         final CasConfigurationProperties casProperties,
         final ConfigurableApplicationContext applicationContext,
-        final ObjectProvider<PersonAttributeDao> cachingAttributeRepository,
-        final ObjectProvider<PersonDirectoryAttributeRepositoryPlan> attributeRepositoryPlan) {
+        final ObjectProvider<@NonNull PersonAttributeDao> cachingAttributeRepository,
+        final ObjectProvider<@NonNull PersonDirectoryAttributeRepositoryPlan> attributeRepositoryPlan) {
         super(casProperties, applicationContext);
         this.cachingAttributeRepository = cachingAttributeRepository;
         this.attributeRepositoryPlan = attributeRepositoryPlan;

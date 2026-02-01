@@ -1,13 +1,10 @@
 package org.apereo.cas.otp.util;
 
+import module java.base;
 import org.apereo.cas.util.EncodingUtils;
-
 import lombok.val;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import java.io.ByteArrayOutputStream;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -20,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class QRUtilsTests {
     @Test
     void verifyOperation() throws Throwable {
-        try (val out = new ByteArrayOutputStream()) {
+        try (val _ = new ByteArrayOutputStream()) {
             val result = QRUtils.generateQRCode("test", 16, 16);
             assertNotNull(EncodingUtils.decodeBase64(result));
         }

@@ -1,15 +1,13 @@
 package org.apereo.cas.monitor;
 
+import module java.base;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.Status;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
+import org.springframework.boot.health.contributor.Health;
+import org.springframework.boot.health.contributor.Status;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -26,7 +24,7 @@ class PoolHealthIndicatorTests {
     void verifyObserveOK() {
         val monitor = new AbstractPoolHealthIndicator(1000, executor) {
             @Override
-            protected Health.Builder checkPool(final Health.Builder builder) {
+            protected Health.Builder checkPool(final Health.@NonNull Builder builder) {
                 return builder.up();
             }
 
@@ -51,7 +49,7 @@ class PoolHealthIndicatorTests {
     void verifyObserveDown() {
         val monitor = new AbstractPoolHealthIndicator(200, executor) {
             @Override
-            protected Health.Builder checkPool(final Health.Builder builder) throws Exception {
+            protected Health.Builder checkPool(final Health.@NonNull Builder builder) throws Exception {
                 Thread.sleep(300);
                 return builder.up();
             }

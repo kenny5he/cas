@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.acme.AcmeAuthorizationExecutor;
 import org.apereo.cas.acme.AcmeCertificateManager;
 import org.apereo.cas.acme.AcmeChallengeRepository;
@@ -25,7 +26,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.ScopedProxyMode;
-import java.security.Security;
 
 /**
  * This is {@link CasAcmeAutoConfiguration}.
@@ -88,7 +88,7 @@ public class CasAcmeAutoConfiguration {
     public CasApplicationReadyListener acmeApplicationReady(
         @Qualifier(AcmeCertificateManager.BEAN_NAME) final AcmeCertificateManager acmeCertificateManager,
         final CasConfigurationProperties casProperties) {
-        return event -> FunctionUtils.doUnchecked(__ -> {
+        return event -> FunctionUtils.doUnchecked(_ -> {
             val domains = casProperties.getAcme().getDomains();
             LOGGER.info("Fetching certificates for domains [{}]", domains);
             acmeCertificateManager.fetchCertificate(domains);

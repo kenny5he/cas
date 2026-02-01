@@ -1,5 +1,6 @@
 package org.apereo.cas.logout.slo;
 
+import module java.base;
 import org.apereo.cas.CasProtocolConstants;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
 import org.apereo.cas.authentication.principal.WebApplicationService;
@@ -7,6 +8,7 @@ import org.apereo.cas.logout.DefaultSingleLogoutRequestContext;
 import org.apereo.cas.logout.LogoutHttpMessage;
 import org.apereo.cas.logout.LogoutRequestStatus;
 import org.apereo.cas.services.RegisteredService;
+import org.apereo.cas.services.RegisteredServiceAccessStrategyUtils;
 import org.apereo.cas.services.RegisteredServiceLogoutType;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.services.WebBasedRegisteredService;
@@ -19,11 +21,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link BaseSingleLogoutServiceMessageHandler}.
@@ -60,9 +57,10 @@ public abstract class BaseSingleLogoutServiceMessageHandler implements SingleLog
 
         LOGGER.trace("Processing logout request for service [{}]...", selectedService);
         val registeredService = servicesManager.findServiceBy(selectedService);
-
+        RegisteredServiceAccessStrategyUtils.ensureServiceAccessIsAllowed(registeredService);
+        
         LOGGER.debug("Service [{}] supports single logout and is found in the registry as [{}]. Proceeding...",
-            selectedService.getId(), registeredService.getName());
+            selectedService.getId(), Objects.requireNonNull(registeredService).getName());
 
         val logoutUrls = singleLogoutServiceLogoutUrlBuilder.determineLogoutUrl(registeredService, selectedService);
         LOGGER.debug("Prepared logout url [{}] for service [{}]", logoutUrls, selectedService);
@@ -79,7 +77,7 @@ public abstract class BaseSingleLogoutServiceMessageHandler implements SingleLog
     public boolean supports(final SingleLogoutExecutionRequest context, final WebApplicationService singleLogoutService) {
         val selectedService = FunctionUtils.doUnchecked(() ->
             (WebApplicationService) authenticationRequestServiceSelectionStrategies.resolveService(singleLogoutService));
-        val registeredService = (WebBasedRegisteredService) this.servicesManager.findServiceBy(selectedService);
+        val registeredService = (WebBasedRegisteredService) servicesManager.findServiceBy(selectedService);
 
         return registeredService != null
             && registeredService.getAccessStrategy().isServiceAccessAllowed(registeredService, selectedService)

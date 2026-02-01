@@ -1,5 +1,6 @@
 package org.apereo.cas.web.support;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.model.support.cookie.TicketGrantingCookieProperties;
 import org.apereo.cas.multitenancy.BaseMultitenancyTests;
@@ -19,7 +20,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
-import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -43,7 +43,7 @@ class DefaultCipherExecutorResolverTests {
     private TenantExtractor tenantExtractor;
 
     @Test
-    void verifyOperation() throws Exception {
+    void verifyOperation() {
         val request = new MockHttpServletRequest();
         request.setRemoteAddr("185.86.151.12");
         request.setLocalAddr("185.88.151.11");

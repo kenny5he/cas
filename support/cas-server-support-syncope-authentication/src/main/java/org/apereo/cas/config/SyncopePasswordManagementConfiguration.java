@@ -1,8 +1,10 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.pm.PasswordHistoryService;
+import org.apereo.cas.pm.PasswordManagementExecutionPlan;
 import org.apereo.cas.pm.PasswordManagementService;
 import org.apereo.cas.pm.impl.NoOpPasswordManagementService;
 import org.apereo.cas.syncope.pm.SyncopePasswordManagementService;
@@ -32,12 +34,14 @@ class SyncopePasswordManagementConfiguration {
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     @Bean
     @ConditionalOnMissingBean(name = "syncopePasswordChangeService")
-    public PasswordManagementService passwordChangeService(
-            final CasConfigurationProperties casProperties,
-            @Qualifier("passwordManagementCipherExecutor") final CipherExecutor passwordManagementCipherExecutor,
-            @Qualifier(PasswordHistoryService.BEAN_NAME) final PasswordHistoryService passwordHistoryService) {
+    public PasswordManagementExecutionPlan syncopePasswordChangeService(
+        final CasConfigurationProperties casProperties,
+        @Qualifier("passwordManagementCipherExecutor")
+        final CipherExecutor passwordManagementCipherExecutor,
+        @Qualifier(PasswordHistoryService.BEAN_NAME)
+        final PasswordHistoryService passwordHistoryService) {
         val pm = casProperties.getAuthn().getPm();
-        return pm.getCore().isEnabled() && pm.getSyncope().isDefined()
+        return () -> pm.getCore().isEnabled() && pm.getSyncope().isDefined()
             ? new SyncopePasswordManagementService(passwordManagementCipherExecutor, casProperties, passwordHistoryService)
             : new NoOpPasswordManagementService(passwordManagementCipherExecutor, casProperties);
     }

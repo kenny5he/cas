@@ -1,18 +1,16 @@
 package org.apereo.cas.support.saml.idp.metadata;
 
-
+import module java.base;
 import org.apereo.cas.monitor.Monitorable;
 import org.apereo.cas.redis.core.CasRedisTemplate;
 import org.apereo.cas.support.saml.idp.metadata.locator.AbstractSamlIdPMetadataLocator;
 import org.apereo.cas.support.saml.services.SamlRegisteredService;
 import org.apereo.cas.support.saml.services.idp.metadata.SamlIdPMetadataDocument;
 import org.apereo.cas.util.crypto.CipherExecutor;
-
 import com.github.benmanes.caffeine.cache.Cache;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.ConfigurableApplicationContext;
-
-import java.util.Optional;
 
 /**
  * This is {@link RedisSamlIdPMetadataLocator}.
@@ -32,7 +30,7 @@ public class RedisSamlIdPMetadataLocator extends AbstractSamlIdPMetadataLocator 
     private final long scanCount;
 
     public RedisSamlIdPMetadataLocator(final CipherExecutor<String, String> metadataCipherExecutor,
-                                       final Cache<String, SamlIdPMetadataDocument> metadataCache,
+                                       final Cache<@NonNull String, SamlIdPMetadataDocument> metadataCache,
                                        final CasRedisTemplate<String, SamlIdPMetadataDocument> redisTemplate,
                                        final ConfigurableApplicationContext applicationContext,
                                        final long scanCount) {

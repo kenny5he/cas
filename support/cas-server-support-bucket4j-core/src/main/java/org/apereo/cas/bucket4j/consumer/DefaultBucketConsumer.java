@@ -1,18 +1,15 @@
 package org.apereo.cas.bucket4j.consumer;
 
+import module java.base;
 import org.apereo.cas.bucket4j.producer.BucketStore;
 import org.apereo.cas.configuration.model.support.bucket4j.BaseBucket4jProperties;
 import org.apereo.cas.util.LoggingUtils;
 import org.apereo.cas.util.concurrent.CasReentrantLock;
 import org.apereo.cas.util.function.FunctionUtils;
-
 import io.github.bucket4j.BlockingStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
-import java.util.LinkedHashMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This is {@link DefaultBucketConsumer}.
@@ -57,10 +54,15 @@ public class DefaultBucketConsumer implements BucketConsumer {
                 val seconds = TimeUnit.NANOSECONDS.toSeconds(probe.getNanosToWaitForRefill());
                 headers.put(HEADER_NAME_X_RATE_LIMIT_RETRY_AFTER_SECONDS, Long.toString(seconds));
                 LOGGER.warn("The request is throttled as capacity is entirely consumed. Available tokens are [{}]", availableTokens);
-                return BucketConsumptionResult.builder().consumed(false).headers(headers).build();
+                return BucketConsumptionResult.builder()
+                    .retryAfterSeconds(seconds)
+                    .tokensRemaining(availableTokens)
+                    .consumed(false).headers(headers).build();
             }
             headers.put(HEADER_NAME_X_RATE_LIMIT_REMAINING, Long.toString(availableTokens));
-            return BucketConsumptionResult.builder().consumed(true).headers(headers).build();
+            return BucketConsumptionResult.builder()
+                .tokensRemaining(availableTokens)
+                .consumed(true).headers(headers).build();
         });
     }
 }

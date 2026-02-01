@@ -1,5 +1,6 @@
 package org.apereo.cas.authentication.principal.cache;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.authentication.principal.PrincipalAttributesRepositoryCache;
 import org.apereo.cas.authentication.principal.RegisteredServicePrincipalAttributesRepository;
@@ -11,12 +12,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
-import java.io.Closeable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This is {@link DefaultPrincipalAttributesRepositoryCache}.
@@ -32,7 +28,7 @@ public class DefaultPrincipalAttributesRepositoryCache implements PrincipalAttri
 
     private final CasReentrantLock lock = new CasReentrantLock();
 
-    private final Map<String, Cache<String, Map<String, List<Object>>>> registeredServicesCache = new HashMap<>();
+    private final Map<String, Cache<@NonNull String, Map<String, List<Object>>>> registeredServicesCache = new HashMap<>();
 
     private static String buildRegisteredServiceCacheKey(final RegisteredService registeredService) {
         val key = registeredService.getId() + "@" + registeredService.getName();
@@ -41,7 +37,7 @@ public class DefaultPrincipalAttributesRepositoryCache implements PrincipalAttri
         return cacheKey;
     }
 
-    private static Cache<String, Map<String, List<Object>>> initializeCache(
+    private static Cache<@NonNull String, Map<String, List<Object>>> initializeCache(
         final RegisteredServicePrincipalAttributesRepository repository) {
         val cachedRepository = (CachingPrincipalAttributesRepository) repository;
         val unit = TimeUnit.valueOf(StringUtils.defaultIfBlank(cachedRepository.getTimeUnit(), DEFAULT_CACHE_EXPIRATION_UNIT));
@@ -59,7 +55,7 @@ public class DefaultPrincipalAttributesRepositoryCache implements PrincipalAttri
 
     @Override
     public void invalidate() {
-        lock.tryLock(__ -> registeredServicesCache.values().forEach(Cache::invalidateAll));
+        lock.tryLock(_ -> registeredServicesCache.values().forEach(Cache::invalidateAll));
     }
 
     @Override
@@ -68,7 +64,7 @@ public class DefaultPrincipalAttributesRepositoryCache implements PrincipalAttri
                                                      final Principal principal) {
         return lock.tryLock(() -> {
             val cache = getRegisteredServiceCacheInstance(registeredService, repository);
-            return cache.get(principal.getId(), __ -> {
+            return cache.get(principal.getId(), _ -> {
                 LOGGER.debug("No cached attributes could be found for [{}]", principal.getId());
                 return new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
             });
@@ -79,13 +75,13 @@ public class DefaultPrincipalAttributesRepositoryCache implements PrincipalAttri
     public void putAttributes(final RegisteredService registeredService,
                               final RegisteredServicePrincipalAttributesRepository repository,
                               final String id, final Map<String, List<Object>> attributes) {
-        lock.tryLock(__ -> {
+        lock.tryLock(_ -> {
             val cache = getRegisteredServiceCacheInstance(registeredService, repository);
             cache.put(id, attributes);
         });
     }
 
-    private Cache<String, Map<String, List<Object>>> getRegisteredServiceCacheInstance(
+    private Cache<@NonNull String, Map<String, List<Object>>> getRegisteredServiceCacheInstance(
         final RegisteredService registeredService, final RegisteredServicePrincipalAttributesRepository repository) {
 
         val key = buildRegisteredServiceCacheKey(registeredService);

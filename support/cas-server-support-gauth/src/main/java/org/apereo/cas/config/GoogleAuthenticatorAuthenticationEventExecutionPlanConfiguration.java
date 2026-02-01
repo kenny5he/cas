@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationEventExecutionPlanConfigurer;
 import org.apereo.cas.authentication.AuthenticationHandler;
 import org.apereo.cas.authentication.AuthenticationMetaDataPopulator;
@@ -64,6 +65,7 @@ import org.apereo.cas.web.flow.actions.WebflowActionBeanSupplier;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
@@ -103,7 +105,7 @@ class GoogleAuthenticatorAuthenticationEventExecutionPlanConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public AuthenticationHandler googleAuthenticatorAuthenticationHandler(
             @Qualifier("googleAuthenticatorMultifactorAuthenticationProvider")
-            final ObjectProvider<MultifactorAuthenticationProvider> multifactorAuthenticationProvider,
+            final ObjectProvider<@NonNull MultifactorAuthenticationProvider> multifactorAuthenticationProvider,
             final CasConfigurationProperties casProperties,
             @Qualifier("googlePrincipalFactory")
             final PrincipalFactory googlePrincipalFactory,
@@ -201,7 +203,7 @@ class GoogleAuthenticatorAuthenticationEventExecutionPlanConfiguration {
             final ServicesManager servicesManager,
             final CasConfigurationProperties casProperties,
             @Qualifier("googleAuthenticatorMultifactorAuthenticationProvider")
-            final ObjectProvider<MultifactorAuthenticationProvider> multifactorAuthenticationProvider) {
+            final ObjectProvider<@NonNull MultifactorAuthenticationProvider> multifactorAuthenticationProvider) {
             val authenticationContextAttribute = casProperties.getAuthn().getMfa().getCore().getAuthenticationContextAttribute();
             return new MultifactorAuthenticationProviderMetadataPopulator(authenticationContextAttribute,
                 multifactorAuthenticationProvider, servicesManager);
@@ -218,7 +220,7 @@ class GoogleAuthenticatorAuthenticationEventExecutionPlanConfiguration {
             final ConfigurableApplicationContext applicationContext,
             final CasConfigurationProperties casProperties,
             @Qualifier(BaseGoogleAuthenticatorTokenCredentialRepository.BEAN_NAME)
-            final ObjectProvider<OneTimeTokenCredentialRepository> googleAuthenticatorAccountRegistry) {
+            final ObjectProvider<@NonNull OneTimeTokenCredentialRepository> googleAuthenticatorAccountRegistry) {
             return new GoogleAuthenticatorTokenCredentialRepositoryEndpoint(
                 casProperties, applicationContext, googleAuthenticatorAccountRegistry);
         }
@@ -286,7 +288,7 @@ class GoogleAuthenticatorAuthenticationEventExecutionPlanConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public MultifactorAuthenticationDeviceManager googleAuthenticatorDeviceManager(
             @Qualifier("googleAuthenticatorMultifactorAuthenticationProvider")
-            final ObjectProvider<MultifactorAuthenticationProvider> googleAuthenticatorMultifactorAuthenticationProvider,
+            final ObjectProvider<@NonNull MultifactorAuthenticationProvider> googleAuthenticatorMultifactorAuthenticationProvider,
             @Qualifier(BaseGoogleAuthenticatorTokenCredentialRepository.BEAN_NAME)
             final OneTimeTokenCredentialRepository googleAuthenticatorAccountRegistry) {
             return new OneTimeTokenCredentialDeviceManager(googleAuthenticatorAccountRegistry,

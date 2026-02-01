@@ -1,5 +1,6 @@
 package org.apereo.cas.dynamodb;
 
+import module java.base;
 import org.apereo.cas.configuration.model.support.dynamodb.AbstractDynamoDbProperties;
 import org.apereo.cas.util.LoggingUtils;
 import org.apereo.cas.util.function.FunctionUtils;
@@ -7,7 +8,6 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.tuple.Pair;
-import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeDefinition;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
@@ -25,13 +25,6 @@ import software.amazon.awssdk.services.dynamodb.model.TableDescription;
 import software.amazon.awssdk.services.dynamodb.model.TableStatus;
 import software.amazon.awssdk.services.dynamodb.model.TimeToLiveSpecification;
 import software.amazon.awssdk.services.dynamodb.model.UpdateTimeToLiveRequest;
-import java.io.Serial;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This is {@link DynamoDbTableUtils}.
@@ -51,10 +44,10 @@ public class DynamoDbTableUtils {
      *
      * @param dynamo    the dynamo
      * @param tableName the table name
-     * @throws Exception the exception
+     * @return the table description
      */
-    public static void waitUntilActive(final DynamoDbClient dynamo, final String tableName) throws Exception {
-        waitUntilActive(dynamo, tableName, DEFAULT_WAIT_TIMEOUT, DEFAULT_WAIT_INTERVAL);
+    public static TableDescription waitUntilActive(final DynamoDbClient dynamo, final String tableName) {
+        return waitUntilActive(dynamo, tableName, DEFAULT_WAIT_TIMEOUT, DEFAULT_WAIT_INTERVAL);
     }
 
     /**
@@ -64,15 +57,17 @@ public class DynamoDbTableUtils {
      * @param tableName the table name
      * @param timeout   the timeout
      * @param interval  the interval
-     * @throws Exception the exception
+     * @return the table description
      */
-    public static void waitUntilActive(final DynamoDbClient dynamo, final String tableName, final int timeout,
-                                       final int interval) throws Exception {
+    public static TableDescription waitUntilActive(final DynamoDbClient dynamo, final String tableName,
+                                                   final int timeout,
+                                                   final int interval) {
         val table = waitForTableDescription(dynamo, tableName, TableStatus.ACTIVE, timeout, interval);
 
         if (table == null || !table.tableStatusAsString().equals(TableStatus.ACTIVE.toString())) {
             throw new TableNeverTransitionedToStateException(tableName, TableStatus.ACTIVE);
         }
+        return table;
     }
 
     /**
@@ -128,19 +123,13 @@ public class DynamoDbTableUtils {
                                                final List<AttributeDefinition> attributeDefinitions,
                                                final List<KeySchemaElement> keySchemaElements) throws Exception {
 
-        val billingMode = BillingMode.fromValue(dynamoDbProperties.getBillingMode().name());
-        val provisionedThroughput = billingMode == BillingMode.PROVISIONED
-            ? ProvisionedThroughput.builder()
-                .readCapacityUnits(dynamoDbProperties.getReadCapacity())
-                .writeCapacityUnits(dynamoDbProperties.getWriteCapacity())
-                .build()
-            : null;
+        val provisionedThroughput = getProvisionedThroughput(dynamoDbProperties);
         val request = CreateTableRequest.builder()
             .attributeDefinitions(attributeDefinitions)
             .keySchema(keySchemaElements)
             .provisionedThroughput(provisionedThroughput)
             .tableName(tableName)
-            .billingMode(billingMode)
+            .billingMode(BillingMode.fromValue(dynamoDbProperties.getBillingMode().name()))
             .build();
 
         if (deleteTable) {
@@ -159,6 +148,16 @@ public class DynamoDbTableUtils {
         return tableDescription;
     }
 
+    private static ProvisionedThroughput getProvisionedThroughput(final AbstractDynamoDbProperties dynamoDbProperties) {
+        val billingMode = BillingMode.fromValue(dynamoDbProperties.getBillingMode().name());
+        return billingMode == BillingMode.PROVISIONED
+            ? ProvisionedThroughput.builder()
+            .readCapacityUnits(dynamoDbProperties.getReadCapacity())
+            .writeCapacityUnits(dynamoDbProperties.getWriteCapacity())
+            .build()
+            : null;
+    }
+
     /**
      * Enable time to live on table.
      *
@@ -169,7 +168,7 @@ public class DynamoDbTableUtils {
     public static void enableTimeToLiveOnTable(final DynamoDbClient dynamoDbClient,
                                                final String tableName,
                                                final String ttlAttributeName) {
-        FunctionUtils.doAndHandle(__ -> {
+        FunctionUtils.doAndHandle(_ -> {
             val ttlSpec = TimeToLiveSpecification.builder()
                 .attributeName(ttlAttributeName)
                 .enabled(true)
@@ -312,8 +311,7 @@ public class DynamoDbTableUtils {
                                                             final String tableName,
                                                             final TableStatus desiredStatus,
                                                             final int timeout,
-                                                            final int interval)
-        throws Exception {
+                                                            final int interval) {
         val startTime = System.currentTimeMillis();
         val endTime = startTime + timeout;
 
@@ -328,7 +326,7 @@ public class DynamoDbTableUtils {
             } catch (final ResourceNotFoundException rnfe) {
                 LOGGER.trace(rnfe.getMessage());
             }
-            Thread.sleep(interval);
+            FunctionUtils.doUnchecked(_ -> Thread.sleep(interval));
         }
         return table;
     }
@@ -379,20 +377,13 @@ public class DynamoDbTableUtils {
             .filter(Objects::nonNull);
     }
 
-    static class TableNeverTransitionedToStateException extends SdkClientException {
+    public static class TableNeverTransitionedToStateException extends RuntimeException {
 
         @Serial
         private static final long serialVersionUID = 8920567021104846647L;
 
-        /**
-         * Instantiates a new Table never transitioned to state exception.
-         *
-         * @param tableName     the table name
-         * @param desiredStatus the desired status
-         */
         TableNeverTransitionedToStateException(final String tableName, final TableStatus desiredStatus) {
-            super(SdkClientException.builder()
-                .message("Table " + tableName + " never transitioned to desired state of " + desiredStatus.toString()));
+            super("Table " + tableName + " never transitioned to desired state of " + desiredStatus.toString());
         }
 
     }

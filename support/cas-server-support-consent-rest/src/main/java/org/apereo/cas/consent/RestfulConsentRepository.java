@@ -1,5 +1,6 @@
 package org.apereo.cas.consent;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.configuration.model.support.consent.RestfulConsentProperties;
@@ -9,7 +10,6 @@ import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.SpringExpressionLanguageValueResolver;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.io.IOUtils;
@@ -21,12 +21,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.util.UriComponentsBuilder;
-import java.io.Serial;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link RestfulConsentRepository}.
@@ -60,6 +55,7 @@ public class RestfulConsentRepository implements ConsentRepository {
                 val exec = HttpExecutionRequest.builder()
                     .basicAuthPassword(properties.getBasicAuthPassword())
                     .basicAuthUsername(properties.getBasicAuthUsername())
+                    .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                     .method(HttpMethod.GET)
                     .url(url)
                     .headers(headers)
@@ -92,6 +88,7 @@ public class RestfulConsentRepository implements ConsentRepository {
                 val exec = HttpExecutionRequest.builder()
                     .basicAuthPassword(properties.getBasicAuthPassword())
                     .basicAuthUsername(properties.getBasicAuthUsername())
+                    .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                     .method(HttpMethod.GET)
                     .url(resolveUrl())
                     .headers(headers)
@@ -129,6 +126,7 @@ public class RestfulConsentRepository implements ConsentRepository {
                 val exec = HttpExecutionRequest.builder()
                     .basicAuthPassword(properties.getBasicAuthPassword())
                     .basicAuthUsername(properties.getBasicAuthUsername())
+                    .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                     .method(HttpMethod.GET)
                     .url(url)
                     .headers(headers)
@@ -158,6 +156,7 @@ public class RestfulConsentRepository implements ConsentRepository {
             val exec = HttpExecutionRequest.builder()
                 .basicAuthPassword(properties.getBasicAuthPassword())
                 .basicAuthUsername(properties.getBasicAuthUsername())
+                .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                 .method(HttpMethod.POST)
                 .url(resolveUrl())
                 .headers(headers)
@@ -188,6 +187,7 @@ public class RestfulConsentRepository implements ConsentRepository {
             val exec = HttpExecutionRequest.builder()
                 .basicAuthPassword(properties.getBasicAuthPassword())
                 .basicAuthUsername(properties.getBasicAuthUsername())
+                .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                 .method(HttpMethod.DELETE)
                 .url(url)
                 .headers(headers)
@@ -210,6 +210,7 @@ public class RestfulConsentRepository implements ConsentRepository {
             val exec = HttpExecutionRequest.builder()
                 .basicAuthPassword(properties.getBasicAuthPassword())
                 .basicAuthUsername(properties.getBasicAuthUsername())
+                .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                 .method(HttpMethod.DELETE)
                 .url(resolveUrl())
                 .headers(headers)
@@ -236,6 +237,7 @@ public class RestfulConsentRepository implements ConsentRepository {
             val exec = HttpExecutionRequest.builder()
                 .basicAuthPassword(properties.getBasicAuthPassword())
                 .basicAuthUsername(properties.getBasicAuthUsername())
+                .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                 .method(HttpMethod.DELETE)
                 .url(url)
                 .headers(headers)

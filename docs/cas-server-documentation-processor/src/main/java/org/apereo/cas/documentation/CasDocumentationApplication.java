@@ -1,5 +1,6 @@
 package org.apereo.cas.documentation;
 
+import module java.base;
 import org.apereo.cas.CentralAuthenticationService;
 import org.apereo.cas.audit.AuditableActions;
 import org.apereo.cas.metadata.CasConfigurationMetadataCatalog;
@@ -16,9 +17,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import lombok.Getter;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.RegExUtils;
@@ -38,10 +39,7 @@ import org.springframework.boot.actuate.endpoint.web.annotation.RestControllerEn
 import org.springframework.boot.actuate.endpoint.web.annotation.WebEndpoint;
 import org.springframework.core.StandardReflectionParameterNameDiscoverer;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.shell.standard.ShellCommandGroup;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellOption;
+import org.springframework.shell.core.command.annotation.Command;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -52,27 +50,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link CasDocumentationApplication}.
@@ -135,7 +113,8 @@ public class CasDocumentationApplication {
         ui.setRequired(false);
         options.addOption(ui);
 
-        new HelpFormatter().printHelp("CAS Documentation", options);
+        HelpFormatter.builder().get().printHelp("-- Review Required Options --",
+            "Apereo CAS Documentation", options, "Apereo CAS Documentation", true);
         var cmd = new DefaultParser().parse(options, args);
 
         var dataDirectory = cmd.getOptionValue("data");
@@ -194,7 +173,7 @@ public class CasDocumentationApplication {
             exportTemplateViews(projectRootDirectory, dataPath);
             exportThemeProperties(projectRootDirectory, dataPath);
         }
-        
+
         var actuators = cmd.getOptionValue("actuators", "true");
         if (Strings.CI.equals("true", actuators)) {
             exportActuatorEndpoints(dataPath);
@@ -269,40 +248,35 @@ public class CasDocumentationApplication {
             FileUtils.deleteQuietly(parentPath);
         }
         if (!parentPath.mkdirs()) {
-            LOGGER.debug("Unable to create directory");
+            LOGGER.debug("Unable to create directory [{}]", parentPath);
         }
-        var subTypes = ReflectionUtils.findClassesWithAnnotationsInPackage(List.of(ShellComponent.class), CasShellCommand.NAMESPACE);
+        var subTypes = ReflectionUtils.findSubclassesInPackage(CasShellCommand.class, CasShellCommand.NAMESPACE);
         var properties = new ArrayList<Map<?, ?>>();
 
         subTypes.forEach(clazz -> {
             LOGGER.debug("Locating shell command group for [{}]", clazz.getSimpleName());
-            var group = clazz.getAnnotation(ShellCommandGroup.class);
-            if (group == null) {
-                LOGGER.warn("Shell command group is missing for {}", clazz.getName());
-            }
-
             var methods = new LinkedHashMap();
             for (var method : clazz.getDeclaredMethods()) {
-                if (method.isAnnotationPresent(ShellMethod.class)) {
-                    var annotInstance = method.getAnnotation(ShellMethod.class);
+                if (method.isAnnotationPresent(Command.class)) {
+                    var annotInstance = method.getAnnotation(Command.class);
                     var cmd = new ShellCommand();
 
                     cmd.parameters = new ArrayList<Map<String, String>>();
                     var parameterAnnotations = method.getParameterAnnotations();
                     for (var parameterAnnotation : parameterAnnotations) {
                         for (var annotation : parameterAnnotation) {
-                            var ann = (ShellOption) annotation;
+                            var ann = (org.springframework.shell.core.command.annotation.Option) annotation;
                             cmd.parameters.add(Map.of(
-                                "name", String.join(",", ann.value()),
-                                "help", String.valueOf(ann.help()),
-                                "optOut", String.valueOf(ann.optOut()),
+                                "name", ann.longName(),
+                                "help", ann.description(),
+                                "required", String.valueOf(ann.required()),
                                 "defaultValue", ann.defaultValue()));
                         }
                     }
 
-                    cmd.description = annotInstance.value();
-                    cmd.name = String.join(",", annotInstance.key());
-                    cmd.group = group == null ? "other" : group.value();
+                    cmd.description = annotInstance.description();
+                    cmd.name = String.join(",", annotInstance.name());
+                    cmd.group = StringUtils.isBlank(annotInstance.group()) ? "other" : annotInstance.group();
 
                     LOGGER.debug("Adding shell command [{}]", cmd.name);
                     methods.put(cmd.name, cmd);
@@ -399,7 +373,7 @@ public class CasDocumentationApplication {
         if (Modifier.isAbstract(clazz.getModifiers())) {
             return null;
         }
-        
+
         var endpoint = (Endpoint) clazz.getAnnotation(Endpoint.class);
         if (endpoint != null) {
             return Pair.of(endpoint.id(), endpoint.annotationType().getSimpleName());
@@ -436,12 +410,12 @@ public class CasDocumentationApplication {
         var subTypes = ReflectionUtils.findClassesWithAnnotationsInPackage(List.of(RestControllerEndpoint.class), "org");
         collectRestActuators(subTypes, parentPath, RestControllerEndpoint.class);
 
-        
+
         var restActuators = ReflectionUtils.findSubclassesInPackage(BaseCasRestActuatorEndpoint.class, "org.apereo.cas");
         collectRestActuators(restActuators, parentPath, Endpoint.class);
 
         LOGGER.info("Checking endpoints...");
-        subTypes = ReflectionUtils.findClassesWithAnnotationsInPackage(List.of(Endpoint.class), "org");
+        subTypes = ReflectionUtils.findClassesWithAnnotationsInPackage(List.of(), List.of(Endpoint.class), "org");
         subTypes.forEach(clazz -> {
             var properties = new ArrayList<Map<?, ?>>();
             var endpoint = getEndpoint(clazz);
@@ -512,7 +486,7 @@ public class CasDocumentationApplication {
             var properties = new ArrayList<Map<?, ?>>();
             var endpoint = clazz.getAnnotation(annotationClazz);
             var endpointId = getEndpointId(endpoint, annotationClazz);
-            
+
             var methods = findAnnotatedMethods(clazz, GetMapping.class);
             LOGGER.debug("Checking actuator endpoint (GET) for [{}]", clazz.getName());
             methods.forEach(Unchecked.consumer(method -> {
@@ -762,14 +736,14 @@ public class CasDocumentationApplication {
         if (isCasEndpoint(clazz)) {
             var operation = Objects.requireNonNull(method.getAnnotation(Operation.class),
                 () -> "Unable to locate @Operation annotation for " + method.toGenericString()
-                      + " in declaring class " + clazz.getName());
+                    + " in declaring class " + clazz.getName());
             if (!map.containsKey("deprecated") && operation.deprecated()) {
                 map.put("deprecated", true);
             }
             map.put("summary", Strings.CI.appendIfMissing(operation.summary(), "."));
             var paramCount = Arrays.stream(method.getParameterTypes())
                 .filter(type -> !type.equals(HttpServletRequest.class) && !type.equals(HttpServletResponse.class)).count();
-            
+
             if (operation.parameters().length == 0 && paramCount > 0) {
                 for (var i = 0; i < method.getParameterTypes().length; i++) {
                     var parameter = method.getParameters()[i];
@@ -809,7 +783,7 @@ public class CasDocumentationApplication {
 
                 if (parameters.isEmpty()) {
                     throw new RuntimeException("Unable to locate @Parameter annotation for " + method.toGenericString()
-                                               + " in declaring class " + clazz.getName());
+                        + " in declaring class " + clazz.getName());
                 }
             }
 

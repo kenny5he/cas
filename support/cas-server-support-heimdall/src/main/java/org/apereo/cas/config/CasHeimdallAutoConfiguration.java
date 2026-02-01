@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationSystemSupport;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
@@ -13,13 +14,17 @@ import org.apereo.cas.heimdall.engine.AuthorizationEngine;
 import org.apereo.cas.heimdall.engine.AuthorizationPrincipalParser;
 import org.apereo.cas.heimdall.engine.DefaultAuthorizationEngine;
 import org.apereo.cas.heimdall.engine.DefaultAuthorizationPrincipalParser;
+import org.apereo.cas.oidc.jwks.OidcJsonWebKeyCacheKey;
 import org.apereo.cas.ticket.OAuth20TokenSigningAndEncryptionService;
 import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.token.JwtBuilder;
 import org.apereo.cas.util.spring.beans.BeanSupplier;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import org.apereo.cas.web.CasWebSecurityConfigurer;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import lombok.val;
+import org.jose4j.jwk.JsonWebKeySet;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
@@ -30,7 +35,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
-import java.util.List;
 
 /**
  * This is {@link CasHeimdallAutoConfiguration}.
@@ -47,17 +51,20 @@ public class CasHeimdallAutoConfiguration {
     @ConditionalOnMissingBean(name = "authorizationPrincipalParser")
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     public AuthorizationPrincipalParser authorizationPrincipalParser(
+        @Qualifier("oidcServiceJsonWebKeystoreCache")
+        final ObjectProvider<@NonNull LoadingCache<@NonNull OidcJsonWebKeyCacheKey, Optional<JsonWebKeySet>>> oidcServiceJsonWebKeystoreCache,
         @Qualifier(AuthenticationSystemSupport.BEAN_NAME)
         final AuthenticationSystemSupport authenticationSystemSupport,
         final CasConfigurationProperties casProperties,
         @Qualifier("oidcTokenSigningAndEncryptionService")
-        final ObjectProvider<OAuth20TokenSigningAndEncryptionService> oidcTokenSigningAndEncryptionService,
+        final ObjectProvider<@NonNull OAuth20TokenSigningAndEncryptionService> oidcTokenSigningAndEncryptionService,
         @Qualifier(JwtBuilder.ACCESS_TOKEN_JWT_BUILDER_BEAN_NAME)
-        final ObjectProvider<JwtBuilder> accessTokenJwtBuilder,
+        final ObjectProvider<@NonNull JwtBuilder> accessTokenJwtBuilder,
         @Qualifier(TicketRegistry.BEAN_NAME)
         final TicketRegistry ticketRegistry) {
         return new DefaultAuthorizationPrincipalParser(ticketRegistry, casProperties,
-            accessTokenJwtBuilder, oidcTokenSigningAndEncryptionService, authenticationSystemSupport);
+            accessTokenJwtBuilder, oidcTokenSigningAndEncryptionService,
+            authenticationSystemSupport, oidcServiceJsonWebKeystoreCache);
     }
 
     @Bean
@@ -84,7 +91,7 @@ public class CasHeimdallAutoConfiguration {
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     @ConditionalOnMissingBean(name = AuthorizableResourceRepository.BEAN_NAME)
     public AuthorizableResourceRepository authorizableResourceRepository(
-        final CasConfigurationProperties casProperties) throws Exception {
+        final CasConfigurationProperties casProperties) {
         val location = casProperties.getHeimdall().getJson().getLocation();
         return BeanSupplier.of(AuthorizableResourceRepository.class)
             .when(() -> location != null)

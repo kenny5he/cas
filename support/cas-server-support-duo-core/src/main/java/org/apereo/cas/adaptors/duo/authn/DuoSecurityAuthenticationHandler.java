@@ -1,5 +1,6 @@
 package org.apereo.cas.adaptors.duo.authn;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationHandlerExecutionResult;
 import org.apereo.cas.authentication.Credential;
 import org.apereo.cas.authentication.MultifactorAuthenticationCredential;
@@ -11,16 +12,10 @@ import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.monitor.Monitorable;
 import org.apereo.cas.util.LoggingUtils;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.ObjectProvider;
-
-import javax.security.auth.login.FailedLoginException;
-import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Authenticate CAS credentials against Duo Security.
@@ -39,7 +34,6 @@ public class DuoSecurityAuthenticationHandler extends AbstractPreAndPostProcessi
     private final List<MultifactorAuthenticationPrincipalResolver> multifactorAuthenticationPrincipalResolver;
 
     public DuoSecurityAuthenticationHandler(final String name,
-
                                             final PrincipalFactory principalFactory,
                                             final ObjectProvider<DuoSecurityMultifactorAuthenticationProvider> multifactorAuthenticationProvider,
                                             final Integer order,
@@ -71,19 +65,23 @@ public class DuoSecurityAuthenticationHandler extends AbstractPreAndPostProcessi
      */
     @Override
     protected AuthenticationHandlerExecutionResult doAuthentication(final Credential credential, final Service service) throws Exception {
-        if (credential instanceof final DuoSecurityPasscodeCredential duo) {
-            LOGGER.debug("Attempting to authenticate credential via Duo Security passcode");
-            return authenticateDuoPasscodeCredential(duo);
+        switch (credential) {
+            case final DuoSecurityPasscodeCredential duo -> {
+                LOGGER.debug("Attempting to authenticate credential via Duo Security passcode");
+                return authenticateDuoPasscodeCredential(duo);
+            }
+            case final DuoSecurityUniversalPromptCredential duo -> {
+                LOGGER.debug("Attempting to authenticate credential via Duo Security universal prompt");
+                return authenticateDuoUniversalPromptCredential(duo);
+            }
+            case final DuoSecurityDirectCredential duo -> {
+                LOGGER.debug("Attempting to directly authenticate credential against Duo");
+                return authenticateDuoApiCredential(duo);
+            }
+            default -> {
+                throw new FailedLoginException("Unknown Duo Security authentication attempt");
+            }
         }
-        if (credential instanceof final DuoSecurityUniversalPromptCredential duo) {
-            LOGGER.debug("Attempting to authenticate credential via Duo Security universal prompt");
-            return authenticateDuoUniversalPromptCredential(duo);
-        }
-        if (credential instanceof final DuoSecurityDirectCredential duo) {
-            LOGGER.debug("Attempting to directly authenticate credential against Duo");
-            return authenticateDuoApiCredential(duo);
-        }
-        throw new FailedLoginException("Unknown Duo Security authentication attempt");
     }
 
     /**
@@ -122,7 +120,7 @@ public class DuoSecurityAuthenticationHandler extends AbstractPreAndPostProcessi
             val result = duoAuthenticationService.authenticate(credential);
             if (result.isSuccess()) {
                 val principal = principalFactory.createPrincipal(result.getUsername(), result.getAttributes());
-                LOGGER.debug("Duo Security Universal Prompt has successfully authenticated [{}]", principal.getId());
+                LOGGER.debug("Duo Security Universal Prompt has successfully authenticated [{}]", Objects.requireNonNull(principal).getId());
                 return createHandlerResult(credential, principal, new ArrayList<>());
             }
         } catch (final Throwable e) {

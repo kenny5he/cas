@@ -1,22 +1,16 @@
 package org.apereo.cas.configuration.api;
 
+import module java.base;
 import org.apereo.cas.configuration.loader.CasConfigurationPropertiesLoader;
 import org.apereo.cas.configuration.support.RelaxedPropertyNames;
 import lombok.val;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ResourceLoader;
-import java.io.File;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.ServiceLoader;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link CasConfigurationPropertiesSourceLocator}.
@@ -90,7 +84,7 @@ public interface CasConfigurationPropertiesSourceLocator {
      * @param environment the environment
      * @return the standalone profile configuration directory
      */
-    static File getStandaloneProfileConfigurationDirectory(final Environment environment) {
+    static @Nullable File getStandaloneProfileConfigurationDirectory(final Environment environment) {
         if (environment.getActiveProfiles().length > 0
             && Arrays.stream(environment.getActiveProfiles()).allMatch(profile -> profile.equalsIgnoreCase(PROFILE_NONE))) {
             LOGGER.info("Standalone configuration directory processing is skipped for profile [{}]", PROFILE_NONE);
@@ -124,7 +118,7 @@ public interface CasConfigurationPropertiesSourceLocator {
      * @param environment the environment
      * @return the standalone profile configuration file
      */
-    static File getStandaloneProfileConfigurationFile(final Environment environment) {
+    static @Nullable File getStandaloneProfileConfigurationFile(final Environment environment) {
         val values = new LinkedHashSet<>(RelaxedPropertyNames.forCamelCase(PROPERTY_CAS_STANDALONE_CONFIGURATION_FILE).getValues());
         values.add(PROPERTY_CAS_STANDALONE_CONFIGURATION_FILE);
 

@@ -1,7 +1,8 @@
 package org.apereo.cas.support.events.listener;
 
-import org.apereo.cas.config.CasConfigurationModifiedEvent;
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationPropertiesEnvironmentManager;
+import org.apereo.cas.support.events.config.CasConfigurationModifiedEvent;
 import org.apereo.cas.util.function.FunctionUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +14,6 @@ import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
-import java.util.ArrayList;
-import java.util.Objects;
 
 /**
  * This is {@link DefaultCasConfigurationEventListener}.
@@ -59,7 +58,7 @@ public class DefaultCasConfigurationEventListener implements CasConfigurationEve
     }
 
     private void initializeBeansEagerly() {
-        FunctionUtils.doAndHandle(__ -> {
+        FunctionUtils.doAndHandle(_ -> {
             for (val beanName : applicationContext.getBeanDefinitionNames()) {
                 Objects.requireNonNull(applicationContext.getBean(beanName).getClass());
             }

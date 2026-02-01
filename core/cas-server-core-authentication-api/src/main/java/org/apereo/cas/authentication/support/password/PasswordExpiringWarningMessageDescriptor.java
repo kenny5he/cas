@@ -1,12 +1,9 @@
 package org.apereo.cas.authentication.support.password;
 
+import module java.base;
 import org.apereo.cas.DefaultMessageDescriptor;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * Message conveying account password expiration warning details.
@@ -26,12 +23,15 @@ public class PasswordExpiringWarningMessageDescriptor extends DefaultMessageDesc
 
     @JsonCreator
     public PasswordExpiringWarningMessageDescriptor(
-        @JsonProperty("message") final String message,
-        @JsonProperty("days") final long days) {
-        super(CODE, message, new Serializable[]{days});
+        @JsonProperty("defaultMessage")
+        final String defaultMessage,
+        @JsonProperty("daysToExpiration")
+        final long days) {
+        super(CODE, defaultMessage, new Serializable[]{days});
     }
 
     public long getDaysToExpiration() {
         return (Long) getParams()[0];
     }
+
 }

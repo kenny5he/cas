@@ -1,10 +1,10 @@
 package org.apereo.cas.oidc.web.controllers.authorize;
 
+import module java.base;
 import org.apereo.cas.oidc.OidcConfigurationContext;
 import org.apereo.cas.oidc.OidcConstants;
 import org.apereo.cas.support.oauth.OAuth20Constants;
 import org.apereo.cas.support.oauth.util.OAuth20Utils;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.val;
@@ -13,10 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
 
 /**
  * This is {@link OidcPushedAuthorizeEndpointController}.
@@ -40,7 +38,7 @@ public class OidcPushedAuthorizeEndpointController extends OidcAuthorizeEndpoint
 
     @Override
     @PostMapping("/**/" + OidcConstants.PUSHED_AUTHORIZE_URL)
-    @Operation(summary = "Handle OIDC Pushed authorization request")
+    @Operation(summary = "Handle OIDC Pushed Authorization Request")
     public ModelAndView handleRequestPost(final HttpServletRequest request, final HttpServletResponse response) throws Throwable {
         val webContext = new JEEContext(request, response);
         if (!getConfigurationContext().getIssuerService().validateIssuer(webContext, List.of(OidcConstants.PUSHED_AUTHORIZE_URL))) {

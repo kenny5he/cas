@@ -1,13 +1,11 @@
 package org.apereo.cas.authentication.support.password;
 
+import module java.base;
 import lombok.val;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
-
-import java.nio.charset.StandardCharsets;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -24,7 +22,7 @@ class GroovyPasswordEncoderTests {
     void verifyOperation() {
         val enc = new GroovyPasswordEncoder(new ClassPathResource("GroovyPasswordEncoder.groovy"), mock(ApplicationContext.class));
         assertTrue(enc.matches("helloworld", "6adfb183a4a2c94a2f92dab5ade762a47889a5a1"));
-        assertNotNull(enc.encode("helloworld", "thisIsSalt".getBytes(StandardCharsets.UTF_8)));
+        assertNotNull(enc.encode("helloworld"));
         enc.destroy();
     }
 }

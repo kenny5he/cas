@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.code;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.configuration.support.Beans;
@@ -14,15 +15,11 @@ import org.apereo.cas.ticket.UniqueTicketIdGenerator;
 import org.apereo.cas.ticket.tracking.TicketTrackingPolicy;
 import org.apereo.cas.util.crypto.CipherExecutor;
 import org.apereo.cas.util.function.FunctionUtils;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * Default OAuth code factory.
@@ -80,7 +77,7 @@ public class OAuth20DefaultOAuthCodeFactory implements OAuth20CodeFactory {
             expirationPolicyToUse, ticketGrantingTicket, scopes,
             codeChallenge, codeChallengeMethod, clientId,
             requestClaims, responseType, grantType);
-        FunctionUtils.doIfNotNull(service, __ -> oauthCode.setTenantId(service.getTenant()));
+        FunctionUtils.doIfNotNull(service, _ -> oauthCode.setTenantId(service.getTenant()));
         descendantTicketsTrackingPolicy.trackTicket(ticketGrantingTicket, oauthCode);
         return oauthCode;
     }

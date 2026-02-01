@@ -1,7 +1,9 @@
 package org.apereo.cas.logging;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.DateTimeUtils;
+import org.apereo.cas.util.RegexUtils;
 import org.apereo.cas.web.BaseCasRestActuatorEndpoint;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.endpoint.Access;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
@@ -19,10 +22,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
 import software.amazon.awssdk.services.cloudwatchlogs.model.GetLogEventsRequest;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Locale;
-import java.util.regex.Pattern;
 
 /**
  * This is {@link CloudWatchLogsEndpoint}.
@@ -33,13 +32,13 @@ import java.util.regex.Pattern;
 @Endpoint(id = "cloudWatchLogs", defaultAccess = Access.NONE)
 @Slf4j
 public class CloudWatchLogsEndpoint extends BaseCasRestActuatorEndpoint {
-    private static final Pattern LOG_LEVEL_PATTERN = Pattern.compile("(\\[*(FATAL|CRITICAL|NOTICE|WARNING|ERROR|DEBUG|INFO|WARN|TRACE)\\]*)\\s", Pattern.CASE_INSENSITIVE);
+    private static final Pattern LOG_LEVEL_PATTERN = RegexUtils.createPattern("(\\[*(FATAL|CRITICAL|NOTICE|WARNING|ERROR|DEBUG|INFO|WARN|TRACE)\\]*)\\s", Pattern.CASE_INSENSITIVE);
 
-    private final ObjectProvider<CloudWatchLogsClient> awsLogsClient;
+    private final ObjectProvider<@NonNull CloudWatchLogsClient> awsLogsClient;
 
     public CloudWatchLogsEndpoint(final CasConfigurationProperties casProperties,
                                   final ConfigurableApplicationContext applicationContext,
-                                  final ObjectProvider<CloudWatchLogsClient> awsLogsClient) {
+                                  final ObjectProvider<@NonNull CloudWatchLogsClient> awsLogsClient) {
         super(casProperties, applicationContext);
         this.awsLogsClient = awsLogsClient;
     }

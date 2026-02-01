@@ -1,13 +1,9 @@
 package org.apereo.cas.authentication.principal.merger;
 
+import module java.base;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
-import java.io.Serial;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
 
 
 /**
@@ -35,7 +31,7 @@ public class MultivaluedAttributeMerger extends BaseAdditiveAttributeMerger {
         for (val sourceEntry : toConsider.entrySet()) {
             var sourceKey = sourceEntry.getKey();
 
-            var values = toModify.computeIfAbsent(sourceKey, __ -> new ArrayList<>());
+            var values = toModify.computeIfAbsent(sourceKey, _ -> new ArrayList<>());
 
             val sourceValue = sourceEntry.getValue();
             if (this.distinctValues) {

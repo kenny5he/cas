@@ -1,5 +1,6 @@
 package org.apereo.cas.util.nativex;
 
+import module java.base;
 import org.apereo.cas.util.ReflectionUtils;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import lombok.val;
@@ -16,11 +17,6 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.DecoratingProxy;
 import org.springframework.util.ClassUtils;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link CasRuntimeHintsRegistrar}.
@@ -213,20 +209,14 @@ public interface CasRuntimeHintsRegistrar extends RuntimeHintsRegistrar {
     @CanIgnoreReturnValue
     default CasRuntimeHintsRegistrar registerReflectionHints(final RuntimeHints hints, final Collection entries) {
         val memberCategories = new MemberCategory[]{
-            MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
-            MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS,
-
-            MemberCategory.INTROSPECT_DECLARED_METHODS,
-            MemberCategory.INTROSPECT_PUBLIC_METHODS,
-
             MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
             MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
 
             MemberCategory.INVOKE_DECLARED_METHODS,
             MemberCategory.INVOKE_PUBLIC_METHODS,
-
-            MemberCategory.DECLARED_FIELDS,
-            MemberCategory.PUBLIC_FIELDS
+            
+            MemberCategory.ACCESS_DECLARED_FIELDS,
+            MemberCategory.ACCESS_PUBLIC_FIELDS
         };
         registerReflectionHints(hints, entries, memberCategories);
         return this;
@@ -242,27 +232,10 @@ public interface CasRuntimeHintsRegistrar extends RuntimeHintsRegistrar {
     @CanIgnoreReturnValue
     default CasRuntimeHintsRegistrar registerReflectionHintsForMethodsAndFields(final RuntimeHints hints, final Collection entries) {
         val memberCategories = new MemberCategory[]{
-            MemberCategory.PUBLIC_FIELDS,
-            MemberCategory.DECLARED_FIELDS,
             MemberCategory.INVOKE_DECLARED_METHODS,
-            MemberCategory.INVOKE_PUBLIC_METHODS
-        };
-        registerReflectionHints(hints, entries, memberCategories);
-        return this;
-    }
-
-    /**
-     * Register reflection hints for introspected public elements.
-     *
-     * @param hints   the hints
-     * @param entries the entries
-     * @return the cas runtime hints registrar
-     */
-    @CanIgnoreReturnValue
-    default CasRuntimeHintsRegistrar registerReflectionHintsForIntrospectedPublicElements(final RuntimeHints hints, final Collection entries) {
-        val memberCategories = new MemberCategory[]{
-            MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS,
-            MemberCategory.INTROSPECT_PUBLIC_METHODS
+            MemberCategory.INVOKE_PUBLIC_METHODS,
+            MemberCategory.ACCESS_DECLARED_FIELDS,
+            MemberCategory.ACCESS_PUBLIC_FIELDS
         };
         registerReflectionHints(hints, entries, memberCategories);
         return this;
@@ -280,6 +253,7 @@ public interface CasRuntimeHintsRegistrar extends RuntimeHintsRegistrar {
         val memberCategories = new MemberCategory[]{
             MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
             MemberCategory.INVOKE_DECLARED_METHODS,
+            MemberCategory.ACCESS_DECLARED_FIELDS
         };
         registerReflectionHints(hints, entries, memberCategories);
         return this;
@@ -295,9 +269,6 @@ public interface CasRuntimeHintsRegistrar extends RuntimeHintsRegistrar {
     @CanIgnoreReturnValue
     default CasRuntimeHintsRegistrar registerReflectionHintsForConstructors(final RuntimeHints hints, final Collection entries) {
         val memberCategories = new MemberCategory[]{
-            MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
-            MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS,
-
             MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
             MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS
         };
@@ -319,8 +290,8 @@ public interface CasRuntimeHintsRegistrar extends RuntimeHintsRegistrar {
             MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
             MemberCategory.INVOKE_DECLARED_METHODS,
             MemberCategory.INVOKE_PUBLIC_METHODS,
-            MemberCategory.DECLARED_FIELDS,
-            MemberCategory.PUBLIC_FIELDS
+            MemberCategory.ACCESS_DECLARED_FIELDS,
+            MemberCategory.ACCESS_PUBLIC_FIELDS
         };
         registerReflectionHints(hints, entries, memberCategories);
         return this;
@@ -338,7 +309,7 @@ public interface CasRuntimeHintsRegistrar extends RuntimeHintsRegistrar {
         val memberCategories = new MemberCategory[]{
             MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
             MemberCategory.INVOKE_PUBLIC_METHODS,
-            MemberCategory.PUBLIC_FIELDS
+            MemberCategory.ACCESS_PUBLIC_FIELDS
         };
         registerReflectionHints(hints, entries, memberCategories);
         return this;
@@ -454,7 +425,7 @@ public interface CasRuntimeHintsRegistrar extends RuntimeHintsRegistrar {
      */
     default void log(final String message) {
         //CHECKSTYLE:OFF
-        System.out.println(message);
+        IO.println(message);
         //CHECKSTYLE:ON
     }
 }

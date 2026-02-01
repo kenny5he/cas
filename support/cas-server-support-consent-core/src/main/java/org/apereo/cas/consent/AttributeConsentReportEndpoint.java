@@ -1,17 +1,17 @@
 package org.apereo.cas.consent;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.CompressionUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.web.BaseCasRestActuatorEndpoint;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.io.IOUtils;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.endpoint.Access;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
@@ -27,15 +27,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * This is {@link AttributeConsentReportEndpoint}.
@@ -49,14 +43,14 @@ public class AttributeConsentReportEndpoint extends BaseCasRestActuatorEndpoint 
     private static final ObjectMapper MAPPER = JacksonObjectMapperFactory.builder()
         .defaultTypingEnabled(false).build().toObjectMapper();
 
-    private final ObjectProvider<ConsentRepository> consentRepository;
+    private final ObjectProvider<@NonNull ConsentRepository> consentRepository;
 
-    private final ObjectProvider<ConsentEngine> consentEngine;
+    private final ObjectProvider<@NonNull ConsentEngine> consentEngine;
 
     public AttributeConsentReportEndpoint(final CasConfigurationProperties casProperties,
                                           final ConfigurableApplicationContext applicationContext,
-                                          final ObjectProvider<ConsentRepository> consentRepository,
-                                          final ObjectProvider<ConsentEngine> consentEngine) {
+                                          final ObjectProvider<@NonNull ConsentRepository> consentRepository,
+                                          final ObjectProvider<@NonNull ConsentEngine> consentEngine) {
         super(casProperties, applicationContext);
         this.consentRepository = consentRepository;
         this.consentEngine = consentEngine;
@@ -115,7 +109,7 @@ public class AttributeConsentReportEndpoint extends BaseCasRestActuatorEndpoint 
     @GetMapping(path = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseBody
     @Operation(summary = "Export consent decisions as a zip file")
-    public ResponseEntity<Resource> export() {
+    public ResponseEntity<@NonNull Resource> export() {
         val accounts = consentRepository.getObject().findConsentDecisions();
         val resource = CompressionUtils.toZipFile(accounts.stream(),
             Unchecked.function(entry -> {

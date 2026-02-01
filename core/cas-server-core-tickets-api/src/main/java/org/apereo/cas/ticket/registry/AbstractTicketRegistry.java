@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.registry;
 
+import module java.base;
 import org.apereo.cas.authentication.CoreAuthenticationUtils;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.support.events.logout.CasRequestSingleLogoutEvent;
@@ -23,28 +24,16 @@ import org.apereo.cas.util.serialization.SerializationUtils;
 import com.google.common.io.ByteSource;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apereo.inspektr.common.web.ClientInfoHolder;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationContext;
-
-import java.time.ZonedDateTime;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Base ticket registry class that implements common ticket-related ops.
@@ -68,7 +57,7 @@ public abstract class AbstractTicketRegistry implements TicketRegistry {
 
     protected final ApplicationContext applicationContext;
 
-    protected static String getPrincipalIdFrom(final Ticket ticket) {
+    protected String getPrincipalIdFrom(final Ticket ticket) {
         return ticket instanceof final AuthenticationAwareTicket authenticationAwareTicket
             ? Optional.ofNullable(authenticationAwareTicket.getAuthentication())
             .map(auth -> auth.getPrincipal().getId()).orElse(StringUtils.EMPTY)
@@ -103,12 +92,20 @@ public abstract class AbstractTicketRegistry implements TicketRegistry {
     }
 
     @Override
+    public long deleteTicketsFor(final String principalId) {
+        return getTickets(ticket -> ticket instanceof final AuthenticationAwareTicket aat
+            && Strings.CI.equals(aat.getAuthentication().getPrincipal().getId(), principalId))
+            .mapToLong(ticket -> FunctionUtils.doAndHandle(() -> deleteTicket(ticket), t -> 0).get())
+            .sum();
+    }
+
+    @Override
     public Ticket addTicket(final Ticket ticket) throws Exception {
         return ticket != null && !ticket.isExpired() ? addSingleTicket(ticket) : null;
     }
 
     @Override
-    public Ticket getTicket(final String ticketId) {
+    public @Nullable Ticket getTicket(final String ticketId) {
         val returnTicket = getTicket(ticketId, ticket -> {
             if (ticket.isExpired()) {
                 val ticketAgeSeconds = getTicketAgeSeconds(ticket);
@@ -148,7 +145,7 @@ public abstract class AbstractTicketRegistry implements TicketRegistry {
         }
         if (!clazz.isAssignableFrom(ticket.getClass())) {
             throw new ClassCastException("Ticket [" + ticket.getId() + " is of type "
-                                         + ticket.getClass() + " when we were expecting " + clazz);
+                + ticket.getClass() + " when we were expecting " + clazz);
         }
         return clazz.cast(ticket);
     }
@@ -172,7 +169,7 @@ public abstract class AbstractTicketRegistry implements TicketRegistry {
         val count = new AtomicLong(0);
         if (ticket instanceof final TicketGrantingTicket tgt) {
             LOGGER.debug("Removing children of ticket [{}] from the registry.", ticket.getId());
-            count.getAndAdd(deleteChildren(tgt));
+            count.getAndAdd(deleteServiceTickets(tgt));
             if (ticket instanceof final ProxyGrantingTicket pgt) {
                 deleteProxyGrantingTicketFromParent(pgt);
             } else {
@@ -190,7 +187,7 @@ public abstract class AbstractTicketRegistry implements TicketRegistry {
             return tgtStream.count();
         } catch (final Exception t) {
             LOGGER.trace("sessionCount() operation is not implemented by the ticket registry instance [{}]. "
-                         + "Message is: [{}] Returning unknown as [{}]", this.getClass().getName(), t.getMessage(), Long.MIN_VALUE);
+                + "Message is: [{}] Returning unknown as [{}]", this.getClass().getName(), t.getMessage(), Long.MIN_VALUE);
             return Long.MIN_VALUE;
         }
     }
@@ -201,7 +198,7 @@ public abstract class AbstractTicketRegistry implements TicketRegistry {
             return stStream.count();
         } catch (final Exception t) {
             LOGGER.trace("serviceTicketCount() operation is not implemented by the ticket registry instance [{}]. "
-                         + "Message is: [{}] Returning unknown as [{}]", this.getClass().getName(), t.getMessage(), Long.MIN_VALUE);
+                + "Message is: [{}] Returning unknown as [{}]", this.getClass().getName(), t.getMessage(), Long.MIN_VALUE);
             return Long.MIN_VALUE;
         }
     }
@@ -300,7 +297,7 @@ public abstract class AbstractTicketRegistry implements TicketRegistry {
      * @param ticket the ticket
      * @return the count of tickets that were removed including child tickets and zero if the ticket was not deleted
      */
-    protected int deleteChildren(final TicketGrantingTicket ticket) {
+    protected int deleteServiceTickets(final TicketGrantingTicket ticket) {
         val count = new AtomicLong(0);
         val services = ticket.getServices();
         if (services != null && !services.isEmpty()) {
@@ -321,7 +318,7 @@ public abstract class AbstractTicketRegistry implements TicketRegistry {
         return count.intValue();
     }
 
-    protected Ticket encodeTicket(final Ticket ticket) throws Exception {
+    protected @Nullable Ticket encodeTicket(final Ticket ticket) throws Exception {
         if (!isCipherExecutorEnabled()) {
             LOGGER.trace(TICKET_ENCRYPTION_LOG_MESSAGE);
             return ticket;
@@ -335,10 +332,10 @@ public abstract class AbstractTicketRegistry implements TicketRegistry {
         return encodedTicket;
     }
 
-    protected Ticket decodeTicket(final Ticket ticketToProcess) {
+    protected @Nullable Ticket decodeTicket(final Ticket ticketToProcess) {
         if (ticketToProcess instanceof EncodedTicket && !isCipherExecutorEnabled()) {
             LOGGER.warn("Found removable encoded ticket [{}] yet cipher operations are disabled.", ticketToProcess.getId());
-            FunctionUtils.doUnchecked(__ -> deleteTicket(ticketToProcess));
+            FunctionUtils.doUnchecked(_ -> deleteTicket(ticketToProcess));
             return null;
         }
 
@@ -356,9 +353,13 @@ public abstract class AbstractTicketRegistry implements TicketRegistry {
             return ticketToProcess;
         }
         LOGGER.debug("Attempting to decode [{}]", ticketToProcess);
-        val ticket = SerializationUtils.decodeAndDeserializeObject(encodedTicket.getEncodedTicket(), this.cipherExecutor, Ticket.class);
+        val ticket = decodeAndDeserialize(encodedTicket.getEncodedTicket());
         LOGGER.debug("Decoded ticket to [{}]", ticket);
         return ticket;
+    }
+
+    protected Ticket decodeAndDeserialize(final byte[] encodedTicket) {
+        return SerializationUtils.decodeAndDeserializeObject(encodedTicket, this.cipherExecutor, Ticket.class);
     }
 
     protected Collection<Ticket> decodeTickets(final Collection<Ticket> items) {
@@ -383,8 +384,12 @@ public abstract class AbstractTicketRegistry implements TicketRegistry {
 
     protected Ticket createEncodedTicket(final Ticket ticket) throws Exception {
         LOGGER.debug("Encoding ticket [{}]", ticket);
-        val encodedTicketObject = SerializationUtils.serializeAndEncodeObject(cipherExecutor, ticket);
+        val encodedTicketObject = getSerializeAndEncode(ticket);
         return toEncodedTicket(ticket, encodedTicketObject);
+    }
+
+    protected byte[] getSerializeAndEncode(final Ticket ticket) {
+        return SerializationUtils.serializeAndEncodeObject(cipherExecutor, ticket);
     }
 
     protected Ticket toEncodedTicket(final Ticket ticket, final byte[] encodedTicketObject) throws Exception {

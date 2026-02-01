@@ -1,5 +1,6 @@
 package org.apereo.cas.web.flow.actions.logout;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.ServiceFactory;
 import org.apereo.cas.logout.LogoutConfirmationResolver;
 import org.apereo.cas.pac4j.client.DelegatedIdentityProviders;
@@ -22,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.net.URIBuilder;
 import org.apereo.inspektr.common.web.ClientInfoHolder;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.Nullable;
 import org.opensaml.saml.saml2.core.LogoutRequest;
 import org.pac4j.core.context.CallContext;
 import org.pac4j.core.context.session.SessionStore;
@@ -30,8 +32,6 @@ import org.pac4j.jee.http.adapter.JEEHttpActionAdapter;
 import org.pac4j.saml.client.SAML2Client;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * This is {@link DelegatedSaml2ClientFinishLogoutAction}.
@@ -64,7 +64,7 @@ public class DelegatedSaml2ClientFinishLogoutAction extends BaseCasWebflowAction
     private final LogoutConfirmationResolver logoutConfirmationResolver;
 
     @Override
-    protected Event doExecuteInternal(final RequestContext requestContext) {
+    protected @Nullable Event doExecuteInternal(final RequestContext requestContext) {
         if (logoutConfirmationResolver.isLogoutRequestConfirmed(requestContext)) {
             val request = WebUtils.getHttpServletRequestFromExternalWebflowContext(requestContext);
             val response = WebUtils.getHttpServletResponseFromExternalWebflowContext(requestContext);
@@ -77,7 +77,7 @@ public class DelegatedSaml2ClientFinishLogoutAction extends BaseCasWebflowAction
                     identityProviders.findClient(clientName, context)
                         .filter(SAML2Client.class::isInstance)
                         .map(SAML2Client.class::cast)
-                        .ifPresent(client -> FunctionUtils.doAndHandle(__ -> {
+                        .ifPresent(client -> FunctionUtils.doAndHandle(_ -> {
                             client.init();
                             LOGGER.debug("Located client from relay-state [{}]", client);
                             val callContext = new CallContext(context, sessionStore);
@@ -97,9 +97,9 @@ public class DelegatedSaml2ClientFinishLogoutAction extends BaseCasWebflowAction
                     .ifPresent(client -> {
                         client.init();
                         Optional.ofNullable(delegatedClientLogoutRequest)
-                            .filter(__ -> StringUtils.isNotBlank(logoutRedirect))
-                            .filter(__ -> StringUtils.isNotBlank(delegatedClientLogoutRequest.getLocation()))
-                            .ifPresent(Unchecked.consumer(__ -> {
+                            .filter(_ -> StringUtils.isNotBlank(logoutRedirect))
+                            .filter(_ -> StringUtils.isNotBlank(delegatedClientLogoutRequest.getLocation()))
+                            .ifPresent(Unchecked.consumer(_ -> {
                                 try {
                                     val urlBuilder = new URIBuilder(delegatedClientLogoutRequest.getLocation());
                                     val samlRequestParam = Optional.ofNullable(urlBuilder.getFirstQueryParam(SamlProtocolConstants.PARAMETER_SAML_REQUEST));

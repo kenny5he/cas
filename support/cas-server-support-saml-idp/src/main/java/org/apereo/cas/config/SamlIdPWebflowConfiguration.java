@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
 import org.apereo.cas.authentication.MultifactorAuthenticationContextValidator;
 import org.apereo.cas.authentication.MultifactorAuthenticationTrigger;
@@ -32,6 +33,7 @@ import org.apereo.cas.web.flow.resolver.CasWebflowEventResolver;
 import org.apereo.cas.web.flow.resolver.impl.CasWebflowEventResolutionConfigurationContext;
 import org.apereo.cas.web.flow.resolver.impl.mfa.DefaultMultifactorAuthenticationProviderWebflowEventResolver;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -46,7 +48,6 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.webflow.definition.registry.FlowDefinitionRegistry;
 import org.springframework.webflow.engine.builder.support.FlowBuilderServices;
 import org.springframework.webflow.execution.Action;
-import java.util.Objects;
 
 /**
  * This is {@link SamlIdPWebflowConfiguration}.
@@ -155,7 +156,7 @@ class SamlIdPWebflowConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public MultifactorAuthenticationTrigger samlIdPMultifactorAuthenticationTrigger(
             @Qualifier("samlProfileHandlerConfigurationContext")
-            final ObjectProvider<SamlProfileHandlerConfigurationContext> samlProfileHandlerConfigurationContext) {
+            final ObjectProvider<@NonNull SamlProfileHandlerConfigurationContext> samlProfileHandlerConfigurationContext) {
             return new SamlIdPMultifactorAuthenticationTrigger(samlProfileHandlerConfigurationContext);
         }
     }

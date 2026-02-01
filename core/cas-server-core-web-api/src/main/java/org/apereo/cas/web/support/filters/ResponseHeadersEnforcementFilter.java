@@ -1,7 +1,9 @@
 package org.apereo.cas.web.support.filters;
 
+import module java.base;
 import org.apereo.cas.services.RegisteredService;
 import org.apereo.cas.util.RandomUtils;
+import org.apereo.cas.util.RegexUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -15,10 +17,6 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.regex.Pattern;
 
 /**
  * Allows users to easily inject the default security headers to assist in protecting the application.
@@ -160,7 +158,7 @@ public class ResponseHeadersEnforcementFilter extends AbstractSecurityFilter imp
         val cacheControlStaticResources = filterConfig.getInitParameter(INIT_PARAM_CACHE_CONTROL_STATIC_RESOURCES);
         val hstsOptions = filterConfig.getInitParameter(INIT_PARAM_ENABLE_STRICT_TRANSPORT_SECURITY_OPTIONS);
 
-        this.cacheControlStaticResourcesPattern = Pattern.compile("^.+\\.(" + cacheControlStaticResources + ")$", Pattern.CASE_INSENSITIVE);
+        this.cacheControlStaticResourcesPattern = RegexUtils.createPattern("^.+\\.(" + cacheControlStaticResources + ")$", Pattern.CASE_INSENSITIVE);
         this.enableCacheControl = Boolean.parseBoolean(cacheControl);
         this.enableXContentTypeOptions = Boolean.parseBoolean(contentTypeOpts);
         this.enableStrictTransportSecurity = Boolean.parseBoolean(stsEnabled);

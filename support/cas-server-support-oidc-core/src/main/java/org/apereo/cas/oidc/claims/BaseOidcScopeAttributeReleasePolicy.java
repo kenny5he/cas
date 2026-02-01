@@ -1,14 +1,18 @@
 package org.apereo.cas.oidc.claims;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.services.AbstractRegisteredServiceAttributeReleasePolicy;
 import org.apereo.cas.services.RegisteredServiceAttributeReleasePolicyContext;
 import org.apereo.cas.util.CollectionUtils;
+import org.apereo.cas.util.nativex.CasRuntimeHintsRegistrar;
 import org.apereo.cas.util.scripting.ExecutableCompiledScriptFactory;
 import org.apereo.cas.util.spring.ApplicationContextProvider;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,15 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jooq.lambda.Unchecked;
-import java.io.Serial;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.TreeMap;
 
 /**
  * This is {@link BaseOidcScopeAttributeReleasePolicy}.
@@ -46,9 +41,11 @@ public abstract class BaseOidcScopeAttributeReleasePolicy extends AbstractRegist
     private static final long serialVersionUID = -7302163334687300920L;
 
     @JsonProperty
-    private List<String> allowedAttributes;
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    private List<String> allowedAttributes = new ArrayList<>();
 
     @JsonProperty("claimMappings")
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private Map<String, String> claimMappings = new TreeMap<>();
 
     @JsonIgnore
@@ -78,13 +75,15 @@ public abstract class BaseOidcScopeAttributeReleasePolicy extends AbstractRegist
 
             val scriptFactoryInstance = ExecutableCompiledScriptFactory.findExecutableCompiledScriptFactory();
 
-            if (scriptFactoryInstance.isPresent() && scriptFactoryInstance.get().isInlineScript(mappedAttr)) {
-                val script = scriptFactoryInstance.get().getInlineScript(mappedAttr).orElseThrow();
-                LOGGER.trace("Locating attribute value via script [{}] for definition [{}]", script, claim);
+            if (scriptFactoryInstance.isPresent()
+                && CasRuntimeHintsRegistrar.notInNativeImage()
+                && scriptFactoryInstance.get().isScript(mappedAttr)) {
+                
+                LOGGER.trace("Locating attribute value via script [{}] for definition [{}]", mappedAttr, claim);
                 try (val cacheManager = ApplicationContextProvider.getScriptResourceCacheManager()
                     .orElseThrow(() -> new IllegalArgumentException("No groovy script cache manager is available to execute claim mappings"))) {
-                    val scriptResource = cacheManager.resolveScriptableResource(script, mappedAttr);
-                    val args = Map.of("attributes", resolvedAttributes, "context", context, "logger", LOGGER);
+                    val scriptResource = cacheManager.resolveScriptableResource(mappedAttr, mappedAttr);
+                    val args = CollectionUtils.<String, Object>wrap("attributes", resolvedAttributes, "context", context, "claim", claim, "logger", LOGGER);
                     scriptResource.setBinding(args);
                     val result = scriptResource.execute(args.values().toArray(), Object.class);
                     LOGGER.debug("Mapped attribute [{}] to [{}] from script", claim, result);

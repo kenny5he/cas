@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
+import module java.base;
 
 /**
  * This is {@link CheckFunctionalConditionUsage}.
@@ -13,7 +14,7 @@ import java.util.regex.Pattern;
  * @since 7.0.0
  */
 public class CheckFunctionalConditionUsage {
-    public static void main(final String[] args) throws Exception {
+    void main(final String[] args) throws Exception {
         checkPattern(args[0]);
     }
 

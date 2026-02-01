@@ -1,5 +1,6 @@
 package org.apereo.cas.support.saml.web.idp.profile.sso;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.AuthenticationSystemSupport;
 import org.apereo.cas.authentication.DefaultAuthenticationBuilder;
@@ -42,6 +43,7 @@ import net.shibboleth.shared.resolver.CriteriaSet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.opensaml.core.criterion.EntityIdCriterion;
 import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.messaging.context.ScratchContext;
@@ -74,15 +76,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.Clock;
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
 
 /**
  * This is {@link SSOSamlIdPPostProfileHandlerEndpoint}.
@@ -151,9 +144,9 @@ public class SSOSamlIdPPostProfileHandlerEndpoint extends BaseCasRestActuatorEnd
         @Parameter(name = SamlProtocolConstants.PARAMETER_ENTITY_ID, required = true, description = "The entity id"),
         @Parameter(name = "encrypt", schema = @Schema(type = "boolean"), description = "Whether to encrypt the response")
     })
-    public ResponseEntity<Object> producePost(final HttpServletRequest request,
-                                              final HttpServletResponse response,
-                                              @ModelAttribute
+    public ResponseEntity<@NonNull Object> producePost(final HttpServletRequest request,
+                                                       final HttpServletResponse response,
+                                                       @ModelAttribute
                                               final SamlRequest samlRequest) {
         return produce(request, response, samlRequest);
     }
@@ -170,7 +163,7 @@ public class SSOSamlIdPPostProfileHandlerEndpoint extends BaseCasRestActuatorEnd
     @PostMapping(value = "/logout/post", produces = MediaType.TEXT_HTML_VALUE)
     @Operation(summary = "Produce SAML2 logout request for the given SAML2 SP",
                parameters = @Parameter(name = SamlProtocolConstants.PARAMETER_ENTITY_ID, required = true, description = "The entity id"))
-    public ResponseEntity<Object> produceLogoutRequestPost(
+    public ResponseEntity<@NonNull Object> produceLogoutRequestPost(
         @RequestParam(SamlProtocolConstants.PARAMETER_ENTITY_ID) final String entityId,
         final HttpServletResponse response) throws Exception {
         val selectedService = serviceFactory.createService(entityId);
@@ -228,9 +221,9 @@ public class SSOSamlIdPPostProfileHandlerEndpoint extends BaseCasRestActuatorEnd
         return ResponseEntity.ok().build();
     }
 
-    private ResponseEntity<Object> produce(final HttpServletRequest request,
-                                           final HttpServletResponse response,
-                                           final SamlRequest samlRequest) {
+    private ResponseEntity<@NonNull Object> produce(final HttpServletRequest request,
+                                                    final HttpServletResponse response,
+                                                    final SamlRequest samlRequest) {
         try {
             val selectedService = serviceFactory.createService(samlRequest.getEntityId());
             val registeredService = servicesManager.findServiceBy(selectedService, SamlRegisteredService.class);
@@ -264,7 +257,7 @@ public class SSOSamlIdPPostProfileHandlerEndpoint extends BaseCasRestActuatorEnd
                         .build();
                     val object = responseBuilder.build(buildContext);
                     val encoded = SamlUtils.transformSamlObject(saml20ObjectBuilder.getOpenSamlConfigBean(), object, true).toString();
-                    return new ResponseEntity<Object>(encoded, HttpStatus.OK);
+                    return new ResponseEntity<@NonNull Object>(encoded, HttpStatus.OK);
                 }))
                 .orElseThrow(() -> new SamlException("Unable to locate " + samlRequest.getEntityId()));
         } catch (final Throwable e) {

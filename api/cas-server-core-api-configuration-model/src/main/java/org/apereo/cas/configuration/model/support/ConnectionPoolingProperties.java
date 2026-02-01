@@ -1,14 +1,12 @@
 package org.apereo.cas.configuration.model.support;
 
+import module java.base;
 import org.apereo.cas.configuration.support.DurationCapable;
 import org.apereo.cas.configuration.support.RequiresModule;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import java.io.Serial;
-import java.io.Serializable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This is {@link ConnectionPoolingProperties}.
@@ -81,5 +79,6 @@ public class ConnectionPoolingProperties implements Serializable {
      * Set the name of the connection pool. This is primarily used for
      * the MBean to uniquely identify the pool configuration.
      */
+    @Nullable
     private String name;
 }

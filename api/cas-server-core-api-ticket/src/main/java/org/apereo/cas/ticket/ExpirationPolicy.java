@@ -1,11 +1,9 @@
 package org.apereo.cas.ticket;
 
+import module java.base;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
-import java.io.Serializable;
-import java.time.Clock;
-import java.time.ZonedDateTime;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Strategy that determines if the ticket is expired. Implementations of the
@@ -69,7 +67,7 @@ public interface ExpirationPolicy extends Serializable {
      * @param ticketState the ticket state
      * @return the maximum expiration time
      */
-    default ZonedDateTime toMaximumExpirationTime(final Ticket ticketState) {
+    default @Nullable ZonedDateTime toMaximumExpirationTime(final Ticket ticketState) {
         return null;
     }
 }

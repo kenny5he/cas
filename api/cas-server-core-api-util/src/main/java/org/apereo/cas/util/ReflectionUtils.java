@@ -1,15 +1,13 @@
 package org.apereo.cas.util;
 
+import module java.base;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import lombok.experimental.UtilityClass;
 import lombok.val;
+import org.apache.commons.lang3.ClassUtils;
+import org.jooq.lambda.Unchecked;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Reflection Utilities based on {@link ClassGraph}.
@@ -37,10 +35,41 @@ public class ReflectionUtils {
             .enableSystemJarsAndModules()
             .removeTemporaryFilesAfterScan()
             .enableAnnotationInfo()
+            .disableModuleScanning()
             .scan()) {
             return superclass.isInterface()
                 ? new ArrayList<>(scanResult.getClassesImplementing(superclass).loadClasses(superclass))
                 : new ArrayList<>(scanResult.getSubclasses(superclass).loadClasses(superclass));
+        }
+    }
+
+    /**
+     * Find classes with annotations in package collection.
+     *
+     * @param classLoaders the class loaders
+     * @param annotations  the annotations
+     * @param packageName  the package name
+     * @return the collection
+     */
+    public Collection<Class<?>> findClassesWithAnnotationsInPackage(
+        final List<ClassLoader> classLoaders,
+        final Collection<Class<? extends Annotation>> annotations,
+        final String... packageName) {
+        
+        var classGraph = new ClassGraph()
+            .acceptPackages(packageName)
+            .enableAnnotationInfo()
+            .disableModuleScanning();
+        if (!classLoaders.isEmpty()) {
+            classGraph = classGraph.overrideClassLoaders(classLoaders.toArray(new ClassLoader[0]));
+        }
+        try (val scanResult = classGraph.scan()) {
+            return annotations
+                .stream()
+                .map(annotation -> scanResult.getClassesWithAnnotation(annotation).getNames())
+                .flatMap(List::stream)
+                .map(Unchecked.function(ClassUtils::getClass))
+                .collect(Collectors.toList());
         }
     }
 
@@ -53,16 +82,7 @@ public class ReflectionUtils {
      */
     public Collection<Class<?>> findClassesWithAnnotationsInPackage(final Collection<Class<? extends Annotation>> annotations,
                                                                     final String... packageName) {
-        try (val scanResult = new ClassGraph()
-            .acceptPackages(packageName)
-            .enableAnnotationInfo()
-            .scan()) {
-            return annotations
-                .stream()
-                .map(annotation -> scanResult.getClassesWithAnnotation(annotation).loadClasses())
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
-        }
+        return findClassesWithAnnotationsInPackage(List.of(Thread.currentThread().getContextClassLoader()), annotations, packageName);
     }
 
     /**
@@ -76,6 +96,7 @@ public class ReflectionUtils {
         try (val scanResult = new ClassGraph()
             .acceptPackages(packageName)
             .enableClassInfo()
+            .disableModuleScanning()
             .scan()) {
 
             return scanResult.getAllClasses()

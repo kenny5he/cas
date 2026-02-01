@@ -1,18 +1,14 @@
 package org.apereo.cas.authentication.principal;
 
+import module java.base;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.UserProfile;
-
-import jakarta.annotation.Nonnull;
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This is {@link DelegatedAuthenticationCandidateProfile}.
@@ -27,13 +23,13 @@ public class DelegatedAuthenticationCandidateProfile implements Serializable {
     @Serial
     private static final long serialVersionUID = 6377783357802049769L;
 
-    @Nonnull
+    @NonNull
     private final String key;
 
-    @Nonnull
+    @NonNull
     private final String id;
 
-    @Nonnull
+    @NonNull
     private final String linkedId;
 
     @Builder.Default

@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.idtoken;
 
+import module java.base;
 import org.apereo.cas.support.oauth.OAuth20ResponseTypes;
 import org.apereo.cas.support.oauth.web.endpoints.OAuth20ConfigurationContext;
 import lombok.AccessLevel;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jose4j.jwt.JwtClaims;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
@@ -20,7 +22,7 @@ import org.springframework.beans.factory.ObjectProvider;
 @Slf4j
 @Getter
 public abstract class BaseIdTokenGeneratorService<T extends OAuth20ConfigurationContext> implements IdTokenGeneratorService {
-    private final ObjectProvider<T> configurationContextProvider;
+    private final ObjectProvider<@NonNull T> configurationContextProvider;
 
     protected T getConfigurationContext() {
         return this.configurationContextProvider.getObject();

@@ -1,5 +1,6 @@
 package org.apereo.cas.oidc;
 
+import module java.base;
 import lombok.Getter;
 import org.apache.commons.text.WordUtils;
 
@@ -29,7 +30,7 @@ public interface OidcConstants {
      */
     String CLIENT_NOTIFICATION_TOKEN = "client_notification_token";
     /**
-     * Id token hint specified in CIBA requests.
+     * Id token hint specified in authn requests.
      */
     String ID_TOKEN_HINT = "id_token_hint";
     /**

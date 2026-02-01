@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.aws.ChainingAWSCredentialsProvider;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
@@ -9,17 +10,14 @@ import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.actuate.autoconfigure.metrics.export.ConditionalOnEnabledMetricsExport;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.micrometer.metrics.autoconfigure.export.ConditionalOnEnabledMetricsExport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
-import java.net.URI;
-import java.time.Duration;
-import java.util.Locale;
-import java.util.Map;
 
 /**
  * This is {@link CasAmazonCloudWatchMetricsConfiguration}.
@@ -69,7 +67,7 @@ class CasAmazonCloudWatchMetricsConfiguration {
         @Qualifier("cloudWatchClient") final CloudWatchAsyncClient cloudWatchClient) {
         val cloudWatchConfig = new CloudWatchConfig() {
             @Override
-            public String get(final String key) {
+            public String get(final @NonNull String key) {
                 return CLOUDWATCH_CONFIGURATION.get(key);
             }
         };

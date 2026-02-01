@@ -1,5 +1,6 @@
 package org.apereo.cas.support.pac4j.authentication.clients;
 
+import module java.base;
 import org.apereo.cas.authentication.CasSSLContext;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.model.support.pac4j.Pac4jBaseClientProperties;
@@ -11,15 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.ObjectUtils;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.pac4j.core.client.BaseClient;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import java.io.Closeable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * This is {@link BaseDelegatedIdentityProviderFactory}.
@@ -37,7 +33,7 @@ public abstract class BaseDelegatedIdentityProviderFactory implements DelegatedI
 
     protected final CasSSLContext casSSLContext;
 
-    protected final Cache<String, List<BaseClient>> clientsCache;
+    protected final Cache<@NonNull String, List<BaseClient>> clientsCache;
 
     protected final ConfigurableApplicationContext applicationContext;
 

@@ -1,14 +1,11 @@
 package org.apereo.cas.configuration.model.core.ticket;
 
+import module java.base;
 import org.apereo.cas.configuration.support.DurationCapable;
 import org.apereo.cas.configuration.support.RequiresModule;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * This is {@link ServiceTicketProperties}.
@@ -42,4 +39,9 @@ public class ServiceTicketProperties implements Serializable {
      * Maximum length of generated service tickets.
      */
     private int maxLength = 20;
+
+    /**
+     * Proxy granting ticket tracking policy for service tickets.
+     */
+    private TicketTrackingPolicyTypes proxyGrantingTicketTrackingPolicy = TicketTrackingPolicyTypes.ALL;
 }

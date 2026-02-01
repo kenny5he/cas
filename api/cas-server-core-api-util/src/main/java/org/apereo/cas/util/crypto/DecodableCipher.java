@@ -1,12 +1,11 @@
 package org.apereo.cas.util.crypto;
 
+import module java.base;
 import lombok.val;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This is {@link DecodableCipher}.
@@ -28,7 +27,7 @@ public interface DecodableCipher<I, O> {
      * @param parameters the parameters
      * @return the decoded value.
      */
-    O decode(I value, Object[] parameters);
+    @Nullable O decode(I value, Object[] parameters);
 
     /**
      * Decode the value.
@@ -36,7 +35,7 @@ public interface DecodableCipher<I, O> {
      * @param value the value
      * @return the decoded value or null
      */
-    default O decode(final I value) {
+    default @Nullable O decode(final I value) {
         return decode(value, ArrayUtils.EMPTY_OBJECT_ARRAY);
     }
 

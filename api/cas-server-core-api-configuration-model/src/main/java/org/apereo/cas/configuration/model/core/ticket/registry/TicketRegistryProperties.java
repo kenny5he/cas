@@ -1,5 +1,6 @@
 package org.apereo.cas.configuration.model.core.ticket.registry;
 
+import module java.base;
 import org.apereo.cas.configuration.model.support.cassandra.ticketregistry.CassandraTicketRegistryProperties;
 import org.apereo.cas.configuration.model.support.cosmosdb.CosmosDbTicketRegistryProperties;
 import org.apereo.cas.configuration.model.support.dynamodb.DynamoDbTicketRegistryProperties;
@@ -11,17 +12,14 @@ import org.apereo.cas.configuration.model.support.jpa.ticketregistry.JpaTicketRe
 import org.apereo.cas.configuration.model.support.kafka.KafkaTicketRegistryProperties;
 import org.apereo.cas.configuration.model.support.memcached.MemcachedTicketRegistryProperties;
 import org.apereo.cas.configuration.model.support.mongo.ticketregistry.MongoDbTicketRegistryProperties;
+import org.apereo.cas.configuration.model.support.pulsar.PulsarTicketRegistryProperties;
 import org.apereo.cas.configuration.model.support.quartz.ScheduledJobProperties;
 import org.apereo.cas.configuration.model.support.redis.RedisTicketRegistryProperties;
 import org.apereo.cas.configuration.support.RequiresModule;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * This is {@link TicketRegistryProperties}.
@@ -73,6 +71,12 @@ public class TicketRegistryProperties implements Serializable {
      */
     @NestedConfigurationProperty
     private KafkaTicketRegistryProperties kafka = new KafkaTicketRegistryProperties();
+
+    /**
+     * Pulsar registry settings.
+     */
+    @NestedConfigurationProperty
+    private PulsarTicketRegistryProperties pulsar = new PulsarTicketRegistryProperties();
 
     /**
      * Apache Ignite registry settings.

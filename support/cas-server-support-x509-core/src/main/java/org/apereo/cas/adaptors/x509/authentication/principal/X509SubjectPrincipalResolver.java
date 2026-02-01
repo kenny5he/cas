@@ -1,7 +1,8 @@
 package org.apereo.cas.adaptors.x509.authentication.principal;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.resolvers.PrincipalResolutionContext;
-
+import org.apereo.cas.util.RegexUtils;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -11,11 +12,7 @@ import org.cryptacular.x509.dn.AttributeType;
 import org.cryptacular.x509.dn.NameReader;
 import org.cryptacular.x509.dn.RDNSequence;
 import org.cryptacular.x509.dn.StandardAttributeType;
-
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.regex.Pattern;
 
 /**
  * Credential to principal resolver that extracts one or more attribute values
@@ -32,7 +29,7 @@ public class X509SubjectPrincipalResolver extends AbstractX509PrincipalResolver 
     /**
      * Pattern used to extract attribute names from descriptor.
      */
-    private static final Pattern ATTR_PATTERN = Pattern.compile("\\$(\\w+)");
+    private static final Pattern ATTR_PATTERN = RegexUtils.createPattern("\\$(\\w+)");
 
     /**
      * Descriptor representing an abstract format of the principal to be resolved.

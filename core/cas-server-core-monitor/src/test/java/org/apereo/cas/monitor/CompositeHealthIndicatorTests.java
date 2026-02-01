@@ -1,16 +1,14 @@
 package org.apereo.cas.monitor;
 
+import module java.base;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.actuate.health.AbstractHealthIndicator;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.PingHealthIndicator;
-import org.springframework.boot.actuate.health.Status;
-
-import java.util.List;
-
+import org.springframework.boot.health.contributor.AbstractHealthIndicator;
+import org.springframework.boot.health.contributor.Health;
+import org.springframework.boot.health.contributor.PingHealthIndicator;
+import org.springframework.boot.health.contributor.Status;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**

@@ -1,5 +1,6 @@
 package org.apereo.cas.webauthn.web;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.CompressionUtils;
 import org.apereo.cas.util.EncodingUtils;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.io.IOUtils;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.endpoint.Access;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
@@ -32,10 +34,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.Collection;
-import java.util.Objects;
 
 /**
  * This is {@link WebAuthnRegisteredDevicesEndpoint}.
@@ -46,11 +44,11 @@ import java.util.Objects;
 @Endpoint(id = "webAuthnDevices", defaultAccess = Access.NONE)
 @Slf4j
 public class WebAuthnRegisteredDevicesEndpoint extends BaseCasRestActuatorEndpoint {
-    private final ObjectProvider<WebAuthnCredentialRepository> registrationStorage;
+    private final ObjectProvider<@NonNull WebAuthnCredentialRepository> registrationStorage;
 
     public WebAuthnRegisteredDevicesEndpoint(final CasConfigurationProperties casProperties,
                                              final ConfigurableApplicationContext applicationContext,
-                                             final ObjectProvider<WebAuthnCredentialRepository> registrationStorage) {
+                                             final ObjectProvider<@NonNull WebAuthnCredentialRepository> registrationStorage) {
         super(casProperties, applicationContext);
         this.registrationStorage = registrationStorage;
     }
@@ -124,7 +122,7 @@ public class WebAuthnRegisteredDevicesEndpoint extends BaseCasRestActuatorEndpoi
     @GetMapping(path = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @Operation(summary = "Export device registrations as a zip file")
     @ResponseBody
-    public ResponseEntity<Resource> export() {
+    public ResponseEntity<@NonNull Resource> export() {
         val resource = CompressionUtils.toZipFile(registrationStorage.getObject().stream(),
             Unchecked.function(entry -> {
                 val acct = (CredentialRegistration) entry;

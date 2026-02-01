@@ -1,21 +1,20 @@
 package org.apereo.cas.authentication.metadata;
 
+import module java.base;
 import org.apereo.cas.authentication.Credential;
 import org.apereo.cas.authentication.CredentialMetadata;
 import org.apereo.cas.authentication.CredentialTrait;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Basic credential metadata implementation that stores the original credential ID and the original credential type.
@@ -27,6 +26,8 @@ import java.util.Optional;
 @Getter
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode
+@RequiredArgsConstructor(onConstructor_ = @JsonCreator)
+@SuppressWarnings("NullAway.Init")
 public class BasicCredentialMetadata implements CredentialMetadata {
 
     @Serial
@@ -42,11 +43,14 @@ public class BasicCredentialMetadata implements CredentialMetadata {
      */
     private final Class<? extends Credential> credentialClass;
 
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private final List<CredentialTrait> traits = new ArrayList<>();
 
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private final Map<String, Serializable> properties = new HashMap<>();
 
     @Setter
+    @Nullable
     private String tenant;
 
     public BasicCredentialMetadata(final Credential credential, final Map<String, ? extends Serializable> properties) {
@@ -74,7 +78,7 @@ public class BasicCredentialMetadata implements CredentialMetadata {
     }
 
     @Override
-    public <T extends Serializable> T getProperty(final String key, final Class<T> clazz) {
+    public <T extends Serializable> @Nullable T getProperty(final String key, final Class<T> clazz) {
         return Optional.ofNullable(properties.get(key)).map(clazz::cast).orElse(null);
     }
 

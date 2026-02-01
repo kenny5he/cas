@@ -1,4 +1,4 @@
-ARG JAVA_VERSION
+ARG JAVA_VERSION=25.0.2
 FROM azul/zulu-openjdk:${JAVA_VERSION}
 
 ARG SCENARIO_FOLDER
@@ -26,8 +26,8 @@ COPY thekeystore /etc/cas
 COPY entrypoint.sh cas-server/
 RUN chmod +x /cas-server/entrypoint.sh
 
-EXPOSE 8080 $SERVER_PORT 5005
+EXPOSE 8080 $SERVER_PORT 5005 5000
 
-ENV PATH $PATH:$JAVA_HOME/bin:.
+ENV PATH=$PATH:$JAVA_HOME/bin:.
 WORKDIR cas-server
 ENTRYPOINT ["/cas-server/entrypoint.sh"]

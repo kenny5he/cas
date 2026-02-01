@@ -1,5 +1,6 @@
 package org.apereo.cas.web;
 
+import module java.base;
 import org.apereo.cas.config.CasCoreConfigurationMetadataAutoConfiguration;
 import org.apereo.cas.config.CasWebApplicationAutoConfiguration;
 import org.apereo.cas.configuration.CasConfigurationProperties;
@@ -27,17 +28,16 @@ import static org.junit.jupiter.api.Assertions.*;
 }, properties = {
     "server.port=8588",
     "server.ssl.enabled=false",
-    "cas.authn.mfa.gauth.issuer=CAS",
-    "cas.server.unknown.property=false"
+    "cas.authn.mfa.gauth.core.issuer=CAS"
 },
     webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @EnableConfigurationProperties(CasConfigurationProperties.class)
-@Tag("WebApp")
+@Tag("ApacheTomcat")
 @ExtendWith(CasTestExtension.class)
 class CasWebApplicationReadyTests {
     @Test
     void verifyOperation() {
-        assertEquals(Boolean.FALSE.toString(), System.getProperty(CasWebApplicationReady.SYSTEM_PROPERTY_CONFIG_VALIDATION_STATUS));
+        assertEquals(Boolean.TRUE.toString(), System.getProperty(CasWebApplicationReady.SYSTEM_PROPERTY_CONFIG_VALIDATION_STATUS));
     }
 
     @Test

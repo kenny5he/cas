@@ -1,17 +1,16 @@
 package org.apereo.cas.web.view;
 
+import module java.base;
 import org.apereo.cas.util.http.HttpRequestUtils;
+import org.apereo.cas.web.theme.ThemeResolver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.web.servlet.ThemeResolver;
 import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresource.ClassLoaderTemplateResource;
 import org.thymeleaf.templateresource.ITemplateResource;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 /**
  * This is {@link ThemeClassLoaderTemplateResolver}.

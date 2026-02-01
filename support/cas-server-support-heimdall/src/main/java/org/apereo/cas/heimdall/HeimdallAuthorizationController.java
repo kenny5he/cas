@@ -1,5 +1,6 @@
 package org.apereo.cas.heimdall;
 
+import module java.base;
 import org.apereo.cas.heimdall.engine.AuthorizationEngine;
 import org.apereo.cas.heimdall.engine.AuthorizationPrincipalParser;
 import org.apereo.cas.util.LoggingUtils;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * This is {@link HeimdallAuthorizationController}.
@@ -135,7 +135,7 @@ public class HeimdallAuthorizationController {
         return requestToAuthorize;
     }
 
-    protected ResponseEntity<AuthorizationResponse> buildResponse(
+    protected ResponseEntity<@NonNull AuthorizationResponse> buildResponse(
         final AuthorizationResponse authorizationResponse) {
         authorizationResponse.log();
         return ResponseEntity

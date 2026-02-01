@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.configuration.support.JpaBeans;
@@ -13,6 +14,7 @@ import org.apereo.cas.webauthn.JpaWebAuthnCredentialRegistration;
 import org.apereo.cas.webauthn.JpaWebAuthnCredentialRepository;
 import org.apereo.cas.webauthn.storage.WebAuthnCredentialRepository;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -28,7 +30,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionOperations;
 import org.springframework.transaction.support.TransactionTemplate;
 import jakarta.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
+import module java.sql;
 
 /**
  * This is {@link CasJpaWebAuthnAutoConfiguration}.
@@ -107,7 +109,7 @@ public class CasJpaWebAuthnAutoConfiguration {
         @Bean
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         @ConditionalOnMissingBean(name = "webAuthnEntityManagerFactory")
-        public FactoryBean<EntityManagerFactory> webAuthnEntityManagerFactory(
+        public FactoryBean<@NonNull EntityManagerFactory> webAuthnEntityManagerFactory(
             @Qualifier("jpaWebAuthnVendorAdapter")
             final JpaVendorAdapter jpaWebAuthnVendorAdapter,
             @Qualifier("dataSourceWebAuthn")

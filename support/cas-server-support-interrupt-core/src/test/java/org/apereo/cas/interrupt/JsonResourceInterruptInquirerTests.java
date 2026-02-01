@@ -1,17 +1,15 @@
 package org.apereo.cas.interrupt;
 
+import module java.base;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.MockRequestContext;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.FileSystemResource;
-import java.nio.file.Files;
-import java.util.LinkedHashMap;
-import java.util.List;
+import tools.jackson.databind.ObjectMapper;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -34,11 +32,11 @@ class JsonResourceInterruptInquirerTests {
             "field2", List.of("value3", "value4")));
         map.put("casuser", response);
 
-        val f = Files.createTempFile("interrupt", "json").toFile();
-        MAPPER.writer().withDefaultPrettyPrinter().writeValue(f, map);
-        assertTrue(f.exists());
+        val jsonFile = Files.createTempFile("interrupt", "json").toFile();
+        MAPPER.writeValue(jsonFile, map);
+        assertTrue(jsonFile.exists());
 
-        val inquirer = new JsonResourceInterruptInquirer(new FileSystemResource(f));
+        val inquirer = new JsonResourceInterruptInquirer(new FileSystemResource(jsonFile));
         response = inquirer.inquire(CoreAuthenticationTestUtils.getAuthentication("unknown"),
             CoreAuthenticationTestUtils.getRegisteredService(),
             CoreAuthenticationTestUtils.getService(),

@@ -1,13 +1,11 @@
 package org.apereo.cas.consent;
 
+import module java.base;
 import org.apereo.cas.util.ResourceUtils;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.io.FileWatcherService;
 import org.apereo.cas.util.io.WatcherService;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.val;
 import org.hjson.JsonValue;
@@ -16,12 +14,8 @@ import org.jooq.lambda.fi.util.function.CheckedConsumer;
 import org.jooq.lambda.fi.util.function.CheckedSupplier;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.io.Resource;
-
-import java.io.InputStreamReader;
-import java.io.Serial;
-import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link JsonConsentRepository}.
@@ -46,7 +40,7 @@ public class JsonConsentRepository extends BaseConsentRepository implements Disp
         setConsentDecisions(readDecisionsFromJsonResource());
         if (ResourceUtils.isFile(this.jsonResource)) {
             this.watcherService = new FileWatcherService(resource.getFile(),
-                __ -> setConsentDecisions(readDecisionsFromJsonResource()));
+                _ -> setConsentDecisions(readDecisionsFromJsonResource()));
             this.watcherService.start(getClass().getSimpleName());
         }
     }

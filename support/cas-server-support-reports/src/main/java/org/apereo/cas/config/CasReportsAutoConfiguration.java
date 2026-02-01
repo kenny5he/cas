@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.audit.AuditTrailExecutionPlan;
 import org.apereo.cas.audit.AuditableExecution;
 import org.apereo.cas.authentication.AuthenticationEventExecutionPlan;
@@ -56,6 +57,7 @@ import org.apereo.cas.web.report.TicketRegistryEndpoint;
 import org.apereo.cas.web.support.ArgumentExtractor;
 import lombok.val;
 import org.apereo.inspektr.common.spi.AuditActionDateProvider;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
@@ -73,7 +75,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
-import java.util.List;
 
 /**
  * This this {@link CasReportsAutoConfiguration}.
@@ -94,10 +95,11 @@ public class CasReportsAutoConfiguration {
         @ConditionalOnAvailableEndpoint
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public AttributeDefinitionsEndpoint attributeDefinitionsEndpoint(
+            final ConfigurableApplicationContext applicationContext,
             @Qualifier(AttributeDefinitionStore.BEAN_NAME)
-            final ObjectProvider<AttributeDefinitionStore> attributeDefinitionStore,
+            final ObjectProvider<@NonNull AttributeDefinitionStore> attributeDefinitionStore,
             final CasConfigurationProperties casProperties) {
-            return new AttributeDefinitionsEndpoint(casProperties, attributeDefinitionStore);
+            return new AttributeDefinitionsEndpoint(casProperties, applicationContext, attributeDefinitionStore);
         }
         
         @Bean
@@ -105,7 +107,7 @@ public class CasReportsAutoConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public CasResolveAttributesReportEndpoint resolveAttributesReportEndpoint(
             @Qualifier(PrincipalResolver.BEAN_NAME_PRINCIPAL_RESOLVER)
-            final ObjectProvider<PrincipalResolver> defaultPrincipalResolver,
+            final ObjectProvider<@NonNull PrincipalResolver> defaultPrincipalResolver,
             final CasConfigurationProperties casProperties) {
             return new CasResolveAttributesReportEndpoint(casProperties, defaultPrincipalResolver);
         }
@@ -116,15 +118,15 @@ public class CasReportsAutoConfiguration {
         public CasReleaseAttributesReportEndpoint releaseAttributesReportEndpoint(
             final ConfigurableApplicationContext applicationContext,
             @Qualifier(PrincipalResolver.BEAN_NAME_PRINCIPAL_RESOLVER)
-            final ObjectProvider<PrincipalResolver> defaultPrincipalResolver,
+            final ObjectProvider<@NonNull PrincipalResolver> defaultPrincipalResolver,
             @Qualifier(WebApplicationService.BEAN_NAME_FACTORY)
-            final ObjectProvider<ServiceFactory<WebApplicationService>> webApplicationServiceFactory,
+            final ObjectProvider<@NonNull ServiceFactory<WebApplicationService>> webApplicationServiceFactory,
             @Qualifier(AuthenticationSystemSupport.BEAN_NAME)
-            final ObjectProvider<AuthenticationSystemSupport> authenticationSystemSupport,
+            final ObjectProvider<@NonNull AuthenticationSystemSupport> authenticationSystemSupport,
             @Qualifier(PrincipalFactory.BEAN_NAME)
-            final ObjectProvider<PrincipalFactory> principalFactory,
+            final ObjectProvider<@NonNull PrincipalFactory> principalFactory,
             @Qualifier(ServicesManager.BEAN_NAME)
-            final ObjectProvider<ServicesManager> servicesManager,
+            final ObjectProvider<@NonNull ServicesManager> servicesManager,
             final CasConfigurationProperties casProperties) {
             return new CasReleaseAttributesReportEndpoint(
                 casProperties, applicationContext,
@@ -159,9 +161,9 @@ public class CasReportsAutoConfiguration {
         public SingleSignOnSessionsEndpoint singleSignOnSessionsEndpoint(
             final ConfigurableApplicationContext applicationContext,
             @Qualifier(TicketRegistry.BEAN_NAME)
-            final ObjectProvider<TicketRegistry> ticketRegistry,
+            final ObjectProvider<@NonNull TicketRegistry> ticketRegistry,
             @Qualifier(SingleLogoutRequestExecutor.BEAN_NAME)
-            final ObjectProvider<SingleLogoutRequestExecutor> defaultSingleLogoutRequestExecutor,
+            final ObjectProvider<@NonNull SingleLogoutRequestExecutor> defaultSingleLogoutRequestExecutor,
             final CasConfigurationProperties casProperties) {
             return new SingleSignOnSessionsEndpoint(ticketRegistry, applicationContext,
                 casProperties, defaultSingleLogoutRequestExecutor);
@@ -174,9 +176,9 @@ public class CasReportsAutoConfiguration {
             final CasConfigurationProperties casProperties,
             final ConfigurableApplicationContext applicationContext,
             @Qualifier(CasCookieBuilder.BEAN_NAME_TICKET_GRANTING_COOKIE_BUILDER)
-            final ObjectProvider<CasCookieBuilder> ticketGrantingTicketCookieGenerator,
+            final ObjectProvider<@NonNull CasCookieBuilder> ticketGrantingTicketCookieGenerator,
             @Qualifier(TicketRegistrySupport.BEAN_NAME)
-            final ObjectProvider<TicketRegistrySupport> ticketRegistrySupport) {
+            final ObjectProvider<@NonNull TicketRegistrySupport> ticketRegistrySupport) {
             return new SingleSignOnSessionStatusEndpoint(casProperties, applicationContext,
                 ticketGrantingTicketCookieGenerator, ticketRegistrySupport);
         }
@@ -190,7 +192,7 @@ public class CasReportsAutoConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public RegisteredAuthenticationHandlersEndpoint registeredAuthenticationHandlersEndpoint(
             @Qualifier(AuthenticationEventExecutionPlan.DEFAULT_BEAN_NAME)
-            final ObjectProvider<AuthenticationEventExecutionPlan> authenticationEventExecutionPlan,
+            final ObjectProvider<@NonNull AuthenticationEventExecutionPlan> authenticationEventExecutionPlan,
             final CasConfigurationProperties casProperties) {
             return new RegisteredAuthenticationHandlersEndpoint(casProperties, authenticationEventExecutionPlan);
         }
@@ -200,7 +202,7 @@ public class CasReportsAutoConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public RegisteredAuthenticationPoliciesEndpoint registeredAuthenticationPoliciesEndpoint(
             @Qualifier(AuthenticationEventExecutionPlan.DEFAULT_BEAN_NAME)
-            final ObjectProvider<AuthenticationEventExecutionPlan> authenticationEventExecutionPlan,
+            final ObjectProvider<@NonNull AuthenticationEventExecutionPlan> authenticationEventExecutionPlan,
             final CasConfigurationProperties casProperties) {
             return new RegisteredAuthenticationPoliciesEndpoint(casProperties, authenticationEventExecutionPlan);
         }
@@ -242,7 +244,7 @@ public class CasReportsAutoConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public CasRuntimeModulesEndpoint casRuntimeModulesEndpoint(
             @Qualifier("casRuntimeModuleLoader")
-            final ObjectProvider<CasRuntimeModuleLoader> casRuntimeModuleLoader,
+            final ObjectProvider<@NonNull CasRuntimeModuleLoader> casRuntimeModuleLoader,
             final CasConfigurationProperties casProperties) {
             return new CasRuntimeModulesEndpoint(casProperties, casRuntimeModuleLoader);
         }
@@ -267,11 +269,11 @@ public class CasReportsAutoConfiguration {
         @ConditionalOnAvailableEndpoint
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public RegisteredServicesEndpoint registeredServicesReportEndpoint(
-            final ObjectProvider<ConfigurableApplicationContext> applicationContext,
+            final ObjectProvider<@NonNull ConfigurableApplicationContext> applicationContext,
             @Qualifier(ServicesManagerConfigurationContext.BEAN_NAME)
-            final ObjectProvider<ServicesManagerConfigurationContext> configurationContext,
+            final ObjectProvider<@NonNull ServicesManagerConfigurationContext> configurationContext,
             @Qualifier(ServicesManager.BEAN_NAME)
-            final ObjectProvider<ServicesManager> servicesManager,
+            final ObjectProvider<@NonNull ServicesManager> servicesManager,
             final CasConfigurationProperties casProperties) {
 
             val serializers = CollectionUtils.wrapList(
@@ -290,20 +292,20 @@ public class CasReportsAutoConfiguration {
         public RegisteredServiceAccessEndpoint registeredServiceAccessEndpoint(
             final ConfigurableApplicationContext applicationContext,
             @Qualifier(ArgumentExtractor.BEAN_NAME)
-            final ObjectProvider<ArgumentExtractor> argumentExtractor,
+            final ObjectProvider<@NonNull ArgumentExtractor> argumentExtractor,
             @Qualifier(AuthenticationServiceSelectionPlan.BEAN_NAME)
-            final ObjectProvider<AuthenticationServiceSelectionPlan> authenticationServiceSelectionPlan,
+            final ObjectProvider<@NonNull AuthenticationServiceSelectionPlan> authenticationServiceSelectionPlan,
             final CasConfigurationProperties casProperties,
             @Qualifier(ServicesManager.BEAN_NAME)
-            final ObjectProvider<ServicesManager> servicesManager,
+            final ObjectProvider<@NonNull ServicesManager> servicesManager,
             @Qualifier(AuthenticationSystemSupport.BEAN_NAME)
-            final ObjectProvider<AuthenticationSystemSupport> authenticationSystemSupport,
+            final ObjectProvider<@NonNull AuthenticationSystemSupport> authenticationSystemSupport,
             @Qualifier(AuditableExecution.AUDITABLE_EXECUTION_REGISTERED_SERVICE_ACCESS)
-            final ObjectProvider<AuditableExecution> registeredServiceAccessStrategyEnforcer,
+            final ObjectProvider<@NonNull AuditableExecution> registeredServiceAccessStrategyEnforcer,
             @Qualifier(PrincipalResolver.BEAN_NAME_PRINCIPAL_RESOLVER)
-            final ObjectProvider<PrincipalResolver> defaultPrincipalResolver,
+            final ObjectProvider<@NonNull PrincipalResolver> defaultPrincipalResolver,
             @Qualifier(PrincipalFactory.BEAN_NAME)
-            final ObjectProvider<PrincipalFactory> principalFactory) {
+            final ObjectProvider<@NonNull PrincipalFactory> principalFactory) {
             return new RegisteredServiceAccessEndpoint(casProperties, applicationContext, servicesManager,
                 authenticationServiceSelectionPlan, argumentExtractor, registeredServiceAccessStrategyEnforcer,
                 authenticationSystemSupport, defaultPrincipalResolver, principalFactory);
@@ -318,10 +320,10 @@ public class CasReportsAutoConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public AuditLogEndpoint auditLogEndpoint(
             @Qualifier("defaultAuditActionDateProvider")
-            final ObjectProvider<AuditActionDateProvider> defaultAuditActionDateProvider,
+            final ObjectProvider<@NonNull AuditActionDateProvider> defaultAuditActionDateProvider,
             final ConfigurableApplicationContext applicationContext,
             @Qualifier(AuditTrailExecutionPlan.BEAN_NAME)
-            final ObjectProvider<AuditTrailExecutionPlan> auditTrailExecutionPlan,
+            final ObjectProvider<@NonNull AuditTrailExecutionPlan> auditTrailExecutionPlan,
             final CasConfigurationProperties casProperties) {
             return new AuditLogEndpoint(auditTrailExecutionPlan,
                 applicationContext, defaultAuditActionDateProvider, casProperties);
@@ -336,7 +338,7 @@ public class CasReportsAutoConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public StatisticsEndpoint statisticsReportEndpoint(
             @Qualifier(TicketRegistry.BEAN_NAME)
-            final ObjectProvider<TicketRegistry> ticketRegistry,
+            final ObjectProvider<@NonNull TicketRegistry> ticketRegistry,
             final CasConfigurationProperties casProperties) {
             return new StatisticsEndpoint(ticketRegistry, casProperties);
         }
@@ -348,7 +350,7 @@ public class CasReportsAutoConfiguration {
             @Qualifier(WebApplicationService.BEAN_NAME_FACTORY)
             final ServiceFactory<WebApplicationService> webApplicationServiceFactory,
             @Qualifier(ServicesManager.BEAN_NAME)
-            final ObjectProvider<ServicesManager> servicesManager,
+            final ObjectProvider<@NonNull ServicesManager> servicesManager,
             final CasConfigurationProperties casProperties,
             final List<ExpirationPolicyBuilder> builders) {
             return new TicketExpirationPoliciesEndpoint(casProperties, builders,
@@ -360,15 +362,15 @@ public class CasReportsAutoConfiguration {
         @ConditionalOnAvailableEndpoint
         public TicketRegistryEndpoint ticketRegistryEndpoint(
             @Qualifier(TicketCatalog.BEAN_NAME)
-            final ObjectProvider<TicketCatalog> ticketCatalog,
+            final ObjectProvider<@NonNull TicketCatalog> ticketCatalog,
             final ConfigurableApplicationContext applicationContext,
             final CasConfigurationProperties casProperties,
             @Qualifier(TicketRegistrySupport.BEAN_NAME)
-            final ObjectProvider<TicketRegistrySupport> ticketRegistrySupport,
+            final ObjectProvider<@NonNull TicketRegistrySupport> ticketRegistrySupport,
             @Qualifier(TicketRegistry.BEAN_NAME)
-            final ObjectProvider<TicketRegistry> ticketRegistry,
+            final ObjectProvider<@NonNull TicketRegistry> ticketRegistry,
             @Qualifier(TicketRegistryCleaner.BEAN_NAME)
-            final ObjectProvider<TicketRegistryCleaner> ticketRegistryCleaner) {
+            final ObjectProvider<@NonNull TicketRegistryCleaner> ticketRegistryCleaner) {
             return new TicketRegistryEndpoint(casProperties, applicationContext,
                 ticketRegistry, ticketRegistryCleaner, ticketRegistrySupport,
                 ticketCatalog);
@@ -405,7 +407,7 @@ public class CasReportsAutoConfiguration {
         public MultitenancyEndpoint multitenancyEndpoint(
             final ConfigurableApplicationContext applicationContext,
             @Qualifier(TenantExtractor.BEAN_NAME)
-            final ObjectProvider<TenantExtractor> tenantExtractor,
+            final ObjectProvider<@NonNull TenantExtractor> tenantExtractor,
             final CasConfigurationProperties casProperties) {
             return new MultitenancyEndpoint(casProperties, applicationContext, tenantExtractor);
         }

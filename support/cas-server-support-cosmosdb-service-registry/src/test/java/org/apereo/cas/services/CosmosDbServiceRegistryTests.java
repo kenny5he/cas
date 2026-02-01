@@ -1,5 +1,6 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.config.CasCosmosDbServiceRegistryAutoConfiguration;
 import org.apereo.cas.cosmosdb.CosmosDbObjectFactory;
 import org.apereo.cas.test.CasTestExtension;
@@ -22,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author Misagh Moayyed
  * @since 5.2.0
+ * @deprecated Since 8.0.0
  */
 @Tag("Azure")
 @ExtendWith(CasTestExtension.class)
@@ -42,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Getter
 @EnabledIfEnvironmentVariable(named = "COSMOS_DB_URL", matches = ".+")
 @EnabledIfEnvironmentVariable(named = "COSMOS_DB_KEY", matches = ".+")
+@Deprecated(since = "8.0.0", forRemoval = true)
 class CosmosDbServiceRegistryTests extends AbstractServiceRegistryTests {
     @Autowired
     @Qualifier(ServiceRegistry.BEAN_NAME)

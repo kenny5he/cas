@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.audit.AuditTrailExecutionPlanConfigurer;
 import org.apereo.cas.audit.JdbcAuditTrailEntityFactory;
 import org.apereo.cas.audit.generic.JdbcAuditTrailEntity;
@@ -25,6 +26,7 @@ import org.apereo.inspektr.audit.support.JdbcAuditTrailManager;
 import org.apereo.inspektr.audit.support.MaxAgeWhereClauseMatchCriteria;
 import org.apereo.inspektr.audit.support.WhereClauseMatchCriteria;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -47,7 +49,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionOperations;
 import org.springframework.transaction.support.TransactionTemplate;
 import jakarta.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
+import module java.sql;
 
 /**
  * This is {@link CasJdbcAuditAutoConfiguration}.
@@ -86,7 +88,7 @@ public class CasJdbcAuditAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean(name = "inspektrAuditEntityManagerFactory")
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-        public FactoryBean<EntityManagerFactory> inspektrAuditEntityManagerFactory(
+        public FactoryBean<@NonNull EntityManagerFactory> inspektrAuditEntityManagerFactory(
             @Qualifier("jpaAuditTrailEntityFactory")
             final JpaEntityFactory<AuditTrailEntity> jpaAuditTrailEntityFactory,
             @Qualifier("inspektrAuditJpaVendorAdapter")
@@ -165,7 +167,7 @@ public class CasJdbcAuditAutoConfiguration {
             if (StringUtils.isNotBlank(jdbc.getDefaultCatalog())) {
                 tableName = jdbc.getDefaultCatalog().concat(".").concat(tableName);
             }
-            return tableName;
+            return tableName.toLowerCase(Locale.ENGLISH);
         }
 
         @Bean

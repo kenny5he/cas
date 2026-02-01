@@ -1,5 +1,6 @@
 package org.apereo.cas.util.http;
 
+import module java.base;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.EncodingUtils;
 import org.apereo.cas.util.LoggingUtils;
@@ -25,28 +26,23 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuil
 import org.apache.hc.client5.http.ssl.DefaultHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.core5.http.HttpEntityContainer;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
 import org.apache.hc.core5.http.message.BasicHttpResponse;
 import org.apache.hc.core5.net.URIBuilder;
 import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
 import org.apache.hc.core5.pool.PoolReusePolicy;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.util.Timeout;
+import org.jspecify.annotations.Nullable;
+import org.springframework.core.retry.Retryable;
 import org.springframework.http.MediaType;
-import javax.net.ssl.SSLHandshakeException;
-import java.io.Serial;
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * This is {@link HttpUtils}.
@@ -85,31 +81,32 @@ public class HttpUtils {
             });
             prepareHttpRequest(request, execution);
             val client = getHttpClient(execution);
-            return FunctionUtils.doAndRetry(retryContext -> {
-                LOGGER.trace("Sending HTTP request to [{}]. Attempt: [{}]", request.getUri(), retryContext.getRetryCount());
+            return FunctionUtils.doAndRetry((Retryable<HttpResponse>) () -> {
+                LOGGER.trace("Sending HTTP request to [{}]", request.getUri());
                 val res = client.execute(request, HttpRequestUtils.HTTP_CLIENT_RESPONSE_HANDLER);
-                if (res == null || org.springframework.http.HttpStatus.valueOf(res.getCode()).isError()) {
-                    val maxAttempts = (Integer) retryContext.getAttribute("retry.maxAttempts");
-                    if (maxAttempts == null || retryContext.getRetryCount() != maxAttempts - 1) {
-                        throw new HttpRequestExecutionException(res);
-                    }
+                if (res == null || org.springframework.http.HttpStatus.valueOf(res.getCode()).is5xxServerError()) {
+                    throw new HttpRequestExecutionException(res);
                 }
                 return res;
             }, execution.getMaximumRetryAttempts());
-        } catch (final SSLHandshakeException e) {
-            val sanitizedUrl = FunctionUtils.doUnchecked(
-                () -> new URIBuilder(execution.getUrl()).removeQuery().clearParameters().build().toASCIIString());
-            LoggingUtils.error(LOGGER, "SSL error accessing: [" + sanitizedUrl + ']', e);
-            return new BasicHttpResponse(HttpStatus.SC_INTERNAL_SERVER_ERROR, sanitizedUrl);
         } catch (final Exception e) {
             LoggingUtils.error(LOGGER, e);
-            if (e instanceof final HttpRequestExecutionException hre && hre.getResponse() != null) {
-                val response = new BasicHttpResponse(hre.getResponse().getCode(), hre.getResponse().getReasonPhrase());
+            if (e.getCause() instanceof final SSLHandshakeException she) {
+                val sanitizedUrl = FunctionUtils.doUnchecked(
+                    () -> new URIBuilder(execution.getUrl()).removeQuery().clearParameters().build().toASCIIString());
+                LoggingUtils.error(LOGGER, "SSL error accessing: [" + sanitizedUrl + ']', she);
+                return new BasicHttpResponse(HttpStatus.SC_INTERNAL_SERVER_ERROR, sanitizedUrl);
+            }
+            if (e.getCause() instanceof final HttpRequestExecutionException hre && hre.getResponse() != null) {
+                val response = new BasicClassicHttpResponse(hre.getResponse().getCode(), hre.getResponse().getReasonPhrase());
                 response.setHeaders(hre.getResponse().getHeaders());
+                if (hre.getResponse() instanceof final HttpEntityContainer entityContainer) {
+                    response.setEntity(entityContainer.getEntity());
+                }
                 return response;
             }
         }
-        return null;
+        return new BasicHttpResponse(HttpStatus.SC_SERVICE_UNAVAILABLE);
     }
 
     /**
@@ -133,9 +130,9 @@ public class HttpUtils {
      *
      * @param response the response to close
      */
-    public void close(final HttpResponse response) {
+    public void close(final @Nullable HttpResponse response) {
         if (response instanceof final CloseableHttpResponse closeableHttpResponse) {
-            FunctionUtils.doAndHandle(__ -> closeableHttpResponse.close());
+            FunctionUtils.doAndHandle(_ -> closeableHttpResponse.close());
         }
     }
 

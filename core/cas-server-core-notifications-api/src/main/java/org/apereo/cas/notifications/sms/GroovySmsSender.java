@@ -1,5 +1,6 @@
 package org.apereo.cas.notifications.sms;
 
+import module java.base;
 import org.apereo.cas.util.scripting.ExecutableCompiledScript;
 import org.apereo.cas.util.scripting.ExecutableCompiledScriptFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,7 @@ public class GroovySmsSender implements SmsSender, DisposableBean {
 
     @Override
     public boolean send(final String from, final String to, final String message) throws Throwable {
-        return watchableScript.execute(new Object[]{from, to, message, LOGGER}, Boolean.class);
+        return Boolean.TRUE.equals(watchableScript.execute(new Object[]{from, to, message, LOGGER}, Boolean.class));
     }
 
     @Override

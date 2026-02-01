@@ -1,6 +1,8 @@
 package org.apereo.cas.ticket;
 
+import module java.base;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This is {@link TicketGrantingTicketAwareTicket}.
@@ -15,7 +17,7 @@ public interface TicketGrantingTicketAwareTicket extends AuthenticationAwareTick
      *
      * @return the ticket or null if it has no parent
      */
-    default Ticket getTicketGrantingTicket() {
+    default @Nullable Ticket getTicketGrantingTicket() {
         return null;
     }
 }

@@ -1,5 +1,6 @@
 package org.apereo.cas.sba;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.DigestUtils;
 import de.codecentric.boot.admin.server.domain.values.InstanceId;
@@ -8,7 +9,7 @@ import de.codecentric.boot.admin.server.services.InstanceIdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
-import java.util.Objects;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This is {@link CasServerInstanceIdGenerator}.
@@ -23,7 +24,7 @@ public class CasServerInstanceIdGenerator implements InstanceIdGenerator {
     private final CasConfigurationProperties casProperties;
 
     @Override
-    public InstanceId generateId(final Registration registration) {
+    public @NonNull InstanceId generateId(final Registration registration) {
         val serverName = StringUtils.defaultIfEmpty(registration.getMetadata().get("name"), casProperties.getHost().getName());
         val registrationHashKey = registration.getHealthUrl() + '-' + Objects.requireNonNull(serverName,
             "Server name cannot be undefined. Instance registration metadata must include a name in CAS configuration or [cas.host.name=...] must be defined.");

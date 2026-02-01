@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
+import module java.base;
 
 /**
  * This is {@link CheckSpringConfigurationFactories}.
@@ -12,7 +13,7 @@ import java.util.regex.Pattern;
  * @since 6.4.0
  */
 public class CheckMixingSpringBeanWithDependencyInjection {
-    public static void main(final String[] args) throws Exception {
+    void main(final String[] args) throws Exception {
         checkConfigurations(args[0]);
     }
 

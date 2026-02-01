@@ -1,5 +1,6 @@
 package org.apereo.cas.logging;
 
+import module java.base;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.core.Filter;
@@ -36,10 +37,7 @@ public class ExceptionOnlyFilter extends AbstractFilter {
 
     @Override
     public Result filter(final LogEvent event) {
-        if (event.getThrown() != null) {
-            return getOnMatch();
-        }
-        return getOnMismatch();
+        return event.getThrown() != null ? getOnMatch() : getOnMismatch();
     }
 
     @Override

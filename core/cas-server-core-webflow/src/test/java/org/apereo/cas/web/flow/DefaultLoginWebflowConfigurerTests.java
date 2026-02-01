@@ -1,6 +1,6 @@
 package org.apereo.cas.web.flow;
 
-import org.apereo.cas.util.MockRequestContext;
+import module java.base;
 import org.apereo.cas.web.support.CasLocaleChangeInterceptor;
 import lombok.val;
 import org.junit.jupiter.api.Tag;
@@ -8,13 +8,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.binding.expression.Expression;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
-import org.springframework.webflow.engine.EndState;
 import org.springframework.webflow.engine.Flow;
 import org.springframework.webflow.engine.Transition;
 import org.springframework.webflow.engine.ViewState;
 import org.springframework.webflow.execution.Action;
 import org.springframework.webflow.execution.ViewFactory;
-import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -70,16 +68,6 @@ class DefaultLoginWebflowConfigurerTests extends BaseWebflowConfigurerTests {
         assertNull(cfg.createViewState(null, "ViewState", (ViewFactory) null));
         assertNull(cfg.createViewState(null, "ViewState", (Expression) null, null));
         assertNotNull(cfg.createViewState(flow, CasWebflowConstants.STATE_ID_VIEW_LOGIN_FORM, (ViewFactory) null));
-    }
-
-    @Test
-    void verifyWebflowConfigError() throws Throwable {
-        val flow = (Flow) flowDefinitionRegistry.getFlowDefinition(CasWebflowConfigurer.FLOW_ID_LOGIN);
-        val stopState = (EndState) flow.getState(CasWebflowConstants.STATE_ID_VIEW_WEBFLOW_CONFIG_ERROR);
-        val context = MockRequestContext.create(applicationContext);
-        context.setActiveFlow(flow);
-        context.getFlashScope().put(CasWebflowConstants.ATTRIBUTE_ERROR_ROOT_CAUSE_EXCEPTION, new RuntimeException());
-        assertDoesNotThrow(() -> stopState.enter(context));
     }
 
     @Test

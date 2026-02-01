@@ -1,9 +1,12 @@
 package org.apereo.cas.ticket;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -12,12 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Abstract implementation of a ticket that handles all ticket state for
@@ -41,6 +39,7 @@ import java.util.Optional;
 @EqualsAndHashCode(of = "id")
 @Setter
 @Slf4j
+@SuppressWarnings("NullAway.Init")
 public abstract class AbstractTicket implements TicketGrantingTicketAwareTicket, PropertiesAwareTicket {
 
     @Serial
@@ -89,12 +88,13 @@ public abstract class AbstractTicket implements TicketGrantingTicketAwareTicket,
      * Flag to enforce manual expiration.
      */
     private Boolean expired = Boolean.FALSE;
-    
+
     private Boolean stateless = Boolean.FALSE;
 
     @Getter
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private Map<String, Object> properties = new HashMap<>();
-    
+
     protected AbstractTicket(final String id, final ExpirationPolicy expirationPolicy) {
         this.id = id;
         this.creationTime = ZonedDateTime.now(expirationPolicy.getClock());
@@ -140,7 +140,7 @@ public abstract class AbstractTicket implements TicketGrantingTicketAwareTicket,
     }
 
     @Override
-    public Authentication getAuthentication() {
+    public @Nullable Authentication getAuthentication() {
         val ticketGrantingTicket = getTicketGrantingTicket();
         return Optional.ofNullable(ticketGrantingTicket)
             .map(AuthenticationAwareTicket.class::cast)
@@ -195,7 +195,7 @@ public abstract class AbstractTicket implements TicketGrantingTicketAwareTicket,
     }
 
     @Override
-    public <T> T getProperty(final String name, final Class<T> clazz) {
+    public @Nullable <T> T getProperty(final String name, final Class<T> clazz) {
         if (containsProperty(name)) {
             return clazz.cast(this.properties.get(name));
         }

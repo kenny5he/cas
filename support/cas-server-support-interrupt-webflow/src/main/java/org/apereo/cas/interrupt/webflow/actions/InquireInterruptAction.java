@@ -1,5 +1,6 @@
 package org.apereo.cas.interrupt.webflow.actions;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.interrupt.InterruptInquirer;
@@ -19,13 +20,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * This is {@link InquireInterruptAction}.
@@ -42,10 +41,10 @@ public class InquireInterruptAction extends BaseCasWebflowAction {
 
     private final InterruptTrackingEngine interruptTrackingEngine;
 
-    private final ObjectProvider<ScriptResourceCacheManager> scriptResourceCacheManager;
+    private final ObjectProvider<@NonNull ScriptResourceCacheManager> scriptResourceCacheManager;
     
     @Override
-    protected Event doExecuteInternal(final RequestContext requestContext) throws Throwable {
+    protected @Nullable Event doExecuteInternal(final RequestContext requestContext) throws Throwable {
         if (WebUtils.isInterruptAuthenticationFlowFinalized(requestContext)) {
             return getInterruptSkippedEvent();
         }

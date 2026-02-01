@@ -262,12 +262,9 @@
                                 </span>
                             </span>
                         </p>
-
-                        <script type="text/javascript">
-                            let client = new ClientJS();
-                            let fingerprint = client.getFingerprint();
-                            $("[name=\"deviceFingerprint\"]").val(fingerprint);
-                        </script>
+                        <script
+                                th:if="${#cas.isTrue(#cas.theme('cas.login-form.device-fingerprint.enabled'))}"
+                                type="text/javascript">captureFingerprint();</script>
                     </section>
 
                     <p id="fieldsLegend"
@@ -330,7 +327,7 @@
                     $("#webauthnLoginPanel").show();
                 </script>
 
-                <div th:replace="~{fragments/webAuthnLogin :: webAuthnLogin}"/>
+                <div th:replace="~{fragments/webAuthnLogin :: webAuthnLogin(primaryAuthentication=true)}"/>
                 <hr class="my-4"/>
             </span>
 

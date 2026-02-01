@@ -1,5 +1,6 @@
 package org.apereo.cas.consent;
 
+import module java.base;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.io.Serial;
 
 /**
  * This is {@link JpaConsentDecision}.
@@ -31,7 +31,7 @@ public class JpaConsentDecision extends ConsentDecision {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id = -1;
+    private long id;
 
     @Override
     public void setId(final long id) {

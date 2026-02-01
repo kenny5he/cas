@@ -1,5 +1,6 @@
 package org.apereo.cas.support.saml.web.idp.profile.artifact;
 
+import module java.base;
 import org.apereo.cas.ticket.TicketFactory;
 import org.apereo.cas.ticket.TicketGrantingTicket;
 import org.apereo.cas.ticket.artifact.SamlArtifactTicket;
@@ -11,14 +12,12 @@ import org.apereo.cas.web.cookie.CasCookieBuilder;
 import org.apereo.cas.web.support.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.common.binding.artifact.impl.BasicSAMLArtifactMap;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.jee.context.JEEContext;
-import jakarta.annotation.Nonnull;
-import java.io.IOException;
-import java.util.Objects;
 
 /**
  * This is {@link CasSamlArtifactMap}.
@@ -39,10 +38,10 @@ public class CasSamlArtifactMap extends BasicSAMLArtifactMap {
 
     @Override
     public void put(
-        @Nonnull final String artifact,
-        @Nonnull final String relyingPartyId,
-        @Nonnull final String issuerId,
-        @Nonnull final SAMLObject samlMessage) throws IOException {
+        @NonNull final String artifact,
+        @NonNull final String relyingPartyId,
+        @NonNull final String issuerId,
+        @NonNull final SAMLObject samlMessage) throws IOException {
         super.put(artifact, relyingPartyId, issuerId, samlMessage);
 
         val request = HttpRequestUtils.getHttpServletRequestFromRequestAttributes();
@@ -64,6 +63,6 @@ public class CasSamlArtifactMap extends BasicSAMLArtifactMap {
             ticketGrantingTicket,
             issuerId,
             relyingPartyId, samlMessage);
-        FunctionUtils.doUnchecked(__ -> ticketRegistry.addTicket(ticket));
+        FunctionUtils.doUnchecked(_ -> ticketRegistry.addTicket(ticket));
     }
 }

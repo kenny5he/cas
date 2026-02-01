@@ -11,7 +11,7 @@ env:
   GH_PACKAGE_REGISTRY_USER: ${{ secrets.GH_PACKAGE_REGISTRY_USER }}
   GH_PACKAGE_REGISTRY_TOKEN: ${{ secrets.GH_PACKAGE_REGISTRY_TOKEN }}
   CAS_MODULE_METADATA_MONGODB_URL: ${{ secrets.CAS_MODULE_METADATA_MONGODB_URL }}
-  JDK_CURRENT: 21
+  JDK_CURRENT: 25
   JDK_DISTRIBUTION: "corretto"
 
 ##########################################################################
@@ -36,7 +36,7 @@ jobs:
     outputs:
       is_snapshot: ${{ steps.check.outputs.is_snapshot }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Determine version
         id: check
         run: |
@@ -57,14 +57,14 @@ jobs:
     if: needs.check.outputs.is_snapshot == 'true'
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JDK_CURRENT }}
           distribution: ${{ env.JDK_DISTRIBUTION }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
       - name: Initialize
         run: ls ./ci && find ./ci -type f -name "*.sh" -exec chmod +x "{}" \; && ./ci/init-build.sh
         
@@ -76,14 +76,14 @@ jobs:
      continue-on-error: false
      steps:
        - name: Checkout
-         uses: actions/checkout@v5
+         uses: actions/checkout@v6
        - name: Set up JDK
          uses: actions/setup-java@v5
          with:
            java-version: ${{ env.JDK_CURRENT }}
            distribution: ${{ env.JDK_DISTRIBUTION }}
        - name: Setup Gradle
-         uses: gradle/actions/setup-gradle@v4
+         uses: gradle/actions/setup-gradle@v5
        - name: Initialize
          run: find ./ci -type f -name "*.sh" -exec chmod +x "{}" \; && ./ci/init-build.sh
        - name: Publish SNAPSHOTs
@@ -93,7 +93,7 @@ jobs:
            max_attempts: 3
            retry_on: error
            retry_wait_seconds: 10
-           timeout_minutes: 70
+           timeout_minutes: 120
            shell: bash
            command: ./ci/release.sh
        - name: Verify SNAPSHOTs
@@ -111,14 +111,14 @@ jobs:
     continue-on-error: false
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JDK_CURRENT }}
           distribution: ${{ env.JDK_DISTRIBUTION }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
       - name: Initialize
         run: find ./ci -type f -name "*.sh" -exec chmod +x "{}" \; && ./ci/init-build.sh
       - name: Install MongoDB tools

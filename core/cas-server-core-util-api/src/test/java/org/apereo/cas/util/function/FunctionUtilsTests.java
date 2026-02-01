@@ -1,15 +1,15 @@
 package org.apereo.cas.util.function;
 
+import module java.base;
 import org.apereo.cas.util.CompressionUtils;
 import com.google.common.base.Suppliers;
 import lombok.val;
 import org.jooq.lambda.fi.util.function.CheckedFunction;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import org.springframework.core.retry.RetryException;
+import org.springframework.core.retry.Retryable;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -24,20 +24,28 @@ class FunctionUtilsTests {
     @Test
     void verifyDoAndRetry() {
         val count = new AtomicInteger();
-        assertThrows(IllegalArgumentException.class, () -> FunctionUtils.doAndRetry(retryContext -> {
-            count.incrementAndGet();
-            throw new IllegalArgumentException("Failed to execute");
-        }, 2));
-        assertEquals(2, count.get());
+        assertThrows(RetryException.class,
+            () -> FunctionUtils.doAndRetry(new Retryable<>() {
+                @Override
+                public @Nullable Object execute() {
+                    count.incrementAndGet();
+                    throw new IllegalArgumentException("Failed to execute");
+                }
+            }, 2));
+        assertEquals(3, count.get());
     }
 
     @Test
     void verifyDoAndNeverRetry() {
         val count = new AtomicInteger();
-        assertThrows(IllegalArgumentException.class, () -> FunctionUtils.doAndRetry(retryContext -> {
-            count.incrementAndGet();
-            throw new IllegalArgumentException("Failed to execute");
-        }, -1));
+        assertThrows(RetryException.class,
+            () -> FunctionUtils.doAndRetry(new Retryable<>() {
+                @Override
+                public @Nullable Object execute() {
+                    count.incrementAndGet();
+                    throw new IllegalArgumentException("Failed to execute");
+                }
+            }, -1));
         assertEquals(1, count.get());
     }
 
@@ -104,7 +112,7 @@ class FunctionUtilsTests {
             throw new IllegalArgumentException();
         }, Suppliers.ofInstance(Boolean.FALSE));
         assertFalse(supplier.get());
-        assertDoesNotThrow(() -> FunctionUtils.doIfNotNull(null, __ -> {
+        assertDoesNotThrow(() -> FunctionUtils.doIfNotNull(null, _ -> {
             throw new IllegalArgumentException();
         }));
     }

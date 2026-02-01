@@ -1,5 +1,6 @@
 package org.apereo.cas.support.saml.web.idp.profile;
 
+import module java.base;
 import org.apereo.cas.CasProtocolConstants;
 import org.apereo.cas.audit.AuditableContext;
 import org.apereo.cas.authentication.Authentication;
@@ -65,9 +66,6 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * A parent controller to handle SAML requests.
@@ -528,7 +526,7 @@ public abstract class AbstractSamlIdPProfileHandlerController extends AbstractCo
 
     protected void storeAuthenticationRequest(final HttpServletRequest request, final HttpServletResponse response,
                                               final Pair<? extends SignableSAMLObject, MessageContext> context) {
-        lock.tryLock(__ -> {
+        lock.tryLock(_ -> {
             val webContext = new JEEContext(request, response);
             SamlIdPSessionManager.of(configurationContext.getOpenSamlConfigBean(),
                 configurationContext.getSessionStore()).store(webContext, context);

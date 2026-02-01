@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.configuration.support.JpaBeans;
@@ -17,6 +18,7 @@ import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,9 +36,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.spi.PersistenceProvider;
-import javax.sql.DataSource;
-import java.util.Objects;
-import java.util.function.Supplier;
+import module java.sql;
 
 /**
  * This is {@link CasOidcJwksJpaAutoConfiguration}.
@@ -56,7 +56,7 @@ public class CasOidcJwksJpaAutoConfiguration {
     public PlatformTransactionManager transactionManagerOidcJwks(
         final ConfigurableApplicationContext applicationContext,
         @Qualifier("oidcJwksEntityManagerFactory")
-        final ObjectProvider<EntityManagerFactory> emf) {
+        final ObjectProvider<@NonNull EntityManagerFactory> emf) {
 
         return BeanSupplier.of(PlatformTransactionManager.class)
             .when(CONDITION.given(applicationContext.getEnvironment()))
@@ -101,7 +101,7 @@ public class CasOidcJwksJpaAutoConfiguration {
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     @ConditionalOnMissingBean(name = "oidcJwksEntityManagerFactory")
-    public FactoryBean<EntityManagerFactory> oidcJwksEntityManagerFactory(
+    public FactoryBean<@NonNull EntityManagerFactory> oidcJwksEntityManagerFactory(
         @Qualifier("oidcJwksJpaPersistenceProvider")
         final PersistenceProvider oidcJwksPersistenceProvider,
         final ConfigurableApplicationContext applicationContext,

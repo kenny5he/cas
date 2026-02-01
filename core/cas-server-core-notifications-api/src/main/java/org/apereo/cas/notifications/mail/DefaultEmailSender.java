@@ -1,5 +1,6 @@
 package org.apereo.cas.notifications.mail;
 
+import module java.base;
 import org.apereo.cas.configuration.support.ConfigurationPropertiesBindingContext;
 import org.apereo.cas.multitenancy.TenantExtractor;
 import org.apereo.cas.util.function.FunctionUtils;
@@ -9,8 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.mail.MailProperties;
+import org.springframework.boot.mail.autoconfigure.MailProperties;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
@@ -18,9 +20,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import jakarta.mail.internet.MimeMessage;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 /**
  * This is {@link DefaultEmailSender}.
@@ -53,7 +52,7 @@ public class DefaultEmailSender implements EmailSender {
         }, throwable -> false).get();
 
         val recipients = emailRequest.getRecipients();
-        if (connectionAvailable) {
+        if (connectionAvailable && mailSender != null) {
             val message = createEmailMessage(emailRequest, mailSender);
             emailSenderCustomizers.forEach(customizer -> customizer.customize(mailSender, emailRequest));
             mailSender.send(message);
@@ -74,7 +73,7 @@ public class DefaultEmailSender implements EmailSender {
         messageHelper.setTo(recipients.toArray(ArrayUtils.EMPTY_STRING_ARRAY));
 
         val emailProperties = emailRequest.getEmailProperties();
-        messageHelper.setText(emailRequest.getBody(), emailProperties.isHtml());
+        messageHelper.setText(StringUtils.defaultString(emailRequest.getBody()), emailProperties.isHtml());
 
         val subject = determineEmailSubject(emailRequest, messageSource);
         messageHelper.setSubject(subject);
@@ -88,7 +87,7 @@ public class DefaultEmailSender implements EmailSender {
         return message;
     }
 
-    protected JavaMailSenderImpl createMailSender(final EmailMessageRequest emailRequest) {
+    protected @Nullable JavaMailSenderImpl createMailSender(final EmailMessageRequest emailRequest) {
         val sender = applyProperties(new JavaMailSenderImpl(), emailRequest);
         return StringUtils.isNotBlank(sender.getHost()) ? sender : null;
     }

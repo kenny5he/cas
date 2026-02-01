@@ -1,5 +1,6 @@
 package org.apereo.cas.support.oauth.web.response.accesstoken.response;
 
+import module java.base;
 import org.apereo.cas.audit.AuditActionResolvers;
 import org.apereo.cas.audit.AuditResourceResolvers;
 import org.apereo.cas.audit.AuditableActions;
@@ -13,17 +14,16 @@ import org.apereo.cas.ticket.Ticket;
 import org.apereo.cas.ticket.accesstoken.OAuth20AccessToken;
 import org.apereo.cas.ticket.refreshtoken.OAuth20RefreshToken;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.Strings;
 import org.apereo.inspektr.audit.annotation.Audit;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.springframework.web.servlet.view.json.JacksonJsonView;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * This is {@link OAuth20DefaultAccessTokenResponseGenerator}.
@@ -33,10 +33,10 @@ import java.util.Map;
  */
 @RequiredArgsConstructor
 public class OAuth20DefaultAccessTokenResponseGenerator<T extends OAuth20ConfigurationContext> implements OAuth20AccessTokenResponseGenerator {
-    private static final ObjectMapper MAPPER = JacksonObjectMapperFactory.builder()
-        .defaultTypingEnabled(false).build().toObjectMapper();
+    private static final JsonMapper MAPPER = JacksonObjectMapperFactory.builder()
+        .defaultTypingEnabled(false).build().toJsonMapper();
 
-    protected final ObjectProvider<T> configurationContext;
+    protected final ObjectProvider<@NonNull T> configurationContext;
 
     private static boolean shouldGenerateDeviceFlowResponse(final OAuth20AccessTokenResponseResult result) {
         val generatedToken = result.getGeneratedToken();
@@ -59,7 +59,7 @@ public class OAuth20DefaultAccessTokenResponseGenerator<T extends OAuth20Configu
 
     protected ModelAndView generateResponseForDeviceToken(final OAuth20AccessTokenResponseResult result) {
         val model = getDeviceTokenResponseModel(result);
-        return new ModelAndView(new MappingJackson2JsonView(MAPPER), model);
+        return new ModelAndView(new JacksonJsonView(MAPPER), model);
     }
 
     protected Map getDeviceTokenResponseModel(final OAuth20AccessTokenResponseResult result) {
@@ -79,7 +79,7 @@ public class OAuth20DefaultAccessTokenResponseGenerator<T extends OAuth20Configu
 
     protected ModelAndView generateResponseForAccessToken(final OAuth20AccessTokenResponseResult result) {
         val model = getAccessTokenResponseModel(result);
-        val modelAndView = new ModelAndView(new MappingJackson2JsonView(MAPPER), model);
+        val modelAndView = new ModelAndView(new JacksonJsonView(MAPPER), model);
         modelAndView.setStatus(HttpStatus.OK);
         return modelAndView;
     }

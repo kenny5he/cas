@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.audit.AuditActionResolvers;
 import org.apereo.cas.audit.AuditPrincipalIdProvider;
 import org.apereo.cas.audit.AuditResourceResolvers;
@@ -51,6 +52,7 @@ import org.apereo.inspektr.common.spi.AuditActionDateProvider;
 import org.apereo.inspektr.common.spi.ClientInfoResolver;
 import org.apereo.inspektr.common.spi.DefaultClientInfoResolver;
 import org.apereo.inspektr.common.spi.PrincipalResolver;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
@@ -67,9 +69,6 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.StringUtils;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * This is {@link CasCoreAuditAutoConfiguration}.
@@ -294,7 +293,7 @@ public class CasCoreAuditAutoConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public AuditEventRepository auditEventRepository(
             @Qualifier(CasEventRepository.BEAN_NAME)
-            final ObjectProvider<CasEventRepository> casEventRepository,
+            final ObjectProvider<@NonNull CasEventRepository> casEventRepository,
             final ConfigurableApplicationContext applicationContext) {
             return BeanSupplier.of(AuditEventRepository.class)
                 .when(CONDITION_AUDIT.given(applicationContext.getEnvironment()))
@@ -549,7 +548,7 @@ public class CasCoreAuditAutoConfiguration {
                 .when(BeanCondition.on("cas.audit.groovy.template.location")
                     .exists().given(applicationContext.getEnvironment()))
                 .supply(() -> plan ->
-                    FunctionUtils.doAndHandle(__ -> {
+                    FunctionUtils.doAndHandle(_ -> {
                         val templateFile = casProperties.getAudit().getGroovy().getTemplate().getLocation().getFile();
                         val mgr = new GroovyAuditTrailManager(templateFile, applicationContext);
                         plan.registerAuditTrailManager(mgr);

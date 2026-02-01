@@ -1,10 +1,8 @@
 package org.apereo.cas.uma.ticket.resource;
 
-import org.apereo.cas.util.function.FunctionUtils;
+import module java.base;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -12,15 +10,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.Type;
-
+import tools.jackson.databind.ObjectMapper;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * This is {@link ResourceSetPolicy}.
@@ -56,6 +49,6 @@ public class ResourceSetPolicy implements Serializable {
      */
     @JsonIgnore
     public String toJson() {
-        return FunctionUtils.doUnchecked(() -> MAPPER.writeValueAsString(this));
+        return MAPPER.writeValueAsString(this);
     }
 }

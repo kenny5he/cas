@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.CentralAuthenticationService;
 import org.apereo.cas.audit.AuditableExecution;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
@@ -93,15 +94,16 @@ import org.apereo.cas.web.support.gen.CookieRetrievingCookieGenerator;
 import org.apereo.cas.web.support.mgmr.NoOpCookieValueManager;
 import lombok.val;
 import org.apache.commons.lang3.Strings;
+import org.jspecify.annotations.NonNull;
 import org.pac4j.core.context.session.SessionStore;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.WebProperties;
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcProperties;
-import org.springframework.boot.autoconfigure.web.servlet.error.ErrorViewResolver;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.webmvc.autoconfigure.WebMvcProperties;
+import org.springframework.boot.webmvc.autoconfigure.error.ErrorViewResolver;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -120,12 +122,6 @@ import org.springframework.webflow.execution.Action;
 import org.springframework.webflow.execution.FlowExecutionListener;
 import org.springframework.webflow.execution.RequestContext;
 import org.springframework.webflow.executor.FlowExecutor;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link DelegatedAuthenticationWebflowConfiguration}.
@@ -319,7 +315,7 @@ class DelegatedAuthenticationWebflowConfiguration {
         @ConditionalOnMissingBean(name = DelegatedClientIdentityProviderConfigurationProducer.BEAN_NAME)
         public DelegatedClientIdentityProviderConfigurationProducer delegatedClientIdentityProviderConfigurationProducer(
             @Qualifier(DelegatedClientAuthenticationConfigurationContext.BEAN_NAME)
-            final ObjectProvider<DelegatedClientAuthenticationConfigurationContext> configurationContext) {
+            final ObjectProvider<@NonNull DelegatedClientAuthenticationConfigurationContext> configurationContext) {
             return new DefaultDelegatedClientIdentityProviderConfigurationProducer(configurationContext);
         }
 
@@ -657,12 +653,12 @@ class DelegatedAuthenticationWebflowConfiguration {
             final AuthenticationServiceSelectionPlan authenticationRequestServiceSelectionStrategies,
             @Qualifier("delegatedAuthenticationCookieGenerator")
             final CasCookieBuilder delegatedAuthenticationCookieGenerator,
-            final ObjectProvider<List<DelegatedAuthenticationCredentialExtractor>> delegatedAuthenticationCredentialExtractors,
+            final ObjectProvider<@NonNull List<DelegatedAuthenticationCredentialExtractor>> delegatedAuthenticationCredentialExtractors,
             final ConfigurableApplicationContext applicationContext,
             @Qualifier(LogoutExecutionPlan.BEAN_NAME)
             final LogoutExecutionPlan logoutExecutionPlan,
-            final ObjectProvider<List<DelegatedClientAuthenticationRequestCustomizer>> customizersProvider,
-            final ObjectProvider<List<DelegatedClientIdentityProviderAuthorizer>> delegatedClientAuthorizers) {
+            final ObjectProvider<@NonNull List<DelegatedClientAuthenticationRequestCustomizer>> customizersProvider,
+            final ObjectProvider<@NonNull List<DelegatedClientIdentityProviderAuthorizer>> delegatedClientAuthorizers) {
 
             val customizers = Optional.ofNullable(customizersProvider.getIfAvailable())
                 .orElseGet(ArrayList::new)
@@ -726,8 +722,8 @@ class DelegatedAuthenticationWebflowConfiguration {
         public DelegatedClientsEndpoint delegatedClientsEndpoint(
             final CasConfigurationProperties casProperties,
             @Qualifier("pac4jDelegatedClientFactory")
-            final ObjectProvider<DelegatedIdentityProviderFactory> pac4jDelegatedIdentityProviderFactory,
-            final ObjectProvider<List<DelegatedClientsEndpointContributor>> contributors) {
+            final ObjectProvider<@NonNull DelegatedIdentityProviderFactory> pac4jDelegatedIdentityProviderFactory,
+            final ObjectProvider<@NonNull List<DelegatedClientsEndpointContributor>> contributors) {
             return new DelegatedClientsEndpoint(casProperties, pac4jDelegatedIdentityProviderFactory, contributors);
         }
 

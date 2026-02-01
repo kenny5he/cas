@@ -1,11 +1,11 @@
 package org.apereo.cas.ticket.tracking;
 
+import module java.base;
 import org.apereo.cas.ticket.ServiceTicket;
 import org.apereo.cas.ticket.Ticket;
 import org.apereo.cas.ticket.TicketGrantingTicket;
 import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.util.concurrent.CasReentrantLock;
-
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
@@ -26,7 +26,7 @@ public class AllServicesSessionTrackingPolicy implements TicketTrackingPolicy {
         val serviceTicket = (ServiceTicket) ticket;
         val ticketGrantingTicket = (TicketGrantingTicket) ownerTicket;
         val trackedEntry = String.format("%s,%s", serviceTicket.getId(), serviceTicket.getService());
-        lock.tryLock(__ -> {
+        lock.tryLock(_ -> {
             ticketGrantingTicket.update();
             serviceTicket.getService().setPrincipal(ticketGrantingTicket.getRoot().getAuthentication().getPrincipal().getId());
             beforeTrackingServiceTicket(ownerTicket, serviceTicket);

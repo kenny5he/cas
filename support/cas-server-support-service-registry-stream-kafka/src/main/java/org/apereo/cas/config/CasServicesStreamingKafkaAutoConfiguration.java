@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.kafka.KafkaObjectFactory;
@@ -13,7 +14,6 @@ import org.apereo.cas.util.cache.DistributedCacheObject;
 import org.apereo.cas.util.spring.beans.BeanCondition;
 import org.apereo.cas.util.spring.beans.BeanSupplier;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
-
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -22,6 +22,7 @@ import org.apache.kafka.common.errors.TopicExistsException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -36,11 +37,8 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaAdminOperations;
 import org.springframework.kafka.core.KafkaOperations;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonSerializer;
-
-import java.util.List;
-import java.util.concurrent.ExecutionException;
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
+import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
 
 /**
  * This is {@link CasServicesStreamingKafkaAutoConfiguration}.
@@ -60,7 +58,7 @@ public class CasServicesStreamingKafkaAutoConfiguration {
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     @ConditionalOnMissingBean(name = "registeredServiceKafkaListenerContainerFactory")
-    public ConcurrentKafkaListenerContainerFactory<String, DistributedCacheObject> registeredServiceKafkaListenerContainerFactory(
+    public ConcurrentKafkaListenerContainerFactory<@NonNull String, @NonNull DistributedCacheObject> registeredServiceKafkaListenerContainerFactory(
         @Qualifier("casRegisteredServiceStreamPublisherIdentifier")
         final PublisherIdentifier casRegisteredServiceStreamPublisherIdentifier,
         final ConfigurableApplicationContext applicationContext,
@@ -68,8 +66,9 @@ public class CasServicesStreamingKafkaAutoConfiguration {
         val kafka = casProperties.getServiceRegistry().getStream().getKafka();
         val factory = new KafkaObjectFactory<String, DistributedCacheObject>(kafka.getBootstrapAddress());
         factory.setConsumerGroupId(casRegisteredServiceStreamPublisherIdentifier.getId());
-        val mapper = new RegisteredServiceJsonSerializer(applicationContext).getObjectMapper();
-        return factory.getKafkaListenerContainerFactory(new StringDeserializer(), new JsonDeserializer<>(DistributedCacheObject.class, mapper));
+        val mapper = new RegisteredServiceJsonSerializer(applicationContext).getJsonMapper();
+        return factory.getKafkaListenerContainerFactory(new StringDeserializer(),
+            new JacksonJsonDeserializer<>(DistributedCacheObject.class, mapper));
     }
 
     @Bean
@@ -103,16 +102,16 @@ public class CasServicesStreamingKafkaAutoConfiguration {
 
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public KafkaOperations<String, DistributedCacheObject<RegisteredService>> registeredServiceDistributedKafkaTemplate(
+    public KafkaOperations<@NonNull String, @NonNull DistributedCacheObject<RegisteredService>> registeredServiceDistributedKafkaTemplate(
         final ConfigurableApplicationContext applicationContext,
         final CasConfigurationProperties casProperties) {
         return BeanSupplier.of(KafkaOperations.class)
             .when(CONDITION.given(applicationContext.getEnvironment()))
             .supply(() -> {
                 val kafka = casProperties.getServiceRegistry().getStream().getKafka();
-                val mapper = new RegisteredServiceJsonSerializer(applicationContext).getObjectMapper();
+                val mapper = new RegisteredServiceJsonSerializer(applicationContext).getJsonMapper();
                 val factory = new KafkaObjectFactory<String, DistributedCacheObject<RegisteredService>>(kafka.getBootstrapAddress());
-                return factory.getKafkaTemplate(new StringSerializer(), new JsonSerializer<>(mapper));
+                return factory.getKafkaTemplate(new StringSerializer(), new JacksonJsonSerializer<>(mapper));
             })
             .otherwiseProxy()
             .get();
@@ -126,7 +125,7 @@ public class CasServicesStreamingKafkaAutoConfiguration {
         @Qualifier("registeredServiceDistributedCacheKafkaTopic")
         final NewTopic registeredServiceDistributedCacheKafkaTopic,
         @Qualifier("registeredServiceDistributedKafkaTemplate")
-        final KafkaOperations<String, DistributedCacheObject<RegisteredService>> registeredServiceDistributedKafkaTemplate) {
+        final KafkaOperations<@NonNull String, @NonNull DistributedCacheObject<RegisteredService>> registeredServiceDistributedKafkaTemplate) {
         return BeanSupplier.of(DistributedCacheManager.class)
             .when(CONDITION.given(applicationContext.getEnvironment()))
             .supply(Unchecked.supplier(() -> {

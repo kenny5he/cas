@@ -1,8 +1,8 @@
 package org.apereo.cas.ticket.registry.pubsub.commands;
 
+import module java.base;
 import org.apereo.cas.ticket.registry.pubsub.QueueableTicketRegistry;
 import org.apereo.cas.util.PublisherIdentifier;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -10,8 +10,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-
-import java.io.Serial;
 
 /**
  * This is {@link DeleteTicketsMessageQueueCommand}.
@@ -29,9 +27,9 @@ public class DeleteTicketsMessageQueueCommand extends BaseMessageQueueCommand {
     private static final long serialVersionUID = 8907022828993467474L;
 
     @JsonCreator
-    public DeleteTicketsMessageQueueCommand(@JsonProperty("id")
-                                            final PublisherIdentifier id) {
-        super(id);
+    public DeleteTicketsMessageQueueCommand(@JsonProperty("publisherIdentifier")
+                                            final PublisherIdentifier publisherIdentifier) {
+        super(publisherIdentifier);
     }
 
     @Override

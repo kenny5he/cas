@@ -1,7 +1,7 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import java.io.Serializable;
 
 /**
  * The release policy condition controls whether the policy should be activated and support a request.
@@ -19,13 +19,4 @@ public interface RegisteredServiceAttributeReleaseActivationCriteria extends Ser
      * @return true/false
      */
     boolean shouldActivate(RegisteredServiceAttributeReleasePolicyContext context);
-
-    /**
-     * Always allow the condition to pass.
-     *
-     * @return the registered service attribute release condition
-     */
-    static RegisteredServiceAttributeReleaseActivationCriteria always() {
-        return context -> true;
-    }
 }

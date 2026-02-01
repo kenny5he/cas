@@ -1,8 +1,11 @@
 package org.apereo.cas.nativex;
 
+import module java.base;
 import org.apereo.cas.adaptors.x509.authentication.principal.AbstractX509PrincipalResolver;
 import org.apereo.cas.util.nativex.CasRuntimeHintsRegistrar;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.aot.hint.RuntimeHints;
 
 /**
@@ -13,7 +16,7 @@ import org.springframework.aot.hint.RuntimeHints;
  */
 public class X509CertificateRuntimeHints implements CasRuntimeHintsRegistrar {
     @Override
-    public void registerHints(final RuntimeHints hints, final ClassLoader classLoader) {
+    public void registerHints(final @NonNull RuntimeHints hints, final @Nullable ClassLoader classLoader) {
         val classes = findSubclassesInPackage(AbstractX509PrincipalResolver.class, AbstractX509PrincipalResolver.class.getPackageName());
         registerReflectionHints(hints, classes);
     }

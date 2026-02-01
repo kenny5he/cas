@@ -1,5 +1,6 @@
 package org.apereo.cas.support.saml.idp;
 
+import module java.base;
 import org.apereo.cas.CasProtocolConstants;
 import org.apereo.cas.support.saml.BaseSamlIdPConfigurationTests;
 import org.apereo.cas.support.saml.SamlIdPConstants;
@@ -13,7 +14,6 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.pac4j.jee.context.JEEContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.context.TestPropertySource;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 7.0.0
  */
 @Tag("SAML2Web")
-@TestPropertySource(properties = "cas.http-client.allow-local-urls=true")
 class SamlIdPSessionManagerTests extends BaseSamlIdPConfigurationTests {
 
     @Test

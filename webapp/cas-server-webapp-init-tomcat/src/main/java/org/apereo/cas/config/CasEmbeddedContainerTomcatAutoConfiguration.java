@@ -1,7 +1,9 @@
 package org.apereo.cas.config;
 
+import module java.base;
+import org.apereo.cas.configuration.features.CasFeatureModule;
+import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -10,7 +12,8 @@ import org.springframework.context.annotation.Import;
  * @author Misagh Moayyed
  * @since 7.1.0
  */
-@AutoConfiguration(before = ServletWebServerFactoryAutoConfiguration.class)
+@AutoConfiguration
+@ConditionalOnFeatureEnabled(feature = CasFeatureModule.FeatureCatalog.ApacheTomcat)
 @Import({CasEmbeddedContainerTomcatConfiguration.class, CasEmbeddedContainerTomcatFiltersConfiguration.class})
 public class CasEmbeddedContainerTomcatAutoConfiguration {
 }

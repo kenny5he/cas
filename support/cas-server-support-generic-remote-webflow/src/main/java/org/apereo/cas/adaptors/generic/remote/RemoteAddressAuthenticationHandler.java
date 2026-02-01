@@ -1,5 +1,6 @@
 package org.apereo.cas.adaptors.generic.remote;
 
+import module java.base;
 import org.apereo.cas.authentication.AbstractAuthenticationHandler;
 import org.apereo.cas.authentication.AuthenticationHandlerExecutionResult;
 import org.apereo.cas.authentication.Credential;
@@ -14,9 +15,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
-import javax.security.auth.login.FailedLoginException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 /**
  * Checks if the remote address is in the range of allowed addresses.
@@ -116,11 +114,11 @@ public class RemoteAddressAuthenticationHandler extends AbstractAuthenticationHa
             if (splitAddress.size() == 2) {
                 val network = splitAddress.getFirst().trim();
                 val netmask = splitAddress.get(1).trim();
-                FunctionUtils.doAndHandle(__ -> {
+                FunctionUtils.doAndHandle(_ -> {
                     this.inetNetworkRange = InetAddress.getByName(network);
                     LOGGER.debug("InetAddress network: [{}]", this.inetNetworkRange.toString());
                 });
-                FunctionUtils.doAndHandle(__ -> {
+                FunctionUtils.doAndHandle(_ -> {
                     this.inetNetmask = InetAddress.getByName(netmask);
                     LOGGER.debug("InetAddress netmask: [{}]", this.inetNetmask.toString());
                 });

@@ -1,13 +1,14 @@
 package org.apereo.cas.oidc.ticket;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.ticket.AbstractTicket;
 import org.apereo.cas.ticket.ExpirationPolicy;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import lombok.Getter;
-import java.io.Serial;
-import java.util.Set;
 
 /**
  * This is {@link OidcDefaultCibaRequest}.
@@ -36,6 +37,7 @@ public class OidcDefaultCibaRequest extends AbstractTicket implements OidcCibaRe
     public OidcDefaultCibaRequest(final String id,
                                   final Authentication authentication,
                                   final ExpirationPolicy expirationPolicy,
+                                  @JsonSetter(nulls = Nulls.AS_EMPTY)
                                   final Set<String> scopes,
                                   final String clientId,
                                   final String encodedId) {

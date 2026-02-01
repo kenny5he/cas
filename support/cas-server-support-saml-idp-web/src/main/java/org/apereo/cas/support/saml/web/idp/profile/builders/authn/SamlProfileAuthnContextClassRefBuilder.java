@@ -1,5 +1,6 @@
 package org.apereo.cas.support.saml.web.idp.profile.builders.authn;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.support.saml.OpenSamlConfigBean;
 import org.apereo.cas.support.saml.idp.metadata.locator.SamlIdPSamlRegisteredServiceCriterion;
@@ -16,6 +17,7 @@ import lombok.val;
 import net.shibboleth.shared.resolver.CriteriaSet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jspecify.annotations.NonNull;
 import org.opensaml.saml.metadata.criteria.entity.impl.EvaluableEntityRoleEntityDescriptorCriterion;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.saml2.core.AuthenticatingAuthority;
@@ -25,10 +27,6 @@ import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.opensaml.saml.saml2.core.RequestedAuthnContext;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.springframework.beans.factory.ObjectProvider;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * This is {@link SamlProfileAuthnContextClassRefBuilder}.
@@ -43,12 +41,12 @@ public class SamlProfileAuthnContextClassRefBuilder extends AbstractSaml20Object
 
     private final CasConfigurationProperties casProperties;
 
-    private final ObjectProvider<ScriptResourceCacheManager> scriptResourceCacheManager;
+    private final ObjectProvider<@NonNull ScriptResourceCacheManager> scriptResourceCacheManager;
 
     public SamlProfileAuthnContextClassRefBuilder(final OpenSamlConfigBean configBean,
                                                   final MetadataResolver samlIdPMetadataResolver,
                                                   final CasConfigurationProperties casProperties,
-                                                  final ObjectProvider<ScriptResourceCacheManager> scriptResourceCacheManager) {
+                                                  final ObjectProvider<@NonNull ScriptResourceCacheManager> scriptResourceCacheManager) {
         super(configBean);
         this.samlIdPMetadataResolver = samlIdPMetadataResolver;
         this.casProperties = casProperties;

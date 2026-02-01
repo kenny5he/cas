@@ -1,10 +1,10 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.cosmosdb.CosmosDbDocument;
 import org.apereo.cas.services.util.RegisteredServiceJsonSerializer;
 import org.apereo.cas.util.LoggingUtils;
 import org.apereo.cas.util.serialization.StringSerializer;
-
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.models.CosmosItemRequestOptions;
@@ -15,16 +15,15 @@ import lombok.val;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpStatus;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 /**
  * This is {@link CosmosDbServiceRegistry}.
  *
  * @author Misagh Moayyed
  * @since 5.2.0
+ * @deprecated Since 8.0.0
  */
 @Slf4j
+@Deprecated(since = "8.0.0", forRemoval = true)
 public class CosmosDbServiceRegistry extends AbstractServiceRegistry {
     /**
      * Partition key.

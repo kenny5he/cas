@@ -1,5 +1,6 @@
 package org.apereo.cas.support.oauth.authenticator;
 
+import module java.base;
 import org.apereo.cas.CentralAuthenticationService;
 import org.apereo.cas.authentication.AuthenticationSystemSupport;
 import org.apereo.cas.authentication.principal.PrincipalResolver;
@@ -54,11 +55,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
-import org.springframework.retry.annotation.EnableRetry;
-import java.time.Clock;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.UUID;
 import static org.mockito.Mockito.*;
 
 /**
@@ -69,7 +65,6 @@ import static org.mockito.Mockito.*;
  */
 @SpringBootTest(classes = BaseOAuth20AuthenticatorTests.SharedTestConfiguration.class)
 @EnableConfigurationProperties(CasConfigurationProperties.class)
-@EnableRetry
 @ExtendWith(CasTestExtension.class)
 public abstract class BaseOAuth20AuthenticatorTests {
     @Autowired

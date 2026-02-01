@@ -1,12 +1,12 @@
 package org.apereo.cas.ticket.device;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.ticket.ExpirationPolicyBuilder;
 import org.apereo.cas.ticket.Ticket;
 import org.apereo.cas.ticket.UniqueTicketIdGenerator;
 import org.apereo.cas.util.function.FunctionUtils;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -37,7 +37,7 @@ public class OAuth20DefaultDeviceTokenFactory implements OAuth20DeviceTokenFacto
         val codeId = ticketIdGenerator.getNewTicketId(OAuth20DeviceToken.PREFIX);
         val expirationPolicyToUse = OAuth20DeviceTokenUtils.determineExpirationPolicyForService(servicesManager, expirationPolicyBuilder, service);
         val token = new OAuth20DefaultDeviceToken(codeId, service, expirationPolicyToUse);
-        FunctionUtils.doIfNotNull(service, __ -> token.setTenantId(service.getTenant()));
+        FunctionUtils.doIfNotNull(service, _ -> token.setTenantId(service.getTenant()));
         return token;
     }
 

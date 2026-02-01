@@ -1,28 +1,22 @@
 package org.apereo.cas.ticket;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.ticket.tracking.TicketTrackingPolicy;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.val;
-
-import java.io.Serial;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Concrete implementation of a TicketGrantingTicket. A TicketGrantingTicket is
@@ -38,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 @Getter
 @NoArgsConstructor
+@SuppressWarnings("NullAway.Init")
 public class TicketGrantingTicketImpl extends AbstractTicket implements TicketGrantingTicket {
 
     @Serial
@@ -51,41 +46,53 @@ public class TicketGrantingTicketImpl extends AbstractTicket implements TicketGr
     /**
      * Service that produced a proxy-granting ticket.
      */
+    @Nullable
     private Service proxiedBy;
 
     /**
      * The services associated to this ticket.
      */
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private Map<String, Service> services = new ConcurrentHashMap<>(0);
 
     /**
      * The {@link TicketGrantingTicket} this is associated with.
      */
+    @Nullable
     private TicketGrantingTicket ticketGrantingTicket;
 
     /**
      * The PGTs associated to this ticket.
      */
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private Map<String, Service> proxyGrantingTickets = new HashMap<>();
 
     /**
      * The ticket ids which are tied to this ticket.
      */
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private Set<String> descendantTickets = new HashSet<>();
 
     @JsonCreator
     public TicketGrantingTicketImpl(
-        @JsonProperty("id") final String id,
-        @JsonProperty("proxiedBy") final Service proxiedBy,
-        @JsonProperty("ticketGrantingTicket") final TicketGrantingTicket ticketGrantingTicket,
-        @JsonProperty("authentication") final @NonNull Authentication authentication,
-        @JsonProperty("expirationPolicy") final ExpirationPolicy policy) {
+        @JsonProperty("id")
+        final String id,
+        @Nullable
+        @JsonProperty("proxiedBy")
+        final Service proxiedBy,
+        @Nullable
+        @JsonProperty("ticketGrantingTicket")
+        final TicketGrantingTicket ticketGrantingTicket,
+        @JsonProperty("authentication")
+        final @NonNull Authentication authentication,
+        @JsonProperty("expirationPolicy")
+        final ExpirationPolicy policy) {
         super(id, policy);
         if (ticketGrantingTicket != null && proxiedBy == null) {
             throw new IllegalArgumentException("Must specify proxiedBy when providing parent ticket-granting ticket");
         }
         this.ticketGrantingTicket = ticketGrantingTicket;
-        this.authentication = authentication;
+        this.authentication = Objects.requireNonNull(authentication);
         this.proxiedBy = proxiedBy;
     }
 

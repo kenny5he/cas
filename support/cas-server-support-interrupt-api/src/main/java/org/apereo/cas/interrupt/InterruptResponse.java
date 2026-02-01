@@ -1,15 +1,13 @@
 package org.apereo.cas.interrupt;
 
+import module java.base;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * This is {@link InterruptResponse}.
@@ -45,6 +43,7 @@ public class InterruptResponse implements Serializable {
 
     private long autoRedirectAfterSeconds = -1;
 
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private Map<String, List<String>> data = new LinkedHashMap<>();
 
     private String messageCode;

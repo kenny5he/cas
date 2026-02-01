@@ -1,15 +1,12 @@
 package org.apereo.cas.monitor;
 
+import module java.base;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import org.springframework.boot.actuate.health.AbstractHealthIndicator;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.boot.actuate.health.Status;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import org.springframework.boot.health.contributor.AbstractHealthIndicator;
+import org.springframework.boot.health.contributor.Health;
+import org.springframework.boot.health.contributor.HealthIndicator;
+import org.springframework.boot.health.contributor.Status;
 
 /**
  * This is {@link CompositeHealthIndicator}.
@@ -25,12 +22,14 @@ public class CompositeHealthIndicator extends AbstractHealthIndicator {
     protected void doHealthCheck(final Health.Builder builder) {
         val aggregatedStatus = new ArrayList<Status>();
         healthIndicators.forEach(indicator -> {
-            val health = indicator.getHealth(true);
-            val name = (String) health.getDetails().getOrDefault("name", indicator.getClass().getSimpleName());
-            val details = new LinkedHashMap<>(health.getDetails());
-            details.putIfAbsent("status", health.getStatus());
-            builder.withDetail(name, details);
-            aggregatedStatus.add(health.getStatus());
+            val health = indicator.health(true);
+            if (health != null) {
+                val name = (String) health.getDetails().getOrDefault("name", indicator.getClass().getSimpleName());
+                val details = new LinkedHashMap<>(health.getDetails());
+                details.computeIfAbsent("status", _ -> health.getStatus());
+                builder.withDetail(name, details);
+                aggregatedStatus.add(health.getStatus());
+            }
         });
         val isUp = aggregatedStatus.stream().allMatch(s -> s.equals(Status.UP));
         builder.status(isUp ? Status.UP : Status.DOWN);

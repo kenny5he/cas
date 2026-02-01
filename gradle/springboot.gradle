@@ -65,9 +65,6 @@ if (project.ext.forceBootifulArtifact || (!rootProject.publishFlag && !rootProje
                         "Implementation-Version": project.version)
             }
             from "${project.layout.buildDirectory.getAsFile().get().path}/resources/main", { into "WEB-INF/classes" }
-            if (!rootProject.skipBootifulLaunchScript) {
-                launchScript()
-            }
             duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
 
@@ -78,9 +75,6 @@ if (project.ext.forceBootifulArtifact || (!rootProject.publishFlag && !rootProje
                 archiveFileName = project.ext.archiveFileName
             }
             from "${project.layout.buildDirectory.getAsFile().get().path}/resources/main", { into "WEB-INF/classes" }
-            if (!rootProject.skipBootifulLaunchScript) {
-                launchScript()
-            }
             duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
 
@@ -142,8 +136,6 @@ if (project.ext.forceBootifulArtifact || (!rootProject.publishFlag && !rootProje
         list.add("--add-opens")
         list.add("java.base/java.net=ALL-UNNAMED")
         list.add("--add-opens")
-        list.add("java.base/sun.security.action=jdk.crypto.ec")
-        list.add("--add-opens")
         list.add("java.base/java.nio=ALL-UNNAMED")
         list.add("--add-opens")
         list.add("java.base/sun.nio.ch=ALL-UNNAMED")
@@ -152,6 +144,11 @@ if (project.ext.forceBootifulArtifact || (!rootProject.publishFlag && !rootProje
         list.add("--add-opens")
         list.add("jdk.management/com.sun.management.internal=ALL-UNNAMED")
 
+        list.add("-XX:+AllowEnhancedClassRedefinition")
+
+        def agentPath = rootProject.file("etc").absolutePath
+        list.add("-javaagent:${agentPath}/hotswap-agent.jar=autoHotswap=true")
+        
         if (rootProject.enableRemoteDebugging) {
             def port = findAvailableTcpPort(5000..5010)
             if (port > 0) {

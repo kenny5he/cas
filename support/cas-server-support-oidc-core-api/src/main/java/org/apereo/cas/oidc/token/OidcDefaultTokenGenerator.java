@@ -1,5 +1,6 @@
 package org.apereo.cas.oidc.token;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.AuthenticationBuilder;
 import org.apereo.cas.authentication.principal.PrincipalResolver;
@@ -35,7 +36,7 @@ public class OidcDefaultTokenGenerator extends OAuth20DefaultTokenGenerator {
                                                     final AuthenticationBuilder authenticationBuilder) {
         if (tokenRequestContext.getGrantType() == OAuth20GrantTypes.CIBA) {
             FunctionUtils.doIfNotNull(tokenRequestContext.getCibaRequestId(),
-                __ -> authenticationBuilder.addAttribute(OidcConstants.AUTH_REQ_ID, tokenRequestContext.getCibaRequestId()));
+                _ -> authenticationBuilder.addAttribute(OidcConstants.AUTH_REQ_ID, tokenRequestContext.getCibaRequestId()));
         }
 
         return super.finalizeAuthentication(tokenRequestContext, authenticationBuilder);

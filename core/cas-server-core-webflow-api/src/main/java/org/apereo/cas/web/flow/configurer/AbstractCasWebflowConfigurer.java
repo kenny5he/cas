@@ -1,5 +1,6 @@
 package org.apereo.cas.web.flow.configurer;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.LoggingUtils;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.Nullable;
 import org.springframework.binding.convert.service.RuntimeBindingConversionExecutor;
 import org.springframework.binding.expression.Expression;
 import org.springframework.binding.expression.spel.SpringELExpressionParser;
@@ -28,9 +30,9 @@ import org.springframework.binding.mapping.impl.DefaultMappingContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.expression.BeanExpressionContextAccessor;
 import org.springframework.context.expression.EnvironmentAccessor;
-import org.springframework.context.expression.MapAccessor;
 import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.MapAccessor;
 import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -77,11 +79,6 @@ import org.springframework.webflow.expression.spel.FlowVariablePropertyAccessor;
 import org.springframework.webflow.expression.spel.MapAdaptablePropertyAccessor;
 import org.springframework.webflow.expression.spel.MessageSourcePropertyAccessor;
 import org.springframework.webflow.expression.spel.ScopeSearchingPropertyAccessor;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * The {@link AbstractCasWebflowConfigurer} is responsible for
@@ -535,7 +532,7 @@ public abstract class AbstractCasWebflowConfigurer implements CasWebflowConfigur
                         state.getId(), criteriaOutcome);
                     return transition;
                 }
-                
+
                 val transition = createTransition(criteriaOutcome, targetState, actions);
                 attributes.forEach((key, value) -> transition.getAttributes().put(key, value));
                 state.getTransitionSet().add(transition);
@@ -806,7 +803,7 @@ public abstract class AbstractCasWebflowConfigurer implements CasWebflowConfigur
      * @param outputMapper the output mapper
      * @return the subflow attribute mapper
      */
-    public SubflowAttributeMapper createSubflowAttributeMapper(final Mapper inputMapper, final Mapper outputMapper) {
+    public SubflowAttributeMapper createSubflowAttributeMapper(final Mapper inputMapper, @Nullable final Mapper outputMapper) {
         return new GenericSubflowAttributeMapper(inputMapper, outputMapper);
     }
 
@@ -981,7 +978,7 @@ public abstract class AbstractCasWebflowConfigurer implements CasWebflowConfigur
     protected Map<String, Object> createTransitionAttributes(final boolean bind, final boolean validate) {
         return CollectionUtils.wrap("bind", bind, "validate", validate, "history", History.INVALIDATE);
     }
-    
+
     protected void doInitialize() {
     }
 

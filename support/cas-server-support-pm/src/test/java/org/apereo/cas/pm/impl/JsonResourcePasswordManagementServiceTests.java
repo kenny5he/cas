@@ -1,5 +1,6 @@
 package org.apereo.cas.pm.impl;
 
+import module java.base;
 import org.apereo.cas.authentication.credential.UsernamePasswordCredential;
 import org.apereo.cas.config.CasCoreAuditAutoConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationAutoConfiguration;
@@ -31,7 +32,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -123,7 +123,7 @@ class JsonResourcePasswordManagementServiceTests {
     }
     @Test
     void verifyUserPasswordChangeFail() throws Throwable {
-        val c = new UsernamePasswordCredential("casuser", "password");
+        val credential = new UsernamePasswordCredential("casuser", "password");
         val bean = new PasswordChangeRequest();
         bean.setConfirmedPassword("newPassword".toCharArray());
         var res = passwordChangeService.change(bean);
@@ -134,15 +134,15 @@ class JsonResourcePasswordManagementServiceTests {
         assertFalse(res);
 
         bean.setPassword(bean.getConfirmedPassword());
-        c.setUsername(UUID.randomUUID().toString());
+        credential.setUsername(UUID.randomUUID().toString());
         res = passwordChangeService.change(bean);
         assertFalse(res);
     }
     @Test
     void verifyPasswordValidationService() throws Throwable {
-        val c = new UsernamePasswordCredential("casuser", "password");
+        val credential = new UsernamePasswordCredential("casuser", "password");
         val bean = new PasswordChangeRequest();
-        bean.setUsername(c.getUsername());
+        bean.setUsername(credential.getUsername());
         bean.setConfirmedPassword("Test1@1234".toCharArray());
         bean.setPassword("Test1@1234".toCharArray());
         val isValid = passwordValidationService.isValid(bean);
@@ -157,5 +157,13 @@ class JsonResourcePasswordManagementServiceTests {
             passwordChangeService.updateSecurityQuestions(query);
         });
         assertFalse(passwordChangeService.getSecurityQuestions(query).isEmpty());
+    }
+
+    @Test
+    void verifyToken() throws Throwable {
+        val token = passwordChangeService.createToken(PasswordManagementQuery.builder().username("casuser").build());
+        assertNotNull(token);
+        val parsed = passwordChangeService.parseToken(token);
+        assertEquals("casuser", parsed);
     }
 }

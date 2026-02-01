@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.CasProtocolConstants;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
@@ -7,8 +8,10 @@ import org.apereo.cas.util.spring.RefreshableHandlerInterceptor;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import org.apereo.cas.web.support.CookieUtils;
 import org.apereo.cas.web.support.ThemeChangeInterceptor;
+import org.apereo.cas.web.theme.ThemeResolver;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -20,7 +23,6 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -28,13 +30,8 @@ import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
 import org.springframework.web.servlet.mvc.UrlFilenameViewController;
 import org.springframework.web.servlet.view.RedirectView;
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Optional;
 
 /**
  * This is {@link CasWebAppConfiguration}.
@@ -87,10 +84,10 @@ class CasWebAppConfiguration {
         @Bean
         public WebMvcConfigurer casWebAppWebMvcConfigurer(
             @Qualifier("localeChangeInterceptor")
-            final ObjectProvider<HandlerInterceptor> localeChangeInterceptor) {
+            final ObjectProvider<@NonNull HandlerInterceptor> localeChangeInterceptor) {
             return new WebMvcConfigurer() {
                 @Override
-                public void addInterceptors(@Nonnull final InterceptorRegistry registry) {
+                public void addInterceptors(@NonNull final InterceptorRegistry registry) {
                     val interceptor = new RefreshableHandlerInterceptor(localeChangeInterceptor);
                     registry.addInterceptor(interceptor).addPathPatterns("/**");
                 }
@@ -122,9 +119,9 @@ class CasWebAppConfiguration {
         private static final class RootController extends ParameterizableViewController {
             @Override
             protected ModelAndView handleRequestInternal(
-                @Nonnull
+                @NonNull
                 final HttpServletRequest request,
-                @Nonnull
+                @NonNull
                 final HttpServletResponse response) {
                 val queryString = request.getQueryString();
                 val url = request.getContextPath() + CasProtocolConstants.ENDPOINT_LOGIN

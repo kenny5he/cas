@@ -1,5 +1,6 @@
 package org.apereo.cas.oidc.ticket;
 
+import module java.base;
 import org.apereo.cas.support.oauth.services.OAuthRegisteredService;
 import org.apereo.cas.support.oauth.web.response.accesstoken.ext.AccessTokenRequestContext;
 import org.apereo.cas.ticket.ExpirationPolicy;
@@ -11,7 +12,6 @@ import org.apereo.cas.util.EncodingUtils;
 import org.apereo.cas.util.crypto.CipherExecutor;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.serialization.SerializationUtils;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -47,7 +47,7 @@ public class OidcDefaultPushedAuthorizationRequestFactory implements OidcPushedA
             holder.getAuthentication(), holder.getService(), holder.getRegisteredService(),
             EncodingUtils.encodeBase64(request));
         par.setTenantId(holder.getService().getTenant());
-        FunctionUtils.doIfNotNull(holder.getService(), __ -> par.setTenantId(holder.getService().getTenant()));
+        FunctionUtils.doIfNotNull(holder.getService(), _ -> par.setTenantId(holder.getService().getTenant()));
         return par;
     }
 

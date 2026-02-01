@@ -1,7 +1,7 @@
 package org.apereo.cas.audit;
 
+import module java.base;
 import org.apereo.cas.util.junit.EnabledIfListeningOnPort;
-
 import org.junit.jupiter.api.Tag;
 import org.springframework.test.context.TestPropertySource;
 
@@ -19,7 +19,7 @@ import org.springframework.test.context.TestPropertySource;
     "cas.audit.jdbc.user=system",
     "cas.audit.jdbc.password=Oradoc_db1",
     "cas.audit.jdbc.driver-class=oracle.jdbc.driver.OracleDriver",
-    "cas.audit.jdbc.url=jdbc:oracle:thin:@localhost:1521:ORCLCDB",
+    "cas.audit.jdbc.url=jdbc:oracle:thin:@localhost:1521:FREE",
     "cas.audit.jdbc.dialect=org.hibernate.dialect.OracleDialect"
 })
 @EnabledIfListeningOnPort(port = 1521)

@@ -1,5 +1,6 @@
 package org.apereo.cas.syncope;
 
+import module java.base;
 import org.apereo.cas.config.CasAccountManagementWebflowAutoConfiguration;
 import org.apereo.cas.config.CasAuthenticationEventExecutionPlanTestConfiguration;
 import org.apereo.cas.config.CasCoreAuditAutoConfiguration;
@@ -26,9 +27,6 @@ import org.apereo.cas.config.CasSyncopeAutoConfiguration;
 import org.apereo.cas.util.MockWebServer;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.boot.SpringBootTestAutoConfigurations;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.val;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
@@ -36,9 +34,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.UUID;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * This is {@link BaseSyncopeTests}.
@@ -51,7 +49,7 @@ public abstract class BaseSyncopeTests {
         JacksonObjectMapperFactory.builder().defaultTypingEnabled(true).build().toObjectMapper();
 
     protected static MockWebServer startMockSever(final JsonNode json, final HttpStatus status,
-                                                  final int port) throws Exception {
+                                                  final int port) {
         val data = MAPPER.writeValueAsString(json);
         val webServer = new MockWebServer(port,
             new ByteArrayResource(data.getBytes(StandardCharsets.UTF_8), "REST Output"),

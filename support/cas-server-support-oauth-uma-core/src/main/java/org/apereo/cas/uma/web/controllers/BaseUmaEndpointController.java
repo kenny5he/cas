@@ -1,5 +1,6 @@
 package org.apereo.cas.uma.web.controllers;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationException;
 import org.apereo.cas.support.oauth.OAuth20Constants;
 import org.apereo.cas.ticket.Ticket;
@@ -10,18 +11,17 @@ import org.apereo.cas.uma.ticket.resource.ResourceSet;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.web.AbstractController;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.UserProfile;
 import org.pac4j.jee.context.JEEContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMap;
-
+import tools.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -58,11 +58,11 @@ public abstract class BaseUmaEndpointController extends AbstractController {
         return profile;
     }
 
-    protected MultiValueMap<String, Object> buildResponseEntityErrorModel(final InvalidResourceSetException e) {
+    protected MultiValueMap<@NonNull String, Object> buildResponseEntityErrorModel(final InvalidResourceSetException e) {
         return buildResponseEntityErrorModel(e.getStatus(), e.getMessage());
     }
 
-    protected MultiValueMap<String, Object> buildResponseEntityErrorModel(final HttpStatus code, final String message) {
+    protected MultiValueMap<@NonNull String, Object> buildResponseEntityErrorModel(final HttpStatus code, final String message) {
         return CollectionUtils.asMultiValueMap("code",
             code.value(),
             "message", message);

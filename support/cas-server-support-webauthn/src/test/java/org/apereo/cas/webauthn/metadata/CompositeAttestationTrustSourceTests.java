@@ -1,12 +1,12 @@
 package org.apereo.cas.webauthn.metadata;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.model.support.mfa.webauthn.WebAuthnMultifactorAttestationTrustSourceFidoProperties;
 import org.apereo.cas.test.CasTestExtension;
 import org.apereo.cas.util.crypto.CertUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.webauthn.web.flow.BaseWebAuthnWebflowTests;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yubico.webauthn.attestation.AttestationTrustSource;
 import lombok.val;
 import org.junit.jupiter.api.Tag;
@@ -15,12 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.SequencedCollection;
+import tools.jackson.databind.ObjectMapper;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**

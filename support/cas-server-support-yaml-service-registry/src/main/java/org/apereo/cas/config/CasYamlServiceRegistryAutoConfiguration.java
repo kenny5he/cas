@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.services.ServiceRegistry;
@@ -12,6 +13,7 @@ import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.io.WatcherService;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -22,9 +24,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * This is {@link CasYamlServiceRegistryAutoConfiguration}.
@@ -50,7 +49,7 @@ public class CasYamlServiceRegistryAutoConfiguration {
             final CasConfigurationProperties casProperties,
             @Qualifier("registeredServiceReplicationStrategy")
             final RegisteredServiceReplicationStrategy registeredServiceReplicationStrategy,
-            final ObjectProvider<List<ServiceRegistryListener>> serviceRegistryListeners) throws Exception {
+            final ObjectProvider<@NonNull List<ServiceRegistryListener>> serviceRegistryListeners) throws Exception {
 
             val registry = casProperties.getServiceRegistry();
             val yaml = new YamlServiceRegistry(registry.getYaml().getLocation(),

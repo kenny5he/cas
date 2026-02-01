@@ -1,5 +1,6 @@
 package org.apereo.cas.authorization;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.authentication.principal.PrincipalFactoryUtils;
 import org.apereo.cas.configuration.model.core.monitor.LdapSecurityActuatorEndpointsMonitorProperties;
@@ -17,7 +18,7 @@ import org.ldaptive.ReturnAttributes;
 import org.ldaptive.SearchOperation;
 import org.ldaptive.auth.AuthenticationRequest;
 import org.ldaptive.auth.Authenticator;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.security.autoconfigure.SecurityProperties;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -25,12 +26,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link EndpointLdapAuthenticationProvider}.
@@ -51,7 +46,7 @@ public class EndpointLdapAuthenticationProvider implements AuthenticationProvide
 
     private static Authentication generateAuthenticationToken(final Authentication authentication,
                                                               final List<SimpleGrantedAuthority> authorities) {
-        val username = authentication.getPrincipal().toString();
+        val username = Objects.requireNonNull(authentication.getPrincipal()).toString();
         val credentials = authentication.getCredentials();
         return new UsernamePasswordAuthenticationToken(username, credentials, authorities);
     }
@@ -67,7 +62,7 @@ public class EndpointLdapAuthenticationProvider implements AuthenticationProvide
     @Override
     public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
         try {
-            val username = authentication.getPrincipal().toString();
+            val username = Objects.requireNonNull(authentication.getPrincipal()).toString();
             val credentials = authentication.getCredentials();
             val password = Optional.ofNullable(credentials).map(Object::toString).orElse(null);
             if (StringUtils.isBlank(password)) {
@@ -100,7 +95,7 @@ public class EndpointLdapAuthenticationProvider implements AuthenticationProvide
                 entry.getAttributes().forEach(attribute -> attributes.put(attribute.getName(), new ArrayList<>(attribute.getStringValues())));
                 val principal = PrincipalFactoryUtils.newPrincipalFactory().createPrincipal(username, attributes);
                 val authZGen = buildAuthorizationGenerator();
-                var authorities = authZGen.apply(principal);
+                var authorities = authZGen.apply(Objects.requireNonNull(principal));
 
                 LOGGER.debug("List of authorities remapped from profile roles are [{}]", authorities);
                 if (authorities.stream().anyMatch(authority -> requiredRoles.contains(authority.getAuthority()))) {

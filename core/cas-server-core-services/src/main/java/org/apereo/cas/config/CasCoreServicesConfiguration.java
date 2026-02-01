@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.audit.AuditableExecution;
 import org.apereo.cas.authentication.principal.DefaultWebApplicationResponseBuilderLocator;
 import org.apereo.cas.authentication.principal.ResponseBuilder;
@@ -62,6 +63,7 @@ import com.google.common.base.Predicates;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -79,11 +81,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableAsync;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link CasCoreServicesConfiguration}.
@@ -219,7 +216,7 @@ class CasCoreServicesConfiguration {
         @Bean
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public ServiceRegistryExecutionPlan serviceRegistryExecutionPlan(
-            final ObjectProvider<List<ServiceRegistryExecutionPlanConfigurer>> provider) {
+            final ObjectProvider<@NonNull List<ServiceRegistryExecutionPlanConfigurer>> provider) {
             val plan = new DefaultServiceRegistryExecutionPlan();
             provider.ifAvailable(configurers -> configurers
                 .stream()
@@ -261,7 +258,7 @@ class CasCoreServicesConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public ChainingServiceRegistry serviceRegistry(
             final ConfigurableApplicationContext applicationContext,
-            final ObjectProvider<List<ServiceRegistryListener>> serviceRegistryListeners,
+            final ObjectProvider<@NonNull List<ServiceRegistryListener>> serviceRegistryListeners,
             @Qualifier("serviceRegistryExecutionPlan")
             final ServiceRegistryExecutionPlan serviceRegistryExecutionPlan) {
             val filter = (Predicate) Predicates.not(Predicates.instanceOf(ImmutableServiceRegistry.class));
@@ -302,7 +299,7 @@ class CasCoreServicesConfiguration {
             @Qualifier(WebApplicationService.BEAN_NAME_FACTORY)
             final ServiceFactory serviceFactory,
             @Qualifier("servicesManagerCache")
-            final Cache<Long, RegisteredService> servicesManagerCache,
+            final Cache<@NonNull Long, RegisteredService> servicesManagerCache,
             final List<ServicesManagerRegisteredServiceLocator> servicesManagerRegisteredServiceLocators,
             final Environment environment,
             final ConfigurableApplicationContext applicationContext) {
@@ -387,7 +384,7 @@ class CasCoreServicesConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         @Bean
         @ConditionalOnMissingBean(name = "servicesManagerCache")
-        public Cache<Long, RegisteredService> servicesManagerCache(final CasConfigurationProperties casProperties) {
+        public Cache<@NonNull Long, RegisteredService> servicesManagerCache(final CasConfigurationProperties casProperties) {
             return Beans.newCacheBuilder(casProperties.getServiceRegistry().getCache()).build();
         }
 

@@ -1,27 +1,24 @@
 package org.apereo.cas.qr.web;
 
+import module java.base;
 import org.apereo.cas.qr.QRAuthenticationConstants;
 import org.apereo.cas.qr.validation.QRAuthenticationTokenValidationRequest;
 import org.apereo.cas.qr.validation.QRAuthenticationTokenValidatorService;
 import org.apereo.cas.token.TokenConstants;
 import org.apereo.cas.util.LoggingUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.core.MessageSendingOperations;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link QRAuthenticationChannelController}.
@@ -37,7 +34,7 @@ public class QRAuthenticationChannelController {
     private static final ObjectMapper MAPPER = JacksonObjectMapperFactory.builder()
         .defaultTypingEnabled(false).build().toObjectMapper();
 
-    private final MessageSendingOperations<String> messageTemplate;
+    private final MessageSendingOperations<@NonNull String> messageTemplate;
 
     private final QRAuthenticationTokenValidatorService tokenValidatorService;
 
@@ -48,7 +45,7 @@ public class QRAuthenticationChannelController {
      * @return true/false
      */
     @MessageMapping("/accept")
-    public boolean verify(final Message<String> message) {
+    public boolean verify(final Message<@NonNull String> message) {
         val payload = message.getPayload();
         LOGGER.trace("Received payload [{}]", payload);
         val nativeHeaders = Objects.requireNonNull(message.getHeaders().get("nativeHeaders", LinkedMultiValueMap.class));
@@ -91,8 +88,8 @@ public class QRAuthenticationChannelController {
         return false;
     }
 
-    private void convertAndSend(final String endpoint, final Map data) {
+    private void convertAndSend(final String endpoint, final Map<String, ?> data) {
         LOGGER.trace("Sending [{}] to endpoint [{}]", data, endpoint);
-        messageTemplate.convertAndSend(endpoint, data);
+        messageTemplate.convertAndSend(endpoint, (Object) data);
     }
 }

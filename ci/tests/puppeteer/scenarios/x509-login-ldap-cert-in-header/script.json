@@ -8,8 +8,6 @@
     "--cas.server.name=https://localhost:8443",
     "--cas.server.prefix=${cas.server.name}/cas",
     
-
-    
     "--cas.service-registry.core.init-from-json=true",
     "--cas.service-registry.json.location=file:${PWD}/ci/tests/puppeteer/scenarios/${SCENARIO}/services",
 
@@ -60,8 +58,7 @@
 
     "--cas.authn.attribute-repository.groovy[0].id=COMMONATTRS",
     "--cas.authn.attribute-repository.groovy[0].location=file:${PWD}/ci/tests/puppeteer/scenarios/${SCENARIO}/attributes.groovy",
-    "--cas.authn.attribute-repository.groovy[0].order=2",
-    "--cas.authn.attribute-repository.groovy[0].case-insensitive=false"
+    "--cas.authn.attribute-repository.groovy[0].order=2"
   ],
   "trustStoreCertificateFile": "./ci/tests/puppeteer/scenarios/x509-login-ldap-cert-in-header/cert.pem",
   "initScript": "${PWD}/ci/tests/ldap/run-ad-server.sh,${PWD}/ci/tests/httpbin/run-httpbin-server.sh"

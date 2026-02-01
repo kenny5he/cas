@@ -1,19 +1,11 @@
 package org.apereo.cas.ticket.registry;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.ticket.Ticket;
 import org.apereo.cas.ticket.TicketGrantingTicket;
 import org.apereo.cas.util.crypto.CipherExecutor;
 import org.jooq.lambda.Unchecked;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Interface for a registry that stores tickets. The underlying registry can be
@@ -32,6 +24,11 @@ public interface TicketRegistry {
      */
     String BEAN_NAME = "ticketRegistry";
 
+    /**
+     * Ticket transaction manager bean name.
+     */
+    String TICKET_TRANSACTION_MANAGER = "ticketTransactionManager";
+    
     /**
      * Add a ticket to the registry. Ticket storage is based on the ticket id.
      *
@@ -250,4 +247,12 @@ public interface TicketRegistry {
      * @return the cipher executor
      */
     CipherExecutor getCipherExecutor();
+
+    /**
+     * Delete tickets for given principal.
+     *
+     * @param principalId the principal id
+     * @return deleted tickets count
+     */
+    long deleteTicketsFor(String principalId);
 }

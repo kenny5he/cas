@@ -1,15 +1,14 @@
 package org.apereo.cas.monitor;
 
+import module java.base;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.actuate.health.AbstractHealthIndicator;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.Status;
-import org.springframework.boot.actuate.metrics.MetricsEndpoint;
-
-import java.util.List;
-import java.util.Optional;
+import org.springframework.boot.health.contributor.AbstractHealthIndicator;
+import org.springframework.boot.health.contributor.Health;
+import org.springframework.boot.health.contributor.Status;
+import org.springframework.boot.micrometer.metrics.actuate.endpoint.MetricsEndpoint;
 
 /**
  * Monitors JVM system load and memory.
@@ -59,7 +58,7 @@ public class SystemMonitorHealthIndicator extends AbstractHealthIndicator {
         return getMetricsFor(key, tag, 0);
     }
 
-    private double getMetricsFor(final String key, final List<String> tag, final int measure) {
+    private double getMetricsFor(final String key, final @Nullable List<String> tag, final int measure) {
         return Optional.ofNullable(metrics.getIfAvailable())
             .map(endpoint -> {
                 val metric = endpoint.metric(key, tag);

@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.registry;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.monitor.Monitorable;
 import org.apereo.cas.ticket.ServiceAwareTicket;
@@ -26,17 +27,6 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import java.io.Serializable;
-import java.time.Instant;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * A Ticket Registry storage backend based on MongoDB.
@@ -136,11 +126,20 @@ public class MongoDbTicketRegistry extends AbstractTicketRegistry {
             .stream()
             .map(this::getTicketCollectionInstanceByMetadata)
             .filter(StringUtils::isNotBlank)
-            .mapToLong(collectionName -> {
-                val countTickets = mongoTemplate.count(query, collectionName);
-                mongoTemplate.remove(query, collectionName);
-                return countTickets;
-            })
+            .mapToLong(collectionName -> mongoTemplate.remove(query, collectionName).getDeletedCount())
+            .sum();
+    }
+
+    @Override
+    public long deleteTicketsFor(final String principalId) {
+        val query = isCipherExecutorEnabled()
+            ? new Query(Criteria.where(MongoDbTicketDocument.FIELD_NAME_PRINCIPAL).is(digestIdentifier(principalId)))
+            : new Query(Criteria.where(MongoDbTicketDocument.FIELD_NAME_PRINCIPAL).regex(principalId, "i"));
+        return ticketCatalog.findAll()
+            .stream()
+            .map(this::getTicketCollectionInstanceByMetadata)
+            .filter(StringUtils::isNotBlank)
+            .mapToLong(collectionName -> mongoTemplate.remove(query, collectionName).getDeletedCount())
             .sum();
     }
 

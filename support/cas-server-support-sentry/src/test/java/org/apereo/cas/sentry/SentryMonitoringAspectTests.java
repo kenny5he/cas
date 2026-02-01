@@ -1,21 +1,23 @@
 package org.apereo.cas.sentry;
 
+import module java.base;
 import org.apereo.cas.config.CasSentryAutoConfiguration;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.test.CasTestExtension;
 import org.apereo.cas.util.spring.boot.SpringBootTestAutoConfigurations;
+import io.sentry.spring7.opentelemetry.SentryOpenTelemetryAgentWithoutAutoInitConfiguration;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
+import org.springframework.boot.micrometer.metrics.test.autoconfigure.AutoConfigureMetrics;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import io.sentry.spring.jakarta.opentelemetry.SentryOpenTelemetryAgentWithoutAutoInitConfiguration;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -34,7 +36,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @EnableAspectJAutoProxy
 @Tag("Simple")
 @ExtendWith(CasTestExtension.class)
-@AutoConfigureObservability
+@AutoConfigureMetrics
+@AutoConfigureTracing
 class SentryMonitoringAspectTests {
 
     @Autowired

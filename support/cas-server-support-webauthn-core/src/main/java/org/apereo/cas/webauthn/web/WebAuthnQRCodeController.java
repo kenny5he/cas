@@ -1,5 +1,6 @@
 package org.apereo.cas.webauthn.web;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.ticket.TicketFactory;
@@ -32,7 +33,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Map;
 
 /**
  * This is {@link WebAuthnQRCodeController}.
@@ -112,7 +112,7 @@ public class WebAuthnQRCodeController extends BaseWebAuthnController {
             Assert.isTrue(transientTicket != null && !transientTicket.isExpired(), "Ticket not found or has expired");
             val webAuthnCredential = transientTicket.getProperty(WebAuthnCredential.class.getName(), WebAuthnCredential.class);
             if (webAuthnCredential == null) {
-                return ResponseEntity.unprocessableEntity().body(
+                return ResponseEntity.unprocessableContent().body(
                     Map.of("ticketId", ticketId, "message", "WebAuthn credential not found in the ticket"));
             }
             Assert.notNull(webAuthnCredential, "WebAuthn credential not found in the ticket");

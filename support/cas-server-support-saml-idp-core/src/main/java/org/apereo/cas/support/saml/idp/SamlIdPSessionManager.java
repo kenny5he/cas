@@ -1,5 +1,6 @@
 package org.apereo.cas.support.saml.idp;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
 import org.apereo.cas.support.saml.OpenSamlConfigBean;
 import org.apereo.cas.support.saml.SamlIdPConstants;
@@ -27,12 +28,6 @@ import org.opensaml.saml.saml2.core.RequestAbstractType;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.jee.context.JEEContext;
-import java.io.Serial;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * This is {@link SamlIdPSessionManager}.
@@ -127,7 +122,7 @@ public class SamlIdPSessionManager {
         val argumentExtractor = applicationContext.getBean(ArgumentExtractor.BEAN_NAME, ArgumentExtractor.class);
         val service = argumentExtractor.extractService(((JEEContext) context).getNativeRequest());
         return Optional.ofNullable(service)
-            .map(Unchecked.function(__ -> {
+            .map(Unchecked.function(_ -> {
                 val serviceSelectionPlan = applicationContext.getBean(AuthenticationServiceSelectionPlan.BEAN_NAME, AuthenticationServiceSelectionPlan.class);
                 val resolvedService = serviceSelectionPlan.resolveService(service);
                 val authnRequestId = resolvedService.getAttributes().get(SamlIdPConstants.AUTHN_REQUEST_ID);

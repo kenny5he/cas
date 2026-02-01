@@ -1,5 +1,6 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.git.GitRepository;
 import org.apereo.cas.git.PathRegexPatternTreeFilter;
 import org.apereo.cas.services.locator.GitRepositoryRegisteredServiceLocator;
@@ -8,7 +9,6 @@ import org.apereo.cas.util.RegexUtils;
 import org.apereo.cas.util.concurrent.CasReentrantLock;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.serialization.StringSerializer;
-
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
@@ -16,18 +16,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.lambda.Unchecked;
 import org.springframework.context.ConfigurableApplicationContext;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link GitServiceRegistry}.
@@ -92,7 +80,7 @@ public class GitServiceRegistry extends AbstractServiceRegistry {
         val file = locateExistingRegisteredServiceFile(registeredService);
         if (file.isPresent()) {
             val message = "Deleted registered service " + registeredService.getName();
-            FunctionUtils.doUnchecked(__ -> {
+            FunctionUtils.doUnchecked(_ -> {
                 FileUtils.forceDelete(file.get());
                 commitAndPush(message);
             });
@@ -104,7 +92,7 @@ public class GitServiceRegistry extends AbstractServiceRegistry {
 
     @Override
     public void deleteAll() {
-        FunctionUtils.doUnchecked(__ -> {
+        FunctionUtils.doUnchecked(_ -> {
             val currentServices = load();
             currentServices.stream()
                 .map(this::locateExistingRegisteredServiceFile)

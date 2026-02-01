@@ -1,5 +1,6 @@
 package org.apereo.cas.util.spring.boot;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.test.CasTestExtension;
@@ -14,8 +15,10 @@ import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -172,6 +175,7 @@ class CasFeatureEnabledConditionTests {
         properties = CasFeatureEnabledCondition.PROPERTY_SELECTED_FEATURE_MODULES
             + "=CasFeatureModule.AcceptableUsagePolicy.feature1.enabled=true,"
             + "CasFeatureModule.SAMLIdentityProvider.enabled=true")
+    @ContextConfiguration(initializers = ClearRegisteredFeaturesInitializer.class)
     class SelectedFeatureConditionsTests {
         @Autowired
         private ConfigurableApplicationContext applicationContext;
@@ -179,7 +183,19 @@ class CasFeatureEnabledConditionTests {
         @Test
         void verifyOperation() {
             assertTrue(applicationContext.containsBean("selectedBean"));
-            assertEquals(3, CasFeatureModule.FeatureCatalog.getRegisteredFeatures().size());
+            assertTrue(CasFeatureModule.FeatureCatalog.SAMLIdentityProvider.isRegistered());
+            assertTrue(CasFeatureModule.FeatureCatalog.ApacheTomcat.isRegistered());
+            assertTrue(CasFeatureModule.FeatureCatalog.AcceptableUsagePolicy.isRegistered("feature1"));
+            assertFalse(CasFeatureModule.FeatureCatalog.AcceptableUsagePolicy.isRegistered("feature2"));
+            assertFalse(CasFeatureModule.FeatureCatalog.AcceptableUsagePolicy.isRegistered("feature3"));
+        }
+    }
+
+    private static final class ClearRegisteredFeaturesInitializer
+        implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        @Override
+        public void initialize(final ConfigurableApplicationContext applicationContext) {
+            CasFeatureModule.FeatureCatalog.clearRegisteredFeatures();
         }
     }
 

@@ -1,5 +1,6 @@
 package org.apereo.cas.support.saml.services;
 
+import module java.base;
 import org.apereo.cas.CasProtocolConstants;
 import org.apereo.cas.services.RegisteredServiceAttributeReleasePolicyContext;
 import org.apereo.cas.services.ReturnAllowedAttributeReleasePolicy;
@@ -26,11 +27,6 @@ import org.opensaml.saml.saml2.core.RequestAbstractType;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.jee.context.JEEContext;
-import java.io.Serial;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * This is {@link BaseSamlRegisteredServiceAttributeReleasePolicy}.
@@ -128,7 +124,7 @@ public abstract class BaseSamlRegisteredServiceAttributeReleasePolicy extends Re
 
     @Override
     public Map<String, List<Object>> getAttributesInternal(final RegisteredServiceAttributeReleasePolicyContext context,
-                                                           final Map<String, List<Object>> attributes) throws Throwable {
+                                                           final Map<String, List<Object>> attributes) {
         if (context.getRegisteredService() instanceof SamlRegisteredService) {
             val applicationContext = context.getApplicationContext();
             val resolver = applicationContext.getBean(SamlRegisteredServiceCachingMetadataResolver.BEAN_NAME,

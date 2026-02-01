@@ -1,6 +1,8 @@
 package org.apereo.inspektr.common.spi;
 
+import module java.base;
 import org.aspectj.lang.JoinPoint;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An SPI interface needed to be implemented by individual applications requiring an audit trail record keeping
@@ -27,7 +29,7 @@ public interface PrincipalResolver {
      * @param returnValue the returned value
      * @return The principal as a String. CANNOT be NULL.
      */
-    String resolveFrom(JoinPoint auditTarget, Object returnValue);
+    @Nullable String resolveFrom(JoinPoint auditTarget, Object returnValue);
 
     /**
      * Resolve the principal performing an audit-able action that has incurred
@@ -40,7 +42,7 @@ public interface PrincipalResolver {
      * @param exception   The exception incurred when the join point proceeds.
      * @return The principal as a String. CANNOT be NULL.
      */
-    String resolveFrom(JoinPoint auditTarget, Exception exception);
+    @Nullable String resolveFrom(JoinPoint auditTarget, Exception exception);
 
     /**
      * Called when there is no other way to resolve the principal (i.e. an error was captured, auditing was not

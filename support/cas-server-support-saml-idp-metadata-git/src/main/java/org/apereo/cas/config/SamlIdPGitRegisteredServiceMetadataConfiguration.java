@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.git.GitRepository;
@@ -117,7 +118,7 @@ class SamlIdPGitRegisteredServiceMetadataConfiguration {
             fixedDelayString = "${cas.authn.saml-idp.metadata.git.schedule.repeat-interval:PT2H}")
         @Override
         public void run() {
-            FunctionUtils.doUnchecked(__ -> {
+            FunctionUtils.doUnchecked(_ -> {
                 val origin = StringUtils.defaultIfBlank(gitRepository.getRepositoryRemote("origin"), "default");
                 LOGGER.debug("Starting to pull SAML registered services from [{}]", origin);
                 gitRepository.pull();

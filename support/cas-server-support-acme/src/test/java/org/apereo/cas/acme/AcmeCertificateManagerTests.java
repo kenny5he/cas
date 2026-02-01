@@ -1,5 +1,6 @@
 package org.apereo.cas.acme;
 
+import module java.base;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -20,10 +21,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.test.context.TestPropertySource;
-
-import java.io.Serial;
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -56,7 +53,7 @@ class AcmeCertificateManagerTests extends BaseAcmeTests {
         FileUtils.deleteQuietly(casProperties.getAcme().getDomainKey().getLocation().getFile());
         FileUtils.deleteQuietly(casProperties.getAcme().getUserKey().getLocation().getFile());
     }
-    
+
     @Test
     void verifyOperation() throws Throwable {
         assertNotNull(acmeCertificateManager);
@@ -100,8 +97,9 @@ class AcmeCertificateManagerTests extends BaseAcmeTests {
         }
 
         @Override
-        public void update() {
+        public Optional<Instant> fetch() {
             status = Status.VALID;
+            return Optional.empty();
         }
 
         @Override

@@ -1,5 +1,6 @@
 package org.apereo.cas.web.flow;
 
+import module java.base;
 import org.apereo.cas.BaseCasGoogleAnalyticsTests;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.test.CasTestExtension;
@@ -30,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
     properties = {
         "cas.google-analytics.cookie.name=CasGoogleCookie",
         "cas.google-analytics.cookie.same-site-policy=strict",
-        "cas.tgc.cookie.same-site-policy=lax"
+        "cas.tgc.same-site-policy=lax"
     })
 @EnableConfigurationProperties(CasConfigurationProperties.class)
 @Tag("Cookie")

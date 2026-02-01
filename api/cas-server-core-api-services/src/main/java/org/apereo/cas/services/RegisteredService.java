@@ -1,15 +1,13 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import lombok.val;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.core.Ordered;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Interface for a service that can be registered by the Services Management
@@ -151,6 +149,14 @@ public interface RegisteredService extends RegisteredServiceDefinition, Comparab
     RegisteredServiceAttributeReleasePolicy getAttributeReleasePolicy();
 
     /**
+     * Sets attribute release policy.
+     *
+     * @param policy the policy
+     * @return the attribute release policy
+     */
+    RegisteredService setAttributeReleasePolicy(RegisteredServiceAttributeReleasePolicy policy);
+
+    /**
      * Describes extra metadata about the service; custom fields
      * that could be used by submodules implementing additional
      * behavior on a per-service basis.
@@ -213,5 +219,18 @@ public interface RegisteredService extends RegisteredServiceDefinition, Comparab
             setId(System.nanoTime());
         }
         return this;
+    }
+
+
+    /**
+     * Determine whether the service is marked as internal.
+     *
+     * @return true/false
+     */
+    @JsonIgnore
+    default boolean isInternal() {
+        val property = RegisteredServiceProperty.RegisteredServiceProperties.INTERNAL_SERVICE_DEFINITION;
+        return property.isAssignedTo(this, BooleanUtils::toBoolean)
+            && property.getPropertyBooleanValue(this);
     }
 }

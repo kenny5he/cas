@@ -1,5 +1,6 @@
 package org.apereo.cas.adaptors.yubikey.dao;
 
+import module java.base;
 import org.apereo.cas.adaptors.yubikey.AbstractYubiKeyAccountRegistryTests;
 import org.apereo.cas.adaptors.yubikey.BaseYubiKeyTests;
 import org.apereo.cas.adaptors.yubikey.YubiKeyAccountRegistry;
@@ -34,7 +35,6 @@ import software.amazon.awssdk.core.SdkSystemSetting;
         "cas.authn.mfa.yubikey.dynamo-db.drop-tables-on-startup=true",
         "cas.authn.mfa.yubikey.dynamo-db.local-instance=true",
         "cas.authn.mfa.yubikey.dynamo-db.region=us-east-1",
-        "cas.authn.mfa.yubikey.dynamo-db.asynchronous=false",
         "cas.authn.mfa.yubikey.client-id=18423",
         "cas.authn.mfa.yubikey.secret-key=zAIqhjui12mK8x82oe9qzBEb0As="
     })

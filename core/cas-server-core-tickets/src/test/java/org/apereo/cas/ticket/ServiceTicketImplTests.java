@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket;
 
+import module java.base;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.services.RegisteredServiceTestUtils;
 import org.apereo.cas.ticket.expiration.MultiTimeUseOrTimeoutExpirationPolicy;
@@ -7,16 +8,13 @@ import org.apereo.cas.ticket.expiration.NeverExpiresExpirationPolicy;
 import org.apereo.cas.ticket.factory.BaseTicketFactoryTests;
 import org.apereo.cas.util.DefaultUniqueTicketIdGenerator;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.TestPropertySource;
-import java.io.File;
-import java.io.IOException;
-import java.util.UUID;
+import tools.jackson.databind.ObjectMapper;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -24,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 3.0.0
  */
 @Tag("Tickets")
-@TestPropertySource(properties = "cas.ticket.tgt.core.only-track-most-recent-session=true")
+@TestPropertySource(properties = "cas.ticket.tgt.core.service-tracking-policy=MOST_RECENT")
 class ServiceTicketImplTests extends BaseTicketFactoryTests {
 
     private static final ObjectMapper MAPPER = JacksonObjectMapperFactory.builder()
@@ -46,7 +44,7 @@ class ServiceTicketImplTests extends BaseTicketFactoryTests {
     }
 
     @Test
-    void verifySerializeToJson() throws IOException {
+    void verifySerializeToJson() {
         val stWritten = new ServiceTicketImpl(ST_ID, tgt, RegisteredServiceTestUtils.getService(), true, NeverExpiresExpirationPolicy.INSTANCE);
         MAPPER.writeValue(ST_JSON_FILE, stWritten);
         val stRead = MAPPER.readValue(ST_JSON_FILE, ServiceTicketImpl.class);
@@ -120,7 +118,7 @@ class ServiceTicketImplTests extends BaseTicketFactoryTests {
                 new MultiTimeUseOrTimeoutExpirationPolicy(1, 5000),
                 false, serviceTicketSessionTrackingPolicy);
         val t1 = serviceTicket.grantProxyGrantingTicket(idGenerator.getNewTicketId(TicketGrantingTicket.PREFIX), authentication,
-            NeverExpiresExpirationPolicy.INSTANCE);
+            NeverExpiresExpirationPolicy.INSTANCE, proxyGrantingTicketTrackingPolicy);
         assertEquals(authentication, t1.getAuthentication());
     }
 
@@ -142,9 +140,9 @@ class ServiceTicketImplTests extends BaseTicketFactoryTests {
                 new MultiTimeUseOrTimeoutExpirationPolicy(1, 5000),
                 false, serviceTicketSessionTrackingPolicy);
         serviceTicket.grantProxyGrantingTicket(idGenerator.getNewTicketId(TicketGrantingTicket.PREFIX),
-            authentication, NeverExpiresExpirationPolicy.INSTANCE);
+            authentication, NeverExpiresExpirationPolicy.INSTANCE, proxyGrantingTicketTrackingPolicy);
         assertThrows(Exception.class,
             () -> serviceTicket.grantProxyGrantingTicket(idGenerator.getNewTicketId(TicketGrantingTicket.PREFIX),
-                authentication, NeverExpiresExpirationPolicy.INSTANCE));
+                authentication, NeverExpiresExpirationPolicy.INSTANCE, proxyGrantingTicketTrackingPolicy));
     }
 }

@@ -1,13 +1,12 @@
 package org.apereo.cas.trusted.web;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.trusted.authentication.api.MultifactorAuthenticationTrustRecord;
 import org.apereo.cas.trusted.authentication.api.MultifactorAuthenticationTrustStorage;
 import org.apereo.cas.util.CompressionUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.web.BaseCasRestActuatorEndpoint;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -15,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.io.IOUtils;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.endpoint.Access;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
@@ -31,13 +31,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * This is {@link MultifactorAuthenticationTrustedDevicesReportEndpoint}.
@@ -51,12 +47,12 @@ public class MultifactorAuthenticationTrustedDevicesReportEndpoint extends BaseC
     private static final ObjectMapper MAPPER = JacksonObjectMapperFactory.builder()
         .defaultTypingEnabled(false).build().toObjectMapper();
 
-    private final ObjectProvider<MultifactorAuthenticationTrustStorage> mfaTrustEngine;
+    private final ObjectProvider<@NonNull MultifactorAuthenticationTrustStorage> mfaTrustEngine;
 
     public MultifactorAuthenticationTrustedDevicesReportEndpoint(
         final CasConfigurationProperties casProperties,
         final ConfigurableApplicationContext applicationContext,
-        final ObjectProvider<MultifactorAuthenticationTrustStorage> mfaTrustEngine) {
+        final ObjectProvider<@NonNull MultifactorAuthenticationTrustStorage> mfaTrustEngine) {
         super(casProperties, applicationContext);
         this.mfaTrustEngine = mfaTrustEngine;
     }
@@ -155,7 +151,7 @@ public class MultifactorAuthenticationTrustedDevicesReportEndpoint extends BaseC
     @ResponseBody
     @Operation(summary = "Export all device records as a zip file for a given username",
         parameters = @Parameter(name = "username", required = true, in = ParameterIn.PATH, description = "The username to look up"))
-    public ResponseEntity<Resource> exportUserDevices(@PathVariable("username") final String username) {
+    public ResponseEntity<@NonNull Resource> exportUserDevices(@PathVariable("username") final String username) {
         val accounts = mfaTrustEngine.getObject().get(username);
         val resource = CompressionUtils.toZipFile(accounts.stream(),
             Unchecked.function(entry -> {
@@ -179,7 +175,7 @@ public class MultifactorAuthenticationTrustedDevicesReportEndpoint extends BaseC
     @GetMapping(path = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseBody
     @Operation(summary = "Export all device records as a zip file")
-    public ResponseEntity<Resource> export() {
+    public ResponseEntity<@NonNull Resource> export() {
         val accounts = mfaTrustEngine.getObject().getAll();
         val resource = CompressionUtils.toZipFile(accounts.stream(),
             Unchecked.function(entry -> {

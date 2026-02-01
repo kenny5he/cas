@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationEventExecutionPlanConfigurer;
 import org.apereo.cas.authentication.AuthenticationMetaDataPopulator;
 import org.apereo.cas.authentication.metadata.AuthenticationCredentialTypeMetaDataPopulator;
@@ -17,8 +18,8 @@ import org.apereo.cas.util.crypto.CipherExecutor;
 import org.apereo.cas.util.spring.beans.BeanCondition;
 import org.apereo.cas.util.spring.beans.BeanSupplier;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
-
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -147,7 +148,7 @@ class CasCoreAuthenticationMetadataConfiguration {
             @Qualifier("clientInfoAuthenticationMetaDataPopulator") final AuthenticationMetaDataPopulator clientInfoAuthenticationMetaDataPopulator,
             @Qualifier("rememberMeAuthenticationMetaDataPopulator") final AuthenticationMetaDataPopulator rememberMeAuthenticationMetaDataPopulator,
             @Qualifier("successfulHandlerMetaDataPopulator") final AuthenticationMetaDataPopulator successfulHandlerMetaDataPopulator,
-            @Qualifier("cacheCredentialsMetaDataPopulator") final ObjectProvider<AuthenticationMetaDataPopulator> cacheCredentialsMetaDataPopulator) {
+            @Qualifier("cacheCredentialsMetaDataPopulator") final ObjectProvider<@NonNull AuthenticationMetaDataPopulator> cacheCredentialsMetaDataPopulator) {
             return plan -> {
                 plan.registerAuthenticationMetadataPopulator(successfulHandlerMetaDataPopulator);
                 plan.registerAuthenticationMetadataPopulator(rememberMeAuthenticationMetaDataPopulator);

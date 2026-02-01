@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.aws.AmazonClientConfigurationBuilder;
 import org.apereo.cas.aws.ChainingAWSCredentialsProvider;
 import org.apereo.cas.aws.s3.services.AmazonS3ServiceRegistry;
@@ -10,6 +11,7 @@ import org.apereo.cas.services.ServiceRegistryExecutionPlanConfigurer;
 import org.apereo.cas.services.ServiceRegistryListener;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -19,9 +21,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
 import software.amazon.awssdk.services.s3.S3Client;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import software.amazon.awssdk.services.s3.S3Configuration;
 
 /**
  * This is {@link CasAmazonS3ServiceRegistryAutoConfiguration}.
@@ -40,7 +40,11 @@ public class CasAmazonS3ServiceRegistryAutoConfiguration {
         val amz = casProperties.getServiceRegistry().getAmazonS3();
         val credentials = ChainingAWSCredentialsProvider.getInstance(amz.getCredentialAccessKey(),
             amz.getCredentialSecretKey(), amz.getProfilePath(), amz.getProfileName());
+        val s3Config = S3Configuration.builder()
+            .pathStyleAccessEnabled(amz.isPathStyleEnabled())
+            .build();
         val builder = S3Client.builder();
+        builder.serviceConfiguration(s3Config);
         AmazonClientConfigurationBuilder.prepareSyncClientBuilder(builder, credentials, amz);
         return builder.build();
     }
@@ -49,7 +53,7 @@ public class CasAmazonS3ServiceRegistryAutoConfiguration {
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     @ConditionalOnMissingBean(name = "amazonS3ServiceRegistry")
     public ServiceRegistry amazonS3ServiceRegistry(
-        final ObjectProvider<List<ServiceRegistryListener>> serviceRegistryListeners,
+        final ObjectProvider<@NonNull List<ServiceRegistryListener>> serviceRegistryListeners,
         @Qualifier("amazonS3ServiceRegistryClient")
         final S3Client amazonS3ServiceRegistryClient, final ConfigurableApplicationContext applicationContext) {
         return new AmazonS3ServiceRegistry(applicationContext,

@@ -1,5 +1,6 @@
 package org.apereo.cas.pm.web.flow.actions;
 
+import module java.base;
 import org.apereo.cas.authentication.bypass.PrincipalMultifactorAuthenticationProviderBypassEvaluator;
 import org.apereo.cas.authentication.mfa.TestMultifactorAuthenticationProvider;
 import org.apereo.cas.config.CasPersonDirectoryAutoConfiguration;
@@ -30,7 +31,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.TestPropertySource;
-import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -63,7 +63,7 @@ class SendPasswordResetInstructionsActionTests {
         "cas.authn.attribute-repository.stub.attributes.phone=1234567890",
 
         "cas.authn.pm.reset.mail.attribute-name=mail",
-        "cas.authn.pm.reset.phone.attribute-name=phone"
+        "cas.authn.pm.reset.sms.attribute-name=phone"
     })
     class PrincipalResolutionTests extends BasePasswordManagementActionTests {
         @Test

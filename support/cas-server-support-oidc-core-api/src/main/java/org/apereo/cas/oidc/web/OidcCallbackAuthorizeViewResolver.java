@@ -1,5 +1,6 @@
 package org.apereo.cas.oidc.web;
 
+import module java.base;
 import org.apereo.cas.oidc.OidcConstants;
 import org.apereo.cas.oidc.util.OidcRequestSupport;
 import org.apereo.cas.services.ServicesManager;
@@ -17,9 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.profile.ProfileManager;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import org.springframework.web.servlet.view.json.JacksonJsonView;
 
 /**
  * This is {@link OidcCallbackAuthorizeViewResolver}.
@@ -49,7 +48,7 @@ public class OidcCallbackAuthorizeViewResolver implements OAuth20CallbackAuthori
             if (originalRedirectUrl.isEmpty()) {
                 val model = new HashMap<String, String>();
                 model.put(OAuth20Constants.ERROR, OidcConstants.LOGIN_REQUIRED);
-                return new ModelAndView(new MappingJackson2JsonView(), model);
+                return new ModelAndView(new JacksonJsonView(), model);
             }
             val parameters = new LinkedHashMap<String, String>();
             parameters.put(OAuth20Constants.ERROR, OidcConstants.LOGIN_REQUIRED);

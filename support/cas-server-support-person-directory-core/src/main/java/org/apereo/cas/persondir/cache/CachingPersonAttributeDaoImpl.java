@@ -1,5 +1,6 @@
 package org.apereo.cas.persondir.cache;
 
+import module java.base;
 import org.apereo.cas.authentication.attribute.AbstractDefaultAttributePersonAttributeDao;
 import org.apereo.cas.authentication.attribute.SimplePersonAttributes;
 import org.apereo.cas.authentication.principal.attribute.PersonAttributeDao;
@@ -11,17 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.InitializingBean;
-import jakarta.annotation.Nonnull;
-import java.io.Serializable;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * A configurable caching implementation of {@link PersonAttributeDao}
@@ -183,7 +175,7 @@ public class CachingPersonAttributeDaoImpl extends AbstractDefaultAttributePerso
             arguments = args;
         }
         
-        @Nonnull
+        @NonNull
         @Override
         public AccessibleObject getStaticPart() {
             throw new UnsupportedOperationException("getStaticPart() is not supported.");
@@ -199,7 +191,7 @@ public class CachingPersonAttributeDaoImpl extends AbstractDefaultAttributePerso
             throw new UnsupportedOperationException("proceed() is not supported.");
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public Method getMethod() {
             return METHOD;

@@ -1,5 +1,6 @@
 package org.apereo.cas.view;
 
+import module java.base;
 import org.apereo.cas.config.CasCoreEnvironmentBootstrapAutoConfiguration;
 import org.apereo.cas.config.CasCoreMultitenancyAutoConfiguration;
 import org.apereo.cas.config.CasCoreWebAutoConfiguration;
@@ -19,7 +20,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.MessageSource;
 import org.springframework.mock.web.MockHttpServletRequest;
-import java.util.Locale;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -48,6 +48,10 @@ class CasReloadableMessageBundleTests {
 
     @Test
     void verifyMessage() {
+        val request = new MockHttpServletRequest();
+        request.setRemoteAddr("185.86.151.11");
+        request.setLocalAddr("185.88.151.11");
+        ClientInfoHolder.setClientInfo(ClientInfo.from(request));
         assertEquals("cas.message", messageSource.getMessage("cas.message",
             ArrayUtils.EMPTY_STRING_ARRAY, null, Locale.ENGLISH));
         assertEquals("cas.message", messageSource.getMessage("cas.message",

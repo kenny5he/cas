@@ -1,5 +1,6 @@
 package org.apereo.cas.heimdall.authorizer.resource.policy;
 
+import module java.base;
 import org.apereo.cas.configuration.support.ExpressionLanguageCapable;
 import org.apereo.cas.heimdall.AuthorizationRequest;
 import org.apereo.cas.heimdall.authorizer.AuthorizationResult;
@@ -8,9 +9,10 @@ import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.SpringExpressionLanguageValueResolver;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.Nulls;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,11 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import java.io.Serial;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link RestfulAuthorizationPolicy}.
@@ -40,15 +38,14 @@ import java.util.stream.Collectors;
 @ToString
 @Accessors(chain = true)
 @NoArgsConstructor
-@AllArgsConstructor
 @Slf4j
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class RestfulAuthorizationPolicy implements ResourceAuthorizationPolicy {
     @Serial
     private static final long serialVersionUID = -1244481042826672523L;
 
     private static final ObjectMapper MAPPER = JacksonObjectMapperFactory.builder()
         .defaultTypingEnabled(false).minimal(true).build().toObjectMapper();
-
 
     /**
      * The endpoint URL to contact and retrieve attributes.
@@ -59,8 +56,10 @@ public class RestfulAuthorizationPolicy implements ResourceAuthorizationPolicy {
     /**
      * Headers, defined as a Map, to include in the request when making the REST call.
      */
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private Map<String, String> headers = new HashMap<>();
 
+    @JsonSetter(nulls = Nulls.SKIP)
     private String method = "POST";
 
     @Override
@@ -83,7 +82,11 @@ public class RestfulAuthorizationPolicy implements ResourceAuthorizationPolicy {
             .entity(MAPPER.writeValueAsString(entity))
             .build();
         val response = HttpUtils.execute(exec);
-        val authorized = response != null && HttpStatus.valueOf(response.getCode()).is2xxSuccessful();
-        return authorized ? AuthorizationResult.granted("OK") : AuthorizationResult.denied("Denied");
+        try {
+            val authorized = response != null && HttpStatus.valueOf(response.getCode()).is2xxSuccessful();
+            return authorized ? AuthorizationResult.granted("OK") : AuthorizationResult.denied("Denied");
+        } finally {
+            HttpUtils.close(response);
+        }
     }
 }

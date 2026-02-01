@@ -1,5 +1,6 @@
 package org.apereo.cas.pm.rest;
 
+import module java.base;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.config.CasCoreAuditAutoConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationAutoConfiguration;
@@ -35,7 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
+import org.springframework.boot.restclient.autoconfigure.RestTemplateAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpRequest;
@@ -45,10 +46,6 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.RestTemplate;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -100,7 +97,7 @@ class RestPasswordManagementServiceTests {
     private static byte[] LAST_BODY;
 
     @Nested
-    @SpringBootTest(classes = SharedTestConfiguration.class)
+    @SpringBootTest(classes = SharedTestConfiguration.class, properties = "cas.authn.pm.core.enabled=true")
     public class UndefinedConfigurationOperations {
         @Autowired
         @Qualifier(PasswordManagementService.DEFAULT_BEAN_NAME)
@@ -113,7 +110,7 @@ class RestPasswordManagementServiceTests {
             assertNull(passwordChangeService.findEmail(PasswordManagementQuery.builder().username("casuser").build()));
             assertNull(passwordChangeService.findUsername(PasswordManagementQuery.builder().username("casuser").build()));
             assertNull(passwordChangeService.findPhone(PasswordManagementQuery.builder().username("casuser").build()));
-            assertNull(passwordChangeService.getSecurityQuestions(PasswordManagementQuery.builder().username("casuser").build()));
+            assertTrue(passwordChangeService.getSecurityQuestions(PasswordManagementQuery.builder().username("casuser").build()).isEmpty());
             assertTrue(passwordChangeService.unlockAccount(CoreAuthenticationTestUtils.getCredentialsWithSameUsernameAndPassword("casuser")));
         }
     }
@@ -121,6 +118,7 @@ class RestPasswordManagementServiceTests {
     @Nested
     @SpringBootTest(classes = SharedTestConfiguration.class,
         properties = {
+            "cas.authn.pm.core.enabled=true",
             "cas.authn.pm.rest.endpoint-url-change=http://localhost:9090",
             "cas.authn.pm.rest.endpoint-url-security-questions=http://localhost:9090",
             "cas.authn.pm.rest.endpoint-url-email=http://localhost:9091",
@@ -210,16 +208,16 @@ class RestPasswordManagementServiceTests {
         @Test
         void verifySecurityQuestions() throws Throwable {
             val data = "{\"question1\":\"answer1\"}";
-            try (val webServer = new MockWebServer(9308,
+            try (val webServer = new MockWebServer(
                 new ByteArrayResource(data.getBytes(StandardCharsets.UTF_8), "REST Output"),
                 MediaType.APPLICATION_JSON_VALUE)) {
                 webServer.start();
 
                 val props = new CasConfigurationProperties();
                 val rest = props.getAuthn().getPm().getRest();
-                rest.setEndpointUrlChange("http://localhost:9308");
-                rest.setEndpointUrlSecurityQuestions("http://localhost:9308");
-                rest.setEndpointUrlEmail("http://localhost:9308");
+                rest.setEndpointUrlChange("http://localhost:" + webServer.getPort());
+                rest.setEndpointUrlSecurityQuestions("http://localhost:" + webServer.getPort());
+                rest.setEndpointUrlEmail("http://localhost:" + webServer.getPort());
                 val passwordService = getRestPasswordManagementService(props);
 
                 val questions = passwordService.getSecurityQuestions(PasswordManagementQuery.builder().username("casuser").build());
@@ -230,7 +228,7 @@ class RestPasswordManagementServiceTests {
 
             try (val webServer = new MockWebServer(9090, HttpStatus.NO_CONTENT)) {
                 webServer.start();
-                assertNull(passwordChangeService.getSecurityQuestions(PasswordManagementQuery.builder().username("casuser").build()));
+                assertTrue(passwordChangeService.getSecurityQuestions(PasswordManagementQuery.builder().username("casuser").build()).isEmpty());
                 webServer.stop();
             }
         }
@@ -240,14 +238,14 @@ class RestPasswordManagementServiceTests {
         void verifyUpdateSecurityQuestions() {
             val query = PasswordManagementQuery.builder().username("casuser").build();
             query.securityQuestion("Q1", "A1");
-            try (val webServer = new MockWebServer(9308, HttpStatus.OK)) {
+            try (val webServer = new MockWebServer(HttpStatus.OK)) {
                 webServer.start();
 
                 val props = new CasConfigurationProperties();
                 val rest = props.getAuthn().getPm().getRest();
-                rest.setEndpointUrlChange("http://localhost:9308");
-                rest.setEndpointUrlSecurityQuestions("http://localhost:9308");
-                rest.setEndpointUrlEmail("http://localhost:9308");
+                rest.setEndpointUrlChange("http://localhost:" + webServer.getPort());
+                rest.setEndpointUrlSecurityQuestions("http://localhost:" + webServer.getPort());
+                rest.setEndpointUrlEmail("http://localhost:" + webServer.getPort());
                 rest.getHeaders().put("header1", "value1");
                 val passwordService = getRestPasswordManagementService(props);
 
@@ -265,11 +263,11 @@ class RestPasswordManagementServiceTests {
 
         @Test
         void verifyUnlockAccount() {
-            try (val webServer = new MockWebServer(9308, HttpStatus.OK)) {
+            try (val webServer = new MockWebServer(HttpStatus.OK)) {
                 webServer.start();
                 val props = new CasConfigurationProperties();
                 val rest = props.getAuthn().getPm().getRest();
-                rest.setEndpointUrlAccountUnlock("http://localhost:9308");
+                rest.setEndpointUrlAccountUnlock("http://localhost:" + webServer.getPort());
                 val passwordService = getRestPasswordManagementService(props);
                 assertDoesNotThrow(() -> passwordService.unlockAccount(CoreAuthenticationTestUtils.getCredentialsWithSameUsernameAndPassword()));
             }
@@ -280,16 +278,16 @@ class RestPasswordManagementServiceTests {
         void verifyPasswordChanged() throws Throwable {
             val data = "true";
             val request = new PasswordChangeRequest("casuser", "current-psw".toCharArray(), "123456".toCharArray(), "123456".toCharArray());
-            try (val webServer = new MockWebServer(9309,
+            try (val webServer = new MockWebServer(
                 new ByteArrayResource(data.getBytes(StandardCharsets.UTF_8), "REST Output"),
                 MediaType.APPLICATION_JSON_VALUE)) {
                 webServer.start();
 
                 val props = new CasConfigurationProperties();
                 val rest = props.getAuthn().getPm().getRest();
-                rest.setEndpointUrlChange("http://localhost:9309");
-                rest.setEndpointUrlSecurityQuestions("http://localhost:9309");
-                rest.setEndpointUrlEmail("http://localhost:9309");
+                rest.setEndpointUrlChange("http://localhost:" + webServer.getPort());
+                rest.setEndpointUrlSecurityQuestions("http://localhost:" + webServer.getPort());
+                rest.setEndpointUrlEmail("http://localhost:" + webServer.getPort());
                 val passwordService = getRestPasswordManagementService(props);
 
                 val result = passwordService.change(request);

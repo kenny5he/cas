@@ -1,5 +1,6 @@
 package org.apereo.cas.pac4j.web;
 
+import module java.base;
 import org.apereo.cas.support.pac4j.authentication.clients.DelegatedClientSessionManager;
 import org.apereo.cas.ticket.TransientSessionTicket;
 import org.apereo.cas.web.flow.DelegatedClientAuthenticationConfigurationContext;
@@ -7,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
@@ -14,7 +16,6 @@ import org.pac4j.oauth.client.OAuth10Client;
 import org.pac4j.oauth.client.OAuth20Client;
 import org.pac4j.oidc.client.OidcClient;
 import org.springframework.beans.factory.ObjectProvider;
-import java.util.List;
 
 /**
  * This is {@link DelegatedClientOidcSessionManager}.
@@ -32,7 +33,7 @@ public class DelegatedClientOidcSessionManager implements DelegatedClientSession
 
     private static final List<String> SESSION_KEYS = List.of(OIDC_CLIENT_ID_SESSION_KEY, OAUTH20_CLIENT_ID_SESSION_KEY);
 
-    private final ObjectProvider<DelegatedClientAuthenticationConfigurationContext> contextProvider;
+    private final ObjectProvider<@NonNull DelegatedClientAuthenticationConfigurationContext> contextProvider;
 
     @Override
     public void trackIdentifier(final WebContext webContext, final TransientSessionTicket ticket, final Client client) {

@@ -1,7 +1,9 @@
 package org.apereo.cas.ticket;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.principal.Service;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The {@link TicketGrantingTicketFactory} is responsible for
@@ -20,5 +22,5 @@ public interface TicketGrantingTicketFactory<T extends TicketGrantingTicket> ext
      * @return the t
      * @throws Throwable the throwable
      */
-    T create(Authentication authentication, Service service) throws Throwable;
+    T create(Authentication authentication, @Nullable Service service) throws Throwable;
 }

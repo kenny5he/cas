@@ -1,7 +1,7 @@
 package com.yubico.webauthn.attestation;
 
+import module java.base;
 import com.fasterxml.jackson.databind.JsonNode;
-
 import java.security.cert.X509Certificate;
 
 /**

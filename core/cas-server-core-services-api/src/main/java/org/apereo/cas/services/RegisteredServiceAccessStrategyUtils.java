@@ -1,12 +1,12 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.ticket.TicketGrantingTicket;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import jakarta.annotation.Nullable;
-import java.util.function.Predicate;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This is {@link RegisteredServiceAccessStrategyUtils} that encapsulates common
@@ -27,7 +27,7 @@ public class RegisteredServiceAccessStrategyUtils {
      *
      * @param registeredService the registered service
      */
-    public static void ensureServiceAccessIsAllowed(final RegisteredService registeredService) {
+    public static void ensureServiceAccessIsAllowed(@Nullable final RegisteredService registeredService) {
         ensureServiceAccessIsAllowed(null, registeredService);
     }
 
@@ -62,7 +62,7 @@ public class RegisteredServiceAccessStrategyUtils {
      * @param registeredService the service
      * @return boolean - true if service is not expired
      */
-    public static boolean ensureServiceIsNotExpired(final RegisteredService registeredService) {
+    public static boolean ensureServiceIsNotExpired(@Nullable final RegisteredService registeredService) {
         return getRegisteredServiceExpirationPolicyPredicate().test(registeredService);
     }
 
@@ -73,7 +73,7 @@ public class RegisteredServiceAccessStrategyUtils {
      * @param service              the service
      * @param ticketGrantingTicket the ticket granting ticket
      */
-    public static void ensureServiceSsoAccessIsAllowed(final RegisteredService registeredService, final Service service,
+    public static void ensureServiceSsoAccessIsAllowed(@Nullable final RegisteredService registeredService, final Service service,
                                                        final TicketGrantingTicket ticketGrantingTicket) {
         ensureServiceSsoAccessIsAllowed(registeredService, service, ticketGrantingTicket, false);
     }
@@ -86,8 +86,8 @@ public class RegisteredServiceAccessStrategyUtils {
      * @param ticketGrantingTicket the ticket granting ticket
      * @param credentialsProvided  the credentials provided
      */
-    public static void ensureServiceSsoAccessIsAllowed(final RegisteredService registeredService,
-                                                       final Service service,
+    public static void ensureServiceSsoAccessIsAllowed(@Nullable final RegisteredService registeredService,
+                                                       @Nullable final Service service,
                                                        final TicketGrantingTicket ticketGrantingTicket,
                                                        final boolean credentialsProvided) {
 

@@ -1,14 +1,12 @@
 package org.apereo.cas.impl.token;
 
+import module java.base;
 import org.apereo.cas.api.PasswordlessAuthenticationRequest;
 import org.apereo.cas.api.PasswordlessUserAccount;
 import org.apereo.cas.util.crypto.CipherExecutor;
-
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-
-import java.time.Duration;
-import java.util.Optional;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This is {@link InMemoryPasswordlessTokenRepository}.
@@ -21,7 +19,7 @@ public class InMemoryPasswordlessTokenRepository extends BasePasswordlessTokenRe
 
     private static final long MAX_CACHE_SIZE = 100_000_000;
 
-    private final Cache<String, String> storage;
+    private final Cache<@NonNull String, String> storage;
 
     public InMemoryPasswordlessTokenRepository(final long tokenExpirationInSeconds,
                                                final CipherExecutor cipherExecutor) {

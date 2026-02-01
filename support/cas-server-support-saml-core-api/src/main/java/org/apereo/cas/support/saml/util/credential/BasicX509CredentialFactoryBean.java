@@ -1,9 +1,11 @@
 package org.apereo.cas.support.saml.util.credential;
 
+import module java.base;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
 import net.shibboleth.shared.collection.LazyList;
+import org.jspecify.annotations.NonNull;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.crypto.KeySupport;
 import org.opensaml.security.x509.BasicX509Credential;
@@ -11,12 +13,7 @@ import org.opensaml.security.x509.X509Support;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.core.io.Resource;
-
-import java.security.PrivateKey;
-import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This is {@link BasicX509CredentialFactoryBean}.
@@ -26,7 +23,7 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class BasicX509CredentialFactoryBean implements FactoryBean<BasicX509Credential> {
+public class BasicX509CredentialFactoryBean implements FactoryBean<@NonNull BasicX509Credential> {
     /**
      * The specification of where the entity Resource is to be found.
      */

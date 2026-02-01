@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.registry;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.configuration.model.support.dynamodb.DynamoDbTicketRegistryProperties;
 import org.apereo.cas.dynamodb.DynamoDbQueryBuilder;
@@ -35,19 +36,6 @@ import software.amazon.awssdk.services.dynamodb.model.PutRequest;
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
 import software.amazon.awssdk.services.dynamodb.model.ScanRequest;
 import software.amazon.awssdk.services.dynamodb.model.WriteRequest;
-import java.nio.ByteBuffer;
-import java.time.chrono.ChronoZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This is {@link DynamoDbTicketRegistryFacilitator}.
@@ -66,6 +54,43 @@ public class DynamoDbTicketRegistryFacilitator {
     private final DynamoDbTicketRegistryProperties dynamoDbProperties;
 
     private final DynamoDbClient amazonDynamoDBClient;
+
+    /**
+     * Delete tickets for principal.
+     *
+     * @param principalId the principal id
+     * @return the long
+     */
+    public long deleteTicketsFor(final String principalId) {
+        val metadata = ticketCatalog.findAll();
+        return metadata
+            .stream()
+            .mapToLong(definition -> {
+                val keys = List.<DynamoDbQueryBuilder>of(
+                    DynamoDbQueryBuilder.builder()
+                        .key(ColumnNames.PRINCIPAL.getColumnName())
+                        .attributeValue(List.of(AttributeValue.builder().s(principalId).build()))
+                        .operator(ComparisonOperator.EQ)
+                        .build());
+                val deletedCount = DynamoDbTableUtils.getRecordsByKeys(amazonDynamoDBClient,
+                        definition.getProperties().getStorageName(),
+                        keys,
+                        values -> values.get(ColumnNames.ID.getColumnName()).s())
+                    .mapToLong(encodedTicketId -> {
+                        val del = DeleteItemRequest.builder().tableName(definition.getProperties().getStorageName())
+                            .key(CollectionUtils.wrap(ColumnNames.ID.getColumnName(),
+                                AttributeValue.builder().s(encodedTicketId).build())).build();
+                        LOGGER.debug("Submitting delete request [{}] for ticket [{}]", del, encodedTicketId);
+                        amazonDynamoDBClient.deleteItem(del);
+                        return 1;
+                    })
+                    .sum();
+                LOGGER.debug("Deleted [{}] tickets for principal id [{}] from table [{}]", deletedCount, principalId,
+                    definition.getProperties().getStorageName());
+                return deletedCount;
+            })
+            .sum();
+    }
 
     private static Ticket deserializeTicket(final Map<String, AttributeValue> returnItem) {
         val encoded = returnItem.get(ColumnNames.ENCODED.getColumnName()).b();
@@ -106,9 +131,9 @@ public class DynamoDbTicketRegistryFacilitator {
     public int deleteAll() {
         val count = new AtomicInteger();
         val metadata = this.ticketCatalog.findAll();
-        metadata.forEach(r -> {
-            val scan = ScanRequest.builder().tableName(r.getProperties().getStorageName()).build();
-            LOGGER.debug("Submitting scan request [{}] to table [{}]", scan, r.getProperties().getStorageName());
+        metadata.forEach(definition -> {
+            val scan = ScanRequest.builder().tableName(definition.getProperties().getStorageName()).build();
+            LOGGER.debug("Submitting scan request [{}] to table [{}]", scan, definition.getProperties().getStorageName());
             count.addAndGet(this.amazonDynamoDBClient.scan(scan).count());
         });
         createTicketTables(true);
@@ -325,7 +350,8 @@ public class DynamoDbTicketRegistryFacilitator {
                 .attributeName(ColumnNames.ID.getColumnName())
                 .keyType(KeyType.HASH)
                 .build());
-            val tableDesc = DynamoDbTableUtils.createTable(amazonDynamoDBClient, dynamoDbProperties,
+            val tableDesc = DynamoDbTableUtils.createTable(amazonDynamoDBClient,
+                dynamoDbProperties,
                 defn.getProperties().getStorageName(),
                 deleteTables,
                 attributeDefinitions,

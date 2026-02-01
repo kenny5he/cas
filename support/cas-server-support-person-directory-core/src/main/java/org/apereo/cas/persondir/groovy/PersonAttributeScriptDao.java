@@ -1,9 +1,7 @@
 package org.apereo.cas.persondir.groovy;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.attribute.PersonAttributes;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Simplified DAO interface for use by Groovy scripts that provide user attributes.
@@ -32,14 +30,4 @@ public interface PersonAttributeScriptDao {
      */
     Map<String, List<Object>> getPersonAttributesFromMultivaluedAttributes(Map<String, List<Object>> attributes,
                                                                            Set<PersonAttributes> resultPeople);
-
-    /**
-     * Gets person attributes from multivalued attributes.
-     *
-     * @param attributes the attributes
-     * @return the person attributes from multivalued attributes
-     */
-    default Map<String, List<Object>> getPersonAttributesFromMultivaluedAttributes(final Map<String, List<Object>> attributes) {
-        return getPersonAttributesFromMultivaluedAttributes(attributes, Set.of());
-    }
 }

@@ -1,17 +1,18 @@
 package org.apereo.cas.web.support;
 
+import module java.base;
 import org.apereo.cas.configuration.model.support.cookie.CookieProperties;
+import org.apereo.cas.web.theme.ThemeResolver;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.util.WebUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Objects;
 
 /**
  * {@link ThemeResolver} implementation that uses a cookie sent back to the user
@@ -54,7 +55,7 @@ public class CookieThemeResolver implements ThemeResolver {
     private final CookieProperties cookieProperties;
 
     @Override
-    public String resolveThemeName(final HttpServletRequest request) {
+    public @Nullable String resolveThemeName(final HttpServletRequest request) {
         var themeName = (String) request.getAttribute(THEME_REQUEST_ATTRIBUTE_NAME);
         if (StringUtils.isNotBlank(themeName)) {
             return themeName;

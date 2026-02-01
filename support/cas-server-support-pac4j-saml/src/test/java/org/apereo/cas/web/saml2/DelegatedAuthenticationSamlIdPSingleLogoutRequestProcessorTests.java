@@ -1,5 +1,6 @@
 package org.apereo.cas.web.saml2;
 
+import module java.base;
 import org.apereo.cas.config.CasSamlIdPAutoConfiguration;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.support.saml.OpenSamlConfigBean;
@@ -26,7 +27,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.webflow.execution.Action;
-import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -38,7 +38,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(classes = {
     CasSamlIdPAutoConfiguration.class,
     BaseSaml2DelegatedAuthenticationTests.SharedTestConfiguration.class
-}, properties = "cas.authn.saml-idp.metadata.file-system.location=${#systemProperties['java.io.tmpdir']}/saml4222")
+}, properties = {
+    "cas.authn.pac4j.core.session-replication.replicate-sessions=true",
+    "cas.authn.pac4j.core.session-replication.cookie.crypto.enabled=true",
+    "cas.authn.saml-idp.metadata.file-system.location=${#systemProperties['java.io.tmpdir']}/saml4222"
+})
 @Tag("SAML2Web")
 @ExtendWith(CasTestExtension.class)
 class DelegatedAuthenticationSamlIdPSingleLogoutRequestProcessorTests {

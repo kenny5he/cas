@@ -1,14 +1,13 @@
 package org.apereo.cas.logout.slo;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.WebApplicationService;
 import org.apereo.cas.services.CasRegisteredService;
 import org.apereo.cas.services.RegisteredService;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.web.UrlValidator;
-
+import org.jspecify.annotations.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
-
-import java.util.Optional;
 
 /**
  * This is {@link DefaultSingleLogoutServiceLogoutUrlBuilder} which acts on a registered
@@ -24,11 +23,14 @@ public class DefaultSingleLogoutServiceLogoutUrlBuilder extends BaseSingleLogout
     }
 
     @Override
-    public boolean supports(final RegisteredService registeredService,
-                            final WebApplicationService singleLogoutService,
-                            final Optional<HttpServletRequest> httpRequest) {
+    public boolean supports(
+        @Nullable
+        final RegisteredService registeredService,
+        @Nullable
+        final WebApplicationService singleLogoutService,
+        final Optional<HttpServletRequest> httpRequest) {
         return super.supports(registeredService, singleLogoutService, httpRequest)
-               && registeredService.getFriendlyName().equalsIgnoreCase(CasRegisteredService.FRIENDLY_NAME);
+            && Objects.requireNonNull(registeredService).getFriendlyName().equalsIgnoreCase(CasRegisteredService.FRIENDLY_NAME);
     }
 
 }

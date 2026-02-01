@@ -1,14 +1,14 @@
 package org.apereo.cas.multitenancy;
 
+import module java.base;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.webflow.context.servlet.DefaultFlowUrlHandler;
 import org.springframework.webflow.context.servlet.FlowUrlHandler;
 import org.springframework.webflow.execution.RequestContext;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Optional;
-import java.util.regex.Pattern;
 
 /**
  * This is {@link TenantExtractor}.
@@ -52,7 +52,7 @@ public interface TenantExtractor {
      * @param request the request
      * @return the tenant id
      */
-    default Optional<TenantDefinition> extract(final HttpServletRequest request) {
+    default Optional<TenantDefinition> extract(final @Nullable HttpServletRequest request) {
         val flowId = request != null ? FLOW_URL_HANDLER.getFlowId(request) : StringUtils.EMPTY;
         return extract(flowId);
     }
@@ -82,7 +82,7 @@ public interface TenantExtractor {
      * @param requestPath the request path
      * @return the string
      */
-    static String tenantIdFromPath(final String requestPath) {
+    static @Nullable String tenantIdFromPath(final String requestPath) {
         if (StringUtils.isBlank(requestPath)) {
             return null;
         }

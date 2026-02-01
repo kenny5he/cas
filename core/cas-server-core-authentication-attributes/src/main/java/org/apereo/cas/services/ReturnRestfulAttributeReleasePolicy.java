@@ -1,5 +1,6 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.LoggingUtils;
 import org.apereo.cas.util.function.FunctionUtils;
@@ -8,9 +9,6 @@ import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.SpringExpressionLanguageValueResolver;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.core.util.MinimalPrettyPrinter;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,13 +24,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import java.io.Serial;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Return a collection of allowed attributes for the principal based on an external REST endpoint.
@@ -54,7 +47,7 @@ public class ReturnRestfulAttributeReleasePolicy extends BaseMappedAttributeRele
     private static final long serialVersionUID = -6249488544306639050L;
 
     private static final ObjectMapper MAPPER = JacksonObjectMapperFactory.builder()
-        .singleValueAsArray(true).build().toObjectMapper();
+        .singleValueAsArray(true).minimal(true).build().toObjectMapper();
 
     private String method = "GET";
 
@@ -67,7 +60,7 @@ public class ReturnRestfulAttributeReleasePolicy extends BaseMappedAttributeRele
                                                            final Map<String, List<Object>> attributes) {
         HttpResponse response = null;
         try (val writer = new StringWriter()) {
-            MAPPER.writer(new MinimalPrettyPrinter()).writeValue(writer, attributes);
+            MAPPER.writeValue(writer, attributes);
             headers.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
             val exec = HttpExecutionRequest.builder()

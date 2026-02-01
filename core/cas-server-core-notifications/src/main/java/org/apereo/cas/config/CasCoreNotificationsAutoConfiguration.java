@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.multitenancy.TenantExtractor;
@@ -22,12 +23,13 @@ import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.mail.MailProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.mail.autoconfigure.MailProperties;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -36,11 +38,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link CasCoreNotificationsAutoConfiguration}.
@@ -77,9 +74,9 @@ public class CasCoreNotificationsAutoConfiguration {
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     public EmailSender emailSender(
         final ConfigurableApplicationContext applicationContext,
-        final ObjectProvider<List<EmailSenderCustomizer>> customizers,
+        final ObjectProvider<@NonNull List<EmailSenderCustomizer>> customizers,
         final MailProperties mailProperties,
-        final ObjectProvider<SslBundles> sslBundles,
+        final ObjectProvider<@NonNull SslBundles> sslBundles,
         @Qualifier(TenantExtractor.BEAN_NAME)
         final TenantExtractor tenantExtractor,
         @Qualifier("messageSource")
@@ -123,7 +120,7 @@ public class CasCoreNotificationsAutoConfiguration {
     @ConditionalOnMissingBean(name = NotificationSender.BEAN_NAME)
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     public NotificationSender notificationSender(
-        final ObjectProvider<List<NotificationSenderExecutionPlanConfigurer>> configurerProviders) {
+        final ObjectProvider<@NonNull List<NotificationSenderExecutionPlanConfigurer>> configurerProviders) {
         val configurers = Optional.ofNullable(configurerProviders.getIfAvailable()).orElseGet(ArrayList::new);
         val results = configurers
             .stream()

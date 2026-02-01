@@ -1,37 +1,13 @@
-// Copyright (c) 2018, Yubico AB
-// All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-//
-// 1. Redistributions of source code must retain the above copyright notice, this
-//    list of conditions and the following disclaimer.
-//
-// 2. Redistributions in binary form must reproduce the above copyright notice,
-//    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 package com.yubico.core;
-
-import jakarta.servlet.http.HttpServletRequest;
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.yubico.core.SessionManager;
+import com.yubico.core.WebAuthnCache;
 import com.yubico.data.AssertionRequestWrapper;
 import com.yubico.data.AssertionResponse;
 import com.yubico.data.CredentialRegistration;
@@ -58,22 +34,16 @@ import com.yubico.webauthn.data.UserIdentity;
 import com.yubico.webauthn.exception.AssertionFailedException;
 import com.yubico.webauthn.exception.RegistrationFailedException;
 import lombok.AllArgsConstructor;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import java.io.IOException;
+import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
+import jakarta.servlet.http.HttpServletRequest;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.time.Clock;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.concurrent.ExecutionException;
 
 @Setter
 @Slf4j
@@ -95,7 +65,7 @@ public class WebAuthnServer {
         final Optional<String> displayName,
         final Optional<String> credentialNickname,
         final ResidentKeyRequirement residentKeyRequirement,
-        final Optional<ByteArray> sessionToken) throws ExecutionException {
+        final Optional<ByteArray> sessionToken) {
 
         LOGGER.trace("Starting registration operation for username: [{}], credentialNickname: [{}]", username, credentialNickname);
         val registrations = userStorage.getRegistrationsByUsername(username);
@@ -138,7 +108,7 @@ public class WebAuthnServer {
         RegistrationResponse registrationResponse;
         try {
             registrationResponse = OBJECT_MAPPER.readValue(responseJson, RegistrationResponse.class);
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             LOGGER.error("Registration failed; response: [{}]", responseJson, e);
             return Either.left(List.of("Registration failed", "Failed to decode response object.", e.getMessage()));
         }
@@ -218,7 +188,7 @@ public class WebAuthnServer {
         final AssertionResponse assertionResponse;
         try {
             assertionResponse = OBJECT_MAPPER.readValue(responseJson, AssertionResponse.class);
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             LOGGER.debug("Failed to decode response object", e);
             return Either.left(List.of("Assertion failed!", "Failed to decode response object.", e.getMessage()));
         }
@@ -274,7 +244,7 @@ public class WebAuthnServer {
 
     @Value
     public static class SuccessfulRegistrationResult {
-        boolean success = true;
+        boolean success;
 
         RegistrationRequest request;
 
@@ -293,9 +263,11 @@ public class WebAuthnServer {
 
         ByteArray sessionToken;
 
-        public SuccessfulRegistrationResult(final RegistrationRequest request, final RegistrationResponse response,
+        public SuccessfulRegistrationResult(final RegistrationRequest request,
+                                            final RegistrationResponse response,
                                             final CredentialRegistration registration,
-                                            final boolean attestationTrusted, final ByteArray sessionToken) {
+                                            final boolean attestationTrusted,
+                                            final ByteArray sessionToken) {
             this.request = request;
             this.response = response;
             this.registration = registration;
@@ -303,18 +275,12 @@ public class WebAuthnServer {
             attestationCert = Optional.ofNullable(
                     response.credential().getResponse().getAttestation().getAttestationStatement().get("x5c")
                 ).map(certs -> certs.get(0))
-                .flatMap((final JsonNode certDer) -> {
-                    try {
-                        return Optional.of(new ByteArray(certDer.binaryValue()));
-                    } catch (final IOException e) {
-                        LOGGER.error("Failed to get binary value from x5c element: {}", certDer, e);
-                        return Optional.empty();
-                    }
-                })
+                .flatMap(Unchecked.function(certDer -> Optional.of(new ByteArray(certDer.binaryValue()))))
                 .map(AttestationCertInfo::new);
             this.authData = response.credential().getResponse().getParsedAuthenticatorData();
             this.username = request.username();
             this.sessionToken = sessionToken;
+            this.success = true;
         }
 
     }
@@ -383,6 +349,7 @@ public class WebAuthnServer {
     }
 
     private static class AuthDataSerializer extends JsonSerializer<AuthenticatorData> {
+
         @Override
         public void serialize(final AuthenticatorData value, final JsonGenerator gen,
                               final SerializerProvider serializers) throws IOException {

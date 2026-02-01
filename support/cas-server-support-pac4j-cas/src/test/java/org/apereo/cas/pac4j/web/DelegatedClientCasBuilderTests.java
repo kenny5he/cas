@@ -1,5 +1,6 @@
 package org.apereo.cas.pac4j.web;
 
+import module java.base;
 import org.apereo.cas.config.CasDelegatedAuthenticationCasAutoConfiguration;
 import org.apereo.cas.support.pac4j.clients.BaseDelegatedClientFactoryTests;
 import org.apereo.cas.test.CasTestExtension;
@@ -35,7 +36,7 @@ class DelegatedClientCasBuilderTests extends BaseDelegatedClientFactoryTests {
     void verifyFactoryForCasClientsHavingLoginInDomain() {
         val clients = delegatedIdentityProviderFactory.build();
         assertEquals(1, clients.size());
-        val client = (CasClient) clients.iterator().next();
+        val client = (CasClient) clients.getFirst();
         assertEquals("https://login.example.org/", client.getConfiguration().getPrefixUrl());
     }
 }

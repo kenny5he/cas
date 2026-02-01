@@ -1,5 +1,6 @@
 package org.apereo.cas.monitor;
 
+import module java.base;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.instance.impl.HazelcastInstanceProxy;
 import com.hazelcast.internal.memory.MemoryStats;
@@ -7,9 +8,8 @@ import com.hazelcast.map.IMap;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
-
-import java.util.ArrayList;
 
 /**
  * This is {@link HazelcastHealthIndicator}.
@@ -21,10 +21,10 @@ import java.util.ArrayList;
 @ToString
 public class HazelcastHealthIndicator extends AbstractCacheHealthIndicator {
 
-    private final ObjectProvider<HazelcastInstance> instance;
+    private final ObjectProvider<@NonNull HazelcastInstance> instance;
 
     public HazelcastHealthIndicator(final long evictionThreshold, final long threshold,
-                                    final ObjectProvider<HazelcastInstance> instance) {
+                                    final ObjectProvider<@NonNull HazelcastInstance> instance) {
         super(evictionThreshold, threshold);
         this.instance = instance;
     }

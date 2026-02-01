@@ -1,5 +1,6 @@
 package org.apereo.cas.redis.core;
 
+import module java.base;
 import org.apereo.cas.authentication.CasSSLContext;
 import org.apereo.cas.configuration.model.support.redis.BaseRedisProperties;
 import org.apereo.cas.configuration.support.Beans;
@@ -30,12 +31,6 @@ import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.StringUtils;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link RedisObjectFactory}.
@@ -177,8 +172,8 @@ public class RedisObjectFactory {
         var poolingClientConfig = LettucePoolingClientConfiguration.builder();
         if (redis.isUseSsl()) {
             val sslPoolingConfig = poolingClientConfig.useSsl();
-            FunctionUtils.doWhen(!redis.isVerifyPeer(), __ -> sslPoolingConfig.disablePeerVerification());
-            FunctionUtils.doWhen(redis.isStartTls(), __ -> sslPoolingConfig.startTls());
+            FunctionUtils.doWhen(!redis.isVerifyPeer(), _ -> sslPoolingConfig.disablePeerVerification());
+            FunctionUtils.doWhen(redis.isStartTls(), _ -> sslPoolingConfig.startTls());
             LOGGER.trace("Redis configuration: SSL connections are enabled");
         }
         if (redis.getReadFrom() != null) {

@@ -1,5 +1,6 @@
 package org.apereo.cas.webauthn;
 
+import module java.base;
 import org.apereo.cas.config.CasMongoDbWebAuthnAutoConfiguration;
 import org.apereo.cas.util.junit.EnabledIfListeningOnPort;
 import org.apereo.cas.webauthn.storage.BaseWebAuthnCredentialRepositoryTests;
@@ -26,7 +27,6 @@ import org.springframework.test.context.TestPropertySource;
         "cas.authn.mfa.web-authn.mongo.host=localhost",
         "cas.authn.mfa.web-authn.mongo.port=27017",
         "cas.authn.mfa.web-authn.mongo.drop-collection=true",
-        "cas.authn.mfa.web-authn.mongo.asynchronous=false",
         "cas.authn.mfa.web-authn.mongo.user-id=root",
         "cas.authn.mfa.web-authn.mongo.password=secret",
         "cas.authn.mfa.web-authn.mongo.database-name=mfa",

@@ -1,16 +1,14 @@
 package org.apereo.cas.ticket.artifact;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.ticket.AbstractTicket;
 import org.apereo.cas.ticket.ExpirationPolicy;
 import org.apereo.cas.ticket.TicketGrantingTicket;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.io.Serial;
 
 /**
  * This is {@link SamlArtifactTicketImpl}.
@@ -47,10 +45,12 @@ public class SamlArtifactTicketImpl extends AbstractTicket implements SamlArtifa
      */
     private Authentication authentication;
 
-    public SamlArtifactTicketImpl(final String id, final Service service, final Authentication authentication,
+    public SamlArtifactTicketImpl(final String id, final Service service,
+                                  final Authentication authentication,
                                   final ExpirationPolicy expirationPolicy,
                                   final TicketGrantingTicket ticketGrantingTicket,
-                                  final String issuer, final String relyingParty, final String samlObject) {
+                                  final String issuer, final String relyingParty,
+                                  final String samlObject) {
         super(id, expirationPolicy);
         this.service = service;
         this.authentication = authentication;

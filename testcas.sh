@@ -171,8 +171,11 @@ while (( "$#" )); do
             auth|authn|authentication)
                 task+="testAuthentication "
                 ;;
-            tickets|ticketing)
+            tickets|ticketing|geode)
                 task+="testTickets "
+                ;;
+            tomcat|apachetomcat|apache-tomcat|atc)
+                task+="testApacheTomcat "
                 ;;
             syncope)
                 isDockerOnLinux && ./ci/tests/syncope/run-syncope-server.sh || exit 1
@@ -482,6 +485,10 @@ while (( "$#" )); do
             cassandra)
                 isDockerOnLinux && ./ci/tests/cassandra/run-cassandra-server.sh || exit 1
                 task+="testCassandra "
+                ;;
+            pulsar)
+                isDockerOnLinux && ./ci/tests/pulsar/run-pulsar-server.sh || exit 1
+                task+="testPulsar "
                 ;;
             kafka)
                 isDockerOnLinux && ./ci/tests/kafka/run-kafka-server.sh || exit 1

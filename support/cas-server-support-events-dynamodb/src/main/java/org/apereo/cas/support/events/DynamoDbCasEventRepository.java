@@ -1,11 +1,9 @@
 package org.apereo.cas.support.events;
 
+import module java.base;
 import org.apereo.cas.support.events.dao.AbstractCasEventRepository;
 import org.apereo.cas.support.events.dao.CasEvent;
 import org.apereo.cas.util.function.FunctionUtils;
-
-import java.time.ZonedDateTime;
-import java.util.stream.Stream;
 
 /**
  * This is {@link DynamoDbCasEventRepository}.
@@ -24,7 +22,7 @@ public class DynamoDbCasEventRepository extends AbstractCasEventRepository {
 
     @Override
     public void removeAll() {
-        FunctionUtils.doUnchecked(__ -> dbCasEventsFacilitator.createTable(true));
+        FunctionUtils.doUnchecked(_ -> dbCasEventsFacilitator.createTable(true));
     }
 
     @Override
@@ -39,13 +37,13 @@ public class DynamoDbCasEventRepository extends AbstractCasEventRepository {
 
     @Override
     public Stream<? extends CasEvent> getEventsOfTypeForPrincipal(final String type,
-                                                                      final String principal) {
+                                                                  final String principal) {
         return dbCasEventsFacilitator.getEventsOfTypeForPrincipal(type, principal);
     }
 
     @Override
     public Stream<? extends CasEvent> getEventsOfTypeForPrincipal(final String type, final String principal,
-                                                                      final ZonedDateTime dateTime) {
+                                                                  final ZonedDateTime dateTime) {
         return dbCasEventsFacilitator.getEventsOfTypeForPrincipal(type, principal, dateTime);
     }
 

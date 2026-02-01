@@ -1,5 +1,6 @@
 package org.apereo.cas.adaptors.duo.web.flow;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.model.support.mfa.duo.DuoSecurityMultifactorAuthenticationProperties;
 import org.apereo.cas.trusted.web.flow.AbstractMultifactorTrustedDeviceWebflowConfigurer;
@@ -25,10 +26,6 @@ import org.springframework.webflow.engine.model.EvaluateModel;
 import org.springframework.webflow.engine.model.TransitionModel;
 import org.springframework.webflow.engine.model.ViewStateModel;
 import org.springframework.webflow.engine.model.builder.DefaultFlowModelHolder;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * This is {@link DuoSecurityMultifactorWebflowConfigurer}.
@@ -58,7 +55,7 @@ public class DuoSecurityMultifactorWebflowConfigurer extends AbstractMultifactor
         if (passwordlessEnabled) {
             val flow = getLoginFlow();
             val verifyAccountState = getState(flow, CasWebflowConstants.STATE_ID_PASSWORDLESS_VERIFY_ACCOUNT);
-            FunctionUtils.doIfNotNull(verifyAccountState, __ -> {
+            FunctionUtils.doIfNotNull(verifyAccountState, _ -> {
                 val originalTargetState = verifyAccountState.getTransition(CasWebflowConstants.TRANSITION_ID_SUCCESS).getTargetStateId();
                 createTransitionForState(verifyAccountState, CasWebflowConstants.TRANSITION_ID_SUCCESS, CasWebflowConstants.STATE_ID_DUO_PASSWORDLESS_VERIFY, true);
                 val actionState = createActionState(flow, CasWebflowConstants.STATE_ID_DUO_PASSWORDLESS_VERIFY, CasWebflowConstants.ACTION_ID_DUO_PASSWORDLESS_VERIFY);

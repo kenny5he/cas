@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.registry;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.monitor.Monitorable;
 import org.apereo.cas.ticket.AuthenticationAwareTicket;
@@ -18,16 +19,6 @@ import org.apache.commons.lang3.Strings;
 import org.jooq.lambda.Unchecked;
 import org.springframework.context.ConfigurableApplicationContext;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This is {@link DynamoDbTicketRegistry}.
@@ -107,7 +98,7 @@ public class DynamoDbTicketRegistry extends AbstractTicketRegistry {
 
     @Override
     public Ticket addSingleTicket(final Ticket ticket) {
-        FunctionUtils.doAndHandle(__ -> {
+        FunctionUtils.doAndHandle(_ -> {
             LOGGER.debug("Adding ticket [{}] with ttl [{}s]", ticket.getId(),
                 ticket.getExpirationPolicy().getTimeToLive());
             dbTableService.put(toTicketPayload(ticket));
@@ -159,6 +150,11 @@ public class DynamoDbTicketRegistry extends AbstractTicketRegistry {
     public long deleteSingleTicket(final Ticket ticketToDelete) {
         val ticketId = digestIdentifier(ticketToDelete.getId());
         return dbTableService.delete(ticketToDelete.getId(), ticketId) ? 1 : 0;
+    }
+
+    @Override
+    public long deleteTicketsFor(final String principalId) {
+        return dbTableService.deleteTicketsFor(digestIdentifier(principalId));
     }
 
     @Override

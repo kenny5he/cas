@@ -1,31 +1,25 @@
 package org.apereo.cas.support.pac4j.authentication.clients;
 
+import module java.base;
 import org.apereo.cas.authentication.CasSSLContext;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.core5.http.HttpEntityContainer;
 import org.hjson.JsonValue;
+import org.jspecify.annotations.NonNull;
 import org.pac4j.config.client.PropertiesConfigFactory;
 import org.pac4j.core.client.BaseClient;
 import org.pac4j.core.client.IndirectClient;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link RestfulDelegatedIdentityProviderFactory}.
@@ -41,7 +35,7 @@ public class RestfulDelegatedIdentityProviderFactory extends BaseDelegatedIdenti
     public RestfulDelegatedIdentityProviderFactory(final Collection<DelegatedClientFactoryCustomizer> customizers,
                                                    final CasSSLContext casSSLContext,
                                                    final CasConfigurationProperties casProperties,
-                                                   final Cache<String, List<BaseClient>> clientsCache,
+                                                   final Cache<@NonNull String, List<BaseClient>> clientsCache,
                                                    final ConfigurableApplicationContext applicationContext) {
         super(casProperties, customizers, casSSLContext, clientsCache, applicationContext);
     }

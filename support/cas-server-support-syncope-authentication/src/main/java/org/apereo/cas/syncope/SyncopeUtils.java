@@ -1,5 +1,6 @@
 package org.apereo.cas.syncope;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationHandler;
 import org.apereo.cas.authentication.CoreAuthenticationUtils;
 import org.apereo.cas.authentication.credential.UsernamePasswordCredential;
@@ -20,8 +21,6 @@ import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.SpringExpressionLanguageValueResolver;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -33,18 +32,8 @@ import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link SyncopeUtils}.
@@ -77,34 +66,34 @@ public class SyncopeUtils {
 
         if (user.has("securityQuestion") && !user.get("securityQuestion").isNull()) {
             val name = attributeMappings.getOrDefault("securityQuestion", "syncopeUserSecurityQuestion");
-            attributes.put(name, CollectionUtils.wrapList(user.get("securityQuestion").asText()));
+            attributes.put(name, CollectionUtils.wrapList(user.get("securityQuestion").asString()));
         }
         var name = attributeMappings.getOrDefault("key", "syncopeUserKey");
-        attributes.put(name, CollectionUtils.wrapList(user.get("key").asText()));
+        attributes.put(name, CollectionUtils.wrapList(user.get("key").asString()));
 
         name = attributeMappings.getOrDefault("username", "username");
-        attributes.put(name, CollectionUtils.wrapList(user.get("username").asText()));
+        attributes.put(name, CollectionUtils.wrapList(user.get("username").asString()));
 
         name = attributeMappings.getOrDefault("status", "syncopeUserStatus");
-        attributes.put(name, CollectionUtils.wrapList(user.get("status").asText()));
+        attributes.put(name, CollectionUtils.wrapList(user.get("status").asString()));
 
         name = attributeMappings.getOrDefault("realm", "syncopeUserRealm");
-        attributes.put(name, CollectionUtils.wrapList(user.get("realm").asText()));
+        attributes.put(name, CollectionUtils.wrapList(user.get("realm").asString()));
 
         name = attributeMappings.getOrDefault("creator", "syncopeUserCreator");
-        attributes.put(name, CollectionUtils.wrapList(user.get("creator").asText()));
+        attributes.put(name, CollectionUtils.wrapList(user.get("creator").asString()));
 
         name = attributeMappings.getOrDefault("creationDate", "syncopeUserCreationDate");
-        attributes.put(name, CollectionUtils.wrapList(user.get("creationDate").asText()));
+        attributes.put(name, CollectionUtils.wrapList(user.get("creationDate").asString()));
 
         if (user.has("changePwdDate") && !user.get("changePwdDate").isNull()) {
             name = attributeMappings.getOrDefault("changePwdDate", "syncopeUserChangePwdDate");
-            attributes.put(name, CollectionUtils.wrapList(user.get("changePwdDate").asText()));
+            attributes.put(name, CollectionUtils.wrapList(user.get("changePwdDate").asString()));
         }
 
         if (user.has("lastLoginDate") && !user.get("lastLoginDate").isNull()) {
             name = attributeMappings.getOrDefault("lastLoginDate", "syncopeUserLastLoginDate");
-            attributes.put(name, CollectionUtils.wrapList(user.get("lastLoginDate").asText()));
+            attributes.put(name, CollectionUtils.wrapList(user.get("lastLoginDate").asString()));
         }
 
         collectListableAttribute(attributes, user, "roles", "syncopeUserRoles", attributeMappings);
@@ -121,7 +110,7 @@ public class SyncopeUtils {
 
         if (user.has("dynMemberships")) {
             val dynMemberships = new ArrayList<>();
-            user.get("dynMemberships").forEach(m -> dynMemberships.add(m.get("groupName").asText()));
+            user.get("dynMemberships").forEach(membership -> dynMemberships.add(membership.get("groupName").asString()));
             if (!dynMemberships.isEmpty()) {
                 name = attributeMappings.getOrDefault("dynMemberships", "syncopeUserDynMemberships");
                 attributes.put(name, dynMemberships);
@@ -131,7 +120,7 @@ public class SyncopeUtils {
         if (user.has("relationships")) {
             val relationships = new ArrayList<>();
             user.get("relationships").forEach(
-                r -> relationships.add(r.get("type").asText() + ';' + r.get("otherEndName").asText()));
+                r -> relationships.add(r.get("type").asString() + ';' + r.get("otherEndName").asString()));
             if (!relationships.isEmpty()) {
                 name = attributeMappings.getOrDefault("relationships", "syncopeUserRelationships");
                 attributes.put(name, relationships);
@@ -149,10 +138,10 @@ public class SyncopeUtils {
         val memberships = new ArrayList<Map<String, String>>();
         user.get("memberships").forEach(member -> {
             val membershipInfo = new HashMap<String, String>();
-            membershipInfo.put("groupName", member.get("groupName").asText());
+            membershipInfo.put("groupName", member.get("groupName").asString());
             if (member.has("plainAttrs")) {
                 member.get("plainAttrs").forEach(attr ->
-                    membershipInfo.put(attr.get("schema").asText(), attr.get("values").toString())
+                    membershipInfo.put(attr.get("schema").asString(), attr.get("values").toString())
                 );
                 memberships.add(membershipInfo);
             }
@@ -166,7 +155,7 @@ public class SyncopeUtils {
         if (user.has(attributeName)) {
             val prefix = attributeMappings.getOrDefault(attributeName, "syncopeUserAttr_");
             user.get(attributeName).forEach(attr -> {
-                val attrName = prefix + attr.get("schema").asText();
+                val attrName = prefix + attr.get("schema").asString();
                 attributes.put(
                     attributeMappings.getOrDefault(attrName, attrName),
                     MAPPER.convertValue(attr.get("values"), ArrayList.class));
@@ -232,7 +221,7 @@ public class SyncopeUtils {
                 .build();
             response = Objects.requireNonNull(HttpUtils.execute(exec));
             LOGGER.debug("Received http response status as [{}]", response.getReasonPhrase());
-            if (HttpStatus.resolve(response.getCode()).is2xxSuccessful()) {
+            if (Objects.requireNonNull(HttpStatus.resolve(response.getCode())).is2xxSuccessful()) {
                 val entity = ((HttpEntityContainer) response).getEntity();
                 return FunctionUtils.doUnchecked(() -> {
                     val result = EntityUtils.toString(entity);
@@ -310,8 +299,8 @@ public class SyncopeUtils {
     private static void convertFromGroupEntity(final JsonNode group,
                                                final List<Object> attributes) {
         val groupAttrs = new HashMap<String, String>();
-        groupAttrs.put("groupName", group.get("name").asText());
-        group.get("plainAttrs").forEach(attr -> groupAttrs.put(attr.get("schema").asText(), attr.get("values").toString()));
+        groupAttrs.put("groupName", group.get("name").asString());
+        group.get("plainAttrs").forEach(attr -> groupAttrs.put(attr.get("schema").asString(), attr.get("values").toString()));
         attributes.add(groupAttrs);
     }
 

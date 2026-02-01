@@ -1,5 +1,6 @@
 package org.apereo.cas.services.web;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.configuration.CasConfigurationProperties;
@@ -15,6 +16,8 @@ import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.spring.ApplicationContextProvider;
 import org.apereo.cas.util.spring.SpringExpressionLanguageValueResolver;
 import org.apereo.cas.web.support.WebUtils;
+import org.apereo.cas.web.theme.AbstractThemeResolver;
+import org.apereo.cas.web.theme.ThemeResolver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -24,20 +27,17 @@ import org.apache.commons.lang3.Strings;
 import org.apache.hc.core5.http.HttpEntityContainer;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.HttpStatus;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpMethod;
-import org.springframework.web.servlet.theme.AbstractThemeResolver;
 import org.springframework.webflow.execution.RequestContextHolder;
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
 
 /**
- * {@link org.springframework.web.servlet.ThemeResolver} to determine the theme for CAS based on the service provided.
+ * {@link ThemeResolver} to determine the theme for CAS based on the service provided.
  * The theme resolver will extract the service parameter from the Request object
  * and attempt to match the URL provided to a Service Id. If the service is
  * found and there is no theme specified or access to the service is not allowed,
@@ -61,13 +61,13 @@ import java.util.Locale;
 @Slf4j
 @RequiredArgsConstructor
 public class RegisteredServiceThemeResolver extends AbstractThemeResolver {
-    protected final ObjectProvider<ServicesManager> servicesManager;
+    protected final ObjectProvider<@NonNull ServicesManager> servicesManager;
 
-    protected final ObjectProvider<AuthenticationServiceSelectionPlan> authenticationRequestServiceSelectionStrategies;
+    protected final ObjectProvider<@NonNull AuthenticationServiceSelectionPlan> authenticationRequestServiceSelectionStrategies;
 
-    protected final ObjectProvider<CasConfigurationProperties> casProperties;
+    protected final ObjectProvider<@NonNull CasConfigurationProperties> casProperties;
 
-    @Nonnull
+    @NonNull
     @Override
     public String resolveThemeName(final HttpServletRequest request) {
         val context = RequestContextHolder.getRequestContext();

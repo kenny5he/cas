@@ -1,5 +1,6 @@
 package org.apereo.cas.web.security;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.model.core.monitor.ActuatorEndpointProperties;
 import org.apereo.cas.configuration.model.core.monitor.JaasSecurityActuatorEndpointsMonitorProperties;
@@ -15,14 +16,15 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
-import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.boot.actuate.autoconfigure.web.server.ManagementServerProperties;
 import org.springframework.boot.actuate.endpoint.Access;
 import org.springframework.boot.actuate.endpoint.web.PathMappedEndpoints;
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.boot.autoconfigure.web.WebProperties;
+import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest;
+import org.springframework.boot.security.autoconfigure.web.servlet.PathRequest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,11 +41,6 @@ import org.springframework.security.web.servlet.util.matcher.PathPatternRequestM
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.ResourceUtils;
 import jakarta.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link CasWebSecurityConfigurerAdapter}.
@@ -65,7 +62,7 @@ public class CasWebSecurityConfigurerAdapter {
                 .collect(Collectors.toSet());
             object.setAuthenticationConverter(new BasicAuthenticationConverter() {
                 @Override
-                public UsernamePasswordAuthenticationToken convert(final HttpServletRequest request) {
+                public UsernamePasswordAuthenticationToken convert(final @NonNull HttpServletRequest request) {
                     val requestIsNotIgnored = patternsToIgnore.stream().noneMatch(requestMatcher -> requestMatcher.matches(request));
                     return requestIsNotIgnored ? super.convert(request) : null;
                 }
@@ -77,10 +74,10 @@ public class CasWebSecurityConfigurerAdapter {
     private final CasConfigurationProperties casProperties;
 
     private final WebEndpointProperties webEndpointProperties;
-    
+
     private final ManagementServerProperties managementServerProperties;
 
-    private final ObjectProvider<PathMappedEndpoints> pathMappedEndpoints;
+    private final ObjectProvider<@NonNull PathMappedEndpoints> pathMappedEndpoints;
 
     private final List<CasWebSecurityConfigurer> webSecurityConfigurers;
 
@@ -144,15 +141,14 @@ public class CasWebSecurityConfigurerAdapter {
         val endpoints = casProperties.getMonitor().getEndpoints().getEndpoint();
         endpoints.forEach(Unchecked.biConsumer((key, endpointProps) -> {
             val endpoint = EndpointRequest.to(key);
-            endpointProps.getAccess().forEach(Unchecked.consumer(
-                access -> configureEndpointAccess(requests, access, endpointProps, endpoint)));
+            configureEndpointAccess(requests, endpointProps, endpoint);
         }));
         configureEndpointAccessToDenyUndefined(requests, applicationContext);
         configureEndpointAccessForStaticResources(requests);
         configureEndpointAccessByFormLogin(requests);
 
         val jaas = casProperties.getMonitor().getEndpoints().getJaas();
-        FunctionUtils.doIfNotNull(jaas.getLoginConfig(), __ -> configureJaasAuthenticationProvider(http, jaas));
+        FunctionUtils.doIfNotNull(jaas.getLoginConfig(), _ -> configureJaasAuthenticationProvider(http, jaas));
 
         http.securityContext(securityContext -> securityContext.securityContextRepository(securityContextRepository));
         webSecurityConfigurers
@@ -192,6 +188,7 @@ public class CasWebSecurityConfigurerAdapter {
         final HttpSecurity http, final ApplicationContext applicationContext) {
         val endpoints = casProperties.getMonitor().getEndpoints().getEndpoint().keySet();
         val mappedEndpoints = pathMappedEndpoints.getObject();
+
         mappedEndpoints
             .stream()
             .filter(BeanSupplier::isNotProxy)
@@ -210,10 +207,8 @@ public class CasWebSecurityConfigurerAdapter {
                         }
                     } else {
                         val endpointDefaults = casProperties.getMonitor().getEndpoints().getDefaultEndpointProperties();
-                        val defaultAccessRules = endpointDefaults.getAccess();
                         LOGGER.trace("Endpoint security is NOT defined for endpoint [{}]. Using default security rules [{}]", rootPath, endpointDefaults);
-                        defaultAccessRules.forEach(Unchecked.consumer(access ->
-                            configureEndpointAccess(http, access, endpointDefaults, endpointMatcher)));
+                        configureEndpointAccess(http, endpointDefaults, endpointMatcher);
                     }
                 }
             }));
@@ -249,10 +244,9 @@ public class CasWebSecurityConfigurerAdapter {
     }
 
     protected void configureEndpointAccess(final HttpSecurity httpSecurity,
-                                           final ActuatorEndpointProperties.EndpointAccessLevel access,
                                            final ActuatorEndpointProperties properties,
                                            final EndpointRequest.EndpointRequestMatcher endpoint) throws Exception {
-        switch (access) {
+        switch (properties.getAccess()) {
             case AUTHORITY -> configureEndpointAccessByAuthority(httpSecurity, properties, endpoint);
             case ROLE -> configureEndpointAccessByRole(httpSecurity, properties, endpoint);
             case AUTHENTICATED -> configureEndpointAccessAuthenticated(httpSecurity, endpoint);

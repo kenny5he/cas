@@ -1,7 +1,9 @@
 package org.apereo.cas.ticket.tracking;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.ticket.Ticket;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This is {@link TicketTrackingPolicy}.
@@ -21,6 +23,24 @@ public interface TicketTrackingPolicy {
     String BEAN_NAME_DESCENDANT_TICKET_TRACKING = "descendantTicketsTrackingPolicy";
 
     /**
+     * Tracking policy for proxy granting tickets.
+     */
+    String BEAN_NAME_PROXY_GRANTING_TICKET_TRACKING = "proxyGrantingTicketTrackingPolicy";
+
+    /**
+     * Track application attempt and access.
+     * Typically, ticket-granting tickets keep track of applications
+     * and service tickets for which they are authorized to issue tickets.
+     *
+     * @param ownerTicket the owner ticket
+     * @param ticket      the tracked ticket
+     * @param service     the service
+     */
+    default @Nullable String trackTicket(@Nullable final Ticket ownerTicket, final Ticket ticket, @Nullable final Service service) {
+        return null;
+    }
+
+    /**
      * Track application attempt and access.
      * Typically, ticket-granting tickets keep track of applications
      * and service tickets for which they are authorized to issue tickets.
@@ -28,8 +48,8 @@ public interface TicketTrackingPolicy {
      * @param ownerTicket the owner ticket
      * @param ticket      the tracked ticket
      */
-    default String trackTicket(final Ticket ownerTicket, final Ticket ticket) {
-        return null;
+    default @Nullable String trackTicket(final Ticket ownerTicket, final Ticket ticket) {
+        return trackTicket(ownerTicket, ticket, null);
     }
 
     /**
@@ -49,7 +69,7 @@ public interface TicketTrackingPolicy {
      * @param entry the entry
      * @return the string
      */
-    default String extractTicket(final String entry) {
+    default @Nullable String extractTicket(final String entry) {
         return null;
     }
 

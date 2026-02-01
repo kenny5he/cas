@@ -1,5 +1,6 @@
 package org.apereo.cas.adaptors.duo.web;
 
+import module java.base;
 import org.apereo.cas.adaptors.duo.DuoSecurityUserAccount;
 import org.apereo.cas.adaptors.duo.DuoSecurityUserAccountStatus;
 import org.apereo.cas.adaptors.duo.authn.DuoSecurityClient;
@@ -18,7 +19,6 @@ import org.apereo.cas.util.MockWebServer;
 import org.apereo.cas.util.http.HttpClient;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.boot.SpringBootTestAutoConfigurations;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.val;
 import org.junit.jupiter.api.Tag;
@@ -37,9 +37,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
+import tools.jackson.databind.ObjectMapper;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -125,7 +123,7 @@ class DuoSecurityAdminApiEndpointTests {
     }
 
     @Test
-    void verifyCreateBypassCodes() throws Throwable {
+    void verifyCreateBypassCodes() {
         val endpoint = new DuoSecurityAdminApiEndpoint(casProperties, this.applicationContext);
         val data = Map.of("stat", "OK", "response", CollectionUtils.wrapList("123456"));
         val entity = MAPPER.writeValueAsString(data);

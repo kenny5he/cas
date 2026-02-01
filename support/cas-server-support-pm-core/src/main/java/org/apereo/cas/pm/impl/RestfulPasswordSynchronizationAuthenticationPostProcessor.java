@@ -1,5 +1,6 @@
 package org.apereo.cas.pm.impl;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationBuilder;
 import org.apereo.cas.authentication.AuthenticationPostProcessor;
 import org.apereo.cas.authentication.AuthenticationTransaction;
@@ -11,7 +12,6 @@ import org.apereo.cas.util.LoggingUtils;
 import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -19,9 +19,7 @@ import org.apache.hc.core5.http.HttpResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link RestfulPasswordSynchronizationAuthenticationPostProcessor}.
@@ -57,8 +55,9 @@ public class RestfulPasswordSynchronizationAuthenticationPostProcessor implement
             headers.putAll(properties.getHeaders());
             val exec = HttpExecutionRequest.builder()
                 .url(properties.getUrl())
-                .basicAuthPassword(properties.getBasicAuthUsername())
-                .basicAuthUsername(properties.getBasicAuthPassword())
+                .basicAuthUsername(properties.getBasicAuthUsername())
+                .basicAuthPassword(properties.getBasicAuthPassword())
+                .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                 .method(HttpMethod.POST)
                 .entity(entity)
                 .headers(headers)

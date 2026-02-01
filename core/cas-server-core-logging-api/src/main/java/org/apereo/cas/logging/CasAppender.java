@@ -1,5 +1,6 @@
 package org.apereo.cas.logging;
 
+import module java.base;
 import lombok.Getter;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
@@ -15,8 +16,7 @@ import org.apache.logging.log4j.core.config.plugins.PluginConfiguration;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
-import java.util.ArrayDeque;
-import java.util.Queue;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This is {@link CasAppender}.
@@ -41,7 +41,7 @@ public class CasAppender extends AbstractAppender {
     }
 
     public CasAppender(final String name, final Configuration config, final AppenderRef appenderRef,
-                       final Filter filter, final int maxEntries) {
+                       @Nullable final Filter filter, final int maxEntries) {
         super(name, filter, PatternLayout.createDefaultLayout(), false, Property.EMPTY_ARRAY);
         this.config = config;
         this.appenderRef = appenderRef;

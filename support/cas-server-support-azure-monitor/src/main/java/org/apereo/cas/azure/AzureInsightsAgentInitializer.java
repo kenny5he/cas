@@ -1,5 +1,6 @@
 package org.apereo.cas.azure;
 
+import module java.base;
 import org.apereo.cas.util.app.ApplicationEntrypointInitializer;
 import com.microsoft.applicationinsights.attach.ApplicationInsights;
 import lombok.val;
@@ -21,7 +22,7 @@ public class AzureInsightsAgentInitializer implements ApplicationEntrypointIniti
             System.getenv(AZURE_MONITOR_AGENT_ENABLED)), "true");
         if (BooleanUtils.toBoolean(agentEnabled)) {
             //CHECKSTYLE:OFF
-            System.out.println("Attaching Azure Monitor Application Insights Agent...");
+            IO.println("Attaching Azure Monitor Application Insights Agent...");
             //CHECKSTYLE:ON
             ApplicationInsights.attach();
         }

@@ -1,11 +1,11 @@
 package org.apereo.cas.acme;
 
+import module java.base;
 import org.apereo.cas.util.concurrent.CasReentrantLock;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.concurrent.TimeUnit;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This is {@link DefaultAcmeChallengeRepository}.
@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class DefaultAcmeChallengeRepository implements AcmeChallengeRepository {
     private final CasReentrantLock lock = new CasReentrantLock();
 
-    private final Cache<String, String> cache = Caffeine.newBuilder()
+    private final Cache<@NonNull String, String> cache = Caffeine.newBuilder()
         .initialCapacity(100)
         .maximumSize(1000)
         .expireAfterAccess(2, TimeUnit.SECONDS)
@@ -29,7 +29,7 @@ public class DefaultAcmeChallengeRepository implements AcmeChallengeRepository {
 
     @Override
     public void add(final String token, final String challenge) {
-        lock.tryLock(__ -> {
+        lock.tryLock(_ -> {
             LOGGER.debug("Adding ACME token [{}] linked to challenge [{}]", token, challenge);
             cache.put(token, challenge);
         });

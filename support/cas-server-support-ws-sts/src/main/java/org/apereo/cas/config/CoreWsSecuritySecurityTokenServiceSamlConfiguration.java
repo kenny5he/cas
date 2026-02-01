@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.support.saml.OpenSamlConfigBean;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
@@ -37,7 +38,7 @@ class CoreWsSecuritySecurityTokenServiceSamlConfiguration {
         }
         ReflectionUtils.makeAccessible(field);
         LOGGER.trace("Setting field name [{}]", fieldName);
-        Unchecked.consumer(__ -> field.set(null, value)).accept(field);
+        Unchecked.consumer(_ -> field.set(null, value)).accept(field);
     }
 
     @Bean

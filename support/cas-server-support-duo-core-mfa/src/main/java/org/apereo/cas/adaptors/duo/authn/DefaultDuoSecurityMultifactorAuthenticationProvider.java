@@ -1,5 +1,6 @@
 package org.apereo.cas.adaptors.duo.authn;
 
+import module java.base;
 import org.apereo.cas.authentication.AbstractMultifactorAuthenticationProvider;
 import org.apereo.cas.configuration.model.support.mfa.duo.DuoSecurityMultifactorAuthenticationProperties;
 import org.apereo.cas.configuration.model.support.mfa.duo.DuoSecurityMultifactorAuthenticationRegistrationProperties;
@@ -8,13 +9,11 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.ScopedProxyMode;
-
-import java.io.Serial;
 
 /**
  * This is {@link DefaultDuoSecurityMultifactorAuthenticationProvider}.
@@ -50,6 +49,6 @@ public class DefaultDuoSecurityMultifactorAuthenticationProvider extends Abstrac
 
     @Override
     public String getFriendlyName() {
-        return "Duo Security";
+        return StringUtils.defaultIfBlank(duoAuthenticationService.getProperties().getName(), "Duo Security");
     }
 }

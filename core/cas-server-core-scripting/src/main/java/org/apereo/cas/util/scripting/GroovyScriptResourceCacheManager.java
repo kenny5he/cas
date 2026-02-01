@@ -1,5 +1,6 @@
 package org.apereo.cas.util.scripting;
 
+import module java.base;
 import org.apereo.cas.configuration.model.core.cache.ExpiringSimpleCacheProperties;
 import org.apereo.cas.configuration.support.Beans;
 import org.apereo.cas.util.DigestUtils;
@@ -11,7 +12,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import java.util.Set;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This is {@link GroovyScriptResourceCacheManager}.
@@ -30,7 +31,7 @@ public class GroovyScriptResourceCacheManager implements ScriptResourceCacheMana
     }
 
     @Override
-    public ExecutableCompiledScript get(final String key) {
+    public @Nullable ExecutableCompiledScript get(final String key) {
         return lock.tryLock(() -> cache.getIfPresent(key));
     }
 
@@ -65,7 +66,7 @@ public class GroovyScriptResourceCacheManager implements ScriptResourceCacheMana
 
     @Override
     public void close() {
-        lock.tryLock(__ -> cache.invalidateAll());
+        lock.tryLock(_ -> cache.invalidateAll());
     }
 
     @Override
@@ -74,15 +75,16 @@ public class GroovyScriptResourceCacheManager implements ScriptResourceCacheMana
     }
 
     @Override
-    public ExecutableCompiledScript resolveScriptableResource(
+    public @Nullable ExecutableCompiledScript resolveScriptableResource(
         final String scriptResource,
         final String... keys) {
 
-        val cacheKey = computeKey(keys);
+        val keysToCompute = keys.length == 0 ? new String[]{scriptResource} : keys;
+        val cacheKey = computeKey(keysToCompute);
         LOGGER.trace("Constructed cache key [{}] for keys [{}] mapped as groovy script", cacheKey, keys);
 
         val scriptFactory = ExecutableCompiledScriptFactory.getExecutableCompiledScriptFactory();
-        
+
         var script = (ExecutableCompiledScript) null;
         if (containsKey(cacheKey)) {
             script = get(cacheKey);

@@ -1,5 +1,6 @@
 package org.apereo.cas.influxdb;
 
+import module java.base;
 import org.apereo.cas.configuration.model.support.influxdb.InfluxDbProperties;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.spring.SpringExpressionLanguageValueResolver;
@@ -14,12 +15,6 @@ import org.apache.arrow.memory.DefaultAllocationManagerOption;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import java.nio.charset.StandardCharsets;
-import java.time.Clock;
-import java.time.Instant;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Stream;
 
 /**
  * This is {@link InfluxDbConnectionFactory}.
@@ -34,6 +29,9 @@ public class InfluxDbConnectionFactory implements AutoCloseable {
     private final ClientConfig clientConfig;
 
     static {
+        System.setProperty("sun.misc.unsafe.memory.access", "allow");
+        System.setProperty("io.netty.noUnsafe", "false");
+        System.setProperty("io.netty.tryUnsafe", "true");
         System.setProperty(
             DefaultAllocationManagerOption.ALLOCATION_MANAGER_TYPE_PROPERTY_NAME,
             DefaultAllocationManagerOption.AllocationManagerType.Netty.name()
@@ -114,7 +112,7 @@ public class InfluxDbConnectionFactory implements AutoCloseable {
 
     @Override
     public void close() {
-        FunctionUtils.doAndHandle(__ -> influxDb.close());
+        FunctionUtils.doAndHandle(_ -> influxDb.close());
     }
 
     public String getDatabase() {

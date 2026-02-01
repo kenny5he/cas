@@ -1,5 +1,6 @@
 package org.apereo.cas.audit;
 
+import module java.base;
 import org.apereo.cas.audit.spi.BaseAuditConfigurationTests;
 import org.apereo.cas.config.CasSupportDynamoDbAuditAutoConfiguration;
 import org.apereo.cas.test.CasTestExtension;
@@ -27,8 +28,7 @@ import software.amazon.awssdk.core.SdkSystemSetting;
         "cas.audit.dynamo-db.endpoint=http://localhost:8000",
         "cas.audit.dynamo-db.drop-tables-on-startup=true",
         "cas.audit.dynamo-db.local-instance=true",
-        "cas.audit.dynamo-db.region=us-east-1",
-        "cas.audit.dynamo-db.asynchronous=false"
+        "cas.audit.dynamo-db.region=us-east-1"
     }
 )
 @Tag("DynamoDb")

@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.session.TicketRegistrySessionRepository;
@@ -17,10 +18,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.session.FindByIndexNameSessionRepository;
+import org.springframework.session.MapSession;
 import org.springframework.session.SessionIdGenerator;
-import org.springframework.session.SessionRepository;
 import org.springframework.session.config.annotation.web.http.EnableSpringHttpSession;
-import java.time.Duration;
 
 /**
  * This is {@link CasTicketRegistrySessionAutoConfiguration}.
@@ -36,7 +37,7 @@ public class CasTicketRegistrySessionAutoConfiguration {
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     @ConditionalOnMissingBean(name = "ticketRegistrySessionRepository")
-    public SessionRepository sessionRepository(
+    public FindByIndexNameSessionRepository<MapSession> sessionRepository(
         @Qualifier("ticketRegistrySessionIdGenerator")
         final SessionIdGenerator ticketRegistrySessionIdGenerator,
         @Qualifier(TicketFactory.BEAN_NAME)

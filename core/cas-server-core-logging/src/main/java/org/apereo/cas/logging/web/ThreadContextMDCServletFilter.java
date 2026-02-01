@@ -1,5 +1,6 @@
 package org.apereo.cas.logging.web;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.ticket.registry.TicketRegistrySupport;
 import org.apereo.cas.util.RegexUtils;
@@ -8,6 +9,7 @@ import org.apereo.cas.web.cookie.CasCookieBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.ObjectProvider;
 import jakarta.servlet.Filter;
@@ -17,12 +19,6 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.TimeZone;
-import java.util.UUID;
 
 /**
  * This is {@link ThreadContextMDCServletFilter}.
@@ -33,9 +29,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ThreadContextMDCServletFilter implements Filter {
 
-    private final ObjectProvider<TicketRegistrySupport> ticketRegistrySupport;
+    private final ObjectProvider<@NonNull TicketRegistrySupport> ticketRegistrySupport;
 
-    private final ObjectProvider<CasCookieBuilder> ticketGrantingTicketCookieGenerator;
+    private final ObjectProvider<@NonNull CasCookieBuilder> ticketGrantingTicketCookieGenerator;
 
     private final CasConfigurationProperties casProperties;
 
@@ -96,7 +92,7 @@ public class ThreadContextMDCServletFilter implements Filter {
             Collections.list(request.getAttributeNames()).forEach(a -> addContextAttribute(a, request.getAttribute(a)));
             val requestHeaderNames = request.getHeaderNames();
             FunctionUtils.doIfNotNull(requestHeaderNames,
-                __ -> Collections.list(requestHeaderNames)
+                _ -> Collections.list(requestHeaderNames)
                     .stream()
                     .filter(header -> mdc.getHeadersToExclude().stream().noneMatch(excludedHeader -> RegexUtils.find(header, excludedHeader)))
                     .forEach(h -> addContextAttribute(h, request.getHeader(h))));
@@ -105,7 +101,7 @@ public class ThreadContextMDCServletFilter implements Filter {
                 val cookieValue = builder.retrieveCookieValue(request);
                 if (StringUtils.isNotBlank(cookieValue)) {
                     val principal = ticketRegistrySupport.getObject().getAuthenticatedPrincipalFrom(cookieValue);
-                    FunctionUtils.doIfNotNull(principal, __ -> addContextAttribute("principal", principal.getId()));
+                    FunctionUtils.doIfNotNull(principal, _ -> addContextAttribute("principal", principal.getId()));
                 }
             });
             filterChain.doFilter(servletRequest, servletResponse);

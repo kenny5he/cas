@@ -1,5 +1,6 @@
 package org.apereo.cas.support.oauth.web.response.accesstoken.response;
 
+import module java.base;
 import org.apereo.cas.services.RegisteredService;
 import org.apereo.cas.services.RegisteredServiceCipherExecutor;
 import org.apereo.cas.support.oauth.services.OAuthRegisteredService;
@@ -11,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
-import java.text.ParseException;
-import java.util.Optional;
 
 /**
  * This is {@link OAuth20JwtAccessTokenDecodableCipher}.
@@ -59,7 +58,7 @@ class OAuth20JwtAccessTokenDecodableCipher implements DecodableCipher<String, St
         try {
             val header = JWTParser.parse(tokenId).getHeader();
             val claims = accessTokenJwtBuilder.unpack(Optional.ofNullable(resolveRegisteredService(header)), tokenId);
-            return claims.getJWTID();
+            return claims == null ? null : claims.getJWTID();
         } catch (final ParseException e) {
             LOGGER.trace("Token is not valid JWT, returning it as-is: [{}]", tokenId);
             return tokenId;

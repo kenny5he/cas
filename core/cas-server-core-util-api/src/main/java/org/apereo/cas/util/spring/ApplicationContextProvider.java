@@ -1,17 +1,17 @@
 package org.apereo.cas.util.spring;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.scripting.ExecutableCompiledScript;
 import org.apereo.cas.util.scripting.ScriptResourceCacheManager;
 import org.apereo.cas.util.text.MessageSanitizer;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
-import jakarta.annotation.Nonnull;
-import java.util.Optional;
 
 /**
  * An implementation of {@link ApplicationContextAware} that statically
@@ -28,7 +28,7 @@ public class ApplicationContextProvider implements ApplicationContextAware {
     }
 
     @Override
-    public void setApplicationContext(@Nonnull final ApplicationContext context) {
+    public void setApplicationContext(@NonNull final ApplicationContext context) {
         APPLICATION_CONTEXT = context;
     }
 

@@ -1,5 +1,6 @@
 package org.apereo.cas.support.saml.services.idp.metadata.cache.resolver;
 
+import module java.base;
 import org.apereo.cas.configuration.model.support.saml.idp.SamlIdPProperties;
 import org.apereo.cas.services.UnauthorizedServiceException;
 import org.apereo.cas.support.saml.InMemoryResourceMetadataResolver;
@@ -26,17 +27,6 @@ import org.opensaml.saml.metadata.resolver.impl.AbstractMetadataResolver;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import java.io.File;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.attribute.UserDefinedFileAttributeView;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * This is {@link MetadataQueryProtocolMetadataResolver}.
@@ -113,7 +103,7 @@ public class MetadataQueryProtocolMetadataResolver extends UrlResourceMetadataRe
             .proxyUrl(service.getMetadataProxyLocation())
             .build();
         val response = HttpUtils.execute(exec);
-        if (response == null) {
+        if (response == null || HttpStatus.resolve(response.getCode()).is5xxServerError()) {
             LOGGER.error("Unable to fetch metadata from [{}]", metadataLocation);
             throw UnauthorizedServiceException.denied("Rejected: %s".formatted(metadataLocation));
         }

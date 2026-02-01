@@ -1,18 +1,12 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.services.query.RegisteredServiceQuery;
 import org.apereo.cas.util.NamedObject;
-
 import lombok.val;
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.Ordered;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 /**
  * Manages the storage, retrieval, and matching of Services wishing to use CAS
@@ -84,7 +78,7 @@ public interface ServicesManager extends Ordered, NamedObject {
      * @param id the id of the registeredService to delete.
      * @return the registered service that was deleted, null if there was none.
      */
-    RegisteredService delete(long id);
+    @Nullable RegisteredService delete(long id);
 
     /**
      * Delete the entry for this {@link RegisteredService}.
@@ -92,7 +86,7 @@ public interface ServicesManager extends Ordered, NamedObject {
      * @param svc the registered service to delete.
      * @return the registered service that was deleted, null if there was none.
      */
-    RegisteredService delete(RegisteredService svc);
+    @Nullable RegisteredService delete(RegisteredService svc);
 
     /**
      * Find a {@link RegisteredService} by matching with the supplied service.
@@ -100,7 +94,7 @@ public interface ServicesManager extends Ordered, NamedObject {
      * @param service the service to match with.
      * @return the {@link RegisteredService} that matches the supplied service.
      */
-    RegisteredService findServiceBy(Service service);
+    @Nullable RegisteredService findServiceBy(@Nullable Service service);
 
     /**
      * Find a collection of services by type.
@@ -118,7 +112,7 @@ public interface ServicesManager extends Ordered, NamedObject {
      * @param clazz     the clazz
      * @return the t
      */
-    <T extends RegisteredService> T findServiceBy(Service serviceId, Class<T> clazz);
+    <T extends RegisteredService> @Nullable T findServiceBy(@Nullable Service serviceId, Class<T> clazz);
 
     /**
      * Find a {@link RegisteredService} by matching with the supplied id.
@@ -126,7 +120,7 @@ public interface ServicesManager extends Ordered, NamedObject {
      * @param id the id to match with.
      * @return the {@link RegisteredService} that matches the supplied service.
      */
-    RegisteredService findServiceBy(long id);
+    @Nullable RegisteredService findServiceBy(long id);
 
     /**
      * Find a {@link RegisteredService} by matching with the supplied id.
@@ -136,7 +130,7 @@ public interface ServicesManager extends Ordered, NamedObject {
      * @param clazz the clazz
      * @return the {@link RegisteredService} that matches the supplied service.
      */
-    default <T extends RegisteredService> T findServiceBy(final long id, final Class<T> clazz) {
+    default <T extends RegisteredService> @Nullable T findServiceBy(final long id, final Class<T> clazz) {
         val service = findServiceBy(id);
         if (service != null && clazz.isAssignableFrom(service.getClass())) {
             return (T) service;
@@ -150,7 +144,7 @@ public interface ServicesManager extends Ordered, NamedObject {
      * @param name the name to match with.
      * @return the {@link RegisteredService}  that matches the supplied service.
      */
-    RegisteredService findServiceByName(String name);
+    @Nullable RegisteredService findServiceByName(String name);
 
     /**
      * Find a {@link RegisteredService} by matching with the supplied name.
@@ -160,7 +154,7 @@ public interface ServicesManager extends Ordered, NamedObject {
      * @param clazz the clazz
      * @return the {@link RegisteredService} that matches the supplied service.
      */
-    default <T extends RegisteredService> T findServiceByName(final String name, final Class<T> clazz) {
+    default <T extends RegisteredService> @Nullable T findServiceByName(final String name, final Class<T> clazz) {
         val service = findServiceByName(name);
         if (service != null && clazz.isAssignableFrom(service.getClass())) {
             return (T) service;
@@ -219,7 +213,7 @@ public interface ServicesManager extends Ordered, NamedObject {
     default long count() {
         return 0;
     }
-    
+
     /**
      * Returns true if this manager supports the type of service passed.
      *
@@ -275,6 +269,7 @@ public interface ServicesManager extends Ordered, NamedObject {
     /**
      * Query the services found using arbitrary attributes
      * for which indexes are registered.
+     *
      * @param queries list of queries each mapped to a field
      * @return query results
      */

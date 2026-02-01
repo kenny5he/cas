@@ -1,5 +1,6 @@
 package org.apereo.cas.oidc.util;
 
+import module java.base;
 import org.apereo.cas.oidc.jwks.OidcJsonWebKeyCacheKey;
 import org.apereo.cas.oidc.jwks.OidcJsonWebKeyUsage;
 import org.apereo.cas.oidc.token.OidcRegisteredServiceJwtCipherExecutor;
@@ -20,10 +21,6 @@ import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.JsonWebKeySet;
 import org.jose4j.jwk.PublicJsonWebKey;
-import java.io.Serializable;
-import java.security.Key;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * This is {@link InternalJwtAccessTokenCipherExecutor}.
@@ -62,7 +59,7 @@ public class InternalJwtAccessTokenCipherExecutor extends JwtTicketCipherExecuto
                                               final RegisteredService registeredService,
                                               final OidcRegisteredServiceJwtCipherExecutor cipherExecutor) {
         val cipher = new InternalJwtAccessTokenCipherExecutor(encryptionKey, signingKey, cipherExecutor);
-        Unchecked.consumer(__ -> {
+        Unchecked.consumer(_ -> {
             if (EncodingUtils.isJsonWebKey(encryptionKey)) {
                 val jsonWebKey = toJsonWebKey(encryptionKey, registeredService);
                 cipher.setEncryptionKey(jsonWebKey.getPublicKey());

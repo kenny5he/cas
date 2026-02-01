@@ -1,5 +1,6 @@
 package org.apereo.cas.web.security.authentication;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.model.core.monitor.ActuatorEndpointProperties;
 import org.apereo.cas.test.CasTestExtension;
@@ -13,9 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
-import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -63,11 +63,11 @@ class IpAddressAuthorizationManagerTests {
         assertTrue(results.isGranted());
     }
 
-    private AuthorizationDecision getAuthorizationDecision(final List<String> addresses, final String remoteAddr) {
+    private AuthorizationResult getAuthorizationDecision(final List<String> addresses, final String remoteAddr) {
         val request = new MockHttpServletRequest();
         request.setRemoteAddr(remoteAddr);
         val manager = new IpAddressAuthorizationManager(casProperties,
             new ActuatorEndpointProperties().setRequiredIpAddresses(addresses));
-        return manager.check(() -> new TestingAuthenticationToken("cas", "cas"), new RequestAuthorizationContext(request));
+        return manager.authorize(() -> new TestingAuthenticationToken("cas", "cas"), new RequestAuthorizationContext(request));
     }
 }

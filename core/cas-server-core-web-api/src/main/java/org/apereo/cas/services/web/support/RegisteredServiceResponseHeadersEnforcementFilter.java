@@ -1,5 +1,6 @@
 package org.apereo.cas.services.web.support;
 
+import module java.base;
 import org.apereo.cas.audit.AuditableContext;
 import org.apereo.cas.audit.AuditableExecution;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
@@ -14,13 +15,13 @@ import lombok.val;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.http.HttpStatus;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Optional;
 
 /**
  * This is {@link RegisteredServiceResponseHeadersEnforcementFilter}. A filter extension that looks at the properties of a
@@ -32,13 +33,13 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class RegisteredServiceResponseHeadersEnforcementFilter extends ResponseHeadersEnforcementFilter {
-    private final ObjectProvider<ServicesManager> servicesManagerProvider;
+    private final ObjectProvider<@NonNull ServicesManager> servicesManagerProvider;
 
-    private final ObjectProvider<ArgumentExtractor> argumentExtractor;
+    private final ObjectProvider<@NonNull ArgumentExtractor> argumentExtractor;
 
-    private final ObjectProvider<AuthenticationServiceSelectionPlan> authenticationRequestServiceSelectionStrategies;
+    private final ObjectProvider<@NonNull AuthenticationServiceSelectionPlan> authenticationRequestServiceSelectionStrategies;
 
-    private final ObjectProvider<AuditableExecution> registeredServiceAccessStrategyEnforcer;
+    private final ObjectProvider<@NonNull AuditableExecution> registeredServiceAccessStrategyEnforcer;
 
     private final WebEndpointProperties webEndpointProperties;
 

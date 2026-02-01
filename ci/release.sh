@@ -6,6 +6,28 @@ YELLOW="\e[33m"
 ENDCOLOR="\e[0m"
 
 casVersion=(`cat ./gradle.properties | grep "version" | cut -d= -f2`)
+nextVersion="${casVersion}"
+
+while (("$#")); do
+  case "$1" in
+  --release-version)
+    casVersion=$2
+    shift 2
+    ;;
+  --next-version)
+    nextVersion=$2
+    shift 2
+    ;;
+  esac
+done
+
+function sedi() {
+  if sed --version >/dev/null 2>&1; then
+    sed -i "$@"
+  else
+    sed -i '' "$@"
+  fi
+}
 
 function printgreen() {
   printf "☘️  ${GREEN}$1${ENDCOLOR}\n"
@@ -31,11 +53,12 @@ function snapshot() {
       exit 1
   fi
   printgreen "Publishing CAS SNAPSHOT artifacts. This might take a while..."
-  ./gradlew assemble publish \
+  ./gradlew assemble publishAggregationToCentralPortalSnapshots \
     -x test -x javadoc -x check --no-daemon --parallel \
     -DskipAot=true -DpublishSnapshots=true --stacktrace \
     --no-configuration-cache --configure-on-demand \
-    -DrepositoryUsername="$REPOSITORY_USER" -DrepositoryPassword="$REPOSITORY_PWD"
+    -DrepositoryUsername="$REPOSITORY_USER" \
+    -DrepositoryPassword="$REPOSITORY_PWD"
   if [ $? -ne 0 ]; then
       printred "Publishing CAS SNAPSHOTs failed."
       exit 1
@@ -47,8 +70,17 @@ function publish {
         printred "CAS version ${casVersion} cannot be a SNAPSHOT version"
         exit 1
     fi
-    printgreen "Publishing CAS releases. This might take a while..."
+
+    printgreen "Verifying dependency versions for CAS release ${casVersion}..."
+    ./gradlew verifyDependencyVersions -x test -x javadoc -x check --no-daemon --parallel
+    if [ $? -ne 0 ]; then
+        printred "Dependency version verification failed."
+        exit 1
+    fi
+        
+    printgreen "Assembling and publishing CAS release ${casVersion}. This might take a while..."
     ./gradlew assemble publishAggregationToCentralPortal \
+      -Pversion="${casVersion}" -PnextVersion="${nextVersion}" \
       --parallel --no-daemon --no-configuration-cache -x test -x check \
       -DskipAot=true -DpublishReleases=true --stacktrace \
       -DrepositoryUsername="$REPOSITORY_USER" -DrepositoryPassword="$REPOSITORY_PWD"
@@ -104,23 +136,24 @@ function publish {
         links+=( "[RC$i](https://apereo.github.io/cas/${documentationBranch}/release_notes/RC$i.html)" )
       done
       changelog=$(printf '%s\n' "${links[*]// /,}")
-    fi
-
-    if [[ -n "${changelog}" ]]; then
       changelog="- Changelog: ${changelog}"
     fi
-    
+
     currentCommit=$(git rev-parse HEAD)
     printgreen "Current commit is ${currentCommit}"
 
     previousTag=$(git describe --tags --abbrev=0 "${releaseTag}^")
-    echo "Looking at commits in range: $previousTag..$releaseTag" >&2
-
-    contributors=$(gh api repos/apereo/cas/compare/$previousTag...$releaseTag \
-      --jq '.commits[].author.login // .commits[].commit.author.name' \
-      | sort -u \
-      | sed 's/.*/- @&/')
-    printgreen "Contributors: ${contributors}"
+    echo "Looking at commits in range: $previousTag..$releaseTag" 2>/dev/null
+      
+    if [[ -n "${previousTag}" && -n "${releaseTag}" ]]; then
+      contributors=$(gh api repos/apereo/cas/compare/$previousTag...$releaseTag \
+        --jq '.commits[].author.login // .commits[].commit.author.name' \
+        | sort -u \
+        | sed 's/.*/- @&/')
+      printgreen "Contributors: ${contributors}"
+    else
+      printyellow "Previous or current tag is missing; skipping contributor lookup."
+    fi
     if [[ -z "${contributors}" ]]; then
       contributors="- No contributors found."
     fi
@@ -133,7 +166,7 @@ function publish {
 - [Maintenance Policy](https://apereo.github.io/cas/developer/Maintenance-Policy.html)
 - [Release Policy](https://apereo.github.io/cas/developer/Release-Policy.html)
 - [Release Schedule](https://github.com/apereo/cas/milestones)
-- Changelog: ${changelog}
+${changelog}
 
 # :couple: Contributions
 
@@ -152,6 +185,31 @@ ${contributors}
         printred "Creating GitHub Release for CAS version ${casVersion} failed."
         exit 1
     fi
+    printgreen "Release process for Apereo CAS ${casVersion} completed successfully!"
+
+    echo "Closing milestone v${casVersion} on GitHub..."
+    gh api /repos/apereo/cas/milestones \
+      --jq ".[] | select(.title == \"${casVersion}\") | .number" |
+    while read -r number; do
+      gh api \
+        --method PATCH \
+        /repos/apereo/cas/milestones/${number} \
+        -f state=closed
+    done
+
+    echo "Updating CAS with the next development version: ${nextVersion}"
+    git reset --hard
+    sedi "s/^version=.*/version=${nextVersion}/" ./gradle.properties
+    git add ./gradle.properties
+    git commit -m "Bumping version to ${nextVersion} after release of ${casVersion} [skip ci]"
+    git push origin "${currentBranch}" --force
+    if [ $? -ne 0 ]; then
+        printred "Pushing the next development version ${nextVersion} failed."
+        exit 1
+    fi
+    
+    printgreen "You should now publish the release for CAS v${casVersion} on GitHub!"
+    exit 0
 }
 
 function finished {
@@ -177,6 +235,7 @@ function init {
   esac
 }
 
+
 if [[ "${casVersion}" == v* ]]; then
     printred "CAS version ${casVersion} is incorrect and likely a tag."
     exit 1
@@ -185,6 +244,7 @@ fi
 echo -e "\n"
 echo "***************************************************************"
 printgreen "Welcome to the release process for Apereo CAS ${casVersion}"
+printgreen "Next development version: ${nextVersion}"
 echo -n $(java -version)
 echo -e "***************************************************************\n"
 

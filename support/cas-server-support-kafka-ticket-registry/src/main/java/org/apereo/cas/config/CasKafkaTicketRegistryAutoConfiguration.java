@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.CentralAuthenticationService;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
@@ -14,12 +15,12 @@ import org.apereo.cas.ticket.registry.pubsub.queue.QueueableTicketRegistryMessag
 import org.apereo.cas.util.PublisherIdentifier;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -37,12 +38,11 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.KafkaAdminOperations;
 import org.springframework.kafka.core.KafkaOperations;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
+import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
-import java.util.Map;
-import java.util.UUID;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * This is {@link CasKafkaTicketRegistryAutoConfiguration}.
@@ -57,18 +57,18 @@ import java.util.UUID;
 @Slf4j
 @EnableKafka
 public class CasKafkaTicketRegistryAutoConfiguration {
-    private static final ObjectMapper MAPPER = JacksonObjectMapperFactory.builder()
-        .defaultTypingEnabled(true).minimal(true).build().toObjectMapper();
+    private static final JsonMapper MAPPER = JacksonObjectMapperFactory.builder()
+        .defaultTypingEnabled(true).minimal(true).build().toJsonMapper();
 
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     @ConditionalOnMissingBean(name = "kafkaTicketRegistryTemplate")
-    public KafkaOperations<String, BaseMessageQueueCommand> kafkaTicketRegistryTemplate(
+    public KafkaOperations<@NonNull String, @NonNull BaseMessageQueueCommand> kafkaTicketRegistryTemplate(
         final ConfigurableApplicationContext applicationContext,
         final CasConfigurationProperties casProperties) {
         val kafka = casProperties.getTicket().getRegistry().getKafka();
         val factory = new KafkaObjectFactory<String, BaseMessageQueueCommand>(kafka.getBootstrapAddress());
-        return factory.getKafkaTemplate(new StringSerializer(), new JsonSerializer<>(MAPPER));
+        return factory.getKafkaTemplate(new StringSerializer(), new JacksonJsonSerializer<>(MAPPER));
     }
 
     @Bean
@@ -91,10 +91,10 @@ public class CasKafkaTicketRegistryAutoConfiguration {
         final ConfigurableApplicationContext applicationContext,
         @Qualifier(TicketCatalog.BEAN_NAME)
         final TicketCatalog ticketCatalog,
-        @Qualifier("messageQueueTicketRegistryIdentifier")
+        @Qualifier(PublisherIdentifier.DEFAULT_BEAN_NAME)
         final PublisherIdentifier messageQueueTicketRegistryIdentifier,
         @Qualifier("kafkaTicketRegistryTemplate")
-        final KafkaOperations<String, BaseMessageQueueCommand> kafkaTicketRegistryTemplate) {
+        final KafkaOperations<@NonNull String, @NonNull BaseMessageQueueCommand> kafkaTicketRegistryTemplate) {
         LOGGER.debug("Configuring Kafka ticket registry with identifier [{}]", messageQueueTicketRegistryIdentifier);
         return new KafkaTicketRegistryPublisher(applicationContext, ticketCatalog, kafkaTicketRegistryTemplate);
     }
@@ -109,7 +109,7 @@ public class CasKafkaTicketRegistryAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(name = "kafkaTicketRegistryConsumerFactory")
-    public ConsumerFactory<String, BaseMessageQueueCommand> kafkaTicketRegistryConsumerFactory(
+    public ConsumerFactory<@NonNull String, @NonNull BaseMessageQueueCommand> kafkaTicketRegistryConsumerFactory(
         final ConfigurableApplicationContext applicationContext,
         final CasConfigurationProperties casProperties) {
         val kafka = casProperties.getTicket().getRegistry().getKafka();
@@ -117,10 +117,10 @@ public class CasKafkaTicketRegistryAutoConfiguration {
             ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka.getBootstrapAddress(),
             ConsumerConfig.GROUP_ID_CONFIG, kafka.getGroupId()
         );
-        val factory = new DefaultKafkaConsumerFactory<String, BaseMessageQueueCommand>(config);
+        val factory = new DefaultKafkaConsumerFactory<@NonNull String, @NonNull BaseMessageQueueCommand>(config);
         factory.setKeyDeserializer(new StringDeserializer());
 
-        val valueDeserializer = new JsonDeserializer<BaseMessageQueueCommand>(MAPPER);
+        val valueDeserializer = new JacksonJsonDeserializer<@NonNull BaseMessageQueueCommand>(MAPPER);
         valueDeserializer.addTrustedPackages(Ticket.class.getPackageName());
         valueDeserializer.addTrustedPackages(BaseMessageQueueCommand.class.getPackageName());
         valueDeserializer.addTrustedPackages(CentralAuthenticationService.NAMESPACE);
@@ -132,30 +132,30 @@ public class CasKafkaTicketRegistryAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(name = "kafkaListenerContainerFactory")
-    public ConcurrentKafkaListenerContainerFactory<String, BaseMessageQueueCommand> kafkaListenerContainerFactory(
+    public ConcurrentKafkaListenerContainerFactory<@NonNull String, @NonNull BaseMessageQueueCommand> kafkaListenerContainerFactory(
         @Qualifier("kafkaTicketRegistryConsumerFactory")
-        final ConsumerFactory<String, BaseMessageQueueCommand> kafkaTicketRegistryConsumerFactory) {
-        val factory = new ConcurrentKafkaListenerContainerFactory<String, BaseMessageQueueCommand>();
+        final ConsumerFactory<@NonNull String, @NonNull BaseMessageQueueCommand> kafkaTicketRegistryConsumerFactory) {
+        val factory = new ConcurrentKafkaListenerContainerFactory<@NonNull String, @NonNull BaseMessageQueueCommand>();
         factory.setConsumerFactory(kafkaTicketRegistryConsumerFactory);
         return factory;
     }
 
     @Bean
     @ConditionalOnMissingBean(name = "kafkaTicketRegistryMessageListenerContainer")
-    public ConcurrentMessageListenerContainer<String, BaseMessageQueueCommand> kafkaTicketRegistryMessageListenerContainer(
+    public ConcurrentMessageListenerContainer<@NonNull String, @NonNull BaseMessageQueueCommand> kafkaTicketRegistryMessageListenerContainer(
         @Qualifier("messageHandlerMethodFactory")
         final MessageHandlerMethodFactory messageHandlerMethodFactory,
         @Qualifier("messageQueueTicketRegistryReceiver")
         final QueueableTicketRegistryMessageReceiver messageQueueTicketRegistryReceiver,
         final CasConfigurationProperties casProperties,
         @Qualifier("kafkaTicketRegistryConsumerFactory")
-        final ConsumerFactory<String, BaseMessageQueueCommand> kafkaTicketRegistryConsumerFactory,
+        final ConsumerFactory<@NonNull String, @NonNull BaseMessageQueueCommand> kafkaTicketRegistryConsumerFactory,
         @Qualifier(TicketCatalog.BEAN_NAME)
         final TicketCatalog ticketCatalog) throws Exception {
         
         val kafka = casProperties.getTicket().getRegistry().getKafka();
 
-        val factory = new ConcurrentKafkaListenerContainerFactory<String, BaseMessageQueueCommand>();
+        val factory = new ConcurrentKafkaListenerContainerFactory<@NonNull String, @NonNull BaseMessageQueueCommand>();
         factory.setConsumerFactory(kafkaTicketRegistryConsumerFactory);
         factory.setConcurrency(kafka.getConcurrency());
 

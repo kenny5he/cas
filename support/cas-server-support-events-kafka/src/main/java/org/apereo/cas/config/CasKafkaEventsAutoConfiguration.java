@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.kafka.KafkaObjectFactory;
@@ -9,11 +10,11 @@ import org.apereo.cas.support.events.dao.CasEvent;
 import org.apereo.cas.support.events.kafka.KafkaCasEventRepository;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.config.TopicConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -25,7 +26,8 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaAdminOperations;
 import org.springframework.kafka.core.KafkaOperations;
-import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * This is {@link CasKafkaEventsAutoConfiguration}.
@@ -37,8 +39,8 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 @ConditionalOnFeatureEnabled(feature = CasFeatureModule.FeatureCatalog.Events, module = "kafka")
 @AutoConfiguration
 public class CasKafkaEventsAutoConfiguration {
-    private static final ObjectMapper MAPPER = JacksonObjectMapperFactory.builder()
-        .defaultTypingEnabled(true).minimal(true).build().toObjectMapper();
+    private static final JsonMapper MAPPER = JacksonObjectMapperFactory.builder()
+        .defaultTypingEnabled(true).minimal(true).build().toJsonMapper();
 
     @ConditionalOnMissingBean(name = "kafkaEventRepositoryFilter")
     @Bean
@@ -50,12 +52,12 @@ public class CasKafkaEventsAutoConfiguration {
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     @ConditionalOnMissingBean(name = "kafkaEventRepositoryTemplate")
-    public KafkaOperations<String, CasEvent> kafkaEventRepositoryTemplate(
+    public KafkaOperations<@NonNull String, @NonNull CasEvent> kafkaEventRepositoryTemplate(
         final ConfigurableApplicationContext applicationContext,
         final CasConfigurationProperties casProperties) {
         val kafka = casProperties.getEvents().getKafka();
         val factory = new KafkaObjectFactory<String, CasEvent>(kafka.getBootstrapAddress());
-        return factory.getKafkaTemplate(new StringSerializer(), new JsonSerializer<>(MAPPER));
+        return factory.getKafkaTemplate(new StringSerializer(), new JacksonJsonSerializer<>(MAPPER));
     }
 
     @Bean
@@ -90,7 +92,7 @@ public class CasKafkaEventsAutoConfiguration {
         @Qualifier("kafkaEventRepositoryFilter")
         final CasEventRepositoryFilter kafkaEventRepositoryFilter,
         @Qualifier("kafkaEventRepositoryTemplate")
-        final KafkaOperations<String, CasEvent> kafkaEventRepositoryTemplate,
+        final KafkaOperations<@NonNull String, @NonNull CasEvent> kafkaEventRepositoryTemplate,
         final CasConfigurationProperties casProperties) {
         return new KafkaCasEventRepository(kafkaEventRepositoryFilter,
             kafkaEventRepositoryTemplate, casProperties);

@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.CentralAuthenticationService;
 import org.apereo.cas.audit.AuditActionResolvers;
 import org.apereo.cas.audit.AuditPrincipalIdProvider;
@@ -66,6 +67,7 @@ import org.apereo.inspektr.audit.spi.AuditActionResolver;
 import org.apereo.inspektr.audit.spi.AuditResourceResolver;
 import org.apereo.inspektr.audit.spi.support.DefaultAuditActionResolver;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.jspecify.annotations.NonNull;
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.common.binding.artifact.SAMLArtifactMap;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
@@ -90,8 +92,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.io.ClassPathResource;
-import java.security.Security;
-import java.time.Duration;
 
 /**
  * The {@link SamlIdPConfiguration}.
@@ -273,7 +273,7 @@ class SamlIdPConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public SamlProfileObjectBuilder<AuthnContext> defaultAuthnContextClassRefBuilder(
             @Qualifier(ScriptResourceCacheManager.BEAN_NAME)
-            final ObjectProvider<ScriptResourceCacheManager> scriptResourceCacheManager,
+            final ObjectProvider<@NonNull ScriptResourceCacheManager> scriptResourceCacheManager,
             @Qualifier(OpenSamlConfigBean.DEFAULT_BEAN_NAME)
             final OpenSamlConfigBean openSamlConfigBean,
             @Qualifier("casSamlIdPMetadataResolver")

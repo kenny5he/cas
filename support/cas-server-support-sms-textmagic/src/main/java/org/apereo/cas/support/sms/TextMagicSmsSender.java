@@ -1,21 +1,18 @@
 package org.apereo.cas.support.sms;
 
+import module java.base;
 import org.apereo.cas.configuration.model.support.sms.TextMagicProperties;
 import org.apereo.cas.notifications.sms.SmsSender;
 import org.apereo.cas.util.LoggingUtils;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.http.HttpClient;
-
-import com.squareup.okhttp.OkHttpClient;
 import com.textmagic.sdk.ApiClient;
 import com.textmagic.sdk.api.TextMagicApi;
-import com.textmagic.sdk.model.SendMessageInputObject;
+import com.textmagic.sdk.model.SendMessageRequest;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This is {@link TextMagicSmsSender}.
@@ -31,19 +28,19 @@ public class TextMagicSmsSender implements SmsSender {
                               final Optional<HttpClient> httpClient) {
         val client = new ApiClient();
 
-        FunctionUtils.doIfNotBlank(properties.getUsername(), __ -> client.setUsername(properties.getUsername()));
+        FunctionUtils.doIfNotBlank(properties.getUsername(), _ -> client.setUsername(properties.getUsername()));
 
-        FunctionUtils.doIfNotBlank(properties.getToken(), __ -> client.setAccessToken(properties.getToken()));
+        FunctionUtils.doIfNotBlank(properties.getToken(), _ -> client.setAccessToken(properties.getToken()));
         client.setDebugging(properties.isDebugging());
         client.setVerifyingSsl(properties.isVerifyingSsl());
-        
-        FunctionUtils.doIfNotBlank(properties.getPassword(), __ -> client.setPassword(properties.getPassword()));
+
+        FunctionUtils.doIfNotBlank(properties.getPassword(), _ -> client.setPassword(properties.getPassword()));
 
         client.setReadTimeout(properties.getReadTimeout());
         client.setConnectTimeout(properties.getConnectTimeout());
         client.setWriteTimeout(properties.getWriteTimeout());
-        
-        FunctionUtils.doIfNotBlank(properties.getUserAgent(), __ -> client.setUserAgent(properties.getUserAgent()));
+
+        FunctionUtils.doIfNotBlank(properties.getUserAgent(), _ -> client.setUserAgent(properties.getUserAgent()));
 
         if (StringUtils.isNotBlank(properties.getApiKey())) {
             client.setApiKey(properties.getApiKey());
@@ -51,11 +48,13 @@ public class TextMagicSmsSender implements SmsSender {
         }
 
         httpClient.ifPresent(givenClient -> {
-            val okHttpClient = new OkHttpClient();
             val httpClientFactory = givenClient.httpClientFactory();
-            okHttpClient.setSslSocketFactory(httpClientFactory.getSslContext().getSocketFactory());
-            okHttpClient.setHostnameVerifier(httpClientFactory.getHostnameVerifier());
-            okHttpClient.setConnectTimeout(httpClientFactory.getConnectionTimeout(), TimeUnit.SECONDS);
+            val okHttpClient = new OkHttpClient().newBuilder()
+                .sslSocketFactory(httpClientFactory.getSslContext().getSocketFactory(),
+                    (X509TrustManager) httpClientFactory.getTrustManagers()[0])
+                .hostnameVerifier(httpClientFactory.getHostnameVerifier())
+                .connectTimeout(httpClientFactory.getConnectionTimeout(), TimeUnit.SECONDS)
+                .build();
             client.setHttpClient(okHttpClient);
         });
         this.api = new TextMagicApi(client);
@@ -64,12 +63,12 @@ public class TextMagicSmsSender implements SmsSender {
     @Override
     public boolean send(final String from, final String to, final String text) {
         try {
-            val message = new SendMessageInputObject();
+            val message = new SendMessageRequest();
             message.setFrom(from);
             message.setText(text);
             message.setContacts(to);
             val result = this.api.sendMessage(message);
-            return result != null && result.getMessageId() > 0;
+            return result != null && Objects.requireNonNull(result.getMessageId()) > 0;
         } catch (final Exception e) {
             LoggingUtils.error(LOGGER, e);
         }

@@ -1,12 +1,12 @@
 package org.apereo.cas.multitenancy;
 
+import module java.base;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.io.Serial;
-import java.util.List;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This is {@link DefaultTenantDelegatedAuthenticationPolicy}.
@@ -23,5 +23,5 @@ public class DefaultTenantDelegatedAuthenticationPolicy implements TenantDelegat
     @Serial
     private static final long serialVersionUID = 1800371962642100469L;
     
-    private List<String> allowedProviders;
+    private @Nullable List<String> allowedProviders;
 }

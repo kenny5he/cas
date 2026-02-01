@@ -1,5 +1,6 @@
 package org.apereo.cas.support.spnego.authentication.handler.support;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationHandlerExecutionResult;
 import org.apereo.cas.authentication.Credential;
 import org.apereo.cas.authentication.DefaultAuthenticationHandlerExecutionResult;
@@ -10,20 +11,13 @@ import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.configuration.model.support.spnego.SpnegoProperties;
 import org.apereo.cas.configuration.support.Beans;
 import org.apereo.cas.support.spnego.authentication.principal.SpnegoCredential;
-
+import org.apereo.cas.util.RegexUtils;
 import com.google.common.base.Splitter;
 import jcifs.spnego.Authentication;
 import jcifs.spnego.AuthenticationException;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
-import javax.annotation.concurrent.NotThreadSafe;
-import javax.security.auth.login.FailedLoginException;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Implementation of an AuthenticationHandler for SPNEGO supports. This Handler
@@ -35,7 +29,6 @@ import java.util.regex.Pattern;
  * @author Marvin S. Addison
  * @since 3.1
  */
-@NotThreadSafe
 @Slf4j
 public class JcifsSpnegoAuthenticationHandler extends AbstractPreAndPostProcessingAuthenticationHandler {
 
@@ -130,14 +123,14 @@ public class JcifsSpnegoAuthenticationHandler extends AbstractPreAndPostProcessi
     public boolean supports(final Class<? extends Credential> clazz) {
         return SpnegoCredential.class.isAssignableFrom(clazz);
     }
-    
-    protected Principal getPrincipal(final String name, final boolean isNtlm) throws Throwable {
+
+    protected @Nullable Principal getPrincipal(final String name, final boolean isNtlm) throws Throwable {
         if (spnegoProperties.isPrincipalWithDomainName()) {
             return this.principalFactory.createPrincipal(name);
         }
         if (isNtlm) {
-            if (Pattern.matches("\\S+\\\\\\S+", name)) {
-                val splitList = Splitter.on(Pattern.compile("\\\\")).splitToList(name);
+            if (RegexUtils.createPattern("\\S+\\\\\\S+").matcher(name).matches()) {
+                val splitList = Splitter.on(RegexUtils.createPattern("\\\\")).splitToList(name);
                 if (splitList.size() == 2) {
                     return this.principalFactory.createPrincipal(splitList.get(1));
                 }

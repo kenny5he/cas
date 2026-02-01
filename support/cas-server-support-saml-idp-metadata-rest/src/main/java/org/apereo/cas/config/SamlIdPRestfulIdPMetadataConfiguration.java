@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.support.saml.idp.metadata.RestfulSamlIdPMetadataCipherExecutor;
@@ -14,10 +15,10 @@ import org.apereo.cas.util.crypto.CipherExecutor;
 import org.apereo.cas.util.spring.beans.BeanCondition;
 import org.apereo.cas.util.spring.beans.BeanSupplier;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
-
 import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -80,7 +81,7 @@ class SamlIdPRestfulIdPMetadataConfiguration {
     public SamlIdPMetadataLocator samlIdPMetadataLocator(
         final ConfigurableApplicationContext applicationContext,
         @Qualifier("samlIdPMetadataCache")
-        final Cache<String, SamlIdPMetadataDocument> samlIdPMetadataCache,
+        final Cache<@NonNull String, SamlIdPMetadataDocument> samlIdPMetadataCache,
         final CasConfigurationProperties casProperties,
         @Qualifier("samlIdPMetadataGeneratorCipherExecutor")
         final CipherExecutor samlIdPMetadataGeneratorCipherExecutor) {

@@ -1,9 +1,11 @@
 package org.apereo.cas.jdbc;
 
+import module java.base;
 import org.apereo.cas.authentication.attribute.AbstractQueryPersonAttributeDao;
 import org.apereo.cas.authentication.attribute.CaseCanonicalizationMode;
 import org.apereo.cas.authentication.principal.attribute.PersonAttributeDao;
 import org.apereo.cas.authentication.principal.attribute.PersonAttributes;
+import org.apereo.cas.util.RegexUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -11,10 +13,7 @@ import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import javax.sql.DataSource;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
+import module java.sql;
 
 /**
  * Provides common logic for executing a JDBC based query including building the WHERE clause SQL string.
@@ -24,7 +23,7 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 public abstract class AbstractJdbcPersonAttributeDao<R> extends AbstractQueryPersonAttributeDao<PartialWhereClause> {
-    private static final Pattern WHERE_PLACEHOLDER = Pattern.compile("\\{0\\}");
+    private static final Pattern WHERE_PLACEHOLDER = RegexUtils.createPattern("\\{0\\}");
 
     private final JdbcTemplate simpleJdbcTemplate;
     private final String queryTemplate;

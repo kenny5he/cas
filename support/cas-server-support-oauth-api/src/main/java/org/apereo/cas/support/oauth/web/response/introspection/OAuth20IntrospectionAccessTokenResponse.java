@@ -1,5 +1,6 @@
 package org.apereo.cas.support.oauth.web.response.introspection;
 
+import module java.base;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -7,9 +8,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * This is {@link OAuth20IntrospectionAccessTokenResponse}.
@@ -21,6 +19,7 @@ import java.io.Serializable;
 @Setter
 @Accessors(chain = true)
 @ToString
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class OAuth20IntrospectionAccessTokenResponse extends BaseOAuth20IntrospectionAccessTokenResponse {
     @Serial
     private static final long serialVersionUID = -7917281748569741345L;
@@ -58,6 +57,7 @@ public class OAuth20IntrospectionAccessTokenResponse extends BaseOAuth20Introspe
     private Confirmation confirmation = new Confirmation();
 
     @Data
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class Confirmation implements Serializable {
         @Serial
         private static final long serialVersionUID = 5434898952283549630L;

@@ -1,13 +1,11 @@
 package org.apereo.cas.configuration.model.support.kafka;
 
+import module java.base;
+import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.configuration.support.RequiresModule;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * This is {@link BaseKafkaProperties}.
@@ -19,7 +17,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @Accessors(chain = true)
-public abstract class BaseKafkaProperties implements Serializable {
+public abstract class BaseKafkaProperties implements CasFeatureModule, Serializable {
     @Serial
     private static final long serialVersionUID = -3844529231331941592L;
 

@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.palantir.PalantirConstants;
@@ -8,6 +9,7 @@ import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import org.apereo.cas.web.CasWebSecurityConfigurer;
 import org.apereo.cas.web.flow.CasWebflowConstants;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.actuate.endpoint.web.EndpointLinksResolver;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -20,7 +22,6 @@ import org.springframework.security.web.authentication.SavedRequestAwareAuthenti
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import jakarta.annotation.Nonnull;
 
 /**
  * This is {@link CasPalantirWebMvcConfiguration}.
@@ -47,7 +48,7 @@ class CasPalantirWebMvcConfiguration {
     public WebMvcConfigurer palantirWebMvcConfigurer(final CasConfigurationProperties casProperties) {
         return new WebMvcConfigurer() {
             @Override
-            public void addViewControllers(@Nonnull final ViewControllerRegistry registry) {
+            public void addViewControllers(@NonNull final ViewControllerRegistry registry) {
                 registry.addViewController(CasWebSecurityConfigurer.ENDPOINT_URL_ADMIN_FORM_LOGIN)
                     .setViewName(CasWebflowConstants.VIEW_ID_ENDPOINT_ADMIN_LOGIN_VIEW);
             }

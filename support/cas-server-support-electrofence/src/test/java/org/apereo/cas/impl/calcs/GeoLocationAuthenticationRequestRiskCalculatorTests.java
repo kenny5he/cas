@@ -1,5 +1,6 @@
 package org.apereo.cas.impl.calcs;
 
+import module java.base;
 import org.apereo.cas.authentication.CasSSLContext;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.authentication.adaptive.geo.GeoLocationRequest;
@@ -7,7 +8,6 @@ import org.apereo.cas.authentication.adaptive.geo.GeoLocationResponse;
 import org.apereo.cas.authentication.adaptive.geo.GeoLocationService;
 import org.apereo.cas.impl.mock.MockTicketGrantingTicketCreatedEventProducer;
 import org.apereo.cas.services.RegisteredServiceTestUtils;
-
 import lombok.val;
 import org.apereo.inspektr.common.web.ClientInfo;
 import org.apereo.inspektr.common.web.ClientInfoHolder;
@@ -18,10 +18,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.TestPropertySource;
-
-import javax.net.ssl.HttpsURLConnection;
-import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -32,10 +28,7 @@ import static org.mockito.Mockito.*;
  * @since 5.1.0
  */
 @Import(GeoLocationAuthenticationRequestRiskCalculatorTests.GeoLocationServiceTestConfiguration.class)
-@TestPropertySource(properties = {
-    "cas.authn.adaptive.risk.geo-location.enabled=true",
-    "cas.google-maps.ip-stack-api-access-key=6bde37c76ad15c8a5c828fafad8b0bc4"
-})
+@TestPropertySource(properties = "cas.authn.adaptive.risk.geo-location.enabled=true")
 @Tag("GeoLocation")
 class GeoLocationAuthenticationRequestRiskCalculatorTests extends BaseAuthenticationRequestRiskCalculatorTests {
     

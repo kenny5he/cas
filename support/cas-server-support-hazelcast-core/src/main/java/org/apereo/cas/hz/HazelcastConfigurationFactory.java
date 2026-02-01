@@ -1,5 +1,6 @@
 package org.apereo.cas.hz;
 
+import module java.base;
 import org.apereo.cas.configuration.model.support.hazelcast.BaseHazelcastProperties;
 import org.apereo.cas.configuration.model.support.hazelcast.HazelcastClusterProperties;
 import org.apereo.cas.util.CollectionUtils;
@@ -42,9 +43,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.util.StringUtils;
-import java.util.Locale;
-import java.util.ServiceLoader;
-import java.util.UUID;
 
 /**
  * This is {@link HazelcastConfigurationFactory}.
@@ -64,10 +62,10 @@ public class HazelcastConfigurationFactory {
     public static void setConfigMap(final NamedConfig namedConfig, final Config config) {
         if (namedConfig instanceof final MapConfig mappedConfig) {
             FunctionUtils.doIf(!config.getMapConfigs().containsKey(namedConfig.getName()),
-                __ -> config.addMapConfig(mappedConfig)).accept(mappedConfig);
+                _ -> config.addMapConfig(mappedConfig)).accept(mappedConfig);
         } else if (namedConfig instanceof final ReplicatedMapConfig replicatedConfig) {
             FunctionUtils.doIf(!config.getReliableTopicConfigs().containsKey(namedConfig.getName()),
-                __ -> config.addReplicatedMapConfig(replicatedConfig)).accept(replicatedConfig);
+                _ -> config.addReplicatedMapConfig(replicatedConfig)).accept(replicatedConfig);
         }
     }
 

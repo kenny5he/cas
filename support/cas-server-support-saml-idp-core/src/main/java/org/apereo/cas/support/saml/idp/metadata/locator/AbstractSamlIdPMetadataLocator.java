@@ -1,11 +1,11 @@
 package org.apereo.cas.support.saml.idp.metadata.locator;
 
+import module java.base;
 import org.apereo.cas.configuration.support.CasConfigurationJasyptCipherExecutor;
 import org.apereo.cas.support.saml.services.SamlRegisteredService;
 import org.apereo.cas.support.saml.services.idp.metadata.SamlIdPMetadataDocument;
 import org.apereo.cas.util.ResourceUtils;
 import org.apereo.cas.util.crypto.CipherExecutor;
-
 import com.github.benmanes.caffeine.cache.Cache;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,12 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 /**
  * This is {@link AbstractSamlIdPMetadataLocator}.
@@ -38,7 +36,7 @@ public abstract class AbstractSamlIdPMetadataLocator implements SamlIdPMetadataL
 
     protected final CipherExecutor<String, String> metadataCipherExecutor;
 
-    private final Cache<String, SamlIdPMetadataDocument> metadataCache;
+    private final Cache<@NonNull String, SamlIdPMetadataDocument> metadataCache;
 
     private final ApplicationContext applicationContext;
     
@@ -121,7 +119,7 @@ public abstract class AbstractSamlIdPMetadataLocator implements SamlIdPMetadataL
     public SamlIdPMetadataDocument fetch(final Optional<SamlRegisteredService> registeredService) {
         val key = buildCacheKey(registeredService);
 
-        return getMetadataCache().get(key, Unchecked.function(__ -> {
+        return getMetadataCache().get(key, Unchecked.function(_ -> {
             val metadataDocument = fetchInternal(registeredService);
             if (metadataDocument != null && metadataDocument.isValid()) {
                 LOGGER.trace("Fetched and cached SAML IdP metadata document [{}] under key [{}]", metadataDocument, key);

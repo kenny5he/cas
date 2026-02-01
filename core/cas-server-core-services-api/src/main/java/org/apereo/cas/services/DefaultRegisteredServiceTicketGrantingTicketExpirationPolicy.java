@@ -1,10 +1,13 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.ticket.ExpirationPolicy;
 import org.apereo.cas.ticket.expiration.HardTimeoutExpirationPolicy;
 import org.apereo.cas.util.RegexUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.Nulls;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -15,10 +18,6 @@ import lombok.experimental.Accessors;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apereo.inspektr.common.web.ClientInfoHolder;
-import java.io.Serial;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * This is {@link DefaultRegisteredServiceTicketGrantingTicketExpirationPolicy}.
@@ -41,14 +40,18 @@ public class DefaultRegisteredServiceTicketGrantingTicketExpirationPolicy implem
 
     private long maxTimeToLiveInSeconds;
 
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private Map<String, Long> userAgents = new HashMap<>();
+    
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private Map<String, Long> ipAddresses = new HashMap<>();
 
     @Override
     public Optional<ExpirationPolicy> toExpirationPolicy() {
         val clientInfo = ClientInfoHolder.getClientInfo();
         
-        if (clientInfo != null && !userAgents.isEmpty() && StringUtils.isNotBlank(clientInfo.getUserAgent())) {
+        if (clientInfo != null && userAgents != null
+            && !userAgents.isEmpty() && StringUtils.isNotBlank(clientInfo.getUserAgent())) {
             val timeToLive = userAgents
                 .keySet()
                 .stream()
@@ -61,7 +64,8 @@ public class DefaultRegisteredServiceTicketGrantingTicketExpirationPolicy implem
             }
         }
 
-        if (clientInfo != null && !ipAddresses.isEmpty() && StringUtils.isNotBlank(clientInfo.getClientIpAddress())) {
+        if (clientInfo != null && ipAddresses != null
+            && !ipAddresses.isEmpty() && StringUtils.isNotBlank(clientInfo.getClientIpAddress())) {
             val timeToLive = ipAddresses
                 .keySet()
                 .stream()

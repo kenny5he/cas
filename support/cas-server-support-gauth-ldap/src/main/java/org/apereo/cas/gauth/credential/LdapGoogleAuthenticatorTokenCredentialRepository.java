@@ -1,5 +1,6 @@
 package org.apereo.cas.gauth.credential;
 
+import module java.base;
 import org.apereo.cas.authentication.OneTimeTokenAccount;
 import org.apereo.cas.configuration.model.support.mfa.gauth.LdapGoogleAuthenticatorMultifactorProperties;
 import org.apereo.cas.gauth.CasGoogleAuthenticator;
@@ -10,9 +11,6 @@ import org.apereo.cas.util.RandomUtils;
 import org.apereo.cas.util.crypto.CipherExecutor;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -20,16 +18,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.ldaptive.ConnectionFactory;
 import org.ldaptive.LdapEntry;
 import org.springframework.beans.factory.DisposableBean;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link LdapGoogleAuthenticatorTokenCredentialRepository}.
@@ -278,8 +268,10 @@ public class LdapGoogleAuthenticatorTokenCredentialRepository
 
     private LdapEntry searchLdapAccountsBy(final long id) {
         return FunctionUtils.doUnchecked(() -> {
-            val searchFilter = String.format("(%s=*\"id\":%s*)", ldapProperties.getAccountAttributeName(), id);
-            val filter = LdapUtils.newLdaptiveSearchFilter(searchFilter);
+            val searchFilterWithoutSpaces = String.format("(%s=*\"id\":%s*)", ldapProperties.getAccountAttributeName(), id);
+            val searchFilterWithSpaces = String.format("(%s=*\"id\" : %s*)", ldapProperties.getAccountAttributeName(), id);
+            val filterQuery = "(|" + searchFilterWithoutSpaces + searchFilterWithSpaces + ')';
+            val filter = LdapUtils.newLdaptiveSearchFilter(filterQuery);
             LOGGER.debug("Locating LDAP entry via filter [{}] based on attribute [{}]", filter,
                 ldapProperties.getAccountAttributeName());
             val response = connectionFactory.executeSearchOperation(ldapProperties.getBaseDn(),

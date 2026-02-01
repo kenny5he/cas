@@ -1,5 +1,6 @@
 package org.apereo.cas.logout;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.web.support.WebUtils;
 import lombok.RequiredArgsConstructor;
@@ -27,10 +28,8 @@ public class DefaultLogoutConfirmationResolver implements LogoutConfirmationReso
 
     @Override
     public boolean isLogoutRequestConfirmed(final RequestContext requestContext) {
-        if (casProperties.getLogout().isConfirmLogout()) {
-            return WebUtils.isLogoutRequestConfirmed(requestContext)
-                || requestContext.getRequestParameters().contains("SAMLResponse");
-        }
-        return true;
+        return !casProperties.getLogout().isConfirmLogout()
+            || WebUtils.isLogoutRequestConfirmed(requestContext)
+            || requestContext.getRequestParameters().contains("SAMLResponse");
     }
 }

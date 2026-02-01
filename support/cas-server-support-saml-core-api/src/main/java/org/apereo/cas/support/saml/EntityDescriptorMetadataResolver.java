@@ -1,11 +1,10 @@
 package org.apereo.cas.support.saml;
 
+import module java.base;
 import net.shibboleth.shared.resolver.CriteriaSet;
+import org.jspecify.annotations.NonNull;
 import org.opensaml.saml.metadata.resolver.impl.AbstractMetadataResolver;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
-import jakarta.annotation.Nonnull;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * This is {@link EntityDescriptorMetadataResolver}.
@@ -24,7 +23,7 @@ public class EntityDescriptorMetadataResolver extends AbstractMetadataResolver {
         setFailFastInitialization(true);
     }
 
-    @Nonnull
+    @NonNull
     @Override
     protected Iterable<EntityDescriptor> doResolve(final CriteriaSet criteria) {
         return List.of(entityDescriptor);

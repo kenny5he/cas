@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.adaptors.yubikey.AcceptAllYubiKeyAccountValidator;
 import org.apereo.cas.adaptors.yubikey.DefaultYubiKeyAccountValidator;
 import org.apereo.cas.adaptors.yubikey.DenyAllYubiKeyAccountValidator;
@@ -40,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
@@ -50,12 +52,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
-import java.time.Clock;
-import java.time.ZonedDateTime;
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link YubiKeyAuthenticationEventExecutionPlanConfiguration}.
@@ -159,7 +155,7 @@ class YubiKeyAuthenticationEventExecutionPlanConfiguration {
             final CasConfigurationProperties casProperties,
             final ConfigurableApplicationContext applicationContext,
             @Qualifier("yubiKeyAccountRegistry")
-            final ObjectProvider<YubiKeyAccountRegistry> yubiKeyAccountRegistry) {
+            final ObjectProvider<@NonNull YubiKeyAccountRegistry> yubiKeyAccountRegistry) {
             return new YubiKeyAccountRegistryEndpoint(casProperties, applicationContext, yubiKeyAccountRegistry);
         }
 
@@ -168,7 +164,7 @@ class YubiKeyAuthenticationEventExecutionPlanConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public MultifactorAuthenticationDeviceManager yubiKeyMultifactorAuthenticatorDeviceManager(
             @Qualifier("yubikeyMultifactorAuthenticationProvider")
-            final ObjectProvider<MultifactorAuthenticationProvider> yubikeyMultifactorAuthenticationProvider,
+            final ObjectProvider<@NonNull MultifactorAuthenticationProvider> yubikeyMultifactorAuthenticationProvider,
             @Qualifier("yubiKeyAccountRegistry")
             final YubiKeyAccountRegistry yubiKeyAccountRegistry) {
             return new YubiKeyMultifactorAuthenticatorDeviceManager(yubiKeyAccountRegistry,
@@ -197,7 +193,7 @@ class YubiKeyAuthenticationEventExecutionPlanConfiguration {
             @Qualifier("yubiKeyAccountRegistry")
             final YubiKeyAccountRegistry yubiKeyAccountRegistry,
             @Qualifier("yubikeyMultifactorAuthenticationProvider")
-            final ObjectProvider<MultifactorAuthenticationProvider> multifactorAuthenticationProvider,
+            final ObjectProvider<@NonNull MultifactorAuthenticationProvider> multifactorAuthenticationProvider,
             @Qualifier(ServicesManager.BEAN_NAME)
             final ServicesManager servicesManager) {
             val yubi = casProperties.getAuthn().getMfa().getYubikey();
@@ -264,7 +260,7 @@ class YubiKeyAuthenticationEventExecutionPlanConfiguration {
             final ServicesManager servicesManager,
             final CasConfigurationProperties casProperties,
             @Qualifier("yubikeyMultifactorAuthenticationProvider")
-            final ObjectProvider<MultifactorAuthenticationProvider> yubikeyMultifactorAuthenticationProvider) {
+            final ObjectProvider<@NonNull MultifactorAuthenticationProvider> yubikeyMultifactorAuthenticationProvider) {
             val authenticationContextAttribute = casProperties.getAuthn().getMfa().getCore().getAuthenticationContextAttribute();
             return new MultifactorAuthenticationProviderMetadataPopulator(authenticationContextAttribute,
                 yubikeyMultifactorAuthenticationProvider, servicesManager);

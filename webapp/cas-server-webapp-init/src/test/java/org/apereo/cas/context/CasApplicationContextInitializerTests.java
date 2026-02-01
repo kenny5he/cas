@@ -1,5 +1,6 @@
 package org.apereo.cas.context;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.test.CasTestExtension;
 import org.apereo.cas.util.spring.boot.SpringBootTestAutoConfigurations;
@@ -24,12 +25,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTestAutoConfigurations
 @SpringBootTest(classes = RefreshAutoConfiguration.class, properties = {
     "server.port=8588",
-    "server.ssl.enabled=false",
-    "cas.server.unknown.property=false"
+    "server.ssl.enabled=false"
 }, webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @EnableConfigurationProperties(CasConfigurationProperties.class)
 @ContextConfiguration(initializers = CasApplicationContextInitializer.class)
-@Tag("WebApp")
+@Tag("ApacheTomcat")
 @ExtendWith(CasTestExtension.class)
 class CasApplicationContextInitializerTests {
     @Autowired
@@ -39,6 +39,6 @@ class CasApplicationContextInitializerTests {
     void verifyOperation() {
         assertNotNull(applicationContext);
         val validateConfig = System.getProperty(CasApplicationContextInitializer.SYSTEM_PROPERTY_CONFIG_VALIDATION_STATUS);
-        assertEquals(Boolean.FALSE.toString(), validateConfig);
+        assertEquals(Boolean.TRUE.toString(), validateConfig);
     }
 }

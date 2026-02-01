@@ -1,5 +1,6 @@
 package org.apereo.cas.web.saml2;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.ClientCustomPropertyConstants;
 import org.apereo.cas.pac4j.client.DelegatedIdentityProviderFactory;
 import org.apereo.cas.support.pac4j.authentication.attributes.GroovyAttributeConverter;
@@ -89,7 +90,7 @@ class DelegatedSaml2IdentityProviderTests {
         void verifyClient() {
             val clients = delegatedIdentityProviderFactory.build();
             assertEquals(1, clients.size());
-            val client = (SAML2Client) clients.iterator().next();
+            val client = (SAML2Client) clients.getFirst();
             assertNotNull(client.getConfiguration().getSamlMessageStoreFactory());
             assertInstanceOf(DefaultSAML2MetadataSigner.class, client.getConfiguration().getMetadataSigner());
         }
@@ -123,7 +124,6 @@ class DelegatedSaml2IdentityProviderTests {
         "cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path=classpath:idp-metadata.xml",
         "cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location=file:/tmp/sp.xml",
         "cas.authn.pac4j.saml[0].service-provider-entity-id=test-entityid",
-        "cas.authn.pac4j.saml[0].metadata-signer-strategy=xmlsec",
         "cas.authn.pac4j.core.lazy-init=true"
     })
     class Saml2ClientsWithGroovyAttributeConverter extends BaseTests {
@@ -145,7 +145,6 @@ class DelegatedSaml2IdentityProviderTests {
         "cas.authn.pac4j.saml[0].metadata.identity-provider-metadata-path=classpath:idp-metadata.xml",
         "cas.authn.pac4j.saml[0].metadata.service-provider.file-system.location=file:/tmp/sp.xml",
         "cas.authn.pac4j.saml[0].service-provider-entity-id=test-entityid",
-        "cas.authn.pac4j.saml[0].metadata-signer-strategy=xmlsec",
         "cas.authn.pac4j.core.lazy-init=true"
     })
     class Saml2ClientsWithCustomAttributeConverter extends BaseTests {

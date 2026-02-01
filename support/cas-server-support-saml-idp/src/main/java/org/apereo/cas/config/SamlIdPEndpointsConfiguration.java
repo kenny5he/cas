@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.CentralAuthenticationService;
 import org.apereo.cas.audit.AuditableExecution;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
@@ -12,7 +13,7 @@ import org.apereo.cas.authentication.principal.ServiceFactory;
 import org.apereo.cas.authentication.principal.attribute.PersonAttributeDao;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
-import org.apereo.cas.configuration.model.support.interrupt.InterruptCookieProperties;
+import org.apereo.cas.configuration.model.support.saml.idp.SamlIdPProperties;
 import org.apereo.cas.logout.LogoutExecutionPlanConfigurer;
 import org.apereo.cas.logout.LogoutRedirectionStrategy;
 import org.apereo.cas.logout.slo.SingleLogoutMessageCreator;
@@ -25,6 +26,7 @@ import org.apereo.cas.services.CasRegisteredService;
 import org.apereo.cas.services.ServiceRegistryExecutionPlanConfigurer;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.services.ServicesManagerRegisteredServiceLocator;
+import org.apereo.cas.services.StartsWithRegisteredServiceMatchingStrategy;
 import org.apereo.cas.support.saml.OpenSamlConfigBean;
 import org.apereo.cas.support.saml.SamlIdPConstants;
 import org.apereo.cas.support.saml.idp.SamlIdPDistributedSessionCookieCipherExecutor;
@@ -80,6 +82,7 @@ import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.velocity.app.VelocityEngine;
+import org.jspecify.annotations.NonNull;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.saml2.binding.decoding.impl.HTTPPostDecoder;
 import org.opensaml.saml.saml2.binding.decoding.impl.HTTPPostSimpleSignDecoder;
@@ -103,7 +106,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpMethod;
-import java.util.List;
 
 /**
  * This is {@link SamlIdPEndpointsConfiguration}.
@@ -408,6 +410,9 @@ class SamlIdPEndpointsConfiguration {
                 service.setName(service.getClass().getSimpleName());
                 service.setDescription("SAML2 Authentication Request Callback");
                 service.setServiceId(callbackService);
+                val matchingStrategy = new StartsWithRegisteredServiceMatchingStrategy()
+                    .setExpectedUrl(samlIdPCallbackService.getId());
+                service.setMatchingStrategy(matchingStrategy);
                 service.markAsInternal();
                 plan.registerServiceRegistry(new SamlIdPServiceRegistry(applicationContext, service));
             };
@@ -500,13 +505,13 @@ class SamlIdPEndpointsConfiguration {
             @Qualifier(TenantExtractor.BEAN_NAME)
             final TenantExtractor tenantExtractor,
             @Qualifier(GeoLocationService.BEAN_NAME)
-            final ObjectProvider<GeoLocationService> geoLocationService,
+            final ObjectProvider<@NonNull GeoLocationService> geoLocationService,
             @Qualifier("samlIdPDistributedSessionCookieCipherExecutor")
             final CipherExecutor samlIdPDistributedSessionCookieCipherExecutor,
             final CasConfigurationProperties casProperties) {
 
             val cipherExecutorResolver = new DefaultCipherExecutorResolver(samlIdPDistributedSessionCookieCipherExecutor, tenantExtractor,
-                InterruptCookieProperties.class, bindingContext -> {
+                SamlIdPProperties.class, bindingContext -> {
                 val properties = bindingContext.value();
                 val crypto = properties.getAuthn().getSamlIdp().getCore().getSessionReplication().getCookie().getCrypto();
                 return CipherExecutorUtils.newStringCipherExecutor(crypto, SamlIdPDistributedSessionCookieCipherExecutor.class);

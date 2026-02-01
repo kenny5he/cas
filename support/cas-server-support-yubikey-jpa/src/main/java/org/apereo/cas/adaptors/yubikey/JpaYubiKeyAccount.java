@@ -1,6 +1,6 @@
 package org.apereo.cas.adaptors.yubikey;
 
-import lombok.Builder;
+import module java.base;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,7 +11,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.io.Serial;
 
 /**
  * This is {@link JpaYubiKeyAccount}.
@@ -32,8 +31,7 @@ public class JpaYubiKeyAccount extends YubiKeyAccount {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Builder.Default
-    private long id = -1;
+    private long id;
 
     @Override
     public YubiKeyAccount setId(final long id) {

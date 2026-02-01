@@ -1,12 +1,11 @@
 package org.apereo.cas.services;
 
-
+import module java.base;
 import org.apereo.cas.util.MockRequestContext;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -41,7 +40,7 @@ class DefaultRegisteredServiceTicketGrantingTicketExpirationPolicyTests {
     }
 
     @Test
-    void verifyPolicyByUserAgent() throws Exception {
+    void verifyPolicyByUserAgent() {
         val policy = new DefaultRegisteredServiceTicketGrantingTicketExpirationPolicy();
         policy.setUserAgents(Map.of("Fire.+", 10L));
         val expirationPolicy = policy.toExpirationPolicy().orElseThrow();
@@ -49,7 +48,7 @@ class DefaultRegisteredServiceTicketGrantingTicketExpirationPolicyTests {
     }
 
     @Test
-    void verifyPolicyByIpAddress() throws Exception {
+    void verifyPolicyByIpAddress() {
         val policy = new DefaultRegisteredServiceTicketGrantingTicketExpirationPolicy();
         policy.setIpAddresses(Map.of(".+86.151.+", 10L));
         val expirationPolicy = policy.toExpirationPolicy().orElseThrow();

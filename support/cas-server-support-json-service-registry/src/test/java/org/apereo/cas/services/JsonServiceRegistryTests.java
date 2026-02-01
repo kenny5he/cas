@@ -1,5 +1,6 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.services.replication.NoOpRegisteredServiceReplicationStrategy;
 import org.apereo.cas.services.resource.AbstractResourceBasedServiceRegistry;
@@ -12,10 +13,6 @@ import org.apereo.cas.util.io.WatcherService;
 import org.apereo.cas.util.nativex.CasRuntimeHintsRegistrar;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.ws.idp.services.WSFederationRegisteredService;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
-import com.fasterxml.jackson.dataformat.smile.SmileFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.time.StopWatch;
@@ -30,12 +27,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Stream;
+import tools.jackson.core.TokenStreamFactory;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.dataformat.cbor.CBORFactory;
+import tools.jackson.dataformat.smile.SmileFactory;
+import tools.jackson.dataformat.yaml.YAMLFactory;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -54,7 +50,7 @@ class JsonServiceRegistryTests extends BaseResourceBasedServiceRegistryTests {
     private ConfigurableApplicationContext applicationContext;
 
     @Override
-    public ResourceBasedServiceRegistry getNewServiceRegistry() throws Exception {
+    public ResourceBasedServiceRegistry getNewServiceRegistry() {
         this.newServiceRegistry = buildResourceBasedServiceRegistry(RESOURCE);
         return newServiceRegistry;
     }
@@ -131,12 +127,9 @@ class JsonServiceRegistryTests extends BaseResourceBasedServiceRegistryTests {
 
     @ParameterizedTest
     @MethodSource("getObjectMapperFactories")
-    void verifySerializationPerformance(final JsonFactory factory) throws Throwable {
-        val mapper = JacksonObjectMapperFactory
-            .builder()
-            .jsonFactory(factory)
-            .build()
-            .toObjectMapper();
+    void verifySerializationPerformance(final TokenStreamFactory factory) {
+        val mapperFactory = JacksonObjectMapperFactory.builder().jsonFactory(factory).build();
+        val mapper = mapperFactory.toObjectMapper();
         val registeredService = RegisteredServiceTestUtils.getRegisteredService(UUID.randomUUID().toString());
         val stopWatch = new StopWatch();
         stopWatch.start();
@@ -157,7 +150,8 @@ class JsonServiceRegistryTests extends BaseResourceBasedServiceRegistryTests {
             OAuthRegisteredService.class,
             SamlRegisteredService.class,
             OidcRegisteredService.class,
-            WSFederationRegisteredService.class);
+            WSFederationRegisteredService.class
+        );
     }
 
     private AbstractResourceBasedServiceRegistry buildResourceBasedServiceRegistry(final Resource location) {

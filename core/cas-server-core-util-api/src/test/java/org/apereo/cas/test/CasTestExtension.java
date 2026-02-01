@@ -1,10 +1,11 @@
 package org.apereo.cas.test;
 
+import module java.base;
 import org.apereo.cas.util.MockRequestContext;
 import lombok.val;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcProperties;
+import org.springframework.boot.webmvc.autoconfigure.WebMvcProperties;
 
 /**
  * This is {@link CasTestExtension}. This extension controls global settings
@@ -19,6 +20,7 @@ public class CasTestExtension implements BeforeAllCallback {
         System.setProperty("spring.mvc.pathmatch.matching-strategy", WebMvcProperties.MatchingStrategy.ANT_PATH_MATCHER.name());
         System.setProperty("spring.main.allow-bean-definition-overriding", "true");
         System.setProperty("spring.main.banner-mode", "off");
+        System.setProperty("spring.jmx.enabled", "false");
 
         val requestContext = MockRequestContext.create();
         requestContext

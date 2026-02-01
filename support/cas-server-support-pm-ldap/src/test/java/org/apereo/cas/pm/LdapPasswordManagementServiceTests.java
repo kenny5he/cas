@@ -1,10 +1,10 @@
 package org.apereo.cas.pm;
 
+import module java.base;
 import org.apereo.cas.adaptors.ldap.LdapIntegrationTestsOperations;
 import org.apereo.cas.authentication.credential.UsernamePasswordCredential;
 import org.apereo.cas.services.RegisteredServiceTestUtils;
 import org.apereo.cas.util.junit.EnabledIfListeningOnPort;
-
 import com.unboundid.ldap.sdk.LDAPConnection;
 import lombok.val;
 import org.apereo.inspektr.common.web.ClientInfo;
@@ -17,7 +17,6 @@ import org.ldaptive.Credential;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.TestPropertySource;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -29,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Tag("Ldap")
 @TestPropertySource(properties = {
     "cas.authn.pm.reset.sms.attribute-name=telephoneNumber",
+    "cas.authn.pm.core.enabled=true",
     "cas.authn.pm.ldap[0].ldap-url=ldap://localhost:10389",
     "cas.authn.pm.ldap[0].bind-dn=cn=Directory Manager",
     "cas.authn.pm.ldap[0].bind-credential=password",

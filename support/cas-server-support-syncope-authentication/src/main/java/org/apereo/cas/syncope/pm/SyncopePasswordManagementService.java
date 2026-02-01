@@ -1,5 +1,6 @@
 package org.apereo.cas.syncope.pm;
 
+import module java.base;
 import org.apereo.cas.authentication.Credential;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.pm.PasswordChangeRequest;
@@ -13,8 +14,6 @@ import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.SpringExpressionLanguageValueResolver;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -28,12 +27,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.util.UriComponentsBuilder;
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link SyncopePasswordManagementService}.
@@ -62,7 +57,7 @@ public class SyncopePasswordManagementService extends BasePasswordManagementServ
             .allMatch(domain -> {
                 val httpRequest = buildPasswordChangeHttpRequest(bean, url, domain);
                 val response = Objects.requireNonNull(HttpUtils.execute(httpRequest));
-                return HttpStatus.resolve(response.getCode()).is2xxSuccessful();
+                return Objects.requireNonNull(HttpStatus.resolve(response.getCode())).is2xxSuccessful();
             });
     }
 
@@ -107,12 +102,12 @@ public class SyncopePasswordManagementService extends BasePasswordManagementServ
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
             .build();
         val response = Objects.requireNonNull(HttpUtils.execute(exec));
-        if (HttpStatus.resolve(response.getCode()).is2xxSuccessful()
+        if (Objects.requireNonNull(HttpStatus.resolve(response.getCode())).is2xxSuccessful()
             && response instanceof final HttpEntityContainer container) {
             val entity = container.getEntity();
             val result = EntityUtils.toString(entity);
             LOGGER.debug("Received security question entity as [{}]", result);
-            return Map.of(MAPPER.readTree(result).get("content").asText(), UUID.randomUUID().toString());
+            return Map.of(MAPPER.readTree(result).get("content").asString(), UUID.randomUUID().toString());
         }
         return Map.of();
     }
@@ -136,10 +131,10 @@ public class SyncopePasswordManagementService extends BasePasswordManagementServ
                 HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE,
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
             .entity(MAPPER.writeValueAsString(getUserStatusUpdatePatch(userKey)))
-            .maximumRetryAttempts(1)
+            .maximumRetryAttempts(casProperties.getAuthn().getSyncope().getMaxRetryAttempts())
             .build();
         val response = Objects.requireNonNull(HttpUtils.execute(exec));
-        if (HttpStatus.resolve(response.getCode()).is2xxSuccessful()) {
+        if (Objects.requireNonNull(HttpStatus.resolve(response.getCode())).is2xxSuccessful()) {
             LOGGER.debug("Successfully updated the account status on Apache Syncope for [{}]", credential.getId());
             return true;
         }
@@ -168,7 +163,7 @@ public class SyncopePasswordManagementService extends BasePasswordManagementServ
                 .maximumRetryAttempts(casProperties.getAuthn().getSyncope().getMaxRetryAttempts())
                 .build();
             response = Objects.requireNonNull(HttpUtils.execute(exec));
-            return HttpStatus.resolve(response.getCode()).is2xxSuccessful();
+            return Objects.requireNonNull(HttpStatus.resolve(response.getCode())).is2xxSuccessful();
         } finally {
             HttpUtils.close(response);
         }
@@ -246,8 +241,8 @@ public class SyncopePasswordManagementService extends BasePasswordManagementServ
                         HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE,
                         HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                     .entity(MAPPER.writeValueAsString(getUserPasswordUpdateRequest(bean, userKey)))
-                    .maximumRetryAttempts(1)
-                    .build();
+                    .build()
+                    .withoutRetry();
             }
 
             return HttpExecutionRequest.builder()
@@ -260,8 +255,8 @@ public class SyncopePasswordManagementService extends BasePasswordManagementServ
                     HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE,
                     HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .entity(MAPPER.writeValueAsString(getPasswordPatch(bean)))
-                .maximumRetryAttempts(1)
-                .build();
+                .build()
+                .withoutRetry();
         });
     }
 

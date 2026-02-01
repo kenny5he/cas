@@ -1,15 +1,14 @@
 package org.apereo.cas.oidc.jwks;
 
+import module java.base;
 import org.apereo.cas.services.OidcRegisteredService;
-
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jose4j.jwk.JsonWebKeySet;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.ApplicationContext;
-
-import java.util.Optional;
 
 /**
  * This is {@link OidcRegisteredServiceJsonWebKeystoreCacheLoader}.
@@ -20,7 +19,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class OidcRegisteredServiceJsonWebKeystoreCacheLoader
-    implements CacheLoader<OidcJsonWebKeyCacheKey, Optional<JsonWebKeySet>> {
+    implements CacheLoader<@NonNull OidcJsonWebKeyCacheKey, Optional<JsonWebKeySet>> {
     private final ApplicationContext applicationContext;
 
     @Override

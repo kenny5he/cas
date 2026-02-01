@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationEventExecutionPlanConfigurer;
 import org.apereo.cas.authentication.CoreAuthenticationUtils;
 import org.apereo.cas.authentication.adaptive.AdaptiveAuthenticationPolicy;
@@ -15,10 +16,10 @@ import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.multitenancy.TenantExtractor;
 import org.apereo.cas.util.nativex.CasRuntimeHintsRegistrar;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
-
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -86,7 +87,7 @@ class CasCoreAuthenticationPolicyConfiguration {
         public AdaptiveAuthenticationPolicy adaptiveAuthenticationPolicy(
             final CasConfigurationProperties casProperties,
             @Qualifier(IPAddressIntelligenceService.BEAN_NAME) final IPAddressIntelligenceService ipAddressIntelligenceService,
-            @Qualifier(GeoLocationService.BEAN_NAME) final ObjectProvider<GeoLocationService> geoLocationService) {
+            @Qualifier(GeoLocationService.BEAN_NAME) final ObjectProvider<@NonNull GeoLocationService> geoLocationService) {
             return new DefaultAdaptiveAuthenticationPolicy(geoLocationService.getIfAvailable(),
                 ipAddressIntelligenceService, casProperties.getAuthn().getAdaptive());
         }

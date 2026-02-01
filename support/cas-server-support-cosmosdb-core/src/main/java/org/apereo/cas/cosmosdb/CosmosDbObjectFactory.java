@@ -1,5 +1,6 @@
 package org.apereo.cas.cosmosdb;
 
+import module java.base;
 import org.apereo.cas.authentication.CasSSLContext;
 import org.apereo.cas.configuration.model.support.cosmosdb.BaseCosmosDbProperties;
 import org.apereo.cas.configuration.support.Beans;
@@ -24,16 +25,16 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.Strings;
 import org.springframework.data.util.ReflectionUtils;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link CosmosDbObjectFactory}.
  *
  * @author Misagh Moayyed
  * @since 5.2.0
+ * @deprecated Since 8.0.0
  */
 @Slf4j
+@Deprecated(since = "8.0.0", forRemoval = true)
 public class CosmosDbObjectFactory {
     private final BaseCosmosDbProperties properties;
 

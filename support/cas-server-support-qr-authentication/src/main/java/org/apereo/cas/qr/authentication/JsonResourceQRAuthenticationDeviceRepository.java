@@ -1,23 +1,15 @@
 package org.apereo.cas.qr.authentication;
 
+import module java.base;
 import org.apereo.cas.util.ResourceUtils;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.hjson.JsonValue;
 import org.springframework.core.io.Resource;
-
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link JsonResourceQRAuthenticationDeviceRepository}.
@@ -37,7 +29,7 @@ public class JsonResourceQRAuthenticationDeviceRepository implements QRAuthentic
     public JsonResourceQRAuthenticationDeviceRepository(final Resource jsonResource) {
         this.jsonResource = jsonResource;
         if (ResourceUtils.isFile(jsonResource) && !ResourceUtils.doesResourceExist(jsonResource)) {
-            FunctionUtils.doUnchecked(__ -> {
+            FunctionUtils.doUnchecked(_ -> {
                 val res = jsonResource.getFile().createNewFile();
                 if (res) {
                     LOGGER.debug("Created JSON resource @ [{}]", jsonResource);
@@ -82,12 +74,12 @@ public class JsonResourceQRAuthenticationDeviceRepository implements QRAuthentic
     }
 
     private void writeToJsonResource() {
-        FunctionUtils.doUnchecked(__ -> MAPPER.writerWithDefaultPrettyPrinter().writeValue(jsonResource.getFile(), devices));
+        FunctionUtils.doUnchecked(_ -> MAPPER.writerWithDefaultPrettyPrinter().writeValue(jsonResource.getFile(), devices));
     }
 
     private void readFromJsonResource() {
         if (ResourceUtils.doesResourceExist(jsonResource)) {
-            FunctionUtils.doUnchecked(__ -> {
+            FunctionUtils.doUnchecked(_ -> {
                 try (val reader = new InputStreamReader(jsonResource.getInputStream(), StandardCharsets.UTF_8)) {
                     val personList = new TypeReference<Map<String, String>>() {
                     };

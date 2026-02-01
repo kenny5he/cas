@@ -1,5 +1,6 @@
 package org.apereo.cas.support.oauth.util;
 
+import module java.base;
 import org.apereo.cas.CasProtocolConstants;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.services.RegisteredService;
@@ -20,14 +21,14 @@ import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.web.flow.CasWebflowConstants;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.oauth2.sdk.client.RedirectURIValidator;
-import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.pac4j.core.context.CallContext;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
@@ -35,21 +36,9 @@ import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.UserProfile;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+import org.springframework.web.servlet.view.json.JacksonJsonView;
+import tools.jackson.databind.json.JsonMapper;
 import jakarta.servlet.http.HttpServletResponse;
-import java.net.URI;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 /**
  * This class has some useful methods to output data in plain text,
@@ -61,8 +50,8 @@ import java.util.stream.Stream;
 @Slf4j
 @UtilityClass
 public class OAuth20Utils {
-    private static final ObjectMapper MAPPER = JacksonObjectMapperFactory.builder()
-        .singleArrayElementUnwrapped(true).build().toObjectMapper();
+    private static final JsonMapper MAPPER = JacksonObjectMapperFactory.builder()
+        .singleArrayElementUnwrapped(true).build().toJsonMapper();
 
     /**
      * Write to the output this error.
@@ -86,7 +75,7 @@ public class OAuth20Utils {
     public static ModelAndView writeError(final HttpServletResponse response,
                                           final String error, final String description) {
         val model = getErrorResponseBody(error, description);
-        val mv = new ModelAndView(new MappingJackson2JsonView(MAPPER), model);
+        val mv = new ModelAndView(new JacksonJsonView(MAPPER), model);
         mv.setStatus(HttpStatus.BAD_REQUEST);
         response.setStatus(HttpStatus.BAD_REQUEST.value());
         return mv;
@@ -116,9 +105,9 @@ public class OAuth20Utils {
      * @param clazz           the clazz
      * @return the registered o auth service by client id
      */
-    public static <T extends OAuthRegisteredService> T getRegisteredOAuthServiceByClientId(final ServicesManager servicesManager,
-                                                                                           final String clientId,
-                                                                                           final Class<T> clazz) {
+    public static <T extends OAuthRegisteredService> @Nullable T getRegisteredOAuthServiceByClientId(final ServicesManager servicesManager,
+                                                                                                     final String clientId,
+                                                                                                     final Class<T> clazz) {
         return FunctionUtils.doIfNotBlank(clientId,
             () -> {
                 val query = RegisteredServiceQuery.of(OAuthRegisteredService.class, "clientId", clientId).withIncludeAssignableTypes(true);
@@ -134,8 +123,8 @@ public class OAuth20Utils {
      * @param clientId        the client id by which the {@link OAuthRegisteredService} is to be located.
      * @return null, or the located {@link OAuthRegisteredService} instance in the service registry.
      */
-    public static OAuthRegisteredService getRegisteredOAuthServiceByClientId(final ServicesManager servicesManager,
-                                                                             final String clientId) {
+    public static @Nullable OAuthRegisteredService getRegisteredOAuthServiceByClientId(final ServicesManager servicesManager,
+                                                                                       final String clientId) {
         return getRegisteredOAuthServiceByClientId(servicesManager, clientId, OAuthRegisteredService.class);
     }
 
@@ -146,16 +135,16 @@ public class OAuth20Utils {
      * @param redirectUri     the redirect uri
      * @return the registered OAuth service by redirect uri
      */
-    public static OAuthRegisteredService getRegisteredOAuthServiceByRedirectUri(final ServicesManager servicesManager,
-                                                                                final String redirectUri) {
+    public static @Nullable OAuthRegisteredService getRegisteredOAuthServiceByRedirectUri(final ServicesManager servicesManager,
+                                                                                          final String redirectUri) {
         validateRedirectUri(redirectUri);
         return FunctionUtils.doIfNotBlank(redirectUri,
             () -> getRegisteredOAuthServiceByPredicate(servicesManager, service -> service.matches(redirectUri)),
             () -> null);
     }
 
-    private static OAuthRegisteredService getRegisteredOAuthServiceByPredicate(final ServicesManager servicesManager,
-                                                                               final Predicate<OAuthRegisteredService> predicate) {
+    private static @Nullable OAuthRegisteredService getRegisteredOAuthServiceByPredicate(final ServicesManager servicesManager,
+                                                                                         final Predicate<OAuthRegisteredService> predicate) {
         val services = servicesManager.getAllServicesOfType(OAuthRegisteredService.class);
         return services
             .stream()
@@ -225,7 +214,7 @@ public class OAuth20Utils {
      * @return the string
      */
     public static String toJson(final Object value) {
-        return FunctionUtils.doUnchecked(() -> MAPPER.writeValueAsString(value));
+        return MAPPER.writeValueAsString(value);
     }
 
     /**

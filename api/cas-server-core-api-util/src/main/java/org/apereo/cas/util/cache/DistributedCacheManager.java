@@ -1,15 +1,10 @@
 package org.apereo.cas.util.cache;
 
+import module java.base;
 import org.apereo.cas.util.NamedObject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import lombok.val;
-
-import java.io.Closeable;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.function.Predicate;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This is {@link DistributedCacheManager} that acts as a facade for a cache implementation.
@@ -41,7 +36,7 @@ public interface DistributedCacheManager<K extends Serializable, V extends Seria
      * @param key the key
      * @return the item or null if not found.
      */
-    default V get(final K key) {
+    default @Nullable V get(final K key) {
         return null;
     }
 

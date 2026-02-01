@@ -1,5 +1,6 @@
 package org.apereo.cas.web.flow.authentication;
 
+import module java.base;
 import org.apereo.cas.authentication.Credential;
 import org.apereo.cas.authentication.credential.AbstractCredential;
 import org.apereo.cas.authentication.metadata.BasicCredentialMetadata;
@@ -10,10 +11,8 @@ import org.apereo.cas.web.flow.CasWebflowCredentialProvider;
 import org.apereo.cas.web.support.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.webflow.execution.RequestContext;
-import jakarta.annotation.Nonnull;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * This is {@link DefaultCasWebflowCredentialProvider}.
@@ -26,7 +25,7 @@ public class DefaultCasWebflowCredentialProvider implements CasWebflowCredential
     protected final TenantExtractor tenantExtractor;
 
     @Override
-    @Nonnull
+    @NonNull
     public List<Credential> extract(final RequestContext requestContext) {
         val credential = WebUtils.getCredential(requestContext);
         if (credential instanceof final AbstractCredential ac) {

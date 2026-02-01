@@ -1,5 +1,6 @@
 package org.apereo.cas.support.oauth.web.endpoints;
 
+import module java.base;
 import org.apereo.cas.AbstractOAuth20Tests;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.mock.MockTicketGrantingTicket;
@@ -26,11 +27,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.TestPropertySource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -138,7 +134,7 @@ class OAuth20UserProfileEndpointControllerTests extends AbstractOAuth20Tests {
         assertEquals(HttpStatus.UNAUTHORIZED, entity.getStatusCode());
         assertEquals(MediaType.APPLICATION_JSON_VALUE, mockResponse.getContentType());
         assertNotNull(entity.getBody());
-        assertTrue(entity.getBody().toString().contains(OAuth20Constants.INVALID_REQUEST));
+        assertTrue(entity.getBody().toString().contains(OAuth20Constants.MISSING_ACCESS_TOKEN));
     }
 
     @Test
@@ -200,14 +196,14 @@ class OAuth20UserProfileEndpointControllerTests extends AbstractOAuth20Tests {
         assertEquals(MediaType.APPLICATION_JSON_VALUE, mockResponse.getContentType());
 
         val expectedObj = MAPPER.createObjectNode();
-        val attrNode = MAPPER.createObjectNode();
-        attrNode.put(NAME, VALUE);
-        val values = MAPPER.createArrayNode();
-        values.add(VALUE);
-        values.add(VALUE);
-        attrNode.put(NAME2, values);
+        val objectNode = MAPPER.createObjectNode();
+        objectNode.put(NAME, VALUE);
+        val arrayNode = MAPPER.createArrayNode();
+        arrayNode.add(VALUE);
+        arrayNode.add(VALUE);
+        objectNode.set(NAME2, arrayNode);
         expectedObj.put("id", ID);
-        expectedObj.put("attributes", attrNode);
+        expectedObj.set("attributes", objectNode);
 
         val receivedBody = (Map) entity.getBody();
         assertEquals(ID, receivedBody.get("id"));

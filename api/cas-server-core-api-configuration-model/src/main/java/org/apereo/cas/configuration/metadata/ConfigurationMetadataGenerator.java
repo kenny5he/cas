@@ -1,5 +1,6 @@
 package org.apereo.cas.configuration.metadata;
 
+import module java.base;
 import org.apereo.cas.configuration.support.DurationCapable;
 import org.apereo.cas.configuration.support.ExpressionLanguageCapable;
 import org.apereo.cas.configuration.support.PropertyOwner;
@@ -8,11 +9,8 @@ import org.apereo.cas.configuration.support.RelaxedPropertyNames;
 import org.apereo.cas.configuration.support.RequiredProperty;
 import org.apereo.cas.configuration.support.RequiresModule;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.Nulls;
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
@@ -29,19 +27,12 @@ import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.util.ReflectionUtils;
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.core.util.DefaultPrettyPrinter;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * This is {@link ConfigurationMetadataGenerator}.
@@ -63,12 +54,15 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class ConfigurationMetadataGenerator {
-    private static final ObjectMapper MAPPER = new ObjectMapper()
-        .setDefaultPrettyPrinter(new DefaultPrettyPrinter())
+    private static final ObjectMapper MAPPER = JsonMapper.builderWithJackson2Defaults()
+        .changeDefaultNullHandling(handler -> handler.withValueNulls(Nulls.SKIP).withContentNulls(Nulls.SKIP))
+        .changeDefaultPropertyInclusion(handler -> handler.withValueInclusion(JsonInclude.Include.NON_EMPTY)
+            .withContentInclusion(JsonInclude.Include.NON_EMPTY))
+        .defaultPrettyPrinter(new DefaultPrettyPrinter())
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true)
-        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-        .findAndRegisterModules();
+        .findAndAddModules()
+        .build();
 
     private static final Pattern PATTERN_GENERICS = Pattern.compile(".+\\<(.+)\\>");
 
@@ -115,6 +109,7 @@ public class ConfigurationMetadataGenerator {
             throw new RuntimeException("Could not locate file " + inputSpringConfigurationMetadata.getCanonicalPath());
         }
         LOGGER.info("Project directory [{}]", projectDirectory);
+        StaticJavaParser.getParserConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_25);
         final Map<String, Object> jsonMap = MAPPER.readValue(inputSpringConfigurationMetadata, new TypeReference<>() {});
         final List<ConfigurationMetadataProperty> properties = MAPPER.convertValue(jsonMap.get("properties"), new TypeReference<>() {});
         Objects.requireNonNull(properties);

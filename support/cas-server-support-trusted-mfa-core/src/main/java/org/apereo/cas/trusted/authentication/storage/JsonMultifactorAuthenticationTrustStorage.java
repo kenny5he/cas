@@ -1,5 +1,6 @@
 package org.apereo.cas.trusted.authentication.storage;
 
+import module java.base;
 import org.apereo.cas.configuration.model.support.mfa.trusteddevice.TrustedDevicesMultifactorProperties;
 import org.apereo.cas.trusted.authentication.api.MultifactorAuthenticationTrustRecord;
 import org.apereo.cas.trusted.authentication.api.MultifactorAuthenticationTrustRecordKeyGenerator;
@@ -10,8 +11,6 @@ import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.io.FileWatcherService;
 import org.apereo.cas.util.io.WatcherService;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
@@ -19,16 +18,8 @@ import org.hjson.JsonValue;
 import org.jooq.lambda.Unchecked;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.io.Resource;
-import java.io.InputStreamReader;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.time.ZonedDateTime;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link JsonMultifactorAuthenticationTrustStorage}.
@@ -39,7 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class JsonMultifactorAuthenticationTrustStorage extends BaseMultifactorAuthenticationTrustStorage implements DisposableBean {
     private static final ObjectMapper MAPPER = JacksonObjectMapperFactory.builder()
-        .defaultTypingEnabled(false).build().toObjectMapper();
+        .defaultTypingEnabled(true).build().toObjectMapper();
 
     private final Resource location;
 
@@ -57,7 +48,7 @@ public class JsonMultifactorAuthenticationTrustStorage extends BaseMultifactorAu
         readTrustedRecordsFromResource();
         if (ResourceUtils.isFile(location)) {
             this.watcherService = new FileWatcherService(Unchecked.supplier(location::getFile).get(),
-                __ -> readTrustedRecordsFromResource());
+                _ -> readTrustedRecordsFromResource());
             this.watcherService.start(getClass().getSimpleName());
         }
     }
@@ -148,7 +139,7 @@ public class JsonMultifactorAuthenticationTrustStorage extends BaseMultifactorAu
     private void readTrustedRecordsFromResource() {
         this.storage = new LinkedHashMap<>();
         if (ResourceUtils.doesResourceExist(location)) {
-            FunctionUtils.doUnchecked(__ -> {
+            FunctionUtils.doUnchecked(_ -> {
                 try (val reader = new InputStreamReader(location.getInputStream(), StandardCharsets.UTF_8)) {
                     val personList = new TypeReference<Map<String, MultifactorAuthenticationTrustRecord>>() {
                     };
@@ -159,7 +150,7 @@ public class JsonMultifactorAuthenticationTrustStorage extends BaseMultifactorAu
     }
 
     private void writeTrustedRecordsToResource() {
-        FunctionUtils.doUnchecked(__ -> {
+        FunctionUtils.doUnchecked(_ -> {
             val file = this.location.getFile();
             val res = file.createNewFile();
             if (res) {

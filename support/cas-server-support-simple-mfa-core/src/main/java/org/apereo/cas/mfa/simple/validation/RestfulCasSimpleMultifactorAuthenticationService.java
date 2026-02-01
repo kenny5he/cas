@@ -1,5 +1,6 @@
 package org.apereo.cas.mfa.simple.validation;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.configuration.model.support.mfa.simple.RestfulCasSimpleMultifactorAuthenticationTokenProperties;
@@ -14,8 +15,6 @@ import org.apereo.cas.util.JsonUtils;
 import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-import com.fasterxml.jackson.core.util.MinimalPrettyPrinter;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.io.IOUtils;
@@ -28,12 +27,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import javax.security.auth.login.FailedLoginException;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import tools.jackson.core.util.MinimalPrettyPrinter;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link RestfulCasSimpleMultifactorAuthenticationService}.
@@ -62,7 +57,7 @@ public class RestfulCasSimpleMultifactorAuthenticationService extends BaseCasSim
     public CasSimpleMultifactorAuthenticationTicket generate(final Principal principal, final Service service) throws Exception {
         HttpResponse response = null;
         try (val writer = new StringWriter()) {
-            MAPPER.writer(new MinimalPrettyPrinter()).writeValue(writer, principal);
+            MAPPER.writer().with(new MinimalPrettyPrinter()).writeValue(writer, principal);
 
             val parameters = new LinkedHashMap<String, String>();
             Optional.ofNullable(service).ifPresent(s -> parameters.put("service", s.getId()));
@@ -77,6 +72,7 @@ public class RestfulCasSimpleMultifactorAuthenticationService extends BaseCasSim
                 .entity(writer.toString())
                 .basicAuthPassword(properties.getBasicAuthPassword())
                 .basicAuthUsername(properties.getBasicAuthUsername())
+                .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                 .parameters(parameters)
                 .build();
             response = HttpUtils.execute(exec);
@@ -101,7 +97,7 @@ public class RestfulCasSimpleMultifactorAuthenticationService extends BaseCasSim
     public void store(final CasSimpleMultifactorAuthenticationTicket token) throws Exception {
         HttpResponse response = null;
         try (val writer = new StringWriter()) {
-            MAPPER.writer(new MinimalPrettyPrinter()).writeValue(writer, token);
+            MAPPER.writer().with(new MinimalPrettyPrinter()).writeValue(writer, token);
 
             val headers = CollectionUtils.<String, String>wrap(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
             headers.putAll(properties.getHeaders());
@@ -112,6 +108,7 @@ public class RestfulCasSimpleMultifactorAuthenticationService extends BaseCasSim
                 .entity(writer.toString())
                 .basicAuthPassword(properties.getBasicAuthPassword())
                 .basicAuthUsername(properties.getBasicAuthUsername())
+                .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                 .build();
             response = HttpUtils.execute(exec);
             val statusCode = response.getCode();
@@ -128,7 +125,7 @@ public class RestfulCasSimpleMultifactorAuthenticationService extends BaseCasSim
                               final CasSimpleMultifactorTokenCredential credential) throws Exception {
         HttpResponse response = null;
         try (val writer = new StringWriter()) {
-            MAPPER.writer(new MinimalPrettyPrinter()).writeValue(writer, resolvedPrincipal);
+            MAPPER.writer().with(new MinimalPrettyPrinter()).writeValue(writer, resolvedPrincipal);
             val headers = CollectionUtils.<String, String>wrap(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
             headers.putAll(properties.getHeaders());
             val exec = HttpExecutionRequest.builder()
@@ -138,6 +135,7 @@ public class RestfulCasSimpleMultifactorAuthenticationService extends BaseCasSim
                 .entity(writer.toString())
                 .basicAuthPassword(properties.getBasicAuthPassword())
                 .basicAuthUsername(properties.getBasicAuthUsername())
+                .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                 .build();
             response = HttpUtils.execute(exec);
             val statusCode = response.getCode();
@@ -165,6 +163,7 @@ public class RestfulCasSimpleMultifactorAuthenticationService extends BaseCasSim
                 .url(Strings.CI.appendIfMissing(properties.getUrl(), "/").concat(tokenCredential.getToken()))
                 .basicAuthPassword(properties.getBasicAuthPassword())
                 .basicAuthUsername(properties.getBasicAuthUsername())
+                .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                 .build();
             response = HttpUtils.execute(exec);
             val statusCode = response.getCode();
@@ -193,6 +192,7 @@ public class RestfulCasSimpleMultifactorAuthenticationService extends BaseCasSim
                 .url(properties.getUrl())
                 .basicAuthPassword(properties.getBasicAuthPassword())
                 .basicAuthUsername(properties.getBasicAuthUsername())
+                .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                 .build();
             response = HttpUtils.execute(exec);
             Assert.isTrue(HttpStatus.valueOf(response.getCode()).is2xxSuccessful(), "Unable to update principal");

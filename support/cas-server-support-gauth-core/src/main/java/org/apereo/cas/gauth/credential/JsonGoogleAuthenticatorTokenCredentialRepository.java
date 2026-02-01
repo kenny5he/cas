@@ -1,5 +1,6 @@
 package org.apereo.cas.gauth.credential;
 
+import module java.base;
 import org.apereo.cas.authentication.OneTimeTokenAccount;
 import org.apereo.cas.gauth.CasGoogleAuthenticator;
 import org.apereo.cas.util.LoggingUtils;
@@ -11,13 +12,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.core.io.Resource;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link JsonGoogleAuthenticatorTokenCredentialRepository}.
@@ -167,12 +161,12 @@ public class JsonGoogleAuthenticatorTokenCredentialRepository extends BaseGoogle
 
     @Override
     public void deleteAll() {
-        lock.tryLock(__ -> writeAccountsToJsonRepository(new HashMap<>()));
+        lock.tryLock(_ -> writeAccountsToJsonRepository(new HashMap<>()));
     }
 
     @Override
     public void delete(final String username) {
-        lock.tryLock(__ -> {
+        lock.tryLock(_ -> {
             val accounts = readAccountsFromJsonRepository();
             accounts.remove(username.trim().toLowerCase(Locale.ENGLISH));
             writeAccountsToJsonRepository(accounts);
@@ -181,7 +175,7 @@ public class JsonGoogleAuthenticatorTokenCredentialRepository extends BaseGoogle
 
     @Override
     public void delete(final long id) {
-        lock.tryLock(__ -> {
+        lock.tryLock(_ -> {
             val accounts = readAccountsFromJsonRepository();
             accounts.forEach((key, value) -> value.removeIf(d -> d.getId() == id));
             writeAccountsToJsonRepository(accounts);
@@ -205,7 +199,7 @@ public class JsonGoogleAuthenticatorTokenCredentialRepository extends BaseGoogle
     }
 
     private void writeAccountsToJsonRepository(final Map<String, List<OneTimeTokenAccount>> accounts) {
-        FunctionUtils.doUnchecked(__ -> {
+        FunctionUtils.doUnchecked(_ -> {
             if (location.getFile() != null) {
                 LOGGER.debug("Saving [{}] google authenticator accounts to JSON file at [{}]", accounts.size(), location.getFile());
                 serializer.to(location.getFile(), accounts);

@@ -1,10 +1,12 @@
 package org.apereo.cas.web.support;
 
+import module java.base;
+import org.apereo.cas.web.theme.ThemeResolver;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ThemeResolver;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,8 +29,8 @@ public class ThemeChangeInterceptor implements HandlerInterceptor {
     private final String paramName;
 
     @Override
-    public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response,
-                             final Object handler) throws ServletException {
+    public boolean preHandle(final HttpServletRequest request, final @NonNull HttpServletResponse response,
+                             final @NonNull Object handler) throws ServletException {
 
         val newTheme = request.getParameter(this.paramName);
         if (newTheme != null) {

@@ -1,5 +1,6 @@
 package org.apereo.cas.metadata;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.CasVersion;
 import org.apereo.cas.util.CollectionUtils;
@@ -23,11 +24,6 @@ import org.springframework.boot.context.properties.bind.handler.NoUnboundElement
 import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
 import org.springframework.boot.context.properties.source.UnboundElementsSourceFilter;
 import org.springframework.context.ConfigurableApplicationContext;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link CasConfigurationPropertiesValidator}.
@@ -176,7 +172,8 @@ public class CasConfigurationPropertiesValidator {
 
         if (StringUtils.isNotBlank(messages)) {
             messages = "\nThe following settings are deprecated and scheduled to be removed in future releases of CAS. "
-                + "Please review the replacement settings where applicable and update your configuration accordingly.\n\n"
+                + "Please review the replacement settings where applicable and update your configuration accordingly. "
+                + "For more information on changes and progress, always consult the CAS documentation and published release notes.\n\n"
                 + messages;
             LOGGER.warn(messages);
         }

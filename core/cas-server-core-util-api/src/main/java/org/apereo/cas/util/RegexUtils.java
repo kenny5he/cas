@@ -1,16 +1,14 @@
 package org.apereo.cas.util;
 
+import module java.base;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-import java.util.stream.Collectors;
 
 /**
  * Utility class to assist with regex operations.
@@ -27,6 +25,11 @@ public class RegexUtils {
      */
     public static final Pattern MATCH_NOTHING_PATTERN = Pattern.compile("a^");
 
+    private static final Cache<String, Pattern> PATTERN_CACHE = Caffeine.newBuilder()
+        .expireAfterAccess(15, TimeUnit.MINUTES)
+        .maximumSize(10_000)
+        .build();
+    
     /**
      * Check to see if the specified pattern is a valid regular expression.
      *
@@ -36,11 +39,11 @@ public class RegexUtils {
     public static boolean isValidRegex(final String pattern) {
         try {
             if (StringUtils.isNotBlank(pattern)) {
-                Pattern.compile(pattern);
+                computePattern(pattern);
                 return true;
             }
         } catch (final PatternSyntaxException exception) {
-            LOGGER.debug("Pattern [{}] is not a valid regex.", pattern);
+            LOGGER.debug("Pattern [{}] is not a valid regular expression pattern.", pattern);
         }
         return false;
     }
@@ -68,7 +71,7 @@ public class RegexUtils {
      * @return the pattern or {@link RegexUtils#MATCH_NOTHING_PATTERN}
      * if pattern is null or invalid.
      */
-    public static Pattern createPattern(final String pattern) {
+    public static Pattern createPattern(@Nullable final String pattern) {
         return createPattern(pattern, Pattern.CASE_INSENSITIVE);
     }
 
@@ -79,13 +82,13 @@ public class RegexUtils {
      * @param flags   the flags
      * @return the compiled pattern or {@link RegexUtils#MATCH_NOTHING_PATTERN} if pattern is null or invalid.
      */
-    public static Pattern createPattern(final String pattern, final int flags) {
+    public static Pattern createPattern(@Nullable final String pattern, final int flags) {
         if (StringUtils.isBlank(pattern)) {
             LOGGER.warn("Pattern cannot be null/blank");
             return MATCH_NOTHING_PATTERN;
         }
         try {
-            return Pattern.compile(pattern, flags);
+            return computePattern(pattern, flags);
         } catch (final PatternSyntaxException exception) {
             LOGGER.debug("Pattern [{}] is not a valid regex.", pattern);
             return MATCH_NOTHING_PATTERN;
@@ -140,7 +143,7 @@ public class RegexUtils {
      * @param value   the string
      * @return true/false
      */
-    public static boolean find(final String pattern, final String value) {
+    public static boolean find(@Nullable final String pattern, @Nullable final String value) {
         return StringUtils.isNotBlank(value) && createPattern(pattern, Pattern.CASE_INSENSITIVE).matcher(value).find();
     }
 
@@ -151,7 +154,7 @@ public class RegexUtils {
      * @param elements the elements
      * @return the optional
      */
-    public static Optional<String> findFirst(final String pattern, final Collection elements) {
+    public static Optional<String> findFirst(@Nullable final String pattern, final Collection elements) {
         val compiledPattern = createPattern(pattern);
         return elements
             .stream()
@@ -190,5 +193,13 @@ public class RegexUtils {
             LOGGER.trace("Falling back to regex match. Couldn't treat [{}] as an IP address or netmask: [{}]", pattern, e.getMessage());
             return find(pattern, remoteAddr);
         }
+    }
+
+    private static Pattern computePattern(final String pattern) {
+        return computePattern(pattern, 0);
+    }
+
+    private static Pattern computePattern(final String pattern, final int flags) {
+        return PATTERN_CACHE.get(pattern + '|' + flags, p -> Pattern.compile(pattern, flags));
     }
 }

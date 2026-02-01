@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
+import module java.base;
 
 /**
  * This is {@link CheckNativeRuntimeHints}.
@@ -15,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 7.0.0
  */
 public class CheckNativeRuntimeHints {
-    public static void main(final String[] args) throws Exception {
+    void main(final String[] args) throws Exception {
         checkRuntimeHintsConfigurations(args[0]);
     }
 

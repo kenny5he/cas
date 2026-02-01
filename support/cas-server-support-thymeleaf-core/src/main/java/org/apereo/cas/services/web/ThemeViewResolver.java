@@ -1,14 +1,15 @@
 package org.apereo.cas.services.web;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.autoconfigure.template.TemplateLocation;
-import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafProperties;
+import org.springframework.boot.thymeleaf.autoconfigure.ThymeleafProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.OrderComparator;
@@ -16,10 +17,6 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.view.AbstractCachingViewResolver;
 import org.thymeleaf.spring6.view.AbstractThymeleafView;
-
-import jakarta.annotation.Nonnull;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * {@link ThemeViewResolver} is a theme resolver that checks for a UI view in the specific theme before utilizing the
@@ -41,19 +38,19 @@ public class ThemeViewResolver extends AbstractCachingViewResolver {
 
     private final List<CasThymeleafViewResolverConfigurer> thymeleafViewResolverConfigurers;
 
-    @Nonnull
+    @NonNull
     @Override
     protected Object getCacheKey(
-        @Nonnull
-        final String viewName, @Nonnull
+        @NonNull
+        final String viewName, @NonNull
         final Locale locale) {
         return String.format("%s#%s", theme, super.getCacheKey(viewName, locale));
     }
 
     @Override
     protected View loadView(
-        @Nonnull
-        final String viewName, @Nonnull
+        @NonNull
+        final String viewName, @NonNull
         final Locale locale) throws Exception {
         LOGGER.trace("Attempting to resolve view [{}] via locale [{}]", viewName, locale);
         val applicationContext = obtainApplicationContext();

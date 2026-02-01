@@ -1,15 +1,12 @@
 package org.apereo.cas;
 
+import module java.base;
 import org.apereo.cas.authentication.MessageDescriptor;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-
-import java.io.Serial;
-import java.io.Serializable;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * Simple parameterized message descriptor with a code that refers to a message bundle key and a default
@@ -19,8 +16,8 @@ import java.io.Serializable;
  * @since 4.0.0
  */
 @Getter
-@AllArgsConstructor
-@EqualsAndHashCode
+@AllArgsConstructor(onConstructor_ = @JsonCreator)
+@EqualsAndHashCode(of = {"code", "defaultMessage"})
 public class DefaultMessageDescriptor implements MessageDescriptor {
 
     @Serial
@@ -32,8 +29,9 @@ public class DefaultMessageDescriptor implements MessageDescriptor {
 
     private final Serializable[] params;
 
-    @JsonCreator
-    public DefaultMessageDescriptor(@JsonProperty("code") final String code) {
-        this(code, code, null);
+    public DefaultMessageDescriptor(final String code) {
+        this(code, code, ArrayUtils.EMPTY_STRING_ARRAY);
     }
+
+
 }

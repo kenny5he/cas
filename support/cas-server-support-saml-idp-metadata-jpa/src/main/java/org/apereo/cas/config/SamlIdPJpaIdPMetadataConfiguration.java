@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.configuration.support.JpaBeans;
@@ -24,6 +25,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -39,7 +41,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionTemplate;
 import jakarta.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
+import module java.sql;
 
 /**
  * This is {@link SamlIdPJpaIdPMetadataConfiguration}.
@@ -192,7 +194,7 @@ class SamlIdPJpaIdPMetadataConfiguration {
         public SamlIdPMetadataLocator samlIdPMetadataLocator(
             final ConfigurableApplicationContext applicationContext,
             @Qualifier("samlIdPMetadataCache")
-            final Cache<String, SamlIdPMetadataDocument> samlIdPMetadataCache,
+            final Cache<@NonNull String, SamlIdPMetadataDocument> samlIdPMetadataCache,
             @Qualifier("samlIdPMetadataGeneratorCipherExecutor")
             final CipherExecutor samlIdPMetadataGeneratorCipherExecutor) {
             return BeanSupplier.of(SamlIdPMetadataLocator.class)

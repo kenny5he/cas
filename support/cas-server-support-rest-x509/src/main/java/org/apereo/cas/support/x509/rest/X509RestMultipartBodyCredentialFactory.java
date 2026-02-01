@@ -1,25 +1,21 @@
 package org.apereo.cas.support.x509.rest;
 
+import module java.base;
 import org.apereo.cas.adaptors.x509.authentication.principal.X509CertificateCredential;
 import org.apereo.cas.authentication.Credential;
 import org.apereo.cas.rest.factory.RestHttpRequestCredentialFactory;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.LoggingUtils;
 import org.apereo.cas.util.crypto.CertUtils;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.util.MultiValueMap;
-
 import jakarta.servlet.http.HttpServletRequest;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This is {@link X509RestMultipartBodyCredentialFactory} that attempts to read the contents
@@ -37,7 +33,7 @@ public class X509RestMultipartBodyCredentialFactory implements RestHttpRequestCr
     private static final String CERTIFICATE = "cert";
     
     @Override
-    public List<Credential> fromRequest(final HttpServletRequest request, final MultiValueMap<String, String> requestBody) {
+    public List<Credential> fromRequest(final HttpServletRequest request, final MultiValueMap<@NonNull String, String> requestBody) {
         if (requestBody == null || requestBody.isEmpty()) {
             LOGGER.trace("Skipping [{}] because the request body is null or empty", getClass().getSimpleName());
             return new ArrayList<>();

@@ -1,5 +1,6 @@
 package org.apereo.cas.web.flow;
 
+import module java.base;
 import org.apereo.cas.authentication.MultifactorAuthenticationPrincipalResolver;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.util.spring.SecurityContextUtils;
@@ -8,6 +9,8 @@ import org.apereo.cas.web.support.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.security.core.context.SecurityContext;
@@ -15,7 +18,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
-import java.util.ArrayList;
 
 /**
  * This is {@link PopulateSpringSecurityContextAction}.
@@ -26,10 +28,10 @@ import java.util.ArrayList;
 @Slf4j
 @RequiredArgsConstructor
 public class PopulateSpringSecurityContextAction extends BaseCasWebflowAction {
-    private final ObjectProvider<SecurityContextRepository> securityContextRepository;
+    private final ObjectProvider<@NonNull SecurityContextRepository> securityContextRepository;
 
     @Override
-    protected Event doExecuteInternal(final RequestContext requestContext) {
+    protected @Nullable Event doExecuteInternal(final RequestContext requestContext) {
         val request = WebUtils.getHttpServletRequestFromExternalWebflowContext(requestContext);
         val response = WebUtils.getHttpServletResponseFromExternalWebflowContext(requestContext);
         val context = buildAuthenticationContext(requestContext);

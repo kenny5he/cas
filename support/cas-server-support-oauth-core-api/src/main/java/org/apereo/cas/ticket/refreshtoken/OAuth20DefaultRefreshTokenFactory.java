@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.refreshtoken;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.configuration.CasConfigurationProperties;
@@ -21,9 +22,6 @@ import org.apereo.cas.util.function.FunctionUtils;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * Default OAuth refresh token factory.
@@ -83,7 +81,7 @@ public class OAuth20DefaultRefreshTokenFactory implements OAuth20RefreshTokenFac
         val refreshToken = new OAuth20DefaultRefreshToken(codeId, service, authentication,
             expirationPolicyToUse, ticketGrantingTicket,
             scopes, clientId, accessToken, requestClaims, responseType, grantType);
-        FunctionUtils.doIfNotNull(service, __ -> refreshToken.setTenantId(service.getTenant()));
+        FunctionUtils.doIfNotNull(service, _ -> refreshToken.setTenantId(service.getTenant()));
         descendantTicketsTrackingPolicy.trackTicket(ticketGrantingTicket, refreshToken);
         return refreshToken;
     }

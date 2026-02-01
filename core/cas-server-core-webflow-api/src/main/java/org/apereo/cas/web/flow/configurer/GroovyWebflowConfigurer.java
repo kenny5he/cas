@@ -1,5 +1,6 @@
 package org.apereo.cas.web.flow.configurer;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.scripting.ExecutableCompiledScriptFactory;
@@ -26,7 +27,7 @@ public class GroovyWebflowConfigurer extends AbstractCasWebflowConfigurer {
 
     @Override
     public void doInitialize() {
-        FunctionUtils.doAndHandle(__ -> {
+        FunctionUtils.doAndHandle(_ -> {
             val resource = casProperties.getWebflow().getGroovy().getLocation();
             if (resource != null) {
                 val args = new Object[]{this, applicationContext, LOGGER};

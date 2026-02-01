@@ -1,5 +1,6 @@
 package org.apereo.cas.tomcat;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.model.core.web.tomcat.CasEmbeddedApacheTomcatClusteringProperties;
 import org.apereo.cas.monitor.NotMonitorable;
@@ -35,10 +36,9 @@ import org.apache.catalina.webresources.ExtractingRoot;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
-import org.springframework.boot.web.embedded.tomcat.TomcatWebServer;
-import java.util.Locale;
+import org.springframework.boot.tomcat.TomcatWebServer;
+import org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory;
+import org.springframework.boot.web.server.autoconfigure.ServerProperties;
 
 /**
  * A {@link CasTomcatServletWebServerFactory} that will configure Tomcat with clustering support based on the
@@ -57,7 +57,7 @@ public class CasTomcatServletWebServerFactory extends TomcatServletWebServerFact
 
     public CasTomcatServletWebServerFactory(final CasConfigurationProperties casProperties,
                                             final ServerProperties serverProperties) {
-        super(serverProperties.getPort());
+        super(Objects.requireNonNullElse(serverProperties.getPort(), 0));
         if (StringUtils.isNotBlank(serverProperties.getServlet().getContextPath())) {
             setContextPath(serverProperties.getServlet().getContextPath());
         }

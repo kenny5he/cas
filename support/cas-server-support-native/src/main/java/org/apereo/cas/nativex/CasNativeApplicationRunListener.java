@@ -1,13 +1,15 @@
 package org.apereo.cas.nativex;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationPropertiesEnvironmentManager;
 import org.apereo.cas.configuration.DefaultCasConfigurationPropertiesSourceLocator;
 import org.apereo.cas.configuration.StandaloneConfigurationFilePropertiesSourceLocator;
 import org.apereo.cas.configuration.support.CasConfigurationJasyptCipherExecutor;
 import lombok.val;
-import org.springframework.boot.ConfigurableBootstrapContext;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringApplicationRunListener;
+import org.springframework.boot.bootstrap.ConfigurableBootstrapContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.DefaultResourceLoader;
 
@@ -22,8 +24,8 @@ class CasNativeApplicationRunListener implements SpringApplicationRunListener {
     }
 
     @Override
-    public void environmentPrepared(final ConfigurableBootstrapContext bootstrapContext,
-                                    final ConfigurableEnvironment environment) {
+    public void environmentPrepared(final @NonNull ConfigurableBootstrapContext bootstrapContext,
+                                    final @NonNull ConfigurableEnvironment environment) {
         val nativeSources = CasConfigurationPropertiesEnvironmentManager.configureEnvironmentPropertySources(environment);
         val configurationCipher = new CasConfigurationJasyptCipherExecutor(environment);
         val casConfigLocator = new DefaultCasConfigurationPropertiesSourceLocator(configurationCipher);

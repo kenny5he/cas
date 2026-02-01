@@ -1,10 +1,9 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.test.CasTestExtension;
 import org.apereo.cas.util.RandomUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -13,18 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
-
-import java.io.IOException;
-import java.io.Serial;
-import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import tools.jackson.databind.ObjectMapper;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -167,7 +155,8 @@ class DefaultRegisteredServiceAccessStrategyTests {
         val required = new HashMap<String, Set<String>>();
         required.put(CN, Set.of("groovy { return attributes.containsKey('name') && currentValues.contains('admin') }"));
         authz.setRequiredAttributes(required);
-        var request = RegisteredServiceAccessStrategyRequest.builder().applicationContext(applicationContext)
+        var request = RegisteredServiceAccessStrategyRequest.builder()
+            .applicationContext(applicationContext)
             .attributes(Map.of(PHONE, List.of("1234567890")))
             .principalId(TEST).build();
         assertFalse(authz.authorizeRequest(request));
@@ -237,8 +226,11 @@ class DefaultRegisteredServiceAccessStrategyTests {
         val pAttrs = getPrincipalAttributes();
         pAttrs.put(CN, "CAS");
         pAttrs.put(GIVEN_NAME, "kaz");
-        assertFalse(authz.authorizeRequest(RegisteredServiceAccessStrategyRequest.builder().applicationContext(applicationContext)
-            .principalId(TEST).attributes(pAttrs).build()));
+        assertFalse(authz.authorizeRequest(RegisteredServiceAccessStrategyRequest.builder()
+            .applicationContext(applicationContext)
+            .principalId(TEST)
+            .attributes(pAttrs)
+            .build()));
     }
 
     @Test

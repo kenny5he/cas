@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.services.ChainingServiceRegistry;
@@ -19,12 +20,12 @@ import org.apereo.cas.util.io.WatcherService;
 import org.apereo.cas.util.spring.beans.BeanCondition;
 import org.apereo.cas.util.spring.beans.BeanSupplier;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
-
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -42,14 +43,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.EnableAsync;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link CasServiceRegistryInitializationConfiguration}.
@@ -81,7 +74,7 @@ class CasServiceRegistryInitializationConfiguration {
         public ServiceRegistryInitializerEventListener serviceRegistryInitializerConfigurationEventListener(
             final ConfigurableApplicationContext applicationContext,
             @Qualifier("serviceRegistryInitializer")
-            final ObjectProvider<ServiceRegistryInitializer> serviceRegistryInitializer) {
+            final ObjectProvider<@NonNull ServiceRegistryInitializer> serviceRegistryInitializer) {
             return BeanSupplier.of(ServiceRegistryInitializerEventListener.class)
                 .when(CONDITION.given(applicationContext.getEnvironment()))
                 .supply(() -> new DefaultServiceRegistryInitializerEventListener(serviceRegistryInitializer))
@@ -148,7 +141,7 @@ class CasServiceRegistryInitializationConfiguration {
         public ServiceRegistry embeddedJsonServiceRegistry(
             final CasConfigurationProperties casProperties,
             final ConfigurableApplicationContext applicationContext,
-            final ObjectProvider<List<ServiceRegistryListener>> serviceRegistryListeners) {
+            final ObjectProvider<@NonNull List<ServiceRegistryListener>> serviceRegistryListeners) {
             return BeanSupplier.of(ServiceRegistry.class)
                 .when(CONDITION.given(applicationContext.getEnvironment()))
                 .supply(Unchecked.supplier(() -> {

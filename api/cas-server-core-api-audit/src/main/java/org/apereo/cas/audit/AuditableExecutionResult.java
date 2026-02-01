@@ -1,12 +1,12 @@
 package org.apereo.cas.audit;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.AuthenticationResult;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.services.RegisteredService;
 import org.apereo.cas.ticket.ServiceTicket;
 import org.apereo.cas.ticket.TicketGrantingTicket;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,10 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import lombok.val;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
+import org.jspecify.annotations.Nullable;
 
 
 /**
@@ -34,44 +31,44 @@ public class AuditableExecutionResult {
     /**
      * RegisteredService.
      */
-    private RegisteredService registeredService;
+    private @Nullable RegisteredService registeredService;
 
     /**
      * Service.
      */
-    private Service service;
+    private @Nullable Service service;
 
     /**
      * ServiceTicket.
      */
-    private ServiceTicket serviceTicket;
+    private @Nullable ServiceTicket serviceTicket;
 
     /**
      * Authentication.
      */
-    private Authentication authentication;
+    private @Nullable Authentication authentication;
 
     /**
      * RuntimeException.
      */
     @Setter
-    private Throwable exception;
+    private @Nullable Throwable exception;
 
     /**
      * The execution result of the auditable action.
      */
     @Setter
-    private Object executionResult;
+    private @Nullable Object executionResult;
 
     /**
      * TicketGrantingTicket.
      */
-    private TicketGrantingTicket ticketGrantingTicket;
+    private @Nullable TicketGrantingTicket ticketGrantingTicket;
 
     /**
      * AuthenticationResult.
      */
-    private AuthenticationResult authenticationResult;
+    private @Nullable AuthenticationResult authenticationResult;
 
     /**
      * Properties.

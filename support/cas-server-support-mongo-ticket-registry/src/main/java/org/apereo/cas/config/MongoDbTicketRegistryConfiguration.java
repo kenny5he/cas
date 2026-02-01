@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.authentication.CasSSLContext;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
@@ -19,8 +20,10 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 /**
  * This is {@link MongoDbTicketRegistryConfiguration}.
@@ -57,12 +60,13 @@ class MongoDbTicketRegistryConfiguration {
     @ConditionalOnMissingBean(name = "mongoDbTicketRegistryTemplate")
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public MongoOperations mongoDbTicketRegistryTemplate(
+    @Primary
+    public MongoTemplate mongoDbTicketRegistryTemplate(
         final CasConfigurationProperties casProperties,
         @Qualifier(CasSSLContext.BEAN_NAME)
         final CasSSLContext casSslContext) {
         val factory = new MongoDbConnectionFactory(casSslContext.getSslContext());
         val mongo = casProperties.getTicket().getRegistry().getMongo();
-        return factory.buildMongoTemplate(mongo);
+        return factory.buildMongoTemplate(mongo).asMongoTemplate();
     }
 }

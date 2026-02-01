@@ -1,19 +1,14 @@
 package org.apereo.cas.web.view;
 
+import module java.base;
 import org.apereo.cas.util.LoggingUtils;
-
 import com.samskivert.mustache.Mustache;
 import lombok.Setter;
 import lombok.val;
-import org.springframework.boot.web.servlet.view.MustacheView;
-
+import org.jspecify.annotations.NonNull;
+import org.springframework.boot.mustache.servlet.view.MustacheView;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import java.io.InputStreamReader;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 /**
  * This is {@link CasMustacheView}.
@@ -26,7 +21,7 @@ public class CasMustacheView extends MustacheView {
     protected Mustache.Compiler compiler;
 
     @Override
-    protected void renderMergedTemplateModel(final Map<String, Object> model, final HttpServletRequest request,
+    protected void renderMergedTemplateModel(final @NonNull Map<String, Object> model, final @NonNull HttpServletRequest request,
                                              final HttpServletResponse response) throws Exception {
         val resource = getApplicationContext().getResource(getUrl());
         try (val reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);

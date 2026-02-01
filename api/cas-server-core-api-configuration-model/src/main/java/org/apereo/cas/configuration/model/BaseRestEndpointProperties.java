@@ -1,18 +1,13 @@
 package org.apereo.cas.configuration.model;
 
+import module java.base;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.configuration.support.ExpressionLanguageCapable;
 import org.apereo.cas.configuration.support.RequiredProperty;
 import org.apereo.cas.configuration.support.RequiresModule;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This is {@link BaseRestEndpointProperties}.
@@ -55,4 +50,10 @@ public class BaseRestEndpointProperties implements CasFeatureModule, Serializabl
      */
     private Map<String, String> headers = new HashMap<>();
 
+    /**
+     * When attempting to reach the endpoint,
+     * this setting controls the number of <strong>retry attempts</strong> that CAS should execute
+     * Setting this value to a zero or negative value will disable the retry policy.
+     */
+    private int maximumRetryAttempts = 3;
 }

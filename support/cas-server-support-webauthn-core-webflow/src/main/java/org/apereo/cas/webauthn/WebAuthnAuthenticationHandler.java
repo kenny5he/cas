@@ -1,5 +1,6 @@
 package org.apereo.cas.webauthn;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationHandlerExecutionResult;
 import org.apereo.cas.authentication.Credential;
 import org.apereo.cas.authentication.MultifactorAuthenticationHandler;
@@ -9,16 +10,12 @@ import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.monitor.Monitorable;
 import org.apereo.cas.web.support.WebUtils;
-
 import com.yubico.core.RegistrationStorage;
 import com.yubico.core.SessionManager;
 import lombok.Getter;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
-
-import javax.security.auth.login.AccountNotFoundException;
-import javax.security.auth.login.FailedLoginException;
-import java.util.Objects;
 
 /**
  * This is {@link WebAuthnAuthenticationHandler}.
@@ -33,7 +30,7 @@ public class WebAuthnAuthenticationHandler extends AbstractPreAndPostProcessingA
 
     private final SessionManager sessionManager;
 
-    private final ObjectProvider<MultifactorAuthenticationProvider> multifactorAuthenticationProvider;
+    private final ObjectProvider<@NonNull MultifactorAuthenticationProvider> multifactorAuthenticationProvider;
 
     public WebAuthnAuthenticationHandler(final String name,
 
@@ -41,7 +38,7 @@ public class WebAuthnAuthenticationHandler extends AbstractPreAndPostProcessingA
                                          final RegistrationStorage webAuthnCredentialRepository,
                                          final SessionManager sessionManager,
                                          final Integer order,
-                                         final ObjectProvider<MultifactorAuthenticationProvider> multifactorAuthenticationProvider) {
+                                         final ObjectProvider<@NonNull MultifactorAuthenticationProvider> multifactorAuthenticationProvider) {
         super(name, principalFactory, order);
         this.webAuthnCredentialRepository = webAuthnCredentialRepository;
         this.sessionManager = sessionManager;

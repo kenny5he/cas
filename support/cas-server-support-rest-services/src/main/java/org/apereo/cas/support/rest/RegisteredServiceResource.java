@@ -1,5 +1,6 @@
 package org.apereo.cas.support.rest;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.AuthenticationException;
 import org.apereo.cas.authentication.AuthenticationSystemSupport;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -76,9 +78,9 @@ public class RegisteredServiceResource {
                 schema = @Schema(implementation = RegisteredService.class)
             )
         ))
-    public ResponseEntity<String> createService(@RequestBody final RegisteredService service,
-                                                final HttpServletRequest request,
-                                                final HttpServletResponse response) throws Throwable {
+    public ResponseEntity<@NonNull String> createService(@RequestBody final RegisteredService service,
+                                                         final HttpServletRequest request,
+                                                         final HttpServletResponse response) throws Throwable {
         try {
             val auth = authenticateRequest(request);
             if (isAuthenticatedPrincipalAuthorized(auth)) {

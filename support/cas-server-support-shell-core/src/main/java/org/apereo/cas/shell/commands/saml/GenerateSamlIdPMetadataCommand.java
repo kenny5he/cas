@@ -1,6 +1,8 @@
 package org.apereo.cas.shell.commands.saml;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
+import org.apereo.cas.shell.commands.CasShellCommand;
 import org.apereo.cas.support.saml.OpenSamlConfigBean;
 import org.apereo.cas.support.saml.idp.metadata.generator.FileSystemSamlIdPMetadataGenerator;
 import org.apereo.cas.support.saml.idp.metadata.generator.SamlIdPMetadataGeneratorConfigurationContext;
@@ -8,7 +10,6 @@ import org.apereo.cas.support.saml.idp.metadata.locator.FileSystemSamlIdPMetadat
 import org.apereo.cas.support.saml.idp.metadata.writer.DefaultSamlIdPCertificateAndKeyWriter;
 import org.apereo.cas.util.crypto.CipherExecutor;
 import org.apereo.cas.util.function.FunctionUtils;
-
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -17,14 +18,8 @@ import org.apache.velocity.app.VelocityEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.shell.standard.ShellCommandGroup;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellOption;
-
-import java.io.File;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.shell.core.command.annotation.Command;
+import org.springframework.shell.core.command.annotation.Option;
 
 /**
  * This is {@link GenerateSamlIdPMetadataCommand}.
@@ -32,10 +27,8 @@ import java.util.Optional;
  * @author Misagh Moayyed
  * @since 5.3.0
  */
-@ShellCommandGroup("SAML")
-@ShellComponent
 @Slf4j
-public class GenerateSamlIdPMetadataCommand {
+public class GenerateSamlIdPMetadataCommand implements CasShellCommand {
     @Autowired
     private ConfigurableApplicationContext applicationContext;
 
@@ -58,25 +51,49 @@ public class GenerateSamlIdPMetadataCommand {
      * @param subjectAltNames  additional subject alternative names for cert (besides entity id)
      * @throws Throwable the throwable
      */
-    @ShellMethod(key = "generate-idp-metadata", value = "Generate SAML2 IdP Metadata")
+    @Command(group = "SAML", name = "generate-idp-metadata", description = "Generate SAML2 IdP Metadata")
     public void generate(
-        @ShellOption(value = {"metadataLocation", "--metadataLocation"},
-            help = "Directory location to hold metadata and relevant keys/certificates",
-            defaultValue = "/etc/cas/saml") final String metadataLocation,
-        @ShellOption(value = {"entityId", "--entityId"},
-            help = "Entity ID to use for the generated metadata",
-            defaultValue = "cas.example.org") final String entityId,
-        @ShellOption(value = {"hostName", "--hostName"},
-            help = "CAS server prefix to be used at the IdP host name when generating metadata",
-            defaultValue = "https://cas.example.org/cas") final String serverPrefix,
-        @ShellOption(value = {"scope", "--scope"},
-            help = "Scope to use when generating metadata",
-            defaultValue = "example.org") final String scope,
-        @ShellOption(value = {"force", "--force"},
-            help = "Force metadata generation (XML only, not certs), overwriting anything at the specified location") final boolean force,
-        @ShellOption(value = {"subjectAltNames", "--subjectAltNames"},
-            help = "Comma separated list of other subject alternative names for the certificate (besides entityId)",
-            defaultValue = StringUtils.EMPTY) final String subjectAltNames) throws Throwable {
+        @Option(
+            longName = "metadataLocation",
+            description = "Directory location to hold metadata and relevant keys/certificates",
+            defaultValue = "/etc/cas/saml"
+        )
+        final String metadataLocation,
+
+        @Option(
+            longName = "entityId",
+            description = "Entity ID to use for the generated metadata",
+            defaultValue = "cas.example.org"
+        )
+        final String entityId,
+
+        @Option(
+            longName = "serverPrefix",
+            description = "CAS server prefix to be used at the IdP host name when generating metadata",
+            defaultValue = "https://cas.example.org/cas"
+        )
+        final String serverPrefix,
+
+        @Option(
+            longName = "scope",
+            description = "Scope to use when generating metadata",
+            defaultValue = "example.org"
+        )
+        final String scope,
+
+        @Option(
+            longName = "force",
+            description = "Force metadata generation (XML only, not certs), overwriting anything at the specified location"
+        )
+        final boolean force,
+
+        @Option(
+            longName = "subjectAltNames",
+            description = "Comma separated list of other subject alternative names for the certificate (besides entityId)",
+            defaultValue = StringUtils.EMPTY
+        )
+        final String subjectAltNames
+    ) throws Throwable {
 
         val locator = new FileSystemSamlIdPMetadataLocator(CipherExecutor.noOpOfStringToString(),
             new File(metadataLocation),
@@ -99,7 +116,7 @@ public class GenerateSamlIdPMetadataCommand {
             props.getAuthn().getSamlIdp().getCore().setEntityId(entityId);
             props.getServer().setScope(scope);
             props.getServer().setPrefix(serverPrefix);
-            
+
             val context = SamlIdPMetadataGeneratorConfigurationContext.builder()
                 .samlIdPMetadataLocator(locator)
                 .samlIdPCertificateAndKeyWriter(writer)

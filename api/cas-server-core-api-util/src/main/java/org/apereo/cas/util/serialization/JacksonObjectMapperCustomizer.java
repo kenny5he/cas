@@ -1,9 +1,8 @@
 package org.apereo.cas.util.serialization;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import module java.base;
 import org.springframework.core.Ordered;
-import java.util.HashMap;
-import java.util.Map;
+import tools.jackson.databind.cfg.MapperBuilder;
 
 /**
  * This is {@link JacksonObjectMapperCustomizer}.
@@ -28,7 +27,8 @@ public interface JacksonObjectMapperCustomizer extends Ordered {
      *
      * @param objectMapper the object mapper
      */
-    default void customize(final ObjectMapper objectMapper) {
+    default MapperBuilder customize(final MapperBuilder<?, ?> objectMapper) {
+        return objectMapper;
     }
 
     @Override

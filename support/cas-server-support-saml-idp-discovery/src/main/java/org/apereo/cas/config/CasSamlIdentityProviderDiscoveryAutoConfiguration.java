@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.configuration.model.SpringResourceProperties;
@@ -21,6 +22,7 @@ import org.apereo.cas.web.support.ArgumentExtractor;
 import lombok.val;
 import org.apache.commons.lang3.Strings;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -32,11 +34,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.webflow.definition.registry.FlowDefinitionRegistry;
 import org.springframework.webflow.engine.builder.support.FlowBuilderServices;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link CasSamlIdentityProviderDiscoveryAutoConfiguration}.
@@ -87,7 +84,7 @@ public class CasSamlIdentityProviderDiscoveryAutoConfiguration {
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     @ConditionalOnMissingBean(name = "identityProviderDiscoveryFeedService")
     public SamlIdentityProviderDiscoveryFeedService identityProviderDiscoveryFeedService(
-        final ObjectProvider<List<DelegatedClientIdentityProviderAuthorizer>> delegatedClientAuthorizers,
+        final ObjectProvider<@NonNull List<DelegatedClientIdentityProviderAuthorizer>> delegatedClientAuthorizers,
         @Qualifier("samlIdentityProviderEntityParser")
         final BeanContainer<SamlIdentityProviderEntityParser> samlIdentityProviderEntityParser,
         final CasConfigurationProperties casProperties,

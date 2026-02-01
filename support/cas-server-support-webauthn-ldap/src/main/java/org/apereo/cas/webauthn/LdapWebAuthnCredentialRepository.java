@@ -1,13 +1,14 @@
 package org.apereo.cas.webauthn;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.LdapConnectionFactory;
 import org.apereo.cas.util.LdapUtils;
+import org.apereo.cas.util.LoggingUtils;
 import org.apereo.cas.util.crypto.CipherExecutor;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.webauthn.storage.BaseWebAuthnCredentialRepository;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.yubico.data.CredentialRegistration;
 import lombok.extern.slf4j.Slf4j;
@@ -18,21 +19,6 @@ import org.ldaptive.ConnectionFactory;
 import org.ldaptive.LdapEntry;
 import org.ldaptive.LdapException;
 import org.springframework.beans.factory.DisposableBean;
-
-import java.io.IOException;
-import java.time.Clock;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This is {@link LdapWebAuthnCredentialRepository}.
@@ -182,8 +168,8 @@ public class LdapWebAuthnCredentialRepository extends BaseWebAuthnCredentialRepo
                 return WebAuthnUtils.getObjectMapper().readValue(json, new TypeReference<>() {
                 });
             }
-        } catch (final IOException e) {
-            LOGGER.error(e.getMessage(), e);
+        } catch (final Exception e) {
+            LoggingUtils.error(LOGGER, e);
         }
         return new ArrayList<>();
     }

@@ -1,11 +1,12 @@
 package org.apereo.cas.multitenancy;
 
+import module java.base;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.io.Serial;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This is {@link DefaultTenantUserInterfacePolicy}.
@@ -22,5 +23,5 @@ public class DefaultTenantUserInterfacePolicy implements TenantUserInterfacePoli
     @Serial
     private static final long serialVersionUID = 3238689336491450327L;
 
-    private String themeName;
+    private @Nullable String themeName;
 }

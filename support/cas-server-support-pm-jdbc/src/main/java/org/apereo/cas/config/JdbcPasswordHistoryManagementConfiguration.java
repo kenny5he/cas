@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.jpa.JpaBeanFactory;
@@ -15,6 +16,7 @@ import org.apereo.cas.util.spring.beans.BeanSupplier;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import lombok.val;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -28,7 +30,7 @@ import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import jakarta.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
+import module java.sql;
 
 /**
  * This is {@link JdbcPasswordHistoryManagementConfiguration}.
@@ -68,7 +70,7 @@ class JdbcPasswordHistoryManagementConfiguration {
 
         @Bean
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-        public FactoryBean<EntityManagerFactory> passwordHistoryEntityManagerFactory(
+        public FactoryBean<@NonNull EntityManagerFactory> passwordHistoryEntityManagerFactory(
             final ConfigurableApplicationContext applicationContext,
             final CasConfigurationProperties casProperties,
             @Qualifier("jpaPasswordHistoryVendorAdapter")
@@ -103,7 +105,7 @@ class JdbcPasswordHistoryManagementConfiguration {
         public PlatformTransactionManager transactionManagerPasswordHistory(
             final ConfigurableApplicationContext applicationContext,
             @Qualifier("passwordHistoryEntityManagerFactory")
-            final FactoryBean<EntityManagerFactory> emf) {
+            final FactoryBean<@NonNull EntityManagerFactory> emf) {
             return BeanSupplier.of(PlatformTransactionManager.class)
                 .when(CONDITION.given(applicationContext.getEnvironment()))
                 .supply(Unchecked.supplier(() -> {

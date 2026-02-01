@@ -1,5 +1,6 @@
 package org.apereo.cas.oidc.slo;
 
+import module java.base;
 import org.apereo.cas.logout.slo.SingleLogoutMessage;
 import org.apereo.cas.logout.slo.SingleLogoutMessageCreator;
 import org.apereo.cas.logout.slo.SingleLogoutRequestContext;
@@ -12,10 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jose4j.jwt.JwtClaims;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.UUID;
 
 /**
  * The message creator for the OIDC protocol.
@@ -27,7 +26,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OidcSingleLogoutMessageCreator implements SingleLogoutMessageCreator {
 
-    protected final ObjectProvider<OidcConfigurationContext> configurationProvider;
+    protected final ObjectProvider<@NonNull OidcConfigurationContext> configurationProvider;
 
     @Override
     public SingleLogoutMessage create(final SingleLogoutRequestContext request) throws Throwable {

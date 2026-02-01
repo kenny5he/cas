@@ -1,7 +1,7 @@
 package org.apereo.cas.ticket.registry;
 
+import module java.base;
 import org.apereo.cas.util.junit.EnabledIfListeningOnPort;
-
 import org.junit.jupiter.api.Tag;
 import org.springframework.test.context.TestPropertySource;
 
@@ -24,3 +24,4 @@ import org.springframework.test.context.TestPropertySource;
 @Tag("MariaDb")
 class MariaDbJpaTicketRegistryTests extends BaseJpaTicketRegistryTests {
 }
+

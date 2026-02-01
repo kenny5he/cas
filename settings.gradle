@@ -2,8 +2,9 @@
     The Develocity gradle plugin MUST be applied here.
  */
 plugins {
-    id "com.gradle.develocity" version "4.2"
+    id "com.gradle.develocity" version "4.3.2"
     id "com.gradle.common-custom-user-data-gradle-plugin" version "2.4.0"
+    id "org.gradle.toolchains.foojay-resolver-convention" version "1.0.0"
 }
 
 ext.isCiServer = System.getenv().containsKey("CI")
@@ -67,7 +68,7 @@ dependencyResolutionManagement {
             }
         }
         maven {
-            url = "https://oss.sonatype.org/content/repositories/snapshots"
+            url = "https://central.sonatype.com/repository/maven-snapshots"
             mavenContent { snapshotsOnly() }
         }
         maven {
@@ -391,6 +392,7 @@ include "support:cas-server-support-pm-jdbc"
 include "support:cas-server-support-pm-ldap"
 include "support:cas-server-support-pm-rest"
 include "support:cas-server-support-pm-webflow"
+include "support:cas-server-support-pulsar-ticket-registry"
 include "support:cas-server-support-qr-authentication"
 include "support:cas-server-support-radius"
 include "support:cas-server-support-radius-core"
@@ -538,4 +540,4 @@ include "webapp:cas-server-webapp-starter-tomcat"
 include "webapp:cas-server-webapp-native"
 include "webapp:cas-server-webapp-jetty"
 include "webapp:cas-server-webapp-tomcat"
-include "webapp:cas-server-webapp-undertow"
+//include "webapp:cas-server-webapp-undertow"

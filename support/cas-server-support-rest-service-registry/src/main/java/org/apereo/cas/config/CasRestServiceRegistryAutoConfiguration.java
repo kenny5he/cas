@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.services.RestfulServiceRegistry;
@@ -12,6 +13,7 @@ import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -21,9 +23,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * This is {@link CasRestServiceRegistryAutoConfiguration}.
@@ -43,7 +42,7 @@ public class CasRestServiceRegistryAutoConfiguration {
     @ConditionalOnMissingBean(name = "restfulServiceRegistry")
     public ServiceRegistry restfulServiceRegistry(
         final CasConfigurationProperties casProperties,
-        final ObjectProvider<List<ServiceRegistryListener>> serviceRegistryListeners,
+        final ObjectProvider<@NonNull List<ServiceRegistryListener>> serviceRegistryListeners,
         final ConfigurableApplicationContext applicationContext) {
         return BeanSupplier.of(ServiceRegistry.class)
             .when(CONDITION.given(applicationContext))

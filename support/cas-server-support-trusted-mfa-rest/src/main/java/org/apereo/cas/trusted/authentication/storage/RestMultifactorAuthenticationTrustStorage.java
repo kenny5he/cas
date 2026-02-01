@@ -1,5 +1,6 @@
 package org.apereo.cas.trusted.authentication.storage;
 
+import module java.base;
 import org.apereo.cas.configuration.model.support.mfa.trusteddevice.TrustedDevicesMultifactorProperties;
 import org.apereo.cas.trusted.authentication.api.MultifactorAuthenticationTrustRecord;
 import org.apereo.cas.trusted.authentication.api.MultifactorAuthenticationTrustRecordKeyGenerator;
@@ -8,18 +9,12 @@ import org.apereo.cas.util.http.HttpUtils;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
-import java.io.Serializable;
-import java.time.ZonedDateTime;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This is {@link RestMultifactorAuthenticationTrustStorage}.
@@ -84,7 +79,7 @@ public class RestMultifactorAuthenticationTrustStorage extends BaseMultifactorAu
         return new HashSet<>();
     }
 
-    private HttpEntity<Object> getHttpEntity(final Object body) {
+    private HttpEntity<@NonNull Object> getHttpEntity(final Object body) {
         val rest = getTrustedDevicesMultifactorProperties().getRest();
         val headers = HttpUtils.createBasicAuthHeaders(rest.getBasicAuthUsername(), rest.getBasicAuthPassword());
         headers.setContentType(MediaType.APPLICATION_JSON);

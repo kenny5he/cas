@@ -1,7 +1,7 @@
 package org.apereo.cas.support.events.jpa;
 
+import module java.base;
 import org.apereo.cas.util.junit.EnabledIfListeningOnPort;
-
 import org.junit.jupiter.api.Tag;
 import org.springframework.test.context.TestPropertySource;
 
@@ -19,7 +19,7 @@ import org.springframework.test.context.TestPropertySource;
     "cas.events.jpa.user=root",
     "cas.events.jpa.password=password",
     "cas.events.jpa.driver-class=com.mysql.cj.jdbc.Driver",
-    "cas.events.jpa.url=jdbc:mysql://localhost:3306/mysql?allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useSSL=FALSE",
+    "cas.events.jpa.url=jdbc:mysql://localhost:3306/cas?allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useSSL=FALSE",
     "cas.events.jpa.dialect=org.hibernate.dialect.MySQLDialect"
 })
 class MySQLJpaCasEventRepositoryTests extends JpaCasEventRepositoryTests {

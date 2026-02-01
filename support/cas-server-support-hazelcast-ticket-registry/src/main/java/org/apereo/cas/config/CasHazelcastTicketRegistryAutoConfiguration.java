@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.hz.HazelcastConfigurationFactory;
@@ -34,7 +35,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import java.util.ArrayList;
 
 /**
  * Spring's Java configuration component for {@code HazelcastInstance} that is consumed and used by
@@ -118,7 +118,7 @@ public class CasHazelcastTicketRegistryAutoConfiguration {
             ticketDefinitions.forEach(defn -> {
                 val query = buildCreateMappingQuery(defn);
                 LOGGER.trace("Creating mapping for [{}] via [{}]", defn.getPrefix(), query);
-                try (val __ = hazelcastInstance.getSql().execute(query)) {
+                try (val _ = hazelcastInstance.getSql().execute(query)) {
                     LOGGER.info("Created Hazelcast SQL mapping for [{}]", defn.getPrefix());
                 }
             });

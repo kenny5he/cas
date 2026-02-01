@@ -1,5 +1,6 @@
 package org.apereo.cas.aws.s3.services;
 
+import module java.base;
 import org.apereo.cas.config.CasAmazonS3ServiceRegistryAutoConfiguration;
 import org.apereo.cas.services.AbstractServiceRegistryTests;
 import org.apereo.cas.services.RegisteredService;
@@ -33,7 +34,8 @@ import static org.mockito.Mockito.*;
     "cas.service-registry.amazon-s3.endpoint=http://127.0.0.1:4566",
     "cas.service-registry.amazon-s3.region=us-east-1",
     "cas.service-registry.amazon-s3.credential-access-key=test",
-    "cas.service-registry.amazon-s3.credential-secret-key=test"
+    "cas.service-registry.amazon-s3.credential-secret-key=test",
+    "cas.service-registry.amazon-s3.path-style-enabled=true"
 })
 @EnabledIfListeningOnPort(port = 4566)
 @Tag("AmazonWebServices")

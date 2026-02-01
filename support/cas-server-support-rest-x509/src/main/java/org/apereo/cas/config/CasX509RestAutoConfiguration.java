@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.adaptors.x509.authentication.X509CertificateExtractor;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
@@ -13,6 +14,7 @@ import org.apereo.cas.util.spring.beans.BeanSupplier;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -86,11 +88,11 @@ public class CasX509RestAutoConfiguration {
         @ConditionalOnMissingBean(name = "x509RestHttpRequestCredentialFactoryConfigurer")
         public RestHttpRequestCredentialFactoryConfigurer x509RestHttpRequestCredentialFactoryConfigurer(
             @Qualifier("x509RestTlsClientCert")
-            final ObjectProvider<RestHttpRequestCredentialFactory> x509RestTlsClientCert,
+            final ObjectProvider<@NonNull RestHttpRequestCredentialFactory> x509RestTlsClientCert,
             @Qualifier("x509RestMultipartBody")
-            final ObjectProvider<RestHttpRequestCredentialFactory> x509RestMultipartBody,
+            final ObjectProvider<@NonNull RestHttpRequestCredentialFactory> x509RestMultipartBody,
             @Qualifier("x509RestRequestHeader")
-            final ObjectProvider<RestHttpRequestCredentialFactory> x509RestRequestHeader,
+            final ObjectProvider<@NonNull RestHttpRequestCredentialFactory> x509RestRequestHeader,
             final CasConfigurationProperties casProperties) {
             return factory -> {
                 val restProperties = casProperties.getRest().getX509();

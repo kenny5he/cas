@@ -1,9 +1,9 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.ServiceFactory;
 import org.apereo.cas.authentication.principal.WebApplicationService;
 import org.apereo.cas.util.RandomUtils;
-
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jooq.lambda.Unchecked;
@@ -11,13 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.IntStream;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -28,7 +21,7 @@ import static org.mockito.Mockito.*;
  * @since 5.2.0
  */
 @Slf4j
-public abstract class AbstractServicesManagerTests{
+public abstract class AbstractServicesManagerTests {
     @Autowired
     @Qualifier(ServiceRegistry.BEAN_NAME)
     protected ServiceRegistry serviceRegistry;
@@ -141,6 +134,22 @@ public abstract class AbstractServicesManagerTests{
         registeredService.setExpirationPolicy(expirationPolicy);
         servicesManager.save(registeredService);
         assertNull(servicesManager.findServiceBy(RegisteredServiceTestUtils.getService(registeredService.getServiceId())));
+    }
+
+    @Test
+    void verifyReleasePolicyChainFlattened() {
+        val registeredService = new CasRegisteredService();
+        registeredService.setId(RandomUtils.nextLong());
+        registeredService.setName(UUID.randomUUID().toString());
+        registeredService.setServiceId(registeredService.getName());
+        val chain = new ChainingAttributeReleasePolicy();
+        val policy1 = new ReturnAllAttributeReleasePolicy();
+        chain.addPolicies(policy1);
+        registeredService.setAttributeReleasePolicy(chain);
+        servicesManager.save(registeredService);
+        val result = servicesManager.findServiceBy(RegisteredServiceTestUtils.getService(registeredService.getServiceId()));
+        assertNotNull(result);
+        assertInstanceOf(ReturnAllAttributeReleasePolicy.class, result.getAttributeReleasePolicy());
     }
 
     /**

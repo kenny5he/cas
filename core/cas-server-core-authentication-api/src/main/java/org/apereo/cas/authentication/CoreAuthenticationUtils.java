@@ -1,5 +1,6 @@
 package org.apereo.cas.authentication;
 
+import module java.base;
 import org.apereo.cas.authentication.policy.AllAuthenticationHandlersSucceededAuthenticationPolicy;
 import org.apereo.cas.authentication.policy.AllCredentialsValidatedAuthenticationPolicy;
 import org.apereo.cas.authentication.policy.AtLeastOneCredentialValidatedAuthenticationPolicy;
@@ -24,6 +25,7 @@ import org.apereo.cas.configuration.model.core.authentication.PersonDirectoryPri
 import org.apereo.cas.configuration.model.core.authentication.PrincipalAttributesCoreProperties;
 import org.apereo.cas.configuration.model.core.authentication.policy.BaseAuthenticationPolicyProperties;
 import org.apereo.cas.util.CollectionUtils;
+import org.apereo.cas.util.RegexUtils;
 import org.apereo.cas.util.nativex.CasRuntimeHintsRegistrar;
 import org.apereo.cas.util.scripting.ExecutableCompiledScriptFactory;
 import org.apereo.cas.validation.Assertion;
@@ -40,14 +42,6 @@ import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.DefaultResourceLoader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link CoreAuthenticationUtils}.
@@ -84,25 +78,17 @@ public class CoreAuthenticationUtils {
      * @return the attribute merger
      */
     public static AttributeMerger getAttributeMerger(final PrincipalAttributesCoreProperties.MergingStrategyTypes mergingPolicy) {
-        switch (mergingPolicy) {
+        return switch (mergingPolicy) {
             case MULTIVALUED -> {
                 val merger = new MultivaluedAttributeMerger();
                 merger.setDistinctValues(true);
-                return merger;
+                yield merger;
             }
-            case ADD -> {
-                return new NoncollidingAttributeAdder();
-            }
-            case SOURCE -> {
-                return new ReturnOriginalAttributeMerger();
-            }
-            case DESTINATION -> {
-                return new ReturnChangesAttributeMerger();
-            }
-            default -> {
-                return new ReplacingAttributeAdder();
-            }
-        }
+            case ADD -> new NoncollidingAttributeAdder();
+            case SOURCE -> new ReturnOriginalAttributeMerger();
+            case DESTINATION -> new ReturnChangesAttributeMerger();
+            default -> new ReplacingAttributeAdder();
+        };
     }
 
     /**
@@ -247,7 +233,7 @@ public class CoreAuthenticationUtils {
             val predicateClazz = ClassUtils.getClass(selectionCriteria);
             return (Predicate<Credential>) predicateClazz.getDeclaredConstructor().newInstance();
         } catch (final Exception e) {
-            val predicate = Pattern.compile(selectionCriteria).asPredicate();
+            val predicate = RegexUtils.createPattern(selectionCriteria).asPredicate();
             return credential -> predicate.test(credential.getId());
         }
     }

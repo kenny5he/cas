@@ -1,5 +1,6 @@
 package org.apereo.cas.authentication.adaptive.intel;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationException;
 import org.apereo.cas.configuration.model.core.authentication.AdaptiveAuthenticationProperties;
 import org.apereo.cas.multitenancy.TenantExtractor;
@@ -15,8 +16,6 @@ import org.apache.hc.core5.http.HttpResponse;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.webflow.execution.RequestContext;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 
 /**
  * This is {@link RestfulIPAddressIntelligenceService}.
@@ -47,6 +46,7 @@ public class RestfulIPAddressIntelligenceService extends BaseIPAddressIntelligen
                 .url(SpringExpressionLanguageValueResolver.getInstance().resolve(rest.getUrl()))
                 .parameters(parameters)
                 .headers(rest.getHeaders())
+                .maximumRetryAttempts(rest.getMaximumRetryAttempts())
                 .build();
 
             response = HttpUtils.execute(exec);

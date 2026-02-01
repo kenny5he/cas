@@ -1,5 +1,6 @@
 package org.apereo.cas.authentication.adaptive.intel;
 
+import module java.base;
 import org.apereo.cas.authentication.BaseAuthenticationTests;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.test.CasTestExtension;
@@ -18,8 +19,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestPropertySource;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -33,7 +32,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class RestfulIPAddressIntelligenceServiceTests {
 
     @SpringBootTest(classes = BaseAuthenticationTests.SharedTestConfiguration.class,
-        properties = "cas.authn.adaptive.ip-intel.rest.url=http://localhost:${random.int[3000,9999]}")
+        properties = {
+            "cas.authn.adaptive.ip-intel.rest.url=http://localhost:${random.int[3000,9999]}",
+            "cas.authn.adaptive.ip-intel.rest.maximum-retry-attempts=0"
+        })
     abstract static class BaseTests {
         @Autowired
         protected CasConfigurationProperties casProperties;
@@ -88,7 +90,9 @@ class RestfulIPAddressIntelligenceServiceTests {
         @Test
         void verifyOperation() throws Throwable {
             val port = resolvePort();
-            try (val webServer = new MockWebServer(port, new ByteArrayResource("12.435".getBytes(StandardCharsets.UTF_8)), HttpStatus.PRECONDITION_REQUIRED)) {
+            try (val webServer = new MockWebServer(port,
+                new ByteArrayResource("12.435".getBytes(StandardCharsets.UTF_8)),
+                HttpStatus.PRECONDITION_REQUIRED)) {
                 webServer.start();
 
                 val requestContext = MockRequestContext.create(applicationContext);

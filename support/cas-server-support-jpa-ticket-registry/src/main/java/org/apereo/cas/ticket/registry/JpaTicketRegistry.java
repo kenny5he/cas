@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.registry;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.jpa.JpaBeanFactory;
@@ -20,20 +21,13 @@ import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.transaction.support.TransactionOperations;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * JPA implementation of a CAS {@link TicketRegistry}. This implementation of
@@ -89,7 +83,7 @@ public class JpaTicketRegistry extends AbstractTicketRegistry {
     }
 
     @Override
-    public Ticket getTicket(final String ticketId, final Predicate<Ticket> predicate) {
+    public @Nullable Ticket getTicket(final String ticketId, final Predicate<Ticket> predicate) {
         return transactionTemplate.execute(callback -> {
             try {
                 val encTicketId = digestIdentifier(ticketId);
@@ -113,12 +107,12 @@ public class JpaTicketRegistry extends AbstractTicketRegistry {
 
     @Override
     public int deleteTicket(final String ticketId) {
-        return transactionTemplate.execute(callback -> FunctionUtils.doUnchecked(() -> super.deleteTicket(ticketId)));
+        return transactionTemplate.execute(_ -> FunctionUtils.doUnchecked(() -> super.deleteTicket(ticketId)));
     }
 
     @Override
     public long deleteAll() {
-        return transactionTemplate.execute(status -> {
+        return transactionTemplate.execute(_ -> {
             val factory = getJpaTicketEntityFactory();
             val query = entityManager.createQuery(String.format("DELETE FROM %s", factory.getEntityName()));
             return Long.valueOf(query.executeUpdate());
@@ -126,8 +120,20 @@ public class JpaTicketRegistry extends AbstractTicketRegistry {
     }
 
     @Override
+    public long deleteTicketsFor(final String principalId) {
+        return transactionTemplate.execute(_ -> {
+            val factory = getJpaTicketEntityFactory();
+            val sql = String.format("DELETE FROM %s t WHERE t.principalId=:principalId", factory.getEntityName());
+            val query = entityManager.createQuery(sql)
+                .setParameter("principalId", digestIdentifier(principalId));
+            query.setLockMode(LockModeType.NONE);
+            return Long.valueOf(query.executeUpdate());
+        });
+    }
+
+    @Override
     public Collection<? extends Ticket> getTickets() {
-        return transactionTemplate.execute(status -> {
+        return transactionTemplate.execute(_ -> {
             val factory = getJpaTicketEntityFactory();
             val sql = String.format("SELECT t FROM %s t", factory.getEntityName());
             val query = entityManager.createQuery(sql, factory.getType());
@@ -143,7 +149,7 @@ public class JpaTicketRegistry extends AbstractTicketRegistry {
 
     @Override
     public Ticket updateTicket(final Ticket ticket) {
-        return transactionTemplate.execute(status -> FunctionUtils.doUnchecked(() -> {
+        return transactionTemplate.execute(_ -> FunctionUtils.doUnchecked(() -> {
             LOGGER.trace("Updating ticket [{}]", ticket);
             val ticketEntity = getTicketEntityFrom(ticket);
             entityManager.merge(ticketEntity);
@@ -175,7 +181,7 @@ public class JpaTicketRegistry extends AbstractTicketRegistry {
 
     @Override
     public long sessionCount() {
-        return transactionTemplate.execute(status -> {
+        return transactionTemplate.execute(_ -> {
             val factory = getJpaTicketEntityFactory();
             val sql = String.format("SELECT COUNT(t.id) FROM %s t WHERE t.type=:type", factory.getEntityName());
             val query = entityManager.createQuery(sql).setParameter("type", getTicketTypeName(TicketGrantingTicket.class));
@@ -288,7 +294,7 @@ public class JpaTicketRegistry extends AbstractTicketRegistry {
 
     @Override
     public long countTicketsFor(final Service service) {
-        return transactionTemplate.execute(status -> {
+        return transactionTemplate.execute(_ -> {
             val factory = getJpaTicketEntityFactory();
             val sql = String.format("SELECT COUNT(t.id) FROM %s t WHERE t.service = :service", factory.getEntityName());
             val query = entityManager.createQuery(sql).setParameter("service", service.getId());
@@ -304,7 +310,7 @@ public class JpaTicketRegistry extends AbstractTicketRegistry {
 
     @Override
     public long serviceTicketCount() {
-        return transactionTemplate.execute(status -> {
+        return transactionTemplate.execute(_ -> {
             val factory = getJpaTicketEntityFactory();
             val sql = String.format("SELECT COUNT(t.id) FROM %s t WHERE t.type=:type", factory.getEntityName());
             val query = entityManager.createQuery(sql)
@@ -350,7 +356,7 @@ public class JpaTicketRegistry extends AbstractTicketRegistry {
     }
 
     protected int deleteTicketGrantingTickets(final String ticketId) {
-        return transactionTemplate.execute(status -> {
+        return transactionTemplate.execute(_ -> {
             val factory = getJpaTicketEntityFactory();
             var sql = String.format("DELETE FROM %s t WHERE t.parentId = :id OR t.id = :id", factory.getEntityName());
             LOGGER.trace("Creating delete query [{}] for ticket id [{}]", sql, ticketId);

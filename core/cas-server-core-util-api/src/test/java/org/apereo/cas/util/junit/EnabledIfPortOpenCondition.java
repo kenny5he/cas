@@ -1,13 +1,12 @@
 package org.apereo.cas.util.junit;
 
+import module java.base;
 import org.apereo.cas.util.SocketUtils;
 import lombok.val;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.platform.commons.support.AnnotationSupport;
-import java.lang.reflect.AnnotatedElement;
-import java.util.Arrays;
 
 /**
  * This is {@link EnabledIfPortOpenCondition}.
@@ -31,7 +30,7 @@ public class EnabledIfPortOpenCondition implements ExecutionCondition {
         }
         for (val port : ports) {
             if (port > 0 && SocketUtils.isTcpPortAvailable(port)) {
-                return ConditionEvaluationResult.disabled(String.format("%s is disabled because %s is not listening for requests", element, port));
+                return ConditionEvaluationResult.disabled(String.format("%s is disabled because port %s is not listening for requests", element, port));
             }
         }
         return ConditionEvaluationResult.enabled(

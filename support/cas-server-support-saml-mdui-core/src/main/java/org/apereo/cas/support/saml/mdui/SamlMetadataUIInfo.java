@@ -1,8 +1,9 @@
 package org.apereo.cas.support.saml.mdui;
 
+import module java.base;
 import org.apereo.cas.services.WebBasedRegisteredService;
+import org.apereo.cas.util.RegexUtils;
 import org.apereo.cas.web.flow.services.DefaultRegisteredServiceUserInterfaceInfo;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,14 +15,6 @@ import org.opensaml.core.xml.schema.XSURI;
 import org.opensaml.saml.ext.saml2mdui.UIInfo;
 import org.opensaml.saml.saml2.metadata.LocalizedName;
 import org.opensaml.saml.saml2.metadata.LocalizedURI;
-
-import java.io.Serial;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link SamlMetadataUIInfo}.
@@ -103,7 +96,7 @@ public class SamlMetadataUIInfo extends DefaultRegisteredServiceUserInterfaceInf
 
     private static Optional<String> findLocale(final String locale, final List<?> items) {
         LOGGER.trace("Looking for locale [{}]", locale);
-        val p = Pattern.compile(locale, Pattern.CASE_INSENSITIVE);
+        val p = RegexUtils.createPattern(locale, Pattern.CASE_INSENSITIVE);
         return items.stream()
             .filter(LocalizedName.class::isInstance)
             .map(LocalizedName.class::cast)

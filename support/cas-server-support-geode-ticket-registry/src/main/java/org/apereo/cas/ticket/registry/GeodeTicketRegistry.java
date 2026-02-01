@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.registry;
 
+import module java.base;
 import org.apereo.cas.configuration.model.support.geode.GeodeProperties;
 import org.apereo.cas.ticket.ServiceTicket;
 import org.apereo.cas.ticket.Ticket;
@@ -15,16 +16,9 @@ import lombok.val;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.geode.cache.query.SelectResults;
+import org.jooq.lambda.Unchecked;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ConfigurableApplicationContext;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * This is {@link GeodeTicketRegistry}, a ticket registry implementation
@@ -67,7 +61,7 @@ public class GeodeTicketRegistry extends AbstractTicketRegistry implements Dispo
                 return String.format("[%s:{%s}]", entry.getKey(), valueList);
             })
             .collect(Collectors.joining(","));
-        
+
         val document = GeodeTicketDocument.builder()
             .id(encodedTicket.getId())
             .kind(metadata.getImplementationClass().getName())
@@ -103,6 +97,22 @@ public class GeodeTicketRegistry extends AbstractTicketRegistry implements Dispo
             cache.region().destroy(encTicketId);
         }
         return 1;
+    }
+
+    @Override
+    public long deleteTicketsFor(final String principalId) {
+        return ticketCatalog.findAll()
+            .stream()
+            .mapToLong(Unchecked.toLongFunction(ticketDefinition -> {
+                val cache = getCacheFromMetadata(ticketDefinition);
+                val queryString = "SELECT t.id FROM /%s t WHERE t.principal = $1".formatted(cache.region().getName());
+                val query = cache.cache().getQueryService().newQuery(queryString);
+                val digestedId = digestIdentifier(principalId);
+                val results = (Collection<String>) query.execute(digestedId);
+                cache.region().removeAll(results);
+                return results.size();
+            }))
+            .sum();
     }
 
     @Override
@@ -195,7 +205,7 @@ public class GeodeTicketRegistry extends AbstractTicketRegistry implements Dispo
     public Stream<? extends Ticket> getSessionsWithAttributes(final Map<String, List<Object>> queryAttributes) {
         val metadata = ticketCatalog.findTicketDefinition(TicketGrantingTicket.class).orElseThrow();
         val cache = getCacheFromMetadata(metadata);
-        
+
         val sqlBuilder = new StringBuilder(String.format("SELECT * FROM /%s t WHERE t.prefix='%s' AND (",
             cache.region().getName(), metadata.getPrefix()));
 
@@ -208,7 +218,7 @@ public class GeodeTicketRegistry extends AbstractTicketRegistry implements Dispo
                     .append("%}]%' OR ")
             ));
         sqlBuilder.append("1=2);");
-        
+
         val sql = sqlBuilder.toString();
         LOGGER.debug("Executing SQL query [{}]", sql);
         return FunctionUtils.doUnchecked(() -> {

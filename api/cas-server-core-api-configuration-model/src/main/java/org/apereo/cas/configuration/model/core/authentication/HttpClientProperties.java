@@ -1,18 +1,13 @@
 package org.apereo.cas.configuration.model.core.authentication;
 
+import module java.base;
 import org.apereo.cas.configuration.support.DurationCapable;
 import org.apereo.cas.configuration.support.RegularExpressionCapable;
 import org.apereo.cas.configuration.support.RequiresModule;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Configuration properties class for http.client.truststore.
@@ -71,7 +66,7 @@ public class HttpClientProperties implements Serializable {
      * Whether CAS should accept local URLs.
      * For example {@code http(s)://localhost/logout}.
      */
-    private boolean allowLocalUrls;
+    private boolean allowLocalUrls = true;
 
     /**
      * If specified the regular expression will be used to validate the url's authority.

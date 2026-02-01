@@ -1,19 +1,11 @@
 package org.apereo.cas.uma.web.controllers.permission;
 
-import org.apereo.cas.util.function.FunctionUtils;
+import module java.base;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link UmaPermissionRegistrationRequest}.
@@ -45,6 +37,6 @@ public class UmaPermissionRegistrationRequest implements Serializable {
      */
     @JsonIgnore
     public String toJson() {
-        return FunctionUtils.doUnchecked(() -> MAPPER.writeValueAsString(this));
+        return MAPPER.writeValueAsString(this);
     }
 }

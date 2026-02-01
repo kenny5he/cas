@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
+import module java.base;
 
 /**
  * This is {@link CheckDuplicateGradleConfiguration}.
@@ -13,7 +14,7 @@ import java.util.regex.Pattern;
  * @since 7.1.0
  */
 public class CheckDuplicateGradleConfiguration {
-    public static void main(final String[] args) throws Exception {
+    void main(final String[] args) throws Exception {
         checkUnusedDependencies(args[0]);
         checkPattern(args[0]);
     }

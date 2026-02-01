@@ -1,5 +1,7 @@
 package org.apereo.cas.kafka;
 
+import module java.base;
+import org.apereo.cas.util.function.FunctionUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.val;
@@ -15,9 +17,6 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * This is {@link KafkaObjectFactory}.
  *
@@ -28,9 +27,9 @@ import java.util.Map;
  */
 @RequiredArgsConstructor
 @Setter
+@SuppressWarnings("NullAway.Init")
 public class KafkaObjectFactory<K, V> {
     private final String bootstrapAddress;
-
 
     private String consumerGroupId;
 
@@ -78,7 +77,7 @@ public class KafkaObjectFactory<K, V> {
     public Map<String, Object> getConsumerConfiguration() {
         val props = new HashMap<String, Object>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, this.consumerGroupId);
+        FunctionUtils.doIfNotNull(this.consumerGroupId, id -> props.put(ConsumerConfig.GROUP_ID_CONFIG, id));
         return props;
     }
 

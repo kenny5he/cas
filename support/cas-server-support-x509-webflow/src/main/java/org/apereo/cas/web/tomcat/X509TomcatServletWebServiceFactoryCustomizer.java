@@ -1,5 +1,6 @@
 package org.apereo.cas.web.tomcat;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -7,10 +8,12 @@ import org.apache.catalina.connector.Connector;
 import org.apache.coyote.http11.AbstractHttp11Protocol;
 import org.apache.tomcat.util.net.SSLHostConfig;
 import org.apache.tomcat.util.net.SSLHostConfigCertificate;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
-import org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryCustomizer;
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
-import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
+import org.jspecify.annotations.NonNull;
+import org.springframework.boot.tomcat.autoconfigure.TomcatServerProperties;
+import org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory;
+import org.springframework.boot.web.server.autoconfigure.ServerProperties;
+import org.springframework.boot.web.server.autoconfigure.servlet.ServletWebServerFactoryCustomizer;
+import org.springframework.boot.web.server.servlet.ConfigurableServletWebServerFactory;
 
 /**
  * This is {@link X509TomcatServletWebServiceFactoryCustomizer}.
@@ -23,16 +26,19 @@ public class X509TomcatServletWebServiceFactoryCustomizer extends ServletWebServ
     private final CasConfigurationProperties casProperties;
 
     private final ServerProperties serverProperties;
+    private final TomcatServerProperties tomcatServerProperties;
 
     public X509TomcatServletWebServiceFactoryCustomizer(final ServerProperties serverProperties,
-        final CasConfigurationProperties casProperties) {
+                                                        final TomcatServerProperties tomcatServerProperties,
+                                                        final CasConfigurationProperties casProperties) {
         super(serverProperties);
         this.casProperties = casProperties;
         this.serverProperties = serverProperties;
+        this.tomcatServerProperties = tomcatServerProperties;
     }
 
     @Override
-    public void customize(final ConfigurableServletWebServerFactory factory) {
+    public void customize(final @NonNull ConfigurableServletWebServerFactory factory) {
         val webflow = casProperties.getAuthn().getX509().getWebflow();
         if (factory instanceof final TomcatServletWebServerFactory tomcat && webflow.getPort() > 0) {
             LOGGER.debug("Creating X509 configuration for the tomcat container...");
@@ -42,7 +48,7 @@ public class X509TomcatServletWebServiceFactoryCustomizer extends ServletWebServ
             connector.setSecure(true);
             connector.setAllowTrace(true);
             
-            val maxPostSize = Long.valueOf(serverProperties.getTomcat().getMaxHttpFormPostSize().toBytes());
+            val maxPostSize = Long.valueOf(tomcatServerProperties.getMaxHttpFormPostSize().toBytes());
             connector.setMaxPostSize(maxPostSize.intValue());
             LOGGER.debug("Configured max post size for the tomcat connector on port [{}] to be [{}]", webflow.getPort(), maxPostSize);
 
@@ -53,9 +59,10 @@ public class X509TomcatServletWebServiceFactoryCustomizer extends ServletWebServ
             protocol.setMaxHttpRequestHeaderSize(maxHeaderSize.intValue());
             LOGGER.debug("Configured max request header size for the tomcat connector on port [{}] to be [{}]", webflow.getPort(), maxHeaderSize);
             
-            val maxResponseHeader = Long.valueOf(serverProperties.getTomcat().getMaxHttpResponseHeaderSize().toBytes());
+            val maxResponseHeader = Long.valueOf(tomcatServerProperties.getMaxHttpResponseHeaderSize().toBytes());
             protocol.setMaxHttpResponseHeaderSize(maxResponseHeader.intValue());
-            LOGGER.debug("Configured max response header size for the tomcat connector on port [{}] to be [{}]", webflow.getPort(), maxResponseHeader);
+            LOGGER.debug("Configured max response header size for the tomcat connector on port [{}] to be [{}]",
+                webflow.getPort(), maxResponseHeader);
             
             val sslHostConfig = new SSLHostConfig();
             sslHostConfig.setSslProtocol("TLS");
@@ -71,7 +78,7 @@ public class X509TomcatServletWebServiceFactoryCustomizer extends ServletWebServ
 
             sslHostConfig.addCertificate(certificate);
             protocol.addSslHostConfig(sslHostConfig);
-            tomcat.addAdditionalTomcatConnectors(connector);
+            tomcat.addAdditionalConnectors(connector);
         }
     }
 }

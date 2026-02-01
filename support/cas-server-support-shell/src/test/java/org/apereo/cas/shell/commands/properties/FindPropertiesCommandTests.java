@@ -1,10 +1,9 @@
 package org.apereo.cas.shell.commands.properties;
 
+import module java.base;
 import org.apereo.cas.shell.commands.BaseCasShellCommandTests;
-
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -17,7 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class FindPropertiesCommandTests extends BaseCasShellCommandTests {
     @Test
     void verifyOperation() {
-        assertDoesNotThrow(() -> runShellCommand(() -> () -> "find --name cas.server.name --summary"));
+        assertDoesNotThrow(() -> runShellCommand(() -> "find --name=cas.server.name --summary=false"));
+        assertDoesNotThrow(() -> runShellCommand(() -> "find --name=cas.server.name --summary=true"));
     }
 }
 

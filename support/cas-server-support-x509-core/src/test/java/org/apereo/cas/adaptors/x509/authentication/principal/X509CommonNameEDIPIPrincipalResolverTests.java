@@ -1,5 +1,6 @@
 package org.apereo.cas.adaptors.x509.authentication.principal;
 
+import module java.base;
 import org.apereo.cas.adaptors.x509.authentication.CasX509Certificate;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.authentication.CoreAuthenticationUtils;
@@ -28,10 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
-import java.io.FileInputStream;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
@@ -63,7 +61,7 @@ class X509CommonNameEDIPIPrincipalResolverTests {
         MockitoAnnotations.openMocks(this).close();
     }
 
-    private static X509Certificate getCertificateFrom(final String certPath) throws Exception {
+    private static X509Certificate getCertificateFrom(final String certPath) {
         val certLocation = X509CommonNameEDIPIPrincipalResolverTests.class.getResource(certPath).getPath();
         return FunctionUtils.doUnchecked(() -> {
             try (val in = new FileInputStream(certLocation)) {
@@ -77,7 +75,7 @@ class X509CommonNameEDIPIPrincipalResolverTests {
      *
      * @return Test parameter data.
      */
-    public static Stream<Arguments> getTestParameters() throws Exception {
+    public static Stream<Arguments> getTestParameters() {
         return Stream.of(
             /*
              * test with cert with EDIPI and no alternate

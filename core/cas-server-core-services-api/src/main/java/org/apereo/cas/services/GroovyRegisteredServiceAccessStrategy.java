@@ -1,5 +1,6 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.configuration.support.ExpressionLanguageCapable;
 import org.apereo.cas.util.ResourceUtils;
@@ -15,7 +16,6 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.val;
 import jakarta.persistence.Transient;
-import java.io.Serial;
 
 /**
  * This is {@link GroovyRegisteredServiceAccessStrategy}.
@@ -75,7 +75,7 @@ public class GroovyRegisteredServiceAccessStrategy extends BaseRegisteredService
 
     protected void buildGroovyAccessStrategyInstanceIfNeeded() {
         if (watchableScript == null) {
-            FunctionUtils.doAndHandle(__ -> {
+            FunctionUtils.doAndHandle(_ -> {
                 val location = SpringExpressionLanguageValueResolver.getInstance().resolve(this.groovyScript);
                 val groovyResource = ResourceUtils.getResourceFrom(location);
                 val scriptFactory = ExecutableCompiledScriptFactory.getExecutableCompiledScriptFactory();

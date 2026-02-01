@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.api.PasswordlessTokenRepository;
 import org.apereo.cas.api.PasswordlessUserAccountCustomizer;
 import org.apereo.cas.api.PasswordlessUserAccountStore;
@@ -29,8 +30,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
-import java.util.List;
 
 /**
  * This is {@link CasMongoDbPasswordlessAuthenticationAutoConfiguration}.
@@ -49,14 +50,14 @@ public class CasMongoDbPasswordlessAuthenticationAutoConfiguration {
         @ConditionalOnMissingBean(name = "mongoDbPasswordlessAuthenticationTemplate")
         @Bean
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-        public MongoOperations mongoDbPasswordlessAuthenticationTemplate(
+        public MongoTemplate mongoDbPasswordlessAuthenticationTemplate(
             final CasConfigurationProperties casProperties,
             @Qualifier(CasSSLContext.BEAN_NAME) final CasSSLContext casSslContext) {
             val mongo = casProperties.getAuthn().getPasswordless().getAccounts().getMongo();
             val factory = new MongoDbConnectionFactory(casSslContext.getSslContext());
             val mongoTemplate = factory.buildMongoTemplate(mongo);
             MongoDbConnectionFactory.createCollection(mongoTemplate, mongo.getCollection(), mongo.isDropCollection());
-            return mongoTemplate;
+            return mongoTemplate.asMongoTemplate();
         }
 
         @Bean
@@ -83,14 +84,14 @@ public class CasMongoDbPasswordlessAuthenticationAutoConfiguration {
         @ConditionalOnMissingBean(name = "mongoDbPasswordlessAuthenticationTokensTemplate")
         @Bean
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-        public MongoOperations mongoDbPasswordlessAuthenticationTokensTemplate(
+        public MongoTemplate mongoDbPasswordlessAuthenticationTokensTemplate(
             final CasConfigurationProperties casProperties,
             @Qualifier(CasSSLContext.BEAN_NAME) final CasSSLContext casSslContext) {
             val mongo = casProperties.getAuthn().getPasswordless().getTokens().getMongo();
             val factory = new MongoDbConnectionFactory(casSslContext.getSslContext());
             val mongoTemplate = factory.buildMongoTemplate(mongo);
             MongoDbConnectionFactory.createCollection(mongoTemplate, mongo.getCollection(), mongo.isDropCollection());
-            return mongoTemplate;
+            return mongoTemplate.asMongoTemplate();
         }
 
         @Bean
@@ -139,7 +140,7 @@ public class CasMongoDbPasswordlessAuthenticationAutoConfiguration {
             initialDelayString = "${cas.authn.passwordless.tokens.mongo.cleaner.schedule.start-delay:PT30S}",
             fixedDelayString = "${cas.authn.passwordless.tokens.mongo.cleaner.schedule.repeat-interval:PT35S}")
         public void clean() {
-            lock.tryLock(__ -> repository.clean());
+            lock.tryLock(_ -> repository.clean());
         }
     }
 }

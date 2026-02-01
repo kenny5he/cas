@@ -1,13 +1,12 @@
 package org.apereo.cas.ticket;
 
+import module java.base;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import jakarta.annotation.Nonnull;
-import java.io.Serial;
-import java.util.Comparator;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This is {@link DefaultTicketDefinition}.
@@ -36,7 +35,7 @@ public class DefaultTicketDefinition implements TicketDefinition {
     private final int order;
 
     @Override
-    public int compareTo(@Nonnull final TicketDefinition definition) {
+    public int compareTo(@NonNull final TicketDefinition definition) {
         return Comparator
             .comparing(TicketDefinition::getPrefix)
             .thenComparing(TicketDefinition::getImplementationClass, Comparator.comparing(Class::getName))

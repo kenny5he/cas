@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationHandler;
 import org.apereo.cas.authentication.AuthenticationHandlerExecutionResult;
 import org.apereo.cas.configuration.CasConfigurationProperties;
@@ -14,10 +15,11 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.actuate.autoconfigure.tracing.ConditionalOnEnabledTracing;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.micrometer.tracing.autoconfigure.ConditionalOnEnabledTracingExport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -37,26 +39,26 @@ import org.springframework.context.annotation.Lazy;
 })
 @EnableAspectJAutoProxy
 @Lazy(false)
-@ConditionalOnEnabledTracing
+@ConditionalOnEnabledTracingExport
 class CasCoreAuthenticationMonitoringConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = "authenticationManagerMonitoringAspect")
     public AuthenticationManagerMonitoringAspect authenticationManagerMonitoringAspect(
-        final ObjectProvider<ExecutableObserver> observer) {
+        final ObjectProvider<@NonNull ExecutableObserver> observer) {
         return new AuthenticationManagerMonitoringAspect(observer);
     }
 
     @Bean
     @ConditionalOnMissingBean(name = "authenticationHandlerMonitoringAspect")
     public AuthenticationHandlerMonitoringAspect authenticationHandlerMonitoringAspect(
-        final ObjectProvider<ExecutableObserver> observer) {
+        final ObjectProvider<@NonNull ExecutableObserver> observer) {
         return new AuthenticationHandlerMonitoringAspect(observer);
     }
 
     @Aspect
     @Slf4j
     @SuppressWarnings("UnusedMethod")
-    record AuthenticationManagerMonitoringAspect(ObjectProvider<ExecutableObserver> observerProvider) {
+    record AuthenticationManagerMonitoringAspect(ObjectProvider<@NonNull ExecutableObserver> observerProvider) {
 
         @Around("allComponentsInAuthenticationManagementNamespace()")
         public Object aroundAuthenticationManagementOperations(final ProceedingJoinPoint joinPoint) throws Throwable {
@@ -71,7 +73,7 @@ class CasCoreAuthenticationMonitoringConfiguration {
     @Aspect
     @Slf4j
     @SuppressWarnings("UnusedMethod")
-    record AuthenticationHandlerMonitoringAspect(ObjectProvider<ExecutableObserver> observerProvider) {
+    record AuthenticationHandlerMonitoringAspect(ObjectProvider<@NonNull ExecutableObserver> observerProvider) {
 
         @Around("allComponentsInAuthenticationHandlerNamespace()")
         public Object aroundAuthenticationHandlerOperations(final ProceedingJoinPoint joinPoint) throws Throwable {

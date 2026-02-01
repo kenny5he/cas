@@ -1,11 +1,11 @@
 package org.apereo.cas.web.flow.decorator;
 
+import module java.base;
 import org.apereo.cas.configuration.model.core.web.flow.RestfulWebflowLoginDecoratorProperties;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.io.IOUtils;
@@ -15,9 +15,7 @@ import org.hjson.JsonValue;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.webflow.execution.RequestContext;
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-import java.util.Map;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link RestfulLoginWebflowDecorator}.
@@ -34,12 +32,13 @@ public class RestfulLoginWebflowDecorator implements WebflowDecorator {
 
     @Override
     public void decorate(final RequestContext requestContext) {
-        FunctionUtils.doUnchecked(__ -> {
+        FunctionUtils.doUnchecked(_ -> {
             HttpResponse response = null;
             try {
                 val exec = HttpExecutionRequest.builder()
                     .basicAuthPassword(restProperties.getBasicAuthPassword())
                     .basicAuthUsername(restProperties.getBasicAuthUsername())
+                    .maximumRetryAttempts(restProperties.getMaximumRetryAttempts())
                     .method(HttpMethod.valueOf(restProperties.getMethod().toUpperCase(Locale.ENGLISH).trim()))
                     .url(restProperties.getUrl())
                     .headers(restProperties.getHeaders())

@@ -1,11 +1,11 @@
 package org.apereo.cas.authentication.policy;
 
+import module java.base;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.authentication.exceptions.AccountDisabledException;
 import org.apereo.cas.authentication.exceptions.AccountPasswordMustChangeException;
 import org.apereo.cas.configuration.model.core.authentication.RestAuthenticationPolicyProperties;
 import org.apereo.cas.util.MockWebServer;
-
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Tag;
@@ -13,16 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
-
-import javax.security.auth.login.AccountExpiredException;
-import javax.security.auth.login.AccountLockedException;
-import javax.security.auth.login.AccountNotFoundException;
-import javax.security.auth.login.FailedLoginException;
-
-import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-
-import static org.apereo.cas.util.junit.Assertions.*;
+import static org.apereo.cas.util.junit.Assertions.assertThrowsWithRootCause;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -35,14 +26,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class RestfulAuthenticationPolicyTests {
     private static void assertPolicyFails(final int port, final HttpStatus status,
                                           final Class<? extends Throwable> exceptionClass) {
-        val applicationContext = new StaticApplicationContext();
-        applicationContext.refresh();
-
-        try (val webServer = new MockWebServer(port,
+        try (val applicationContext = new StaticApplicationContext();
+             val webServer = new MockWebServer(port,
             new ByteArrayResource(StringUtils.EMPTY.getBytes(StandardCharsets.UTF_8), "Output"), status)) {
+            applicationContext.refresh();
             webServer.start();
             val props = new RestAuthenticationPolicyProperties();
             props.setUrl("http://localhost:" + port);
+            props.setMaximumRetryAttempts(0);
             val policy = new RestfulAuthenticationPolicy(props);
             assertThrowsWithRootCause(GeneralSecurityException.class, exceptionClass,
                 () -> policy.isSatisfiedBy(CoreAuthenticationTestUtils.getAuthentication("casuser"), applicationContext));
@@ -59,6 +50,7 @@ class RestfulAuthenticationPolicyTests {
             webServer.start();
             val props = new RestAuthenticationPolicyProperties();
             props.setUrl("http://localhost:%s".formatted(webServer.getPort()));
+            props.setMaximumRetryAttempts(0);
             val policy = new RestfulAuthenticationPolicy(props);
             assertTrue(policy.isSatisfiedBy(CoreAuthenticationTestUtils.getAuthentication("casuser"), applicationContext).isSuccess());
         }

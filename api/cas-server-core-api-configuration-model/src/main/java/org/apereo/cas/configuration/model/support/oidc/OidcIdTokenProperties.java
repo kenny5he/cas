@@ -1,14 +1,11 @@
 package org.apereo.cas.configuration.model.support.oidc;
 
+import module java.base;
 import org.apereo.cas.configuration.support.DurationCapable;
 import org.apereo.cas.configuration.support.RequiresModule;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * This is {@link OidcIdTokenProperties}.
@@ -55,4 +52,11 @@ public class OidcIdTokenProperties implements Serializable {
      * in future CAS releases.
      */
     private boolean includeIdTokenClaims = true;
+
+    /**
+     * Flag to indicate whether the JWT bearer grant type is supported
+     * for the purposes of requesting ID tokens. Setting this to true
+     * will force to generate ID tokens when the JWT bearer grant type is used.
+     */
+    private boolean generateForJwtBearerGrantType;
 }

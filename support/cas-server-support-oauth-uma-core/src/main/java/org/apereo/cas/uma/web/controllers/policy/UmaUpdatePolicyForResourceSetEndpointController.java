@@ -1,5 +1,6 @@
 package org.apereo.cas.uma.web.controllers.policy;
 
+import module java.base;
 import org.apereo.cas.support.oauth.OAuth20Constants;
 import org.apereo.cas.uma.UmaConfigurationContext;
 import org.apereo.cas.uma.ticket.resource.ResourceSetPolicy;
@@ -20,8 +21,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.HashSet;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link UmaUpdatePolicyForResourceSetEndpointController}.
@@ -68,7 +67,7 @@ public class UmaUpdatePolicyForResourceSetEndpointController extends BaseUmaEndp
             val resourceSetResult = getUmaConfigurationContext().getUmaResourceSetRepository().getById(resourceId);
             if (resourceSetResult.isEmpty()) {
                 val model = buildResponseEntityErrorModel(HttpStatus.NOT_FOUND, "Requested resource-set cannot be found");
-                return new ResponseEntity(model, model, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(model, HttpStatus.BAD_REQUEST);
             }
             val resourceSet = resourceSetResult.get();
             resourceSet.validate(profileResult);

@@ -1,5 +1,6 @@
 package org.apereo.cas.web.report;
 
+import module java.base;
 import org.apereo.cas.services.CasRegisteredService;
 import org.apereo.cas.services.RegisteredServiceTestUtils;
 import org.apereo.cas.services.util.RegisteredServiceJsonSerializer;
@@ -10,12 +11,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
-import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-import static org.apereo.cas.web.CasYamlHttpMessageConverter.MEDIA_TYPE_CAS_YAML;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -76,6 +71,23 @@ class RegisteredServicesEndpointTests extends AbstractCasEndpointTests {
     }
 
     @Test
+    void verifyValidateService() throws Throwable {
+        var content = new RegisteredServiceJsonSerializer(applicationContext)
+            .toString(RegisteredServiceTestUtils.getRegisteredService());
+        mockMvc.perform(post("/actuator/registeredServices/validate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content))
+            .andExpect(status().isOk());
+
+        content = new RegisteredServiceYamlSerializer(applicationContext)
+            .toString(RegisteredServiceTestUtils.getRegisteredService());
+        mockMvc.perform(post("/actuator/registeredServices/validate")
+                .contentType(MediaType.APPLICATION_YAML_VALUE)
+                .content(content))
+            .andExpect(status().isOk());
+    }
+    
+    @Test
     void verifyImportOperationAsJson() throws Throwable {
         val content = new RegisteredServiceJsonSerializer(applicationContext)
             .toString(RegisteredServiceTestUtils.getRegisteredService());
@@ -108,7 +120,7 @@ class RegisteredServicesEndpointTests extends AbstractCasEndpointTests {
         val content = new RegisteredServiceYamlSerializer(applicationContext)
             .toString(RegisteredServiceTestUtils.getRegisteredService());
         mockMvc.perform(post("/actuator/registeredServices/import")
-                .contentType(MEDIA_TYPE_CAS_YAML)
+                .contentType(MediaType.APPLICATION_YAML)
                 .content(content))
             .andExpect(status().isCreated());
     }

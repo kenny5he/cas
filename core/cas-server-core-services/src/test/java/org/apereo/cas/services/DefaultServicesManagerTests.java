@@ -1,5 +1,6 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.config.BaseAutoConfigurationTests;
 import org.apereo.cas.services.query.RegisteredServiceQuery;
 import org.apereo.cas.test.CasTestExtension;
@@ -16,9 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.Ordered;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -36,7 +34,7 @@ class DefaultServicesManagerTests {
         properties = "cas.service-registry.core.index-services=false")
     class NoIndexingTests extends AbstractServicesManagerTests {
         @Test
-        void verifyQuerying() throws Exception {
+        void verifyQuerying() {
             val registeredService = new CasRegisteredService();
             registeredService.setId(RandomUtils.nextLong());
             registeredService.setName(UUID.randomUUID().toString());

@@ -1,5 +1,6 @@
 package org.apereo.cas.interrupt;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.EncodingUtils;
 import org.apereo.cas.util.function.FunctionUtils;
@@ -7,14 +8,13 @@ import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.web.cookie.CasCookieBuilder;
 import org.apereo.cas.web.support.CookieUtils;
 import org.apereo.cas.web.support.WebUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.webflow.execution.RequestContext;
-import java.util.Optional;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link SimpleInterruptTrackingEngine}.
@@ -62,7 +62,7 @@ public class SimpleInterruptTrackingEngine implements InterruptTrackingEngine {
 
     @Override
     public Optional<InterruptResponse> forCurrentRequest(final RequestContext requestContext) {
-        return FunctionUtils.doAndHandle(__ -> {
+        return FunctionUtils.doAndHandle(_ -> {
             val httpRequest = WebUtils.getHttpServletRequestFromExternalWebflowContext(requestContext);
             val cookieValue = casCookieBuilder.retrieveCookieValue(httpRequest);
             LOGGER.debug("Retrieved interrupt cookie value [{}]", cookieValue);
@@ -75,7 +75,7 @@ public class SimpleInterruptTrackingEngine implements InterruptTrackingEngine {
     @Override
     public boolean isInterrupted(final RequestContext requestContext) {
         return FunctionUtils.doAndHandle(
-                __ -> {
+                _ -> {
                     val interruptResponse = forCurrentRequest(requestContext);
                     val authentication = WebUtils.getAuthentication(requestContext);
                     return interruptResponse.stream().anyMatch(InterruptResponse::isInterrupt)

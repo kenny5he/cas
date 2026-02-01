@@ -1,22 +1,19 @@
 package org.apereo.cas.mfa.simple.ticket;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.ticket.AbstractTicket;
 import org.apereo.cas.ticket.ExpirationPolicy;
-
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This is {@link CasSimpleMultifactorAuthenticationTicketImpl}.
@@ -42,7 +39,9 @@ public class CasSimpleMultifactorAuthenticationTicketImpl extends AbstractTicket
     private Service service;
 
     public CasSimpleMultifactorAuthenticationTicketImpl(final String id, final ExpirationPolicy expirationPolicy,
-                                                        final Service service, final Map<String, Serializable> properties) {
+                                                        final Service service,
+                                                        @JsonSetter(nulls = Nulls.AS_EMPTY)
+                                                        final Map<String, Serializable> properties) {
         super(id, expirationPolicy);
         this.service = service;
         setProperties(new HashMap<>(properties));

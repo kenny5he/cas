@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
+import module java.base;
 
 /**
  * This is {@link CheckRedundantTestConfigurationInheritance}.
@@ -16,7 +17,7 @@ import java.util.regex.Pattern;
  * @since 6.3.0
  */
 public class CheckRedundantTestConfigurationInheritance {
-    public static void main(final String[] args) throws Exception {
+    void main(final String[] args) throws Exception {
         var patternBootTestClasses = Pattern.compile("@SpringBootTest\\(classes\\s*=\\s*\\{(.*?)\\}", Pattern.DOTALL);
         var patternBootTestClass = Pattern.compile("@SpringBootTest\\(classes\\s*=\\s*(.*)");
         var importedTestClasses = Pattern.compile("@Import\\(\\{(.*?)\\}\\)", Pattern.DOTALL);

@@ -1,5 +1,6 @@
 package org.apereo.cas.oidc.jwks.generator;
 
+import module java.base;
 import org.apereo.cas.configuration.model.support.oidc.OidcProperties;
 import org.apereo.cas.configuration.support.CasConfigurationJasyptCipherExecutor;
 import org.apereo.cas.util.ResourceUtils;
@@ -21,10 +22,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * This is {@link OidcDefaultJsonWebKeystoreGeneratorService}.
@@ -76,7 +73,7 @@ public class OidcDefaultJsonWebKeystoreGeneratorService implements OidcJsonWebKe
                 file -> new Consumer<File>() {
                     @Override
                     public void accept(final File file) {
-                        FunctionUtils.doUnchecked(__ -> {
+                        FunctionUtils.doUnchecked(_ -> {
                             if (applicationContext.isActive()) {
                                 LOGGER.info("Publishing event to broadcast change in [{}]", file);
                                 applicationContext.publishEvent(new OidcJsonWebKeystoreModifiedEvent(this, file, clientInfo));

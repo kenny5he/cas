@@ -1,7 +1,7 @@
 package org.apereo.cas.pm.jdbc;
 
+import module java.base;
 import org.apereo.cas.util.junit.EnabledIfListeningOnPort;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.springframework.test.context.TestPropertySource;
@@ -17,7 +17,7 @@ import org.springframework.test.context.TestPropertySource;
     "cas.authn.pm.jdbc.user=root",
     "cas.authn.pm.jdbc.password=password",
     "cas.authn.pm.jdbc.driver-class=com.mysql.cj.jdbc.Driver",
-    "cas.authn.pm.jdbc.url=jdbc:mysql://localhost:3306/mysql?allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useSSL=FALSE",
+    "cas.authn.pm.jdbc.url=jdbc:mysql://localhost:3306/cas?allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useSSL=FALSE",
     "cas.authn.pm.jdbc.dialect=org.hibernate.dialect.MySQLDialect"
 })
 @EnabledIfListeningOnPort(port = 3306)

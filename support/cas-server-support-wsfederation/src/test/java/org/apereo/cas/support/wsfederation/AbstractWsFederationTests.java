@@ -1,5 +1,6 @@
 package org.apereo.cas.support.wsfederation;
 
+import module java.base;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.config.CasWsFederationAuthenticationAutoConfiguration;
 import org.apereo.cas.support.saml.AbstractOpenSamlTests;
@@ -16,11 +17,6 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Abstract class, provides resources to run wsfed tests.
@@ -38,7 +34,6 @@ import java.util.Map;
         "cas.authn.wsfed[0].signing-certificate-resources=classpath:adfs-signing.crt",
         "cas.authn.wsfed[0].identity-attribute=upn",
         "cas.authn.wsfed[0].attribute-resolver-enabled=true",
-        "cas.authn.wsfed[0].auto-redirect=false",
         "cas.authn.wsfed[0].name=Test ADFS1",
         "cas.authn.wsfed[0].encryption-private-key=classpath:adfs-enc-private.key",
         "cas.authn.wsfed[0].encryption-certificate=classpath:adfs-enc-certificate.crt"

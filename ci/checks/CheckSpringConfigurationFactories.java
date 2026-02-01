@@ -12,6 +12,7 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+import module java.base;
 
 public class CheckSpringConfigurationFactories {
     private static final String ANSI_RESET = "\u001B[0m";
@@ -24,7 +25,7 @@ public class CheckSpringConfigurationFactories {
     private static final String ANSI_CYAN = "\u001B[36m";
     private static final String ANSI_WHITE = "\u001B[37m";
 
-    public static void main(final String[] args) throws Exception {
+    void main(final String[] args) throws Exception {
         checkSpringFactoryConfigurations(args[0]);
         checkMissingSpringFactoryConfigurations(args[0]);
         checkMissingSpringAutoConfigurations(args[0]);

@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.registry.compact;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.ServiceFactory;
 import org.apereo.cas.ticket.Ticket;
 import org.apereo.cas.ticket.TicketFactory;
@@ -13,9 +14,8 @@ import com.google.common.base.Splitter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
-import java.util.HashMap;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link TransientSessionTicketCompactor}.
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  */
 @RequiredArgsConstructor
 public class TransientSessionTicketCompactor implements TicketCompactor<TransientSessionTicket> {
-    private final ObjectProvider<TicketFactory> ticketFactory;
+    private final ObjectProvider<@NonNull TicketFactory> ticketFactory;
     private final ServiceFactory serviceFactory;
 
     @Override

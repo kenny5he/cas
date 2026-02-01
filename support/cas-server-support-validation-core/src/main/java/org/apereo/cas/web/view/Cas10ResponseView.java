@@ -1,5 +1,6 @@
 package org.apereo.cas.web.view;
 
+import module java.base;
 import org.apereo.cas.CasProtocolConstants;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
 import org.apereo.cas.authentication.ProtocolAttributeEncoder;
@@ -9,17 +10,11 @@ import org.apereo.cas.services.web.view.AbstractCasView;
 import org.apereo.cas.util.LoggingUtils;
 import org.apereo.cas.validation.AuthenticationAttributeReleasePolicy;
 import org.apereo.cas.validation.CasProtocolAttributesRenderer;
-
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.MediaType;
-
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import java.io.StringWriter;
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * Custom View to Return the CAS 1.0 Protocol Response. Implemented as a view
@@ -45,10 +40,10 @@ public class Cas10ResponseView extends AbstractCasView {
 
     @Override
     protected void renderMergedOutputModel(
-        @Nonnull
-        final Map model, @Nonnull
+        @NonNull
+        final Map model, @NonNull
         final HttpServletRequest request,
-        @Nonnull
+        @NonNull
         final HttpServletResponse response) throws Exception {
         try (val writer = new StringWriter()) {
             if (this.successResponse) {

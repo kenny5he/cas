@@ -1,5 +1,6 @@
 package org.apereo.cas.mail;
 
+import module java.base;
 import org.apereo.cas.config.CasCoreWebAutoConfiguration;
 import org.apereo.cas.config.CasSendGridAutoConfiguration;
 import org.apereo.cas.configuration.model.support.email.EmailProperties;
@@ -17,12 +18,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.sendgrid.SendGridAutoConfiguration;
+import org.springframework.boot.sendgrid.autoconfigure.SendGridAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**

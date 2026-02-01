@@ -1,5 +1,6 @@
 package org.apereo.cas.web.flow.pac4j;
 
+import module java.base;
 import org.apereo.cas.api.PasswordlessAuthenticationRequest;
 import org.apereo.cas.authentication.principal.DelegatedAuthenticationCredentialExtractor;
 import org.apereo.cas.authentication.surrogate.SurrogateCredentialTrait;
@@ -20,9 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ConfigurableApplicationContext;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -70,6 +68,23 @@ class SurrogateDelegatedAuthenticationCredentialExtractorTests {
         assertTrue(trait.isPresent());
         assertEquals("cassurrogate", trait.get().getSurrogateUsername());
         when(client.getCredentials(any())).thenReturn(Optional.empty());
+        assertTrue(delegatedAuthenticationCredentialExtractor.extract(client, context).isEmpty());
+    }
+
+    @Test
+    void verifyExtractionWithoutSurrogate() throws Throwable {
+        val context = MockRequestContext.create(applicationContext);
+        val client = mock(BaseClient.class);
+
+        val uid = UUID.randomUUID().toString();
+        val passwordlessRequest = PasswordlessAuthenticationRequest
+            .builder()
+            .username(uid)
+            .build();
+        PasswordlessWebflowUtils.putPasswordlessAuthenticationRequest(context, passwordlessRequest);
+        val tokenCredentials = new TokenCredentials(uid);
+        when(client.getCredentials(any())).thenReturn(Optional.of(tokenCredentials));
+        when(client.validateCredentials(any(), any())).thenReturn(Optional.of(tokenCredentials));
         assertTrue(delegatedAuthenticationCredentialExtractor.extract(client, context).isEmpty());
     }
 }

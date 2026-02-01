@@ -1,17 +1,18 @@
 package org.apereo.cas.hibernate;
 
+import module java.base;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.scripting.ExecutableCompiledScriptFactory;
 import org.apereo.cas.util.spring.ApplicationContextProvider;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy;
 import org.hibernate.boot.model.naming.Identifier;
+import org.hibernate.boot.model.naming.PhysicalNamingStrategySnakeCaseImpl;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import jakarta.annotation.Nonnull;
 
 /**
  * This is {@link CasHibernatePhysicalNamingStrategy}.
@@ -20,7 +21,7 @@ import jakarta.annotation.Nonnull;
  * @since 6.0.0
  */
 @Slf4j
-public class CasHibernatePhysicalNamingStrategy extends CamelCaseToUnderscoresNamingStrategy implements ApplicationContextAware {
+public class CasHibernatePhysicalNamingStrategy extends PhysicalNamingStrategySnakeCaseImpl implements ApplicationContextAware {
     @Override
     public Identifier toPhysicalTableName(final Identifier name, final JdbcEnvironment jdbcEnvironment) {
         val propsResult = ApplicationContextProvider.getCasConfigurationProperties();
@@ -60,18 +61,7 @@ public class CasHibernatePhysicalNamingStrategy extends CamelCaseToUnderscoresNa
     }
 
     @Override
-    public void setApplicationContext(@Nonnull final ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(@NonNull final ApplicationContext applicationContext) throws BeansException {
         ApplicationContextProvider.holdApplicationContext(applicationContext);
-    }
-
-    @Override
-    protected boolean isCaseInsensitive(final JdbcEnvironment jdbcEnvironment) {
-        val propsResult = ApplicationContextProvider.getCasConfigurationProperties();
-        if (propsResult.isEmpty()) {
-            LOGGER.debug("Could not load configuration settings to determine case insensitivity.");
-            return super.isCaseInsensitive(jdbcEnvironment);
-        }
-        val casProperties = propsResult.get();
-        return casProperties.getJdbc().isCaseInsensitive();
     }
 }

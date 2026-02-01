@@ -1,5 +1,6 @@
 package org.apereo.cas.services.resource;
 
+import module java.base;
 import org.apereo.cas.configuration.api.CasConfigurationPropertiesSourceLocator;
 import org.apereo.cas.services.AbstractServiceRegistry;
 import org.apereo.cas.services.RegisteredService;
@@ -30,29 +31,12 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apereo.inspektr.common.web.ClientInfoHolder;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This is {@link AbstractResourceBasedServiceRegistry}.
@@ -146,7 +130,7 @@ public abstract class AbstractResourceBasedServiceRegistry extends AbstractServi
         super(applicationContext, serviceRegistryListeners);
         LOGGER.trace("Provided service registry directory is specified at [{}]", configDirectory);
 
-        FunctionUtils.doAndHandle(__ -> {
+        FunctionUtils.doAndHandle(_ -> {
             val servicesDirectory = prepareRegisteredServicesDirectory(configDirectory);
             val file = servicesDirectory.getFile();
             LOGGER.trace("Prepared service registry directory is specified at [{}]", file);
@@ -190,7 +174,7 @@ public abstract class AbstractResourceBasedServiceRegistry extends AbstractServi
     }
 
     @Override
-    public RegisteredService save(final RegisteredService service) {
+    public @Nullable RegisteredService save(final RegisteredService service) {
         service.assignIdIfNecessary();
         val fileName = getRegisteredServiceFileName(service);
         try (val out = Files.newOutputStream(fileName.toPath())) {
@@ -251,7 +235,8 @@ public abstract class AbstractResourceBasedServiceRegistry extends AbstractServi
                 ? FileUtils.listFiles(serviceRegistryDirectoryFile, getExtensions(), true)
                 : List.<File>of();
             
-            LOGGER.trace("Located [{}] files from [{}] are [{}]", getExtensions(), this.serviceRegistryDirectory, files);
+            LOGGER.trace("Located [{}] files from [{}] are [{}]",
+                Arrays.toString(getExtensions()), this.serviceRegistryDirectory, files);
             val clientInfo = ClientInfoHolder.getClientInfo();
 
             this.services = files
@@ -354,7 +339,7 @@ public abstract class AbstractResourceBasedServiceRegistry extends AbstractServi
         this.services.remove(service.getId());
     }
 
-    protected RegisteredService getRegisteredServiceFromFile(final File file) {
+    protected @Nullable RegisteredService getRegisteredServiceFromFile(final File file) {
         val fileName = file.getName();
         if (!fileName.isEmpty() && fileName.charAt(0) == '.') {
             LOGGER.trace("[{}] starts with ., ignoring...", fileName);

@@ -1,11 +1,10 @@
 package org.apereo.cas.monitor;
 
+import module java.base;
 import lombok.val;
 import org.ldaptive.ConnectionValidator;
 import org.ldaptive.PooledConnectionFactory;
-import org.springframework.boot.actuate.health.Health;
-
-import java.util.concurrent.ExecutorService;
+import org.springframework.boot.health.contributor.Health;
 
 /**
  * Monitors an ldaptive {@link PooledConnectionFactory}.

@@ -1,5 +1,6 @@
 package org.apereo.cas.consent;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.services.RegisteredService;
 import org.apereo.cas.util.CollectionUtils;
@@ -7,23 +8,14 @@ import org.apereo.cas.util.DigestUtils;
 import org.apereo.cas.util.EncodingUtils;
 import org.apereo.cas.util.crypto.CipherExecutor;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-import com.fasterxml.jackson.core.util.MinimalPrettyPrinter;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.hjson.JsonValue;
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import tools.jackson.core.util.MinimalPrettyPrinter;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link DefaultConsentDecisionBuilder}.
@@ -122,7 +114,8 @@ public class DefaultConsentDecisionBuilder implements ConsentDecisionBuilder {
      */
     protected String buildAndEncodeConsentAttributes(final Map<String, List<Object>> attributes) {
         try {
-            val json = MAPPER.writer(new MinimalPrettyPrinter()).writeValueAsString(Objects.requireNonNull(attributes));
+            val json = MAPPER.writer().with(new MinimalPrettyPrinter())
+                .writeValueAsString(Objects.requireNonNull(attributes));
             LOGGER.trace("Consentable attributes are [{}]", json);
             val base64 = EncodingUtils.encodeBase64(Objects.requireNonNull(json));
             return this.consentCipherExecutor.encode(base64);

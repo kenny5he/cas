@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.ticket.registry.DefaultTicketRegistryCleaner;
@@ -70,7 +71,7 @@ class CasCoreTicketsSchedulingConfiguration {
                 LOGGER.debug("Ticket registry cleaner is enabled to run on schedule.");
                 return new TicketRegistryCleanerScheduler(ticketRegistryCleaner);
             })
-            .otherwiseProxy(__ -> LOGGER.info("Ticket registry cleaner is not enabled to run on schedule. "
+            .otherwiseProxy(_ -> LOGGER.info("Ticket registry cleaner is not enabled to run on schedule. "
                 + "Expired tickets are not forcefully cleaned by CAS. It is up to the ticket registry itself to "
                 + "clean up tickets based on its own expiration and eviction policies."))
             .get();
@@ -95,7 +96,7 @@ class CasCoreTicketsSchedulingConfiguration {
             fixedDelayString = "${cas.ticket.registry.cleaner.schedule.repeat-interval:PT120S}")
         @Override
         public void run() {
-            FunctionUtils.doAndHandle(__ -> ticketRegistryCleaner.clean());
+            FunctionUtils.doAndHandle(_ -> ticketRegistryCleaner.clean());
         }
     }
 }

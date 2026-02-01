@@ -9,7 +9,7 @@
 <span th:fragment="main">
     <div class="attribute-tab w-100 mdc-data-table table-responsive noborder" id="attribute-tab-0">
 
-        <div class="jqueryui-tabs">
+        <div class="jqueryui-tabs" id="applications-tabs">
               <ul>
                 <li><a id="applications" href="#applications-tab">Applications</a></li>
                 <li><a id="saml2metadataproviders" href="#saml2metadataproviders-tab" class="hide">SAML2 Metadata Sources</a></li>
@@ -22,7 +22,7 @@
                     <tr class="mdc-data-table__header-row">
                         <th class="mdc-data-table__header-cell" role="columnheader" scope="col"></th>
                         <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Service</th>
-                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">URL</th>
+                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">URL Pattern</th>
                         <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Description</th>
                         <th class="mdc-data-table__header-cell" role="columnheader" scope="col"></th>
                         <th class="mdc-data-table__header-cell" role="columnheader" scope="col"></th>
@@ -34,24 +34,70 @@
 
                 <div width="10%">
                     <div class="mdc-touch-target-wrapper">
-                        <button name="newService" id="newService" class="mdc-button mdc-button--raised"
-                                aria-label="Create">
-                            <span class="mdc-button__label"><i class="mdc-tab__icon mdi mdi-plus"
-                                                               aria-hidden="true"></i>New</span>
-                        </button>
+                        <span class="mdc-menu-surface--anchor">
+                            <button name="newService" id="newService"
+                                    onclick="cas.openMenu();"
+                                    title="Create New Application"
+                                    class="mdc-button mdc-button--raised" aria-label="Create">
+                                <span class="mdc-button__label"><i class="mdc-tab__icon mdi mdi-plus"
+                                                                   aria-hidden="true"></i>New</span>
+                            </button>
+                            <div class="mdc-menu mdc-menu-surface" style="min-width: max(500px, 50%);)">
+                                <ul class="mdc-list" aria-orientation="vertical" role="menu" aria-hidden="true"
+                                    tabindex="-1">
+                                    <li class="mdc-list-item pb-3" role="menuitem">
+                                        <span class="mdc-list-item__ripple"></span>
+                                        <i class="mdi mdi-pencil fas fa-pencil" style="margin-top: 2px;"
+                                           aria-hidden="true"></i>
+                                        <div class="text-justify">
+                                            <h3>Editor</h3>
+                                            <span>Create a service definition using a plain-text editor where you can directly
+                                                modify the service definition or copy-paste it into the editor from elsewhere.</span>
+                                            <p></p>
+                                            <button name="newServicePlain" id="newServicePlain"
+                                                    class="mdc-button mdc-button--raised"
+                                                    aria-label="Create">
+                                                <span class="mdc-button__label"><i class="mdc-tab__icon mdi mdi-plus"
+                                                                                   aria-hidden="true"></i>Proceed</span>
+                                            </button>
+                                        </div>
+                                    </li>
+
+                                    <li class="mdc-list-item pb-3" role="menuitem" style="margin-top: 10px;">
+                                        <span class="mdc-list-item__ripple"></span>
+                                        <i class="mdi mdi-wizard-hat" aria-hidden="true"></i>
+                                        <div class="text-justify">
+                                            <h3 style="margin-top: 2px;">Wizard</h3>
+                                            <span>Create a service definition using a step-by-step wizard and form editor, allowing
+                                                you to modify individual settings and policies without prior knowledge of
+                                                the internal service definition model.</span>
+                                            <p></p>
+                                            <button name="newServiceWizard" id="newServiceWizard"
+                                                    class="mdc-button mdc-button--raised"
+                                                    style="margin-bottom: 2px;"
+                                                    aria-label="Create">
+                                                <span class="mdc-button__label"><i class="mdc-tab__icon mdi mdi-plus"
+                                                                                   aria-hidden="true"></i>Proceed</span>
+                                            </button>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </span>
                         <input type="file" id="serviceFileInput" style="display: none;">
                         <button name="importService" id="importService" class="mdc-button mdc-button--raised"
-                                aria-label="Import">
+                                title="Import applications and service definitions" aria-label="Import">
                              <span class="mdc-button__label"><i class="mdc-tab__icon mdi mdi-file-import"
                                                                 aria-hidden="true"></i>Import</span>
                         </button>
                         <button name="exportAll" id="exportAll" class="mdc-button mdc-button--raised"
-                                aria-label="Export All">
+                                title="Export applications and service definitions as a zip file" aria-label="Export All">
                              <span class="mdc-button__label"><i class="mdc-tab__icon mdi mdi-file-export"
                                                                 aria-hidden="true"></i>Export</span>
                         </button>
                         <button name="reloadAll" id="reloadAll" class="mdc-button mdc-button--raised"
                                 aria-label="Reload"
+                                title="Reload applications and service definitions from the service registry"
                                 onclick="fetchServices();">
                              <span class="mdc-button__label"><i class="mdc-tab__icon mdi mdi-refresh"
                                                                 aria-hidden="true"></i>Reload</span>
@@ -61,6 +107,609 @@
                 <div class="mw-20">
                   <canvas id="servicesChart"></canvas>
                 </div>
+
+                <div class="mdc-dialog modal" id="editServiceWizardDialog" role="alertdialog"
+                     aria-modal="true" aria-labelledby="edit-service-dialog-title" aria-describedby="dialog-content">
+                    <div class="mdc-dialog__container w-100 modal-dialog" style="max-height: 85%">
+                        <div class="mdc-dialog__surface mw-100 w-75 modal-content min-height-60">
+                            <div class="mdc-dialog__content modal-body" id="edit-service-wizard-dialog-content">
+
+                                <div class="p-2 banner banner-info"><h4>
+                                    The wizard-based service editor is a work in progress and not all features are supported yet.
+                                    Use with caution and consider using the plain-text editor for production use cases.
+                                    Verify with release notes for updates on the wizard functionality and feel free to contribute!
+
+                                    Keep the registration record as simple as possible; do NOT modify settings or assign values
+                                    unless you fully understand their purpose and implications. The generation process will only
+                                    accept and process non-default values to keep the service definition clean and concise.
+                                </h4></div>
+                                <span class="hide">
+                                    <p>The following application type is chosen:</p>
+                                    <pre><code id="serviceClassType" class="border-rounded language-html"></code></pre>
+                                </span>
+
+                                <div th:replace="~{fragments/switchbutton :: switchbutton (id='hideAdvancedOptions',
+                                    label='#Hide Advanced Options', cssClass='pb-2 pt-2', selected=true, dataAttrs='changeEventHandler=hideAdvancedRegisteredServiceOptions')}"/>
+                                
+                                <form id="editServiceWizardForm">
+                                    <div id="editServiceWizardContainer" class="d-flex">
+                                        <div id="editServiceWizardMenu" class="jqueryui-accordion mr-2 mmw-45">
+                                              <h3>General</h3>
+                                              <div id="editServiceWizardMenuItemGeneral">
+                                                  <p>This section defines basic properties and settings that can be assigned to an application.</p>
+
+                                                  <div id="editServiceWizardGeneralContainer"
+                                                       class="mdc-input-group-field mdc-input-group-field-append w-100">
+                                                    <script type="text/javascript">
+                                                        createRegisteredServiceFields();
+                                                    </script>
+
+                                                    <div class="class-CasRegisteredService">
+                                                        <script type="text/javascript">
+                                                            createCasRegisteredServiceFields();
+                                                        </script>
+                                                    </div>
+                                                  </div>
+                                              </div>
+
+                                             <h3 class="class-OAuthRegisteredService class-OidcRegisteredService">OAuth / OpenID Connect Relying Party</h3>
+                                             <div class="class-OAuthRegisteredService class-OidcRegisteredService"
+                                                  id="editServiceWizardMenuItemOAuthOidc">
+                                                 <p>This section defines properties and settings applicable to OAuth or OpenID Connect relying parties. </p>
+                                                 <div id="editServiceWizardOAuthOidcContainer"
+                                                      class="mdc-input-group-field mdc-input-group-field-append w-100">
+                                                     <script type="text/javascript">
+                                                          createRegisteredServiceOidcFields().then(() => {
+                                                            createRegisteredServiceResponseMode();
+                                                            createRegisteredServiceUserProfileViewType();
+                                                          });
+                                                     </script>
+                                                     
+                                                 </div>
+                                                 <div id="editServiceWizardOAuthOidcOptionsContainer"
+                                                      class="mdc-input-group-field mdc-input-group-field-append w-100">
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='bypassApprovalPrompt', label='#Bypass Approval Prompt', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='generateRefreshToken', label='#Generate Refresh Token', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='renewRefreshToken', label='#Renew Refresh Token', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='jwtAccessToken', label='#JWT Access Token', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='jwtRefreshToken', label='#JWT Refresh Token', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='signIdToken', label='#Sign ID Tokens', cssClass='class-OidcRegisteredService pt-2', dataAttrs='param-skip-true=true', selected=true)}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='encryptIdToken', label='#Encrypt ID Tokens', cssClass='class-OidcRegisteredService advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='idTokenEncryptionOptional', label='#Encrypt ID Tokens Optionally', cssClass='class-OidcRegisteredService pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='includeIdTokenClaims', label='#Include Claims in ID Tokens', selected=true, cssClass='class-OidcRegisteredService advanced-option', dataAttrs='param-skip-true=true')}"/>
+                                                 </div>
+                                             </div>
+
+                                            <h3 class="class-SamlRegisteredService">SAML2 Service Provider</h3>
+                                            <div class="class-SamlRegisteredService"
+                                                 id="editServiceWizardMenuItemSaml">
+                                                 <p>This section defines properties and settings applicable to SAML2 service providers. </p>
+                                                 <div id="editServiceWizardSamlContainer"
+                                                      class="mdc-input-group-field mdc-input-group-field-append w-100">
+                                                     <script type="text/javascript">
+                                                          createRegisteredServiceSaml2Fields();
+                                                     </script>
+
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='logoutResponseEnabled', label='#Send Logout Response', cssClass='pt-2 advanced-option', selected=true, dataAttrs='param-skip-true=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='requireSignedRoot', label='#Require Metadata Root Signed', cssClass='pt-2 advanced-option', selected=true, dataAttrs='param-skip-true=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='metadataCriteriaRemoveEmptyEntitiesDescriptors', label='#Remove Empty Entities Descriptors', selected=true, cssClass='pt-2 advanced-option', dataAttrs='param-skip-true=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='metadataCriteriaRemoveRolelessEntityDescriptors', label='#Remove Roleless Entity Descriptors', selected=true, cssClass='pt-2 advanced-option', dataAttrs='param-skip-true=true')}"/>
+
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='validateMetadataCertificates', label='#Validate Metadata Certificates', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='signUnsolicitedAuthnRequest', label='#Sign Unsolicited AuthnRequest', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='skipGeneratingSessionNotOnOrAfter', label='#Skip Generating Session NotOnOrAfter', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='skipGeneratingAssertionNameId', label='#Skip Generating Assertion NameID', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='skipGeneratingSubjectConfirmationInResponseTo', label='#Skip Generating SubjectConfirmation InResponseTo', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='isSkipGeneratingResponseInResponseTo', label='#Skip Generating Response InResponseTo', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='skipGeneratingSubjectConfirmationNotOnOrAfter', label='#Skip Generating SubjectConfirmation NotOnOrAfter', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='skipGeneratingSubjectConfirmationRecipient', label='#Skip Generating SubjectConfirmation Recipient', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='skipGeneratingSubjectConfirmationAddress', label='#Skip Generating SubjectConfirmation Address', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='skipGeneratingSubjectConfirmationNotBefore', label='#Skip Generating SubjectConfirmation NotBefore', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='skipGeneratingSubjectConfirmationNameId', label='#Skip Generating SubjectConfirmation NameID', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='skipGeneratingNameIdQualifiers', label='#Skip Generating NameID Qualifiers', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='skipGeneratingTransientNameId', label='#Skip Generating Transient NameID', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='skipValidatingAuthnRequest', label='#Skip Validating AuthnRequest', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='skipGeneratingServiceProviderNameIdQualifier', label='#Skip Generating SP NameID Qualifier', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='skipGeneratingAuthenticatingAuthority', label='#Skip Generating Authenticating Authority', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='skipGeneratingNameIdQualifier', label='#Skip Generating NameID Qualifier', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='encryptAssertions', label='#Encrypt Assertions', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='encryptAttributes', label='#Encrypt Attributes', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='encryptionOptional', label='#Encryption Optional', cssClass='pt-2 advanced-option', dataAttrs='param-skip-false=true')}"/>
+
+                                                     <section class="pt-4 advanced-option"
+                                                              id="editServiceWizardSamlAttributeNameFormatsContainer">
+                                                         <h3>Attribute Name Formats</h3>
+                                                         <script type="text/javascript">
+                                                             createRegisteredServiceAttributeNameFormat();
+                                                         </script>
+                                                     </section>
+
+                                                     <section class="pt-4 advanced-option"
+                                                              id="editServiceWizardSamlAttributeFriendlyNamesContainer">
+                                                         <h3>Attribute Friendly Names</h3>
+                                                         <script type="text/javascript">
+                                                            createRegisteredServiceAttributeFriendlyNames();
+                                                         </script>
+                                                     </section>
+
+                                                     <section class="pt-4 advanced-option"
+                                                              id="editServiceWizardSamlAttributeValueTypesContainer">
+                                                         <h3>Attribute Value Types</h3>
+                                                         <script type="text/javascript">
+                                                             createRegisteredServiceAttributeValueTypes();
+                                                         </script>
+                                                     </section>
+
+                                                     <section class="pt-4 advanced-option"
+                                                              id="editServiceWizardSamlMetadataCriteriaEntityAttributesContainer">
+                                                         <h3>Metadata Criteria Entity Attributes</h3>
+                                                         <script type="text/javascript">
+                                                            createRegisteredServiceMetadataCriteriaEntityAttribute();
+                                                         </script>
+                                                     </section>
+
+                                                 </div>
+                                            </div>
+
+                                            <h3 class="class-WSFederationRegisteredService">WS-Federation Relying Party</h3>
+                                            <div class="class-WSFederationRegisteredService"
+                                                 id="editServiceWizardMenuItemWsFederationRelyingParty">
+                                                <p>This section defines properties and settings applicable to WS-Federation relying parties.</p>
+                                                 <div id="editServiceWizardWSFederationContainer"
+                                                      class="mdc-input-group-field mdc-input-group-field-append w-100">
+                                                     <script type="text/javascript">
+                                                           createRegisteredServiceWsfedOptions();
+                                                     </script>
+                                                 </div>
+                                            </div>
+
+                                              <h3 class="advanced-option">Application Expiration Policy</h3>
+                                              <div id="editServiceWizardMenuItemExpirationPolicy">
+
+                                                    <script type="text/javascript">
+                                                        createRegisteredServiceExpirationPolicy();
+                                                    </script>
+
+                                                  <div th:replace="~{fragments/switchbutton :: switchbutton (id='deleteWhenExpired',
+                                                        title='When enabled, the service will be deleted upon expiration',
+                                                        label='#Delete When Expired', cssClass='pt-2',
+                                                        dataAttrs='param-skip-false=true,param-name=expirationPolicy.deleteWhenExpired')}"/>
+
+                                                  <div th:replace="~{fragments/switchbutton :: switchbutton (id='notifyWhenDeleted',
+                                                        title='When enabled, a notification will be sent when the service is deleted upon expiration',
+                                                        label='#Notify When Deleted', cssClass='pt-2',
+                                                        dataAttrs='param-skip-false=true,param-name=expirationPolicy.notifyWhenDeleted')}"/>
+
+                                                  <div th:replace="~{fragments/switchbutton :: switchbutton (id='notifyWhenExpired',
+                                                        title='When enabled, a notification will be sent when the service is expired',
+                                                        label='#Notify When Expired', cssClass='pt-2',
+                                                        dataAttrs='param-skip-false=true,param-name=expirationPolicy.notifyWhenExpired')}"/>
+
+
+                                              </div>
+
+                                              <h3 class="advanced-option">Ticket-Granting Ticket Expiration Policy</h3>
+                                              <div id="editServiceWizardMenuItemTGTExpirationPolicy">
+                                                  <script type="text/javascript">
+                                                     createRegisteredServiceTicketGrantingTicketPolicy();
+                                                  </script>
+                                              </div>
+
+                                             <h3 class="class-CasRegisteredService advanced-option">Service Ticket Expiration Policy</h3>
+                                             <div class="class-CasRegisteredService"
+                                                  id="editServiceWizardMenuItemSTExpirationPolicy">
+                                                   <script type="text/javascript">
+                                                        createRegisteredServiceServiceTicketPolicy();
+                                                    </script>
+                                             </div>
+                                             <h3 class="class-CasRegisteredService advanced-option">Proxy-granting Ticket Expiration Policy</h3>
+                                             <div class="class-CasRegisteredService"
+                                                  id="editServiceWizardMenuItemPGTExpirationPolicy">
+                                                 <script type="text/javascript">
+                                                        createRegisteredServiceProxyGrantingTicketPolicy();
+                                                </script>
+                                             </div>
+                                             <h3 class="class-CasRegisteredService advanced-option">Proxy Ticket Expiration Policy</h3>
+                                             <div class="class-CasRegisteredService"
+                                                  id="editServiceWizardMenuItemPTExpirationPolicy">
+                                                <script type="text/javascript">
+                                                    createRegisteredServiceProxyTicketPolicy();
+                                                </script>
+                                             </div>
+
+                                             <h3 class="class-CasRegisteredService advanced-option">Proxy Policy</h3>
+                                             <div class="class-CasRegisteredService"
+                                                  id="editServiceWizardMenuItemProxyAuthenticationPolicy">
+
+                                                 <script type="text/javascript">
+                                                     createRegisteredServiceProxyPolicy();
+                                                 </script>
+
+                                                  <div th:replace="~{fragments/switchbutton :: switchbutton (id='proxyAuthenticationUseServiceId',
+                                                        title='When enabled, the service ID pattern will be used in proxy policy enforcement',
+                                                        label='#Use Service ID', cssClass='pt-2 hide RegexMatchingRegisteredServiceProxyPolicy',
+                                                        dataAttrs='param-skip-false=true,param-name=proxyPolicy.useServiceId')}"/>
+                                                 <div th:replace="~{fragments/switchbutton :: switchbutton (id='proxyAuthenticationExactMatch',
+                                                        title='When enabled, an exact match is required for proxy policy enforcement',
+                                                        label='#Exact Match', cssClass='pt-2 hide RegexMatchingRegisteredServiceProxyPolicy',
+                                                        dataAttrs='param-skip-false=true,param-name=proxyPolicy.exactMatch')}"/>
+                                             </div>
+
+                                             <h3 class="class-OAuthRegisteredService class-OidcRegisteredService advanced-option">OAuth / OpenID Connect TLS Client Settings</h3>
+                                             <div class="class-OAuthRegisteredService class-OidcRegisteredService"
+                                                  id="editServiceWizardMenuItemOAuthOidcTlsClientSettings">
+                                                 <script type="text/javascript">
+                                                        createOidcRegisteredServiceTlsClientSettings();
+                                                 </script>
+                                             </div>
+
+                                             <h3 class="class-OAuthRegisteredService class-OidcRegisteredService advanced-option">OAuth / OpenID Connect Code Expiration Policy</h3>
+                                             <div class="class-OAuthRegisteredService class-OidcRegisteredService"
+                                                  id="editServiceWizardMenuItemOAuthOidcCodeExpirationPolicy">
+                                                 <script type="text/javascript">
+                                                        createRegisteredServiceCodeExpirationPolicy();
+                                                 </script>
+                                             </div>
+
+                                            <h3 class="class-OAuthRegisteredService class-OidcRegisteredService advanced-option">OAuth / OpenID Connect Access Token Expiration Policy</h3>
+                                             <div class="class-OAuthRegisteredService class-OidcRegisteredService"
+                                                  id="editServiceWizardMenuItemOAuthOidcATExpirationPolicy">
+
+                                                 <script type="text/javascript">
+                                                     createRegisteredServiceOidcAccessTokenExpirationPolicy();
+                                                 </script>
+                                                 
+                                             </div>
+
+                                            <h3 class="class-OAuthRegisteredService class-OidcRegisteredService advanced-option">OAuth / OpenID Connect Refresh Token Expiration Policy</h3>
+                                             <div class="class-OAuthRegisteredService class-OidcRegisteredService"
+                                                  id="editServiceWizardMenuItemOAuthOidcRTExpirationPolicy">
+
+                                                 <script type="text/javascript">
+                                                    createRegisteredServiceOidcRefreshTokenExpirationPolicy();
+                                                 </script>
+                                                 
+                                             </div>
+
+                                             <h3 class="class-OAuthRegisteredService class-OidcRegisteredService advanced-option">OAuth / OpenID Connect Device Token Expiration Policy</h3>
+                                             <div class="class-OAuthRegisteredService class-OidcRegisteredService"
+                                                  id="editServiceWizardMenuItemOAuthOidcDTExpirationPolicy">
+                                                   <script type="text/javascript">
+                                                         createRegisteredServiceDeviceTokenExpirationPolicy();
+                                                 </script>
+                                             </div>
+
+                                             <h3 class="class-OidcRegisteredService advanced-option">OpenID Connect ID Token Expiration Policy</h3>
+                                             <div class="class-OidcRegisteredService"
+                                                  id="editServiceWizardMenuItemOAuthOidcITExpirationPolicy">
+                                                <script type="text/javascript">
+                                                    createRegisteredServiceIdTokenExpirationPolicy();
+                                                </script>
+                                             </div>
+
+                                            <h3 class="class-OAuthRegisteredService class-OidcRegisteredService advanced-option">OAuth / OpenID Connect Token Exchange Policy</h3>
+                                             <div class="class-OAuthRegisteredService class-OidcRegisteredService"
+                                                  id="editServiceWizardMenuItemOAuthOidcTokenExchangePolicy">
+
+                                                 <script type="text/javascript">
+                                                     createRegisteredServiceOidcTokenExchangePolicy();
+                                                </script>
+                                             </div>
+
+                                              <h3>Username Attribute Provider</h3>
+                                              <div id="editServiceWizardMenuItemUsernameAttribute">
+                                                  <p>Registered CAS applications are given the ability to allow for configuration of a username attribute provider,
+                                                      which controls what should be the designated user identifier that is returned to the application. The user
+                                                      identifier by default is the authenticated CAS principal id,
+                                                      and it optionally may be based off of an existing attribute that
+                                                      is available and resolved for the principal already.</p>
+                                                   <script type="text/javascript">
+                                                       createRegisteredServiceUsernameAttributeProvider();
+                                                   </script>
+
+                                                   <div th:replace="~{fragments/switchbutton :: switchbutton (id='encryptUsername',
+                                                        title='Encrypting the username requires a public key to be defined for the registered service',
+                                                        label='#Encrypt Username', cssClass='pt-2,DefaultRegisteredServiceUsernameProvider',
+                                                        dataAttrs='param-skip-false=true,param-name=usernameAttributeProvider.encryptUsername')}"/>
+                                              </div>
+
+                                              <h3>Attribute Release Policy</h3>
+                                              <div id="editServiceWizardMenuItemAttributeReleasePolicy">
+                                                    <p>The attribute release policy decides how attributes are selected and provided to a given application in the final CAS response. Additionally,
+                                                      each policy has the ability to apply an optional filter to weed out their attributes based on their values.</p>
+                                                    <script type="text/javascript">
+                                                         createRegisteredServiceAttributeReleasePolicy();
+                                                    </script>
+
+                                                  <div id="editServiceWizardMenuItemAttributeReleasePolicyActivationCriteria">
+                                                    <script type="text/javascript">
+                                                        createRegisteredServiceAttributeReleasePolicyActivationCriteria();
+                                                    </script>
+                                                      
+                                                    <div th:replace="~{fragments/switchbutton :: switchbutton (id='registeredServiceAttrReleasePolicyAttributeActivationCriteriaReverseMatch',
+                                                        title='When enabled, the attribute activation criteria performs a reverse match',
+                                                        label='#Reverse Match', cssClass='pt-3 hide AttributeBasedRegisteredServiceAttributeReleaseActivationCriteria',
+                                                        dataAttrs='param-skip-false=true,param-name=attributeReleasePolicy.activationCriteria.reverseMatch')}"/>
+                                                  </div>
+
+                                                   <div id="editServiceWizardMenuItemAttributeReleasePrincipalAttributesRepository">
+                                                       <script type="text/javascript">
+                                                            createRegisteredServiceAttributeReleasePrincipalAttributesRepository();
+                                                       </script>
+
+                                                       <div th:replace="~{fragments/switchbutton :: switchbutton (id='registeredServiceAttrReleasePolicyPrincipalAttributeRepositoryIgnoreResolvedAttributes',
+                                                        title='When enabled, resolved attributes from the principal attributes repository are ignored',
+                                                        label='#Ignore Resolved Attributes', cssClass='pt-3 hide DefaultPrincipalAttributesRepository CachingPrincipalAttributesRepository',
+                                                        dataAttrs='param-skip-false=true,param-name=attributeReleasePolicy.principalAttributesRepository.ignoreResolvedAttributes')}"/>
+                                                   </div>
+
+                                                  <div id="editServiceWizardMenuItemAttributeReleaseValueFilters">
+                                                      <script type="text/javascript">
+                                                          createRegisteredServiceAttributeReleaseValueFilters();
+                                                      </script>
+
+                                                      <div th:replace="~{fragments/switchbutton :: switchbutton (id='registeredServiceAttrReleasePolicyAttributeValueFilterExcludeUnmapped',
+                                                            title='When enabled, unmapped attributes are excluded from release',
+                                                            label='#Exclude Unmapped Attributes', cssClass='pt-2 hide RegisteredServiceMappedRegexAttributeFilter RegisteredServiceReverseMappedRegexAttributeFilter RegisteredServiceMutantRegexAttributeFilter',
+                                                            dataAttrs='param-skip-false=true,param-name=attributeReleasePolicy.attributeFilter.excludeUnmappedAttributes')}"/>
+
+                                                      <div th:replace="~{fragments/switchbutton :: switchbutton (id='registeredServiceAttrReleasePolicyAttributeValueFilterCompleteMatch',
+                                                            title='When enabled, a complete match is required for attribute values to be released',
+                                                            label='#Complete Match', cssClass='hide RegisteredServiceMappedRegexAttributeFilter RegisteredServiceReverseMappedRegexAttributeFilter RegisteredServiceMutantRegexAttributeFilter',
+                                                            dataAttrs='param-skip-false=true,param-name=attributeReleasePolicy.attributeFilter.completeMatch')}"/>
+
+                                                      <div th:replace="~{fragments/switchbutton :: switchbutton (id='registeredServiceAttrReleasePolicyAttributeValueFilterCaseInsensitive',
+                                                            title='When enabled, attribute value filtering is performed in a case-insensitive manner',
+                                                            label='#Case Insensitive', selected=true, cssClass='pt-2 hide RegisteredServiceMappedRegexAttributeFilter RegisteredServiceReverseMappedRegexAttributeFilter RegisteredServiceMutantRegexAttributeFilter',
+                                                            dataAttrs='param-skip-true=true,param-name=attributeReleasePolicy.attributeFilter.caseInsensitive')}"/>
+                                                  </div>
+
+                                                  <div id="editServiceWizardMenuItemAttributeReleaseValueConsentPolicy">
+                                                      <script type="text/javascript">
+                                                          if (CAS_FEATURES.includes("Consent")) {
+                                                              createRegisteredServiceAttributeReleaseConsentPolicy();
+                                                          }
+                                                      </script>
+                                                  </div>
+                                                  <div th:replace="~{fragments/switchbutton :: switchbutton (id='attributeReleaseAuthorizedToReleaseCredentialPassword',
+                                                        title='When enabled, the credential password is authorized to be released as an attribute',
+                                                        label='#Release Credential Password', cssClass='advanced-option',
+                                                        dataAttrs='param-skip-false=true,param-name=attributeReleasePolicy.authorizedToReleaseCredentialPassword')}"/>
+                                                  <div th:replace="~{fragments/switchbutton :: switchbutton (id='attributeReleaseAuthorizedToReleaseProxyGrantingTicket',
+                                                        title='When enabled, the proxy granting ticket is authorized to be released as an attribute',
+                                                        label='#Release Proxy-granting Ticket', cssClass='pt-2 advanced-option',
+                                                        dataAttrs='param-skip-false=true,param-name=attributeReleasePolicy.authorizedToReleaseProxyGrantingTicket')}"/>
+                                                  <div th:replace="~{fragments/switchbutton :: switchbutton (id='attributeReleaseExcludeDefaultAttributes',
+                                                        title='When enabled, default attributes are excluded from being released',
+                                                        label='#Exclude Default Attributes', cssClass='advanced-option',
+                                                        dataAttrs='param-skip-false=true,param-name=attributeReleasePolicy.excludeDefaultAttributes')}"/>
+                                                  <div th:replace="~{fragments/switchbutton :: switchbutton (id='attributeReleaseAuthorizedToReleaseAuthenticationAttributes',
+                                                        title='When enabled, authentication attributes are authorized to be released as attributes',
+                                                        label='#Release Authentication Attributes', cssClass='pt-2 advanced-option',
+                                                        dataAttrs='param-skip-false=true,param-name=attributeReleasePolicy.authorizedToReleaseAuthenticationAttributes')}"/>
+
+                                              </div>
+
+                                              <h3 id="registeredServiceMfaPolicy">Multifactor Authentication Policy</h3>
+                                              <div id="editServiceWizardMenuItemMfaPolicy">
+                                                <script type="text/javascript">
+                                                    createRegisteredServiceMultifactorPolicy();
+                                                </script>
+
+                                                  <div th:replace="~{fragments/switchbutton :: switchbutton (id='bypassEnabled',
+                                                        title='When enabled, the multifactor authentication policy can be bypassed based on defined criteria',
+                                                        label='#Bypass Multifactor Authentication', cssClass='pt-2',
+                                                        dataAttrs='param-skip-false=true,param-name=multifactorPolicy.bypassEnabled,param-type=org.apereo.cas.services.DefaultRegisteredServiceMultifactorPolicy')}"/>
+
+                                                  <div th:replace="~{fragments/switchbutton :: switchbutton (id='forceExecution',
+                                                        title='When enabled, multifactor authentication is forced for this service',
+                                                        label='#Force Multifactor Authentication', cssClass='pt-2 advanced-option',
+                                                        dataAttrs='param-skip-false=true,param-name=multifactorPolicy.forceExecution,param-type=org.apereo.cas.services.DefaultRegisteredServiceMultifactorPolicy')}"/>
+
+                                                  <div th:replace="~{fragments/switchbutton :: switchbutton (id='bypassTrustedDeviceEnabled',
+                                                        title='When enabled, trusted devices are allowed to bypass multifactor authentication',
+                                                        label='#Bypass Trusted Devices', cssClass='advanced-option',
+                                                        dataAttrs='param-skip-false=true,param-name=multifactorPolicy.bypassTrustedDeviceEnabled,param-type=org.apereo.cas.services.DefaultRegisteredServiceMultifactorPolicy')}"/>
+
+                                                  <div th:replace="~{fragments/switchbutton :: switchbutton (id='bypassIfMissingPrincipalAttribute',
+                                                        title='When enabled, multifactor authentication is bypassed if the principal attribute used for triggering is missing',
+                                                        label='#Bypass If Missing Principal Attribute', cssClass='pt-2 advanced-option',
+                                                        dataAttrs='param-skip-false=true,param-name=multifactorPolicy.bypassIfMissingPrincipalAttribute,param-type=org.apereo.cas.services.DefaultRegisteredServiceMultifactorPolicy')}"/>
+                                              </div>
+
+                                              <h3 class="advanced-option">Matching Strategy</h3>
+                                              <div id="editServiceWizardMenuItemMatchingStrategy">
+                                                    <script type="text/javascript">
+                                                        createRegisteredServiceMatchingStrategy();
+                                                    </script>
+
+                                                <div th:replace="~{fragments/switchbutton :: switchbutton (id='matchingStrategyCaseInsensitive',
+                                                    title='When enabled, service ID matching is performed in a case-insensitive manner',
+                                                    label='#Case Insensitive', cssClass='pt-2 hide LiteralRegisteredServiceMatchingStrategy',
+                                                    dataAttrs='param-skip-false=true,param-name=matchingStrategy.caseInsensitive')}"/>
+                                              </div>
+
+
+                                              <h3>Access Strategy</h3>
+                                              <div id="editServiceWizardMenuItemAccessStrategy">
+                                                  <div>The access strategy of a registered service provides fine-grained control over the service
+                                                      authorization rules. It describes whether the service is allowed to use the CAS server,
+                                                      allowed to participate in single sign-on authentication, etc. Additionally, it may be configured
+                                                      to require a certain set of principal attributes that must exist before access can be granted to the service. </div>
+                                                   <script type="text/javascript">
+                                                        createRegisteredServiceAccessStrategy();
+                                                   </script>
+
+                                                  <div th:replace="~{fragments/switchbutton :: switchbutton (id='accessStrategyEnabled',
+                                                        title='Determine if this service is enabled',
+                                                        label='#Enabled', selected=true, cssClass='pt-3 DefaultRegisteredServiceAccessStrategy',
+                                                        dataAttrs='param-skip-true=true,param-name=accessStrategy.enabled,param-type=org.apereo.cas.services.DefaultRegisteredServiceAccessStrategy')}"/>
+
+                                                  <div th:replace="~{fragments/switchbutton :: switchbutton (id='accessStrategySsoEnabled',
+                                                        title='Determine if this service is enabled for SSO',
+                                                        label='#Single Sign-on Enabled', selected=true, cssClass='pt-2 DefaultRegisteredServiceAccessStrategy',
+                                                        dataAttrs='param-skip-true=true,param-name=accessStrategy.ssoEnabled,param-type=org.apereo.cas.services.DefaultRegisteredServiceAccessStrategy')}"/>
+
+                                                  <div th:replace="~{fragments/switchbutton :: switchbutton (id='accessStrategyRequireAllAttrs',
+                                                        title='Require all attributes defined and available in the access strategy for access to be granted',
+                                                        label='#Require All Attributes', selected=true, cssClass='pt-2 DefaultRegisteredServiceAccessStrategy',
+                                                        dataAttrs='param-skip-true=true,param-name=accessStrategy.requireAllAttributes,param-type=org.apereo.cas.services.DefaultRegisteredServiceAccessStrategy')}"/>
+
+                                                  <div th:replace="~{fragments/switchbutton :: switchbutton (id='accessStrategyCaseInsensitive',
+                                                        title='When enabled, attribute matching is performed in a case-insensitive manner',
+                                                        label='#Case Insensitive', cssClass='pt-2 DefaultRegisteredServiceAccessStrategy',
+                                                        dataAttrs='param-skip-false=true,param-name=accessStrategy.caseInsensitive')}"/>
+                                              </div>
+
+                                              <h3 class="advanced-option">Authentication Policy</h3>
+                                              <div id="editServiceWizardMenuItemAuthenticationPolicy">
+                                                 <script type="text/javascript">
+                                                      createRegisteredServiceAuthenticationPolicy();
+                                                 </script>
+
+                                                  <div th:replace="~{fragments/switchbutton :: switchbutton (id='requiredAuthenticationHandlersTryAll',
+                                                        title='When enabled, all required authentication handlers will be tried and executed',
+                                                        label='#Try All', cssClass='pt-2 AllowedAuthenticationHandlersRegisteredServiceAuthenticationPolicyCriteria AnyAuthenticationHandlerRegisteredServiceAuthenticationPolicyCriteria',
+                                                        dataAttrs='param-skip-false=true,param-name=authenticationPolicy.criteria.tryAll')}"/>
+
+                                              </div>
+
+                                              <h3 class="advanced-option">Properties</h3>
+                                              <div id="editServiceWizardMenuItemProperties">
+                                                <script type="text/javascript">
+                                                     createRegisteredServiceProperties();
+                                                 </script>
+                                              </div>
+
+                                              <h3 class="advanced-option">Contacts</h3>
+                                              <div id="editServiceWizardMenuItemContacts">
+                                                  <p>You may assign contact information to this application. These are individual and/or entities that
+                                                      can be classified as owners of the application that may be notified in
+                                                      case changes are applied to the application.</p>
+                                                  <div class="jqueryui-tabs">
+                                                      <ul>
+                                                         <li><a id="registeredServiceContact1"
+                                                                href="#registeredServiceContact1-tab">Primary Contact</a></li>
+                                                         <li><a id="registeredServiceContact2"
+                                                                href="#registeredServiceContact2-tab">Secondary Contact</a></li>
+                                                         <li><a id="registeredServiceContact3"
+                                                                href="#registeredServiceContact3-tab">Other Contact</a></li>
+                                                      </ul>
+
+                                                        <div id="registeredServiceContact1-tab">
+                                                            <script type="text/javascript">
+                                                                createRegisteredServiceContacts(1);
+                                                            </script>
+                                                        </div>
+                                                        <div id="registeredServiceContact2-tab">
+                                                            <script type="text/javascript">
+                                                                createRegisteredServiceContacts(2);
+                                                            </script>
+                                                        </div>
+                                                        <div id="registeredServiceContact3-tab">
+                                                            <script type="text/javascript">
+                                                                createRegisteredServiceContacts(3);
+                                                            </script>
+                                                        </div>
+                                                      
+                                                  </div>
+
+                                              </div>
+
+                                            <h3 class="advanced-option">Public Key</h3>
+                                            <div id="editServiceWizardMenuItemPublicKey">
+                                                <script type="text/javascript">
+                                                    createRegisteredServicePublicKey();
+                                                </script>
+                                            </div>
+                                            <h3 id="registeredServiceAcceptableUsagePolicy" class="advanced-option">Acceptable Usage Policy</h3>
+                                              <div id="editServiceWizardMenuItemAUP">
+                                                    <script type="text/javascript">
+                                                        createRegisteredServiceAcceptableUsagePolicy();
+                                                    </script>
+                                                    <div th:replace="~{fragments/switchbutton :: switchbutton (id='enabled',
+                                                        title='When enabled, the acceptable usage policy is enforced for this service',
+                                                        label='#Enabled', cssClass='pt-2',
+                                                        dataAttrs='param-skip-false=true,param-name=acceptableUsagePolicy.enabled,param-type=org.apereo.cas.services.DefaultRegisteredServiceAcceptableUsagePolicy')}"/>
+                                              </div>
+
+                                              <h3 class="advanced-option">Single Sign-on Participation Policy</h3>
+                                              <div id="editServiceWizardMenuItemSSOParticipationPolicy">
+                                                    <script type="text/javascript">
+                                                       createRegisteredServiceSsoParticipationPolicy();
+                                                    </script>
+                                              </div>
+                                            
+                                             <h3 id="registeredServiceWebflowInterruptPolicy" class="advanced-option">Webflow Interrupt Policy</h3>
+                                              <div id="editServiceWizardMenuItemWebflowInterruptPolicy">
+
+                                                    <script type="text/javascript">
+                                                        createRegisteredServiceWebflowInterruptPolicy();
+                                                    </script>
+                                                  
+                                                    <div th:replace="~{fragments/switchbutton :: switchbutton (id='aupEnabled',
+                                                        title='When enabled, the acceptable usage policy is enforced for this service',
+                                                        label='#Enabled', cssClass='pt-2',
+                                                        dataAttrs='param-skip-false=true,param-name=webflowInterruptPolicy.enabled,param-type=org.apereo.cas.services.DefaultRegisteredServiceWebflowInterruptPolicy')}"/>
+
+                                              </div>
+
+                                            <h3 id="registeredServicePasswordlessPolicy" class="advanced-option">Passwordless Policy</h3>
+                                              <div id="editServiceWizardMenuItemPasswordlessPolicy">
+                                                     <div th:replace="~{fragments/switchbutton :: switchbutton (id='passwordlessEnabled',
+                                                        title='When enabled, passwordless authentication is enforced for this service',
+                                                        label='#Enabled', cssClass='pt-2',
+                                                        dataAttrs='param-skip-false=true,param-name=passwordlessPolicy.enabled,param-type=org.apereo.cas.services.DefaultRegisteredServicePasswordlessPolicy')}"/>
+
+                                              </div>
+                                            <h3 id="registeredServiceSurrogatePolicy" class="advanced-option">Surrogate (Impersonation) Policy</h3>
+                                              <div id="editServiceWizardMenuItemSurrogatePolicy">
+                                                      <div th:replace="~{fragments/switchbutton :: switchbutton (id='surrogateEnabled',
+                                                        title='When enabled, surrogate authentication is enforced for this service',
+                                                        label='#Enabled', cssClass='pt-2',
+                                                        dataAttrs='param-skip-false=true,param-name=surrogatePolicy.enabled,param-type=org.apereo.cas.services.DefaultRegisteredServiceSurrogatePolicy')}"/>
+                                              </div>
+                                        </div>
+                                        <div class="h-750px">
+                                            <pre class="ace-editor ace-relative w-100 h-100 mb-0 mt-0"
+                                                 id="wizardServiceEditor"></pre>
+
+                                            <span><sub><span class="mdi mdi-information-box-outline"></span>
+                                                The editor above shows the current state of the service definition as it is being built using the wizard.
+                                                While the chosen format is JSON, the actual format of the entry used when saving may differ based on your registry configuration.
+                                                This is merely a preview of the service definition being constructed and cannot be edited directly.
+                                            </sub></span>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <footer class="mdc-dialog__actions modal-footer pr-4">
+                                <button id="copyServiceDefinitionWizard" name="copyServiceDefinitionWizard"
+                                        type="button"
+                                        class="mdc-button mdc-button--raised btn mdc-button--lg">
+                                    <span class="mdc-button__label"><i class="mdc-tab__icon mdi mdi-content-copy"
+                                                                       aria-hidden="true"></i>Copy</span>
+                                </button>
+                                <button id="validateServiceWizard" name="validateServiceWizard" type="button"
+                                        class="mdc-button mdc-button--raised btn mdc-button--lg">
+                                    <span class="mdc-button__label"><i class="mdc-tab__icon mdi mdi-check-all"
+                                                                       aria-hidden="true"></i>Validate</span>
+                                </button>
+                                <button id="saveServiceWizard" name="saveServiceWizard" type="button"
+                                        class="mdc-button mdc-button--raised btn mdc-button--lg">
+                                    <span class="mdc-button__label"><i class="mdc-tab__icon mdi mdi-content-save"
+                                                                       aria-hidden="true"></i>Save</span>
+                                </button>
+                            </footer>
+                        </div>
+                    </div>
+                    <div class="mdc-dialog__scrim"></div>
+                </div>
+                
                 <div class="mdc-dialog modal" id="editServiceDialog" role="alertdialog"
                      aria-modal="true" aria-labelledby="edit-service-dialog-title" aria-describedby="dialog-content">
                     <div class="mdc-dialog__container w-100 modal-dialog">
@@ -69,7 +718,6 @@
 
                                 <section class="d-flex h-750px" id="serviceEditorContainer">
                                     <div id="serviceTemplatesContainer" class="w-25 py-3 mr-2 jqueryui-accordion">
-
                                     </div>
                                     <pre class="ace-editor ace-relative w-100 h-100" id="serviceEditor"></pre>
                                 </section>
@@ -132,6 +780,84 @@
                     <div class="mdc-dialog__scrim"></div>
                 </div>
 
+                <div id="validatePatternDialog" class="hide">
+                    <section class="cas-field form-group my-3 mdc-input-group d-flex">
+                        <div id="validateServiceIdPanel"
+                             class="mdc-input-group-field mdc-input-group-field-append w-100">
+                            <label for="providedPattern"
+                                   class="mdc-text-field mdc-text-field--outlined control-label mdc-text-field--with-trailing-icon mb-2">
+                                <span class="mdc-notched-outline">
+                                    <span class="mdc-notched-outline__leading"></span>
+                                    <span class="mdc-notched-outline__notch">
+                                        <span class="mdc-floating-label">Pattern</span>
+                                    </span>
+                                    <span class="mdc-notched-outline__trailing"></span>
+                                </span>
+                                <input class="mdc-text-field__input form-control" type="text"
+                                       name="providedPattern" tabindex="0" id="providedPattern"
+                                       size="50"
+                                       oninput="validatePatterns()"
+                                       autocomplete="off" required/>
+                            </label>
+                            <label for="serviceIdTestValue"
+                                   class="mdc-text-field mdc-text-field--outlined control-label mdc-text-field--with-trailing-icon mb-2">
+                                <span class="mdc-notched-outline">
+                                    <span class="mdc-notched-outline__leading"></span>
+                                    <span class="mdc-notched-outline__notch">
+                                        <span class="mdc-floating-label">Test</span>
+                                    </span>
+                                    <span class="mdc-notched-outline__trailing"></span>
+                                </span>
+                                <input class="mdc-text-field__input form-control" type="text"
+                                       name="serviceIdTestValue" tabindex="0" id="serviceIdTestValue"
+                                       oninput="validatePatterns()"
+                                       size="50" autocomplete="off" required/>
+                            </label>
+
+                            <script type="text/javascript">
+                                cas.init("#validatePatternDialog");
+                                $("#providedPattern").val($("#registeredServiceId").val()).focus();
+                                function validatePatterns() {
+                                    console.log("Validating pattern...");
+
+                                    const pattern = $("#providedPattern").val();
+                                    const testValue = $("#serviceIdTestValue").val();
+
+                                    if (pattern.length > 0 && testValue.length > 0) {
+                                        $("#providedPatternTestResult").removeClass("hide");
+                                        try {
+                                            const regex = new RegExp(pattern, "i");
+                                            const match = regex.test(testValue);
+
+                                            if (match) {
+                                                console.log("Found", match[0]);
+                                                $("#providedPatternTestResult")
+                                                    .addClass("banner-success")
+                                                    .removeClass("banner-danger")
+                                                    .text("✅ The given pattern matches the test value.");
+                                            } else {
+                                                $("#providedPatternTestResult")
+                                                    .removeClass("banner-success")
+                                                    .addClass("banner-danger")
+                                                    .text("❌ The given pattern does NOT match the test value.");
+                                            }
+                                        } catch(e) {
+                                            $("#providedPatternTestResult")
+                                                .removeClass("banner-success")
+                                                .addClass("banner-danger")
+                                                .text("❌ " + e);
+                                        }
+                                    } else {
+                                        $("#providedPatternTestResult").addClass("hide");
+                                    }
+
+                                }
+                            </script>
+                        </div>
+                    </section>
+                    <div id="providedPatternTestResult" class="p-2 banner hide"></div>
+                </div>
+                
             </div>
 
 
@@ -150,6 +876,6 @@
             </div>
         </div>
     </div>
-</span>
+    </span>
 </body>
 </html>

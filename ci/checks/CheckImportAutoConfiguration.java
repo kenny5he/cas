@@ -5,13 +5,14 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
+import module java.base;
 
 public class CheckImportAutoConfiguration {
 
     private static final Pattern IMPORT_PATTERN = Pattern.compile("\\s*@Import\\(\\{(.+?)\\}\\)", Pattern.DOTALL);
     private static final Pattern IMPORT_AUTOCONFIG_PATTERN = Pattern.compile("\\s*@ImportAutoConfiguration\\(\\{(.+?)\\}\\)", Pattern.DOTALL);
 
-    public static void main(final String[] args) throws Exception {
+    void main(final String[] args) throws Exception {
         checkPattern(args[0], IMPORT_AUTOCONFIG_PATTERN, IMPORT_PATTERN);
     }
 

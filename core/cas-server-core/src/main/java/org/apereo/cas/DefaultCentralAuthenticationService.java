@@ -1,5 +1,6 @@
 package org.apereo.cas;
 
+import module java.base;
 import org.apereo.cas.audit.AuditActionResolvers;
 import org.apereo.cas.audit.AuditResourceResolvers;
 import org.apereo.cas.audit.AuditableActions;
@@ -52,11 +53,7 @@ import org.apereo.inspektr.audit.annotation.Audit;
 import org.apereo.inspektr.common.web.ClientInfoHolder;
 import org.jooq.lambda.Unchecked;
 import org.jooq.lambda.fi.util.function.CheckedSupplier;
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Concrete implementation of a {@link CentralAuthenticationService}, and also the
@@ -71,13 +68,9 @@ import java.util.Optional;
  */
 @Slf4j
 public class DefaultCentralAuthenticationService extends AbstractCentralAuthenticationService {
-    @Serial
-    private static final long serialVersionUID = -8943828074939533986L;
-
     public DefaultCentralAuthenticationService(final CentralAuthenticationServiceContext context) {
         super(context);
     }
-
 
     @Audit(
         action = AuditableActions.TICKET_GRANTING_TICKET,
@@ -128,7 +121,7 @@ public class DefaultCentralAuthenticationService extends AbstractCentralAuthenti
                     getAuthenticationSatisfiedByPolicy(currentAuthentication, selectedService, registeredService);
 
                     val latestAuthentication = ticketGrantingTicket.getRoot().getAuthentication();
-                    val principal = latestAuthentication.getPrincipal();
+                    val principal = Objects.requireNonNull(latestAuthentication).getPrincipal();
                     val releasePolicyContext = RegisteredServiceAttributeReleasePolicyContext.builder()
                         .registeredService(registeredService)
                         .service(service)
@@ -136,7 +129,7 @@ public class DefaultCentralAuthenticationService extends AbstractCentralAuthenti
                         .applicationContext(configurationContext.getApplicationContext())
                         .build();
                     val merger = CoreAuthenticationUtils.getAttributeMerger(PrincipalAttributesCoreProperties.MergingStrategyTypes.MULTIVALUED);
-                    val policyAttributes = registeredService.getAttributeReleasePolicy().getAttributes(releasePolicyContext);
+                    val policyAttributes = Objects.requireNonNull(registeredService).getAttributeReleasePolicy().getAttributes(releasePolicyContext);
                     var accessAttributes = CoreAuthenticationUtils.mergeAttributes(principal.getAttributes(), latestAuthentication.getAttributes(), merger);
                     accessAttributes = CoreAuthenticationUtils.mergeAttributes(accessAttributes, policyAttributes, merger);
                     val accessPrincipal = configurationContext.getPrincipalFactory().createPrincipal(principal.getId(), accessAttributes);
@@ -149,7 +142,7 @@ public class DefaultCentralAuthenticationService extends AbstractCentralAuthenti
                     }
                     val addedServiceTicket = configurationContext.getTicketRegistry().addTicket(serviceTicket);
                     LOGGER.info("Granted service ticket [{}] for service [{}] and principal [{}]",
-                        serviceTicket.getId(), DigestUtils.abbreviate(selectedService.getId()), principal.getId());
+                        serviceTicket.getId(), DigestUtils.abbreviate(Objects.requireNonNull(selectedService).getId()), principal.getId());
                     doPublishEvent(new CasServiceTicketGrantedEvent(this, ticketGrantingTicket, serviceTicket, clientInfo));
                     return addedServiceTicket;
                 }
@@ -178,7 +171,7 @@ public class DefaultCentralAuthenticationService extends AbstractCentralAuthenti
                     getAuthenticationSatisfiedByPolicy(proxyGrantingTicket.getRoot().getAuthentication(), service, registeredService);
 
                     val authentication = proxyGrantingTicket.getRoot().getAuthentication();
-                    val principal = authentication.getPrincipal();
+                    val principal = Objects.requireNonNull(authentication).getPrincipal();
                     val factory = (ProxyTicketFactory) configurationContext.getTicketFactory().get(ProxyTicket.class);
                     val proxyTicket = factory.create(proxyGrantingTicket, service);
                     val clientInfo = ClientInfoHolder.getClientInfo();
@@ -228,11 +221,11 @@ public class DefaultCentralAuthenticationService extends AbstractCentralAuthenti
                     }
                     if (!configurationContext.getServiceMatchingStrategy().matches(selectedService, resolvedService)) {
                         LOGGER.error("Service ticket [{}] with service [{}] does not match supplied service [{}]",
-                            serviceTicketId, serviceTicket.getService().getId(), resolvedService.getId());
+                            serviceTicketId, serviceTicket.getService().getId(), Objects.requireNonNull(resolvedService).getId());
                         throw new UnrecognizableServiceForServiceTicketValidationException(selectedService);
                     }
                     if (StringUtils.isNotBlank(serviceTicket.getTenantId())) {
-                        if (!Strings.CI.equals(resolvedService.getTenant(), serviceTicket.getTenantId())) {
+                        if (!Strings.CI.equals(Objects.requireNonNull(resolvedService).getTenant(), serviceTicket.getTenantId())) {
                             LOGGER.warn("Service ticket [{}] is not assigned to the same tenant [{}] as the service [{}]",
                                 serviceTicketId, serviceTicket.getTenantId(), resolvedService.getId());
                             throw new UnknownTenantException("Unknown tenant %s for service ticket %s"
@@ -245,7 +238,7 @@ public class DefaultCentralAuthenticationService extends AbstractCentralAuthenti
                                 .formatted(serviceTicket.getTenantId(), serviceTicketId));
                         }
                     }
-                    
+
                     serviceTicket.update();
                     if (!serviceTicket.isStateless()) {
                         configurationContext.getTicketRegistry().updateTicket(serviceTicket);
@@ -260,9 +253,10 @@ public class DefaultCentralAuthenticationService extends AbstractCentralAuthenti
             val ticketGrantingTicket = (TicketGrantingTicket) serviceTicket.getTicketGrantingTicket();
             var authentication = serviceTicket.isStateless()
                 ? serviceTicket.getAuthentication()
-                : ticketGrantingTicket.getRoot().getAuthentication();
+                : Objects.requireNonNull(ticketGrantingTicket).getRoot().getAuthentication();
 
-            authentication = getAuthenticationSatisfiedByPolicy(authentication, selectedService, registeredService);
+            authentication = getAuthenticationSatisfiedByPolicy(authentication, selectedService, Objects.requireNonNull(registeredService));
+            Objects.requireNonNull(authentication, "Authentication cannot be determined for service ticket validation");
             val principal = serviceTicket.isStateless() ? rebuildStatelessTicketPrincipal(serviceTicket) : authentication.getPrincipal();
             val attributePolicy = Objects.requireNonNull(registeredService.getAttributeReleasePolicy());
             LOGGER.debug("Attribute policy [{}] is associated with service [{}]", attributePolicy, registeredService);
@@ -278,7 +272,7 @@ public class DefaultCentralAuthenticationService extends AbstractCentralAuthenti
 
             val builder = DefaultAuthenticationBuilder.of(
                 configurationContext.getApplicationContext(),
-                principal,
+                Objects.requireNonNull(principal),
                 configurationContext.getPrincipalFactory(),
                 attributesToRelease,
                 selectedService,
@@ -311,7 +305,7 @@ public class DefaultCentralAuthenticationService extends AbstractCentralAuthenti
 
             val assertionContext = serviceTicket.isStateless()
                 ? CollectionUtils.<String, Serializable>wrap(Principal.class.getName(), authentication.getPrincipal().getId())
-                : CollectionUtils.<String, Serializable>wrap(TicketGrantingTicket.class.getName(), ticketGrantingTicket.getRoot().getId());
+                : CollectionUtils.<String, Serializable>wrap(TicketGrantingTicket.class.getName(), Objects.requireNonNull(ticketGrantingTicket).getRoot().getId());
 
             val assertion = DefaultAssertionBuilder.builder()
                 .primaryAuthentication(finalAuthentication)
@@ -319,8 +313,8 @@ public class DefaultCentralAuthenticationService extends AbstractCentralAuthenti
                 .service(selectedService)
                 .registeredService(registeredService)
                 .authentications(serviceTicket.isStateless()
-                    ? List.of(serviceTicket.getAuthentication())
-                    : ticketGrantingTicket.getChainedAuthentications())
+                    ? List.of(Objects.requireNonNull(serviceTicket.getAuthentication()))
+                    : Objects.requireNonNull(ticketGrantingTicket).getChainedAuthentications())
                 .newLogin(((RenewableServiceTicket) serviceTicket).isFromNewLogin())
                 .stateless(serviceTicket.isStateless())
                 .context(assertionContext)
@@ -365,7 +359,7 @@ public class DefaultCentralAuthenticationService extends AbstractCentralAuthenti
 
         enforceRegisteredServiceAccess(ctx);
 
-        if (!registeredService.getProxyPolicy().isAllowedToProxy()) {
+        if (!Objects.requireNonNull(registeredService).getProxyPolicy().isAllowedToProxy()) {
             LOGGER.warn("Service [{}] attempted to proxy, but is not allowed.", serviceTicket.getService().getId());
             throw new UnauthorizedProxyingException();
         }
@@ -378,7 +372,8 @@ public class DefaultCentralAuthenticationService extends AbstractCentralAuthenti
                     val addedTicket = configurationContext.getTicketRegistry().addTicket(proxyGrantingTicket);
                     LOGGER.debug("Generated proxy granting ticket [{}] based off of [{}]", proxyGrantingTicket, serviceTicketId);
                     if (!serviceTicket.isStateless()) {
-                        configurationContext.getTicketRegistry().updateTicket(serviceTicket.getTicketGrantingTicket());
+                        configurationContext.getTicketRegistry()
+                            .updateTicket(Objects.requireNonNull(serviceTicket.getTicketGrantingTicket()));
                     }
                     val clientInfo = ClientInfoHolder.getClientInfo();
                     doPublishEvent(new CasProxyGrantingTicketCreatedEvent(this, addedTicket, clientInfo));
@@ -387,8 +382,8 @@ public class DefaultCentralAuthenticationService extends AbstractCentralAuthenti
             .orElseThrow(UnauthorizedProxyingException::new);
     }
 
-    private void enforceRegisteredServiceAccess(final Authentication authentication, final Service service,
-                                                final RegisteredService registeredService) throws Throwable {
+    private void enforceRegisteredServiceAccess(final Authentication authentication, @Nullable final Service service,
+                                                @Nullable final RegisteredService registeredService) throws Throwable {
 
         val attributeReleaseContext = RegisteredServiceAttributeReleasePolicyContext.builder()
             .registeredService(registeredService)
@@ -396,7 +391,8 @@ public class DefaultCentralAuthenticationService extends AbstractCentralAuthenti
             .principal(authentication.getPrincipal())
             .applicationContext(configurationContext.getApplicationContext())
             .build();
-        val releasingAttributes = registeredService.getAttributeReleasePolicy().getAttributes(attributeReleaseContext);
+        RegisteredServiceAccessStrategyUtils.ensureServiceAccessIsAllowed(registeredService);
+        val releasingAttributes = Objects.requireNonNull(registeredService).getAttributeReleasePolicy().getAttributes(attributeReleaseContext);
         releasingAttributes.putAll(authentication.getAttributes());
 
         val accessStrategyAttributes = CoreAuthenticationUtils.mergeAttributes(
@@ -416,8 +412,8 @@ public class DefaultCentralAuthenticationService extends AbstractCentralAuthenti
         accessResult.throwExceptionIfNeeded();
     }
 
-    private void enforceRegisteredServiceAccess(final Service service, final RegisteredService registeredService,
-                                                final Principal principal) throws Throwable {
+    private void enforceRegisteredServiceAccess(@Nullable final Service service, @Nullable final RegisteredService registeredService,
+                                                @Nullable final Principal principal) throws Throwable {
         val audit = AuditableContext.builder()
             .service(service)
             .principal(principal)
@@ -426,8 +422,8 @@ public class DefaultCentralAuthenticationService extends AbstractCentralAuthenti
         enforceRegisteredServiceAccess(audit);
     }
 
-    private void enforceRegisteredServiceAccess(final Service service, final TicketGrantingTicket ticket,
-                                                final RegisteredService registeredService) throws Throwable {
+    private void enforceRegisteredServiceAccess(@Nullable final Service service, final TicketGrantingTicket ticket,
+                                                @Nullable final RegisteredService registeredService) throws Throwable {
         val audit = AuditableContext.builder()
             .service(service)
             .ticketGrantingTicket(ticket)
@@ -436,24 +432,26 @@ public class DefaultCentralAuthenticationService extends AbstractCentralAuthenti
         enforceRegisteredServiceAccess(audit);
     }
 
-    protected Principal rebuildStatelessTicketPrincipal(final ServiceTicket serviceTicket) throws Throwable {
+    protected @Nullable Principal rebuildStatelessTicketPrincipal(final ServiceTicket serviceTicket) throws Throwable {
         val authentication = serviceTicket.getAuthentication();
         return configurationContext.getPrincipalResolver()
-            .resolve(new BasicIdentifiableCredential(authentication.getPrincipal().getId()),
+            .resolve(new BasicIdentifiableCredential(
+                Objects.requireNonNull(authentication).getPrincipal().getId()),
                 Optional.of(authentication.getPrincipal()), Optional.empty(),
                 Optional.of(serviceTicket.getService()));
     }
 
-    private static Authentication evaluatePossibilityOfMixedPrincipals(final AuthenticationResult context,
-                                                                       final TicketGrantingTicket ticketGrantingTicket) {
+    private static @Nullable Authentication evaluatePossibilityOfMixedPrincipals(final AuthenticationResult context,
+                                                                                 final TicketGrantingTicket ticketGrantingTicket) {
         if (context == null) {
-            LOGGER.warn("Provided authentication result is undefined to evaluate for mixed principals");
+            val error = "Provided authentication result is undefined to evaluate for mixed principals";
+            LOGGER.warn(error);
             return null;
         }
         val currentAuthentication = context.getAuthentication();
         if (currentAuthentication != null) {
             val original = ticketGrantingTicket.getAuthentication();
-            if (!currentAuthentication.getPrincipal().equals(original.getPrincipal())) {
+            if (!currentAuthentication.getPrincipal().equals(Objects.requireNonNull(original).getPrincipal())) {
                 throw new MixedPrincipalException(currentAuthentication,
                     currentAuthentication.getPrincipal(), original.getPrincipal());
             }

@@ -1,5 +1,6 @@
 package org.apereo.cas.mfa.simple.web.flow;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.bucket4j.consumer.BucketConsumer;
@@ -14,6 +15,7 @@ import org.apereo.cas.notifications.CommunicationsManager;
 import org.apereo.cas.ticket.Ticket;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.DigestUtils;
+import org.apereo.cas.util.RegexUtils;
 import org.apereo.cas.web.flow.CasWebflowConstants;
 import org.apereo.cas.web.flow.actions.AbstractMultifactorAuthenticationAction;
 import org.apereo.cas.web.flow.util.MultifactorAuthenticationWebflowUtils;
@@ -24,18 +26,10 @@ import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.webflow.core.collection.LocalAttributeMap;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
-import java.io.Serializable;
-import java.util.EnumSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link CasSimpleMultifactorSendTokenAction}.
@@ -64,6 +58,9 @@ public class CasSimpleMultifactorSendTokenAction extends AbstractMultifactorAuth
 
     private static final String MESSAGE_MFA_CONTACT_FAILED_SMS = "cas.mfa.simple.label.contactfailed.sms";
     private static final String MESSAGE_MFA_CONTACT_FAILED_EMAIL = "cas.mfa.simple.label.contactfailed.email";
+
+    private static final Pattern EMAIL_DOMAIN_PATTERN = RegexUtils.createPattern(".{2}@.{2}");
+    private static final Pattern PHONE_PATTERN = RegexUtils.createPattern("\\d{4}$");
     
     protected final CommunicationsManager communicationsManager;
 
@@ -92,7 +89,7 @@ public class CasSimpleMultifactorSendTokenAction extends AbstractMultifactorAuth
     }
 
     @Override
-    protected Event doExecuteInternal(final RequestContext requestContext) throws Throwable {
+    protected @Nullable Event doExecuteInternal(final RequestContext requestContext) throws Throwable {
         val authentication = WebUtils.getAuthentication(requestContext);
         val principal = resolvePrincipal(authentication.getPrincipal(), requestContext);
         val token = getOrCreateToken(requestContext, principal);
@@ -268,12 +265,11 @@ public class CasSimpleMultifactorSendTokenAction extends AbstractMultifactorAuth
 
         val emailRecipients = recipients.get(TokenSharingStrategyOptions.EMAIL);
         if (emailRecipients != null) {
-            val emailDomainPattern = Pattern.compile(".{2}@.{2}");
             val validAddresses = emailRecipients
                 .stream()
                 .map(address -> {
                     val hash = DigestUtils.sha512(address);
-                    val obfuscated = emailDomainPattern.matcher(address).replaceAll("****@****");
+                    val obfuscated = EMAIL_DOMAIN_PATTERN.matcher(address).replaceAll("****@****");
                     return Pair.of(hash, new CandidateRecipientAddress(TokenSharingStrategyOptions.EMAIL, hash, address, obfuscated));
                 })
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
@@ -285,12 +281,12 @@ public class CasSimpleMultifactorSendTokenAction extends AbstractMultifactorAuth
 
         val smsRecipients = recipients.get(TokenSharingStrategyOptions.SMS);
         if (smsRecipients != null) {
-            val phonePattern = Pattern.compile("\\d{4}$");
+
             val validPhones = smsRecipients
                 .stream()
                 .map(address -> {
                     val hash = DigestUtils.sha512(address);
-                    val obfuscated = phonePattern.matcher(address).replaceAll("******");
+                    val obfuscated = PHONE_PATTERN.matcher(address).replaceAll("******");
                     return Pair.of(hash, new CandidateRecipientAddress(TokenSharingStrategyOptions.SMS, hash, address, obfuscated));
                 })
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue));

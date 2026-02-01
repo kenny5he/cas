@@ -1,5 +1,6 @@
 package org.apereo.cas.trusted.authentication.storage;
 
+import module java.base;
 import org.apereo.cas.configuration.model.support.mfa.trusteddevice.TrustedDevicesMultifactorProperties;
 import org.apereo.cas.trusted.authentication.api.MultifactorAuthenticationTrustRecord;
 import org.apereo.cas.trusted.authentication.api.MultifactorAuthenticationTrustRecordKeyGenerator;
@@ -9,12 +10,7 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import java.io.Serializable;
-import java.time.ZonedDateTime;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This is {@link InMemoryMultifactorAuthenticationTrustStorage}.
@@ -25,11 +21,11 @@ import java.util.stream.Collectors;
 @Slf4j
 @Getter
 public class InMemoryMultifactorAuthenticationTrustStorage extends BaseMultifactorAuthenticationTrustStorage {
-    private final LoadingCache<String, MultifactorAuthenticationTrustRecord> storage;
+    private final LoadingCache<@NonNull String, MultifactorAuthenticationTrustRecord> storage;
 
     public InMemoryMultifactorAuthenticationTrustStorage(final TrustedDevicesMultifactorProperties properties,
                                                          final CipherExecutor<Serializable, String> cipherExecutor,
-                                                         final LoadingCache<String, MultifactorAuthenticationTrustRecord> storage,
+                                                         final LoadingCache<@NonNull String, MultifactorAuthenticationTrustRecord> storage,
                                                          final MultifactorAuthenticationTrustRecordKeyGenerator keyGenerationStrategy) {
         super(properties, cipherExecutor, keyGenerationStrategy);
         this.storage = storage;

@@ -1,16 +1,12 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.services.util.RegisteredServiceAccessStrategyEvaluator;
-
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * This is {@link SurrogateRegisteredServiceAccessStrategy}.
@@ -37,7 +33,8 @@ public class SurrogateRegisteredServiceAccessStrategy extends BaseSurrogateRegis
      * should be done in a case-insensitive manner.
      */
     protected boolean caseInsensitive;
-    
+
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private Map<String, Set<String>> surrogateRequiredAttributes = new HashMap<>();
 
     @Override

@@ -1,11 +1,13 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.authentication.support.password.PasswordEncoderUtils;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.configuration.support.JpaBeans;
 import org.apereo.cas.multitenancy.TenantExtractor;
 import org.apereo.cas.util.CollectionUtils;
+import org.apereo.cas.util.RegexUtils;
 import org.apereo.cas.util.crypto.DefaultPasswordEncoder;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
@@ -13,8 +15,6 @@ import org.apereo.cas.web.CasWebSecurityConfigurer;
 import org.apereo.cas.web.flow.CasWebflowConstants;
 import org.apereo.cas.web.security.CasWebSecurityConfigurerAdapter;
 import org.apereo.cas.web.security.CasWebflowSecurityContextRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +22,7 @@ import lombok.val;
 import org.apache.commons.lang3.Strings;
 import org.apereo.inspektr.common.web.ClientInfoExtractionOptions;
 import org.apereo.inspektr.common.web.ClientInfoThreadLocalFilter;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,9 +31,9 @@ import org.springframework.boot.actuate.autoconfigure.web.server.ManagementServe
 import org.springframework.boot.actuate.endpoint.web.PathMappedEndpoints;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.security.autoconfigure.SecurityProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -69,14 +70,8 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.webflow.context.servlet.FlowUrlHandler;
 import org.springframework.webflow.executor.FlowExecutor;
-import jakarta.annotation.Nonnull;
-import java.io.Serial;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.regex.Pattern;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link CasWebSecurityConfiguration}.
@@ -84,7 +79,7 @@ import java.util.regex.Pattern;
  * @author Misagh Moayyed
  * @since 6.0.0
  */
-@EnableConfigurationProperties(CasConfigurationProperties.class)
+@EnableConfigurationProperties({ManagementServerProperties.class, CasConfigurationProperties.class})
 @ConditionalOnFeatureEnabled(feature = CasFeatureModule.FeatureCatalog.WebApplication)
 @Configuration(value = "CasWebSecurityConfiguration", proxyBeanMethods = false)
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
@@ -106,7 +101,7 @@ class CasWebSecurityConfiguration {
             return new WebMvcConfigurer() {
                 @Override
                 public void addViewControllers(
-                    @Nonnull
+                    @NonNull
                     final ViewControllerRegistry registry) {
                     if (casProperties.getMonitor().getEndpoints().isFormLoginEnabled()) {
                         registry.addViewController(CasWebSecurityConfigurer.ENDPOINT_URL_ADMIN_FORM_LOGIN)
@@ -140,11 +135,11 @@ class CasWebSecurityConfiguration {
 
         @Bean
         @ConditionalOnMissingBean(name = "casClientInfoLoggingFilter")
-        public FilterRegistrationBean<ClientInfoThreadLocalFilter> casClientInfoLoggingFilter(
+        public FilterRegistrationBean<@NonNull ClientInfoThreadLocalFilter> casClientInfoLoggingFilter(
             @Qualifier(TenantExtractor.BEAN_NAME)
             final TenantExtractor tenantExtractor,
             final CasConfigurationProperties casProperties) {
-            val bean = new FilterRegistrationBean<ClientInfoThreadLocalFilter>();
+            val bean = new FilterRegistrationBean<@NonNull ClientInfoThreadLocalFilter>();
             val audit = casProperties.getAudit().getEngine();
             val options = ClientInfoExtractionOptions.builder()
                 .alternateLocalAddrHeaderName(audit.getAlternateClientAddrHeaderName())
@@ -161,10 +156,10 @@ class CasWebSecurityConfiguration {
         }
 
         @Bean
-        public FilterRegistrationBean<SecurityContextHolderFilter> securityContextHolderFilter(
+        public FilterRegistrationBean<@NonNull SecurityContextHolderFilter> securityContextHolderFilter(
             @Qualifier("securityContextRepository")
             final SecurityContextRepository securityContextRepository) {
-            val bean = new FilterRegistrationBean<SecurityContextHolderFilter>();
+            val bean = new FilterRegistrationBean<@NonNull SecurityContextHolderFilter>();
             bean.setFilter(new SecurityContextHolderFilter(securityContextRepository));
             bean.setUrlPatterns(CollectionUtils.wrap("/*"));
             bean.setName("Spring Security Context Holder Filter");
@@ -178,7 +173,7 @@ class CasWebSecurityConfiguration {
         public WebSecurityCustomizer casWebSecurityCustomizer(
             @Qualifier("securityContextRepository")
             final SecurityContextRepository securityContextRepository,
-            final ObjectProvider<PathMappedEndpoints> pathMappedEndpoints,
+            final ObjectProvider<@NonNull PathMappedEndpoints> pathMappedEndpoints,
             final List<CasWebSecurityConfigurer> configurersList,
             final WebEndpointProperties webEndpointProperties,
             final ManagementServerProperties managementServerProperties,
@@ -198,7 +193,7 @@ class CasWebSecurityConfiguration {
             @Qualifier("securityContextRepository")
             final SecurityContextRepository securityContextRepository,
             final HttpSecurity http,
-            final ObjectProvider<PathMappedEndpoints> pathMappedEndpoints,
+            final ObjectProvider<@NonNull PathMappedEndpoints> pathMappedEndpoints,
             final List<CasWebSecurityConfigurer> configurersList,
             final WebEndpointProperties webEndpointProperties,
             final ManagementServerProperties managementServerProperties,
@@ -246,7 +241,7 @@ class CasWebSecurityConfiguration {
         private static final ObjectMapper MAPPER = JacksonObjectMapperFactory.builder()
             .defaultTypingEnabled(false).build().toObjectMapper();
 
-        private static final Pattern PATTERN_PASSWORD_ALG = Pattern.compile("^\\{.+\\}.*");
+        private static final Pattern PATTERN_PASSWORD_ALG = RegexUtils.createPattern("^\\{.+\\}.*");
 
         @Bean
         @ConditionalOnMissingBean(name = "jsonUserDetailsService")

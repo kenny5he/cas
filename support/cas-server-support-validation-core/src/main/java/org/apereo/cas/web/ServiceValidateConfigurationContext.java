@@ -1,5 +1,6 @@
 package org.apereo.cas.web;
 
+import module java.base;
 import org.apereo.cas.CentralAuthenticationService;
 import org.apereo.cas.authentication.AuthenticationSystemSupport;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
@@ -13,17 +14,14 @@ import org.apereo.cas.validation.CasProtocolValidationSpecification;
 import org.apereo.cas.validation.RequestedAuthenticationContextValidator;
 import org.apereo.cas.validation.ServiceTicketValidationAuthorizersExecutionPlan;
 import org.apereo.cas.web.support.ArgumentExtractor;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.With;
 import lombok.experimental.SuperBuilder;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.ConfigurableApplicationContext;
-
-import jakarta.annotation.Nonnull;
-import java.util.Set;
 
 /**
  * This is {@link ServiceValidateConfigurationContext}.
@@ -64,7 +62,7 @@ public class ServiceValidateConfigurationContext {
 
     private final PrincipalResolver principalResolver;
 
-    @Nonnull
+    @NonNull
     private final ConfigurableApplicationContext applicationContext;
 
     private ProxyHandler proxyHandler;

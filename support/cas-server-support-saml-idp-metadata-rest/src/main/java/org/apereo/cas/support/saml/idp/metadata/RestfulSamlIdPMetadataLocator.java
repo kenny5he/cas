@@ -1,5 +1,6 @@
 package org.apereo.cas.support.saml.idp.metadata;
 
+import module java.base;
 import org.apereo.cas.configuration.model.support.saml.idp.metadata.RestSamlMetadataProperties;
 import org.apereo.cas.monitor.Monitorable;
 import org.apereo.cas.support.saml.idp.metadata.locator.AbstractSamlIdPMetadataLocator;
@@ -10,7 +11,6 @@ import org.apereo.cas.util.crypto.CipherExecutor;
 import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -19,12 +19,11 @@ import org.apache.commons.lang3.Strings;
 import org.apache.hc.core5.http.HttpEntityContainer;
 import org.apache.hc.core5.http.HttpResponse;
 import org.hjson.JsonValue;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Optional;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link RestfulSamlIdPMetadataLocator}.
@@ -41,7 +40,7 @@ public class RestfulSamlIdPMetadataLocator extends AbstractSamlIdPMetadataLocato
     private final RestSamlMetadataProperties properties;
 
     public RestfulSamlIdPMetadataLocator(final CipherExecutor<String, String> metadataCipherExecutor,
-                                         final Cache<String, SamlIdPMetadataDocument> metadataCache,
+                                         final Cache<@NonNull String, SamlIdPMetadataDocument> metadataCache,
                                          final RestSamlMetadataProperties properties,
                                          final ConfigurableApplicationContext applicationContext) {
         super(metadataCipherExecutor, metadataCache, applicationContext);
@@ -62,6 +61,7 @@ public class RestfulSamlIdPMetadataLocator extends AbstractSamlIdPMetadataLocato
                 .url(url)
                 .parameters(parameters)
                 .headers(properties.getHeaders())
+                .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                 .build();
             response = HttpUtils.execute(exec);
             if (response != null) {

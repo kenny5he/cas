@@ -1,5 +1,6 @@
 package org.apereo.cas.adaptors.rest;
 
+import module java.base;
 import org.apereo.cas.DefaultMessageDescriptor;
 import org.apereo.cas.authentication.AuthenticationHandlerExecutionResult;
 import org.apereo.cas.authentication.MessageDescriptor;
@@ -19,7 +20,6 @@ import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.SpringExpressionLanguageValueResolver;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.io.IOUtils;
@@ -29,19 +29,7 @@ import org.apache.hc.core5.http.NameValuePair;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import javax.security.auth.login.AccountExpiredException;
-import javax.security.auth.login.AccountLockedException;
-import javax.security.auth.login.AccountNotFoundException;
-import javax.security.auth.login.FailedLoginException;
-import java.nio.charset.StandardCharsets;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link RestAuthenticationHandler} that authenticates uid/password against a remote
@@ -96,8 +84,8 @@ public class RestAuthenticationHandler extends AbstractUsernamePasswordAuthentic
                 .method(HttpMethod.valueOf(properties.getMethod().toUpperCase(Locale.ENGLISH)))
                 .url(SpringExpressionLanguageValueResolver.getInstance().resolve(properties.getUri()))
                 .httpClient(httpClient)
-                .maximumRetryAttempts(1)
-                .build();
+                .build()
+                .withoutRetry();
             response = HttpUtils.execute(exec);
             val status = HttpStatus.resolve(Objects.requireNonNull(response).getCode());
             return switch (Objects.requireNonNull(status)) {

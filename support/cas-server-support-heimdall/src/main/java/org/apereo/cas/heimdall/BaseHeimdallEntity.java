@@ -1,14 +1,13 @@
 package org.apereo.cas.heimdall;
 
+import module java.base;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
-import java.io.Serial;
-import java.io.Serializable;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link BaseHeimdallEntity}.

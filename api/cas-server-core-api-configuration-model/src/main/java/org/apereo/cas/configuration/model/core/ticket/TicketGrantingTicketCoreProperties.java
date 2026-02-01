@@ -1,13 +1,10 @@
 package org.apereo.cas.configuration.model.core.ticket;
 
+import module java.base;
 import org.apereo.cas.configuration.support.RequiresModule;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * This is {@link TicketGrantingTicketCoreProperties}.
@@ -35,5 +32,5 @@ public class TicketGrantingTicketCoreProperties implements Serializable {
      * how session information is tracked for every ticket which then
      * has a subsequent impact on logout.
      */
-    private boolean onlyTrackMostRecentSession = true;
+    private TicketTrackingPolicyTypes serviceTrackingPolicy = TicketTrackingPolicyTypes.MOST_RECENT;
 }

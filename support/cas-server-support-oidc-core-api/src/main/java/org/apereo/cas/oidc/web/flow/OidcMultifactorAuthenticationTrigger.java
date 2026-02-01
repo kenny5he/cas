@@ -1,5 +1,6 @@
 package org.apereo.cas.oidc.web.flow;
 
+import module java.base;
 import org.apereo.cas.CasProtocolConstants;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.AuthenticationException;
@@ -17,7 +18,6 @@ import org.apereo.cas.support.oauth.web.OAuth20RequestParameterResolver;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.EncodingUtils;
 import org.apereo.cas.util.function.FunctionUtils;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -26,18 +26,14 @@ import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.net.URIBuilder;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.pac4j.jee.context.JEEContext;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.web.util.UriComponentsBuilder;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link OidcMultifactorAuthenticationTrigger}.
@@ -58,7 +54,7 @@ public class OidcMultifactorAuthenticationTrigger implements MultifactorAuthenti
 
     private final OAuth20RequestParameterResolver oauthRequestParameterResolver;
 
-    private final FactoryBean<OidcServerDiscoverySettings> discoverySettingsFactory;
+    private final FactoryBean<@NonNull OidcServerDiscoverySettings> discoverySettingsFactory;
 
     private int order = Ordered.LOWEST_PRECEDENCE;
 

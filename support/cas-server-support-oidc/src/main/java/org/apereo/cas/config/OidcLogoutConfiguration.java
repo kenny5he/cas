@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
@@ -17,7 +18,7 @@ import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.util.http.HttpClient;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import org.apereo.cas.web.UrlValidator;
-
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -63,7 +64,7 @@ class OidcLogoutConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public SingleLogoutMessageCreator oidcSingleLogoutMessageCreator(
             @Qualifier(OidcConfigurationContext.BEAN_NAME)
-            final ObjectProvider<OidcConfigurationContext> oidcConfigurationContext) {
+            final ObjectProvider<@NonNull OidcConfigurationContext> oidcConfigurationContext) {
             return new OidcSingleLogoutMessageCreator(oidcConfigurationContext);
         }
     }

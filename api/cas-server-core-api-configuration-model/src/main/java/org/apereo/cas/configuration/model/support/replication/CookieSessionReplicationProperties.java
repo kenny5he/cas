@@ -1,5 +1,6 @@
 package org.apereo.cas.configuration.model.support.replication;
 
+import module java.base;
 import org.apereo.cas.configuration.model.core.util.EncryptionJwtCryptoProperties;
 import org.apereo.cas.configuration.model.core.util.EncryptionJwtSigningJwtCryptographyProperties;
 import org.apereo.cas.configuration.model.core.util.SigningJwtCryptoProperties;
@@ -11,7 +12,6 @@ import lombok.Setter;
 import lombok.With;
 import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import java.io.Serial;
 
 /**
  * This is {@link CookieSessionReplicationProperties}.
@@ -55,6 +55,7 @@ public class CookieSessionReplicationProperties extends PinnableCookieProperties
 
     @Deprecated(since = "7.3.0", forRemoval = true)
     public CookieSessionReplicationProperties() {
+        crypto.setEnabled(false);
         crypto.getEncryption().setKeySize(EncryptionJwtCryptoProperties.DEFAULT_STRINGABLE_ENCRYPTION_KEY_SIZE);
         crypto.getSigning().setKeySize(SigningJwtCryptoProperties.DEFAULT_STRINGABLE_SIGNING_KEY_SIZE);
     }

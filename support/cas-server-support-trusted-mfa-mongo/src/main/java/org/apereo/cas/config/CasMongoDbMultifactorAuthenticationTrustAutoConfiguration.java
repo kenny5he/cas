@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.authentication.CasSSLContext;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
@@ -19,6 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 /**
  * This is {@link CasMongoDbMultifactorAuthenticationTrustAutoConfiguration}.
@@ -40,14 +42,14 @@ public class CasMongoDbMultifactorAuthenticationTrustAutoConfiguration {
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     @Bean
     @ConditionalOnMissingBean(name = "mongoMfaTrustedAuthnTemplate")
-    public MongoOperations mongoMfaTrustedAuthnTemplate(final CasConfigurationProperties casProperties,
-                                                        @Qualifier(CasSSLContext.BEAN_NAME)
-                                                      final CasSSLContext casSslContext) {
+    public MongoTemplate mongoMfaTrustedAuthnTemplate(final CasConfigurationProperties casProperties,
+                                                      @Qualifier(CasSSLContext.BEAN_NAME)
+                                                        final CasSSLContext casSslContext) {
         val mongo = casProperties.getAuthn().getMfa().getTrusted().getMongo();
         val factory = new MongoDbConnectionFactory(casSslContext.getSslContext());
         val mongoTemplate = factory.buildMongoTemplate(mongo);
         MongoDbConnectionFactory.createCollection(mongoTemplate, mongo.getCollection(), mongo.isDropCollection());
-        return mongoTemplate;
+        return mongoTemplate.asMongoTemplate();
     }
 
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)

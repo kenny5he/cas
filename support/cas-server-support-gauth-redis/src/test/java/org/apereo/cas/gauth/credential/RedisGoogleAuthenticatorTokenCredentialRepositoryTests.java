@@ -1,5 +1,6 @@
 package org.apereo.cas.gauth.credential;
 
+import module java.base;
 import org.apereo.cas.authentication.OneTimeTokenAccount;
 import org.apereo.cas.config.CasGoogleAuthenticatorRedisAutoConfiguration;
 import org.apereo.cas.otp.repository.credentials.OneTimeTokenCredentialRepository;
@@ -22,11 +23,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 import static org.awaitility.Awaitility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -137,9 +133,9 @@ class RedisGoogleAuthenticatorTokenCredentialRepositoryTests extends BaseOneTime
                         .build();
                 })
             .limit(1000);
-        executedTimedOperation("Adding accounts", __ -> allAccounts.forEach(registry::save));
+        executedTimedOperation("Adding accounts", _ -> allAccounts.forEach(registry::save));
         executedTimedOperation("Getting accounts",
-            Unchecked.consumer(__ -> {
+            Unchecked.consumer(_ -> {
                 val accounts = registry.load();
                 assertFalse(accounts.isEmpty());
             }));
@@ -147,9 +143,9 @@ class RedisGoogleAuthenticatorTokenCredentialRepositoryTests extends BaseOneTime
         val accountsStream = executedTimedOperation("Getting accounts in bulk",
             Unchecked.supplier(() -> registry.load()));
         executedTimedOperation("Getting accounts individually",
-            Unchecked.consumer(__ -> accountsStream.forEach(acct -> assertNotNull(registry.get(acct.getId())))));
+            Unchecked.consumer(_ -> accountsStream.forEach(acct -> assertNotNull(registry.get(acct.getId())))));
         executedTimedOperation("Getting accounts individually for users",
-            Unchecked.consumer(__ -> accountsStream.forEach(acct -> assertNotNull(registry.get(acct.getUsername())))));
+            Unchecked.consumer(_ -> accountsStream.forEach(acct -> assertNotNull(registry.get(acct.getUsername())))));
     }
 
     private static <T> T executedTimedOperation(final String name, final Supplier<T> operation) {

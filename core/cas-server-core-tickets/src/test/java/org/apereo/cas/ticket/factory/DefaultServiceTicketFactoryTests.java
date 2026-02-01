@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.factory;
 
+import module java.base;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.mock.MockTicketGrantingTicket;
 import org.apereo.cas.services.CasRegisteredService;
@@ -14,7 +15,6 @@ import org.apereo.cas.ticket.proxy.ProxyTicket;
 import lombok.val;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import java.io.Serial;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -75,7 +75,8 @@ class DefaultServiceTicketFactoryTests extends BaseTicketFactoryTests {
         assertTrue(serviceTicket.isStateless());
         assertNotNull(serviceTicket.getAuthentication());
         val pgtIssuer = (ProxyGrantingTicketIssuerTicket) serviceTicket;
-        val pgt = pgtIssuer.grantProxyGrantingTicket("PGT-123", CoreAuthenticationTestUtils.getAuthentication(), NeverExpiresExpirationPolicy.INSTANCE);
+        val pgt = pgtIssuer.grantProxyGrantingTicket("PGT-123", CoreAuthenticationTestUtils.getAuthentication(),
+            NeverExpiresExpirationPolicy.INSTANCE, proxyGrantingTicketTrackingPolicy);
         assertNotNull(pgt);
         assertNotNull(pgt.getAuthentication());
     }

@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.registry.compact;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.AuthenticationHandler;
 import org.apereo.cas.authentication.AuthenticationManager;
@@ -25,11 +26,8 @@ import com.google.common.base.Splitter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.BooleanUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link ProxyGrantingTicketCompactor}.
@@ -39,7 +37,7 @@ import java.util.stream.Collectors;
  */
 @RequiredArgsConstructor
 public class ProxyGrantingTicketCompactor implements TicketCompactor<ProxyGrantingTicket> {
-    private final ObjectProvider<TicketFactory> ticketFactory;
+    private final ObjectProvider<@NonNull TicketFactory> ticketFactory;
     private final ServiceFactory serviceFactory;
     private final PrincipalFactory principalFactory;
 

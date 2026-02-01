@@ -1,25 +1,19 @@
 package org.apereo.cas.ticket.expiration;
 
+import module java.base;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.services.RegisteredServiceTestUtils;
 import org.apereo.cas.ticket.TicketGrantingTicketImpl;
 import org.apereo.cas.ticket.factory.BaseTicketFactoryTests;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.serialization.SerializationUtils;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.TestPropertySource;
-
-import java.io.File;
-import java.io.IOException;
-import java.time.Clock;
-import java.time.ZoneOffset;
-
+import tools.jackson.databind.ObjectMapper;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -29,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 3.4.10
  */
 @Tag("Tickets")
-@TestPropertySource(properties = "cas.ticket.tgt.core.only-track-most-recent-session=true")
+@TestPropertySource(properties = "cas.ticket.tgt.core.service-tracking-policy=MOST_RECENT")
 class TicketGrantingTicketExpirationPolicyTests extends BaseTicketFactoryTests {
 
     private static final long HARD_TIMEOUT = 200;
@@ -79,7 +73,7 @@ class TicketGrantingTicketExpirationPolicyTests extends BaseTicketFactoryTests {
     }
 
     @Test
-    void verifySerializeAnExpirationPolicyToJson() throws IOException {
+    void verifySerializeAnExpirationPolicyToJson() {
         val policy = new TicketGrantingTicketExpirationPolicy(100, 100);
         MAPPER.writeValue(JSON_FILE, policy);
         val policyRead = MAPPER.readValue(JSON_FILE, TicketGrantingTicketExpirationPolicy.class);

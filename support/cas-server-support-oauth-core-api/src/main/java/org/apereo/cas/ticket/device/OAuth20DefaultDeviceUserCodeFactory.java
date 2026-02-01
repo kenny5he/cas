@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.device;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.ticket.ExpirationPolicyBuilder;
@@ -36,7 +37,7 @@ public class OAuth20DefaultDeviceUserCodeFactory implements OAuth20DeviceUserCod
         val userCode = StringUtils.defaultIfBlank(id, normalizeUserCode(RandomUtils.randomAlphanumeric(userCodeLength)));
         val expirationPolicyToUse = OAuth20DeviceTokenUtils.determineExpirationPolicyForService(servicesManager, expirationPolicyBuilder, service);
         val duc = new OAuth20DefaultDeviceUserCode(normalizeUserCode(userCode), service, expirationPolicyToUse);
-        FunctionUtils.doIfNotNull(service, __ -> duc.setTenantId(service.getTenant()));
+        FunctionUtils.doIfNotNull(service, _ -> duc.setTenantId(service.getTenant()));
         return duc;
     }
 

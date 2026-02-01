@@ -1,21 +1,18 @@
 package org.apereo.cas.authentication;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.util.CollectionUtils;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.Nulls;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.val;
-import java.io.Serial;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Immutable authentication event whose attributes may not change after creation.
@@ -32,6 +29,7 @@ import java.util.Objects;
 @EqualsAndHashCode
 @AllArgsConstructor
 @ToString(of = {"principal", "authenticationDate", "attributes"})
+@SuppressWarnings("NullAway.Init")
 public class DefaultAuthentication implements Authentication {
     @Serial
     private static final long serialVersionUID = 3206127526058061391L;
@@ -44,31 +42,37 @@ public class DefaultAuthentication implements Authentication {
     /**
      * Authenticated principal.
      */
+    @Nullable
     private Principal principal;
 
     /**
      * Authentication messages and warnings.
      */
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private List<MessageDescriptor> warnings = new ArrayList<>();
 
     /**
      * List of metadata about credentials presented at authentication.
      */
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private List<Credential> credentials = new ArrayList<>();
 
     /**
      * Authentication metadata attributes.
      */
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private Map<String, List<Object>> attributes = new LinkedHashMap<>();
 
     /**
      * Map of handler name to handler authentication success event.
      */
-    private Map<String, AuthenticationHandlerExecutionResult> successes;
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    private Map<String, AuthenticationHandlerExecutionResult> successes = new LinkedHashMap<>();
 
     /**
      * Map of handler name to handler authentication failure cause.
      */
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private Map<String, Throwable> failures = new LinkedHashMap<>();
 
     @Override
@@ -89,7 +93,9 @@ public class DefaultAuthentication implements Authentication {
         attributes.clear();
         attributes.putAll(finalAuthnAttributes);
 
-        val finalPrincipalAttributes = CoreAuthenticationUtils.mergeAttributes(principal.getAttributes(), authentication.getPrincipal().getAttributes());
+        val finalPrincipalAttributes = CoreAuthenticationUtils.mergeAttributes(
+            Objects.requireNonNull(principal).getAttributes(),
+            authentication.getPrincipal().getAttributes());
         principal.getAttributes().clear();
         principal.getAttributes().putAll(finalPrincipalAttributes);
     }
@@ -97,7 +103,7 @@ public class DefaultAuthentication implements Authentication {
     @Override
     public void replaceAttributes(final Authentication authentication) {
         attributes.clear();
-        principal.getAttributes().clear();
+        Objects.requireNonNull(principal).getAttributes().clear();
         updateAttributes(authentication);
     }
 
@@ -112,9 +118,9 @@ public class DefaultAuthentication implements Authentication {
     }
 
     @Override
-    public <T> T getSingleValuedAttribute(final String name, final Class<T> expectedType) {
+    public @Nullable <T> T getSingleValuedAttribute(final String name, final Class<T> expectedType) {
         if (containsAttribute(name)) {
-            val values = getAttributes().get(name);
+            val values = Objects.requireNonNull(getAttributes().get(name));
             return values
                 .stream()
                 .filter(Objects::nonNull)

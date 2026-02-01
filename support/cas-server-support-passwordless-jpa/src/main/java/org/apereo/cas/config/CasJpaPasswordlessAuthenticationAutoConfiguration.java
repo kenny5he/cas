@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.api.PasswordlessTokenRepository;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
@@ -17,6 +18,7 @@ import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import org.apereo.cas.util.thread.Cleanable;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -33,8 +35,7 @@ import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
 import jakarta.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-import java.util.Set;
+import module java.sql;
 
 /**
  * This is {@link CasJpaPasswordlessAuthenticationAutoConfiguration}.
@@ -53,7 +54,7 @@ public class CasJpaPasswordlessAuthenticationAutoConfiguration {
 
         @Bean
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-        public FactoryBean<EntityManagerFactory> passwordlessEntityManagerFactory(
+        public FactoryBean<@NonNull EntityManagerFactory> passwordlessEntityManagerFactory(
             final CasConfigurationProperties casProperties,
             @Qualifier("jpaPasswordlessVendorAdapter") final JpaVendorAdapter jpaPasswordlessVendorAdapter,
             @Qualifier("passwordlessDataSource") final DataSource passwordlessDataSource,
@@ -149,7 +150,7 @@ public class CasJpaPasswordlessAuthenticationAutoConfiguration {
             initialDelayString = "${cas.authn.passwordless.tokens.jpa.cleaner.schedule.start-delay:PT30S}",
             fixedDelayString = "${cas.authn.passwordless.tokens.jpa.cleaner.schedule.repeat-interval:PT35S}")
         public void clean() {
-            lock.tryLock(__ -> repository.clean());
+            lock.tryLock(_ -> repository.clean());
         }
     }
 }

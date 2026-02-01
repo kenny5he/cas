@@ -1,5 +1,6 @@
 package org.apereo.cas.azure.ad.authentication;
 
+import module java.base;
 import org.apereo.cas.authentication.attribute.BasePersonAttributeDao;
 import org.apereo.cas.authentication.attribute.SimplePersonAttributes;
 import org.apereo.cas.authentication.attribute.SimpleUsernameAttributeProvider;
@@ -27,16 +28,6 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * Provides the ability to fetch attributes from azure active directory
@@ -108,7 +99,7 @@ public class MicrosoftGraphPersonAttributeDao extends BasePersonAttributeDao {
                 return new SimplePersonAttributes(uid, PersonAttributeDao.stuffAttributesIntoList(attributes));
             }
             try (val errorBody = userCallResult.errorBody()) {
-                throw new RuntimeException("error requesting token (" + userCallResult.code() + "): " + errorBody);
+                throw new RuntimeException("error requesting token (" + userCallResult.code() + "): " + errorBody.string());
             }
         });
     }

@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.ticket.serialization.DefaultTicketSerializationExecutionPlan;
@@ -8,8 +9,8 @@ import org.apereo.cas.ticket.serialization.TicketSerializationExecutionPlan;
 import org.apereo.cas.ticket.serialization.TicketSerializationExecutionPlanConfigurer;
 import org.apereo.cas.ticket.serialization.TicketSerializationManager;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
-
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -20,10 +21,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * This is {@link CasCoreTicketsSerializationConfiguration}.
@@ -44,7 +41,7 @@ class CasCoreTicketsSerializationConfiguration {
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public TicketSerializationExecutionPlan ticketSerializationExecutionPlan(
             final ConfigurableApplicationContext applicationContext,
-            final ObjectProvider<List<TicketSerializationExecutionPlanConfigurer>> providerList) {
+            final ObjectProvider<@NonNull List<TicketSerializationExecutionPlanConfigurer>> providerList) {
             val providers = Optional.ofNullable(providerList.getIfAvailable()).orElseGet(ArrayList::new);
             AnnotationAwareOrderComparator.sort(providers);
             val plan = new DefaultTicketSerializationExecutionPlan(applicationContext);

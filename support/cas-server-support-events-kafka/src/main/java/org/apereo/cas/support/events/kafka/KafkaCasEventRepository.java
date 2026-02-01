@@ -1,5 +1,6 @@
 package org.apereo.cas.support.events.kafka;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.support.events.CasEventRepositoryFilter;
 import org.apereo.cas.support.events.dao.AbstractCasEventRepository;
@@ -7,6 +8,7 @@ import org.apereo.cas.support.events.dao.CasEvent;
 import org.apereo.cas.util.LoggingUtils;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.kafka.core.KafkaOperations;
 
 /**
@@ -17,11 +19,11 @@ import org.springframework.kafka.core.KafkaOperations;
  */
 @Slf4j
 public class KafkaCasEventRepository extends AbstractCasEventRepository {
-    private final KafkaOperations<String, CasEvent> kafkaEventRepositoryTemplate;
+    private final KafkaOperations<@NonNull String, @NonNull CasEvent> kafkaEventRepositoryTemplate;
     private final CasConfigurationProperties casProperties;
 
     public KafkaCasEventRepository(final CasEventRepositoryFilter eventRepositoryFilter,
-                                   final KafkaOperations<String, CasEvent> kafkaEventRepositoryTemplate,
+                                   final KafkaOperations<@NonNull String, @NonNull CasEvent> kafkaEventRepositoryTemplate,
                                    final CasConfigurationProperties casProperties) {
         super(eventRepositoryFilter);
         this.kafkaEventRepositoryTemplate = kafkaEventRepositoryTemplate;

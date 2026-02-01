@@ -1,16 +1,20 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.ShibbolethCompatiblePersistentIdGenerator;
 import org.apereo.cas.config.CasCoreAuthenticationAutoConfiguration;
 import org.apereo.cas.config.CasCoreAutoConfiguration;
 import org.apereo.cas.config.CasCoreCookieAutoConfiguration;
 import org.apereo.cas.config.CasCoreLogoutAutoConfiguration;
+import org.apereo.cas.config.CasCoreMultifactorAuthenticationAutoConfiguration;
+import org.apereo.cas.config.CasCoreMultifactorAuthenticationWebflowAutoConfiguration;
 import org.apereo.cas.config.CasCoreNotificationsAutoConfiguration;
 import org.apereo.cas.config.CasCoreScriptingAutoConfiguration;
 import org.apereo.cas.config.CasCoreServicesAutoConfiguration;
 import org.apereo.cas.config.CasCoreTicketsAutoConfiguration;
 import org.apereo.cas.config.CasCoreUtilAutoConfiguration;
 import org.apereo.cas.config.CasCoreWebAutoConfiguration;
+import org.apereo.cas.config.CasCoreWebflowAutoConfiguration;
 import org.apereo.cas.configuration.model.support.mfa.BaseMultifactorAuthenticationProviderProperties;
 import org.apereo.cas.services.consent.DefaultRegisteredServiceConsentPolicy;
 import org.apereo.cas.services.support.RegisteredServiceMappedRegexAttributeFilter;
@@ -33,18 +37,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junitpioneer.jupiter.RetryingTest;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import static org.awaitility.Awaitility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -297,13 +289,17 @@ public abstract class AbstractServiceRegistryTests {
     @Test
     void checkSaveMethodWithDelegatedAuthnPolicy() {
         getRegisteredServiceTypes().forEach(type -> {
-            val r = buildRegisteredServiceInstance(RandomUtils.nextInt(), type)
+            val registeredService = buildRegisteredServiceInstance(RandomUtils.nextInt(), type)
                 .setId(RegisteredServiceDefinition.INITIAL_IDENTIFIER_VALUE);
             val strategy = new DefaultRegisteredServiceAccessStrategy();
             val providers = CollectionUtils.wrapList("one", "two");
-            strategy.setDelegatedAuthenticationPolicy(new DefaultRegisteredServiceDelegatedAuthenticationPolicy(providers, true, false, null));
-            r.setAccessStrategy(strategy);
-            val r2 = serviceRegistry.save(r);
+            val delegatedAuthenticationPolicy = new DefaultRegisteredServiceDelegatedAuthenticationPolicy()
+                .setAllowedProviders(providers)
+                .setPermitUndefined(true)
+                .setExclusive(false);
+            strategy.setDelegatedAuthenticationPolicy(delegatedAuthenticationPolicy);
+            registeredService.setAccessStrategy(strategy);
+            val r2 = serviceRegistry.save(registeredService);
             val r3 = serviceRegistry.findServiceById(r2.getId());
             assertEquals(r2, r3);
         });
@@ -664,7 +660,7 @@ public abstract class AbstractServiceRegistryTests {
         });
     }
 
-    protected abstract ServiceRegistry getNewServiceRegistry() throws Exception;
+    protected abstract ServiceRegistry getNewServiceRegistry();
 
     protected void initializeServiceRegistry() {
     }
@@ -682,7 +678,7 @@ public abstract class AbstractServiceRegistryTests {
     }
 
     @SpringBootTestAutoConfigurations
-    @ImportAutoConfiguration({
+    @ImportAutoConfiguration({      
         CasCoreUtilAutoConfiguration.class,
         CasCoreScriptingAutoConfiguration.class,
         CasCoreServicesAutoConfiguration.class,
@@ -692,7 +688,10 @@ public abstract class AbstractServiceRegistryTests {
         CasCoreAutoConfiguration.class,
         CasCoreTicketsAutoConfiguration.class,
         CasCoreLogoutAutoConfiguration.class,
-        CasCoreCookieAutoConfiguration.class
+        CasCoreCookieAutoConfiguration.class,
+        CasCoreMultifactorAuthenticationAutoConfiguration.class,
+        CasCoreMultifactorAuthenticationWebflowAutoConfiguration.class,
+        CasCoreWebflowAutoConfiguration.class
     })
     @SpringBootConfiguration(proxyBeanMethods = false)
     public static class SharedTestConfiguration {

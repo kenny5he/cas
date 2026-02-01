@@ -1,5 +1,6 @@
 package org.apereo.cas.jdbc;
 
+import module java.base;
 import org.apereo.cas.authentication.attribute.SimplePersonAttributes;
 import org.apereo.cas.authentication.principal.attribute.PersonAttributeDao;
 import org.apereo.cas.authentication.principal.attribute.PersonAttributes;
@@ -7,14 +8,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.jdbc.core.RowMapper;
-import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import module java.sql;
 
 /**
  * An {@link PersonAttributeDao}
@@ -59,7 +53,7 @@ public class MultiRowJdbcPersonAttributeDao extends AbstractJdbcPersonAttributeD
 
         for (val queryResult : queryResults) {
             val userName = getUserName(queryUserName, queryResult, userNameAttribute);
-            val attributes = peopleAttributesBuilder.computeIfAbsent(userName, __ -> new LinkedHashMap<>());
+            val attributes = peopleAttributesBuilder.computeIfAbsent(userName, _ -> new LinkedHashMap<>());
             for (val columnMapping : nameValueColumnMappings.entrySet()) {
                 val keyColumn = columnMapping.getKey();
                 val attrNameObj = queryResult.get(keyColumn);
@@ -111,7 +105,7 @@ public class MultiRowJdbcPersonAttributeDao extends AbstractJdbcPersonAttributeD
         if (value == null) {
             return;
         }
-        val currentValue = results.computeIfAbsent(key, __ -> new ArrayList<>());
+        val currentValue = results.computeIfAbsent(key, _ -> new ArrayList<>());
         if (value instanceof List) {
             currentValue.addAll((Collection<? extends V>) value);
         } else {

@@ -1,5 +1,6 @@
 package org.apereo.cas.support.oauth.web.endpoints;
 
+import module java.base;
 import org.apereo.cas.CentralAuthenticationService;
 import org.apereo.cas.audit.AuditableExecution;
 import org.apereo.cas.authentication.attribute.AttributeDefinitionStore;
@@ -47,6 +48,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.profile.ProfileManager;
@@ -55,9 +57,6 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.scheduling.TaskScheduler;
-import java.io.Serializable;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * This is {@link OAuth20ConfigurationContext}.
@@ -99,7 +98,7 @@ public class OAuth20ConfigurationContext {
 
     private final OAuth20AccessTokenResponseGenerator accessTokenResponseGenerator;
 
-    private final ObjectProvider<List<OAuth20TokenRequestValidator>> accessTokenGrantRequestValidators;
+    private final ObjectProvider<@NonNull List<OAuth20TokenRequestValidator>> accessTokenGrantRequestValidators;
 
     private final ExpirationPolicyBuilder<OAuth20DeviceToken> deviceTokenExpirationPolicy;
 
@@ -107,11 +106,11 @@ public class OAuth20ConfigurationContext {
 
     private final OAuth20CasAuthenticationBuilder authenticationBuilder;
 
-    private final ObjectProvider<List<OAuth20AuthorizationResponseBuilder>> oauthAuthorizationResponseBuilders;
+    private final ObjectProvider<@NonNull List<OAuth20AuthorizationResponseBuilder>> oauthAuthorizationResponseBuilders;
 
     private final OAuth20InvalidAuthorizationResponseBuilder oauthInvalidAuthorizationResponseBuilder;
 
-    private final ObjectProvider<List<OAuth20AuthorizationRequestValidator>> oauthRequestValidators;
+    private final ObjectProvider<@NonNull List<OAuth20AuthorizationRequestValidator>> oauthRequestValidators;
 
     private final AuditableExecution registeredServiceAccessStrategyEnforcer;
 

@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.accesstoken;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.configuration.support.Beans;
@@ -22,9 +23,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * Default OAuth access token factory.
@@ -83,7 +81,7 @@ public class OAuth20DefaultAccessTokenFactory implements OAuth20AccessTokenFacto
         val accessToken = new OAuth20DefaultAccessToken(accessTokenId, service, authentication,
             expirationPolicyToUse, ticketGrantingTicket, exchangedToken, scopes,
             clientId, requestClaims, responseType, grantType);
-        FunctionUtils.doIfNotNull(service, __ -> accessToken.setTenantId(service.getTenant()));
+        FunctionUtils.doIfNotNull(service, _ -> accessToken.setTenantId(service.getTenant()));
         descendantTicketsTrackingPolicy.trackTicket(ticketGrantingTicket, accessToken);
         return accessToken;
     }

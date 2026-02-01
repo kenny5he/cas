@@ -1,5 +1,6 @@
 package org.apereo.cas.util;
 
+import module java.base;
 import org.apereo.cas.authentication.CoreAuthenticationUtils;
 import org.apereo.cas.configuration.model.support.saml.sps.AbstractSamlSPProperties;
 import org.apereo.cas.configuration.support.TriStateBoolean;
@@ -26,11 +27,6 @@ import org.opensaml.saml.metadata.resolver.impl.AbstractBatchMetadataResolver;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.springframework.core.Ordered;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.StreamSupport;
 
 /**
  * This is {@link SamlSPUtils}.
@@ -69,7 +65,7 @@ public class SamlSPUtils {
             service.setUsernameAttributeProvider(new PrincipalAttributeRegisteredServiceUsernameProvider(sp.getNameIdAttribute()));
         }
 
-        FunctionUtils.doIfNotBlank(sp.getNameIdFormat(), __ -> service.setRequiredNameIdFormat(sp.getNameIdFormat()));
+        FunctionUtils.doIfNotBlank(sp.getNameIdFormat(), _ -> service.setRequiredNameIdFormat(sp.getNameIdFormat()));
 
         val attributes = CoreAuthenticationUtils.transformPrincipalAttributesListIntoMultiMap(attributesToRelease);
         val policy = new ChainingAttributeReleasePolicy();
@@ -81,7 +77,7 @@ public class SamlSPUtils {
         service.setMetadataCriteriaRemoveRolelessEntityDescriptors(true);
 
 
-        FunctionUtils.doIfNotBlank(sp.getSignatureLocation(), __ -> service.setMetadataSignatureLocation(sp.getSignatureLocation()));
+        FunctionUtils.doIfNotBlank(sp.getSignatureLocation(), _ -> service.setMetadataSignatureLocation(sp.getSignatureLocation()));
 
         val entityIDList = determineEntityIdList(sp, resolver, service);
 

@@ -1,5 +1,6 @@
 package org.apereo.cas.heimdall;
 
+import module java.base;
 import org.apereo.cas.config.CasAuthenticationEventExecutionPlanTestConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationAutoConfiguration;
 import org.apereo.cas.config.CasCoreAutoConfiguration;
@@ -52,7 +53,6 @@ abstract class BaseHeimdallTests {
         CasThemesAutoConfiguration.class,
         CasOAuth20WebflowAutoConfiguration.class,
         CasOidcAutoConfiguration.class,
-
         CasHeimdallAutoConfiguration.class
     })
     public static class SharedTestConfiguration {

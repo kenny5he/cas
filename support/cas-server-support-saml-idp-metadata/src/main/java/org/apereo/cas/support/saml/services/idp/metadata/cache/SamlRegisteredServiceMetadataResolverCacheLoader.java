@@ -1,5 +1,6 @@
 package org.apereo.cas.support.saml.services.idp.metadata.cache;
 
+import module java.base;
 import org.apereo.cas.support.saml.OpenSamlConfigBean;
 import org.apereo.cas.support.saml.SamlException;
 import org.apereo.cas.support.saml.services.idp.metadata.plan.SamlRegisteredServiceMetadataResolutionPlan;
@@ -13,14 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.shibboleth.shared.component.AbstractIdentifiableInitializableComponent;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.opensaml.saml.metadata.resolver.ChainingMetadataResolver;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
-import java.time.Clock;
-import java.time.Instant;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link SamlRegisteredServiceMetadataResolverCacheLoader} that uses Guava's cache loading strategy
@@ -33,7 +29,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class SamlRegisteredServiceMetadataResolverCacheLoader implements CacheLoader<SamlRegisteredServiceCacheKey, CachedMetadataResolverResult> {
+public class SamlRegisteredServiceMetadataResolverCacheLoader implements CacheLoader<@NonNull SamlRegisteredServiceCacheKey, CachedMetadataResolverResult> {
 
     protected final OpenSamlConfigBean configBean;
 
@@ -90,7 +86,7 @@ public class SamlRegisteredServiceMetadataResolverCacheLoader implements CacheLo
             .filter(Objects::nonNull)
             .peek(Unchecked.consumer(givenResolver -> {
                 if (givenResolver instanceof final AbstractIdentifiableInitializableComponent metadataResolver && !metadataResolver.isInitialized()) {
-                    FunctionUtils.doIfBlank(metadataResolver.getId(), __ -> metadataResolver.setId(registeredService.getName() + '-' + RandomUtils.generateSecureRandomId()));
+                    FunctionUtils.doIfBlank(metadataResolver.getId(), _ -> metadataResolver.setId(registeredService.getName() + '-' + RandomUtils.generateSecureRandomId()));
                     LOGGER.trace("Metadata resolver [{}] will be forcefully initialized", metadataResolver.getId());
                     metadataResolver.initialize();
                 }

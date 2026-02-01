@@ -1,5 +1,6 @@
 package org.apereo.cas.mock;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.ticket.ExpirationPolicy;
@@ -11,17 +12,11 @@ import org.apereo.cas.ticket.Ticket;
 import org.apereo.cas.ticket.TicketGrantingTicket;
 import org.apereo.cas.ticket.expiration.NeverExpiresExpirationPolicy;
 import org.apereo.cas.ticket.proxy.ProxyGrantingTicket;
-
+import org.apereo.cas.ticket.tracking.TicketTrackingPolicy;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
-
-import java.io.Serial;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.Optional;
 
 /**
  * Mock service ticket.
@@ -69,9 +64,10 @@ public class MockServiceTicket implements ServiceTicket, RenewableServiceTicket,
 
     @Override
     public ProxyGrantingTicket grantProxyGrantingTicket(final String id, final Authentication authentication,
-                                                        final ExpirationPolicy expirationPolicy) {
+                                                        final ExpirationPolicy expirationPolicy,
+                                                        final TicketTrackingPolicy proxyGrantingTicketTrackingPolicy) {
         val pgt = new ProxyGrantingTicketImpl(id, this.service, this.getTicketGrantingTicket(), authentication, expirationPolicy);
-        getTicketGrantingTicket().getProxyGrantingTickets().put(pgt.getId(), this.service);
+        proxyGrantingTicketTrackingPolicy.trackTicket(getTicketGrantingTicket(), pgt, this.service);
         return pgt;
     }
 

@@ -1,5 +1,6 @@
 package org.apereo.cas.authentication;
 
+import module java.base;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -8,16 +9,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.annotation.Id;
-import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Transient;
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Comparator;
 
 /**
  * This is {@link OneTimeToken}.
@@ -32,6 +28,7 @@ import java.util.Comparator;
 @Setter
 @EqualsAndHashCode
 @NoArgsConstructor
+@SuppressWarnings("NullAway.Init")
 public class OneTimeToken implements Serializable, Comparable<OneTimeToken> {
 
     @Serial
@@ -57,7 +54,7 @@ public class OneTimeToken implements Serializable, Comparable<OneTimeToken> {
     }
 
     @Override
-    public int compareTo(@Nonnull final OneTimeToken token) {
+    public int compareTo(@NonNull final OneTimeToken token) {
         return Comparator
             .comparing(OneTimeToken::getToken)
             .thenComparing(OneTimeToken::getUserId)

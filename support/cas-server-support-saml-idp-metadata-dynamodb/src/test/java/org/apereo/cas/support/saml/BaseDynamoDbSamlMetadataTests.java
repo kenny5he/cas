@@ -1,5 +1,6 @@
 package org.apereo.cas.support.saml;
 
+import module java.base;
 import org.apereo.cas.config.CasSamlIdPDynamoDbAutoConfiguration;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.services.ServicesManager;
@@ -27,8 +28,7 @@ import software.amazon.awssdk.core.SdkSystemSetting;
     "cas.authn.saml-idp.metadata.dynamo-db.endpoint=http://localhost:8000",
     "cas.authn.saml-idp.metadata.dynamo-db.drop-tables-on-startup=true",
     "cas.authn.saml-idp.metadata.dynamo-db.local-instance=true",
-    "cas.authn.saml-idp.metadata.dynamo-db.region=us-east-1",
-    "cas.authn.saml-idp.metadata.dynamo-db.asynchronous=false"
+    "cas.authn.saml-idp.metadata.dynamo-db.region=us-east-1"
 })
 @EnableConfigurationProperties(CasConfigurationProperties.class)
 @ExtendWith(CasTestExtension.class)

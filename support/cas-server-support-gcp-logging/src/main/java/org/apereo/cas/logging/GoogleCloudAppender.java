@@ -1,11 +1,11 @@
 package org.apereo.cas.logging;
 
+import module java.base;
 import org.apereo.cas.util.AsciiArtUtils;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.ApplicationContextProvider;
 import org.apereo.cas.util.text.MessageSanitizer;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.spring.core.DefaultGcpProjectIdProvider;
 import com.google.cloud.spring.logging.StackdriverTraceConstants;
 import com.google.common.base.Splitter;
@@ -29,10 +29,7 @@ import org.apache.logging.log4j.util.SortedArrayStringMap;
 import org.apache.logging.log4j.util.StringMap;
 import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link GoogleCloudAppender}.

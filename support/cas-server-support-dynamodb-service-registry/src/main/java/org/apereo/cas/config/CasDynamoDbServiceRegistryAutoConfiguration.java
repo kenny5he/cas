@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.dynamodb.AmazonDynamoDbClientFactory;
@@ -10,6 +11,7 @@ import org.apereo.cas.services.ServiceRegistryExecutionPlanConfigurer;
 import org.apereo.cas.services.ServiceRegistryListener;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -20,9 +22,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * This is {@link CasDynamoDbServiceRegistryAutoConfiguration}.
@@ -51,7 +50,7 @@ public class CasDynamoDbServiceRegistryAutoConfiguration {
     @ConditionalOnMissingBean(name = "dynamoDbServiceRegistry")
     public ServiceRegistry dynamoDbServiceRegistry(
         final ConfigurableApplicationContext applicationContext,
-        final ObjectProvider<List<ServiceRegistryListener>> serviceRegistryListeners,
+        final ObjectProvider<@NonNull List<ServiceRegistryListener>> serviceRegistryListeners,
         @Qualifier("dynamoDbServiceRegistryFacilitator")
         final DynamoDbServiceRegistryFacilitator dynamoDbServiceRegistryFacilitator) {
         return new DynamoDbServiceRegistry(applicationContext, dynamoDbServiceRegistryFacilitator,

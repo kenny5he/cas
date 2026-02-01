@@ -1,23 +1,19 @@
 package org.apereo.cas.uma.ticket.resource.repository.impl;
 
+import module java.base;
 import org.apereo.cas.uma.ticket.resource.JpaResourceSet;
 import org.apereo.cas.uma.ticket.resource.ResourceSet;
 import org.apereo.cas.uma.ticket.resource.repository.BaseResourceSetRepository;
 import org.apereo.cas.util.function.FunctionUtils;
-
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
-
-import java.util.Collection;
-import java.util.Optional;
 
 /**
  * This is {@link JpaResourceSetRepository}.
@@ -41,7 +37,7 @@ public class JpaResourceSetRepository extends BaseResourceSetRepository {
             throw new IllegalArgumentException("Cannot save a resource set with inconsistent scopes.");
         }
         val jpaResource = new JpaResourceSet();
-        FunctionUtils.doUnchecked(__ -> BeanUtils.copyProperties(jpaResource, set));
+        FunctionUtils.doUnchecked(_ -> BeanUtils.copyProperties(jpaResource, set));
         return entityManager.merge(jpaResource);
     }
 

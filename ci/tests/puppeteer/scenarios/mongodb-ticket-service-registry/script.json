@@ -1,10 +1,11 @@
 {
-  "dependencies": "reports,mongo-ticket-registry,mongo-service-registry,mongo-monitor,session-mongo",
+  "dependencies": "reports,mongo-ticket-registry,mongo-service-registry,mongo-monitor",
   "conditions": {
     "docker": "true"
   },
-
   "properties": [
+    "--cas.standalone.configuration-file=file:${PWD}/ci/tests/puppeteer/scenarios/${SCENARIO}/config.yml",
+    
     "--cas.server.name=https://localhost:8443",
     "--cas.server.prefix=${cas.server.name}/cas",
 
@@ -13,7 +14,7 @@
     "--cas.monitor.endpoints.endpoint.defaults.access=ANONYMOUS",
 
     "--management.health.mongoHealthIndicator.enabled=true",
-    "--management.endpoints.web.exposure.include=health,ticketRegistry,ssoSessions",
+    "--management.endpoints.web.exposure.include=*",
     "--management.endpoint.health.show-details=always",
     "--management.endpoints.access.default=UNRESTRICTED",
 
@@ -45,17 +46,7 @@
     "--cas.monitor.mongo[1].host=localhost",
     "--cas.monitor.mongo[1].port=27017",
     "--cas.monitor.mongo[1].authentication-database-name=admin",
-    "--cas.monitor.mongo[1].database-name=service-registry",
-
-    "--spring.session.store-type=MONGODB",
-    "--spring.session.mongodb.collection-name=MongoDbSessionRepository",
-
-    "--spring.data.mongodb.host=localhost",
-    "--spring.data.mongodb.port=27017",
-    "--spring.data.mongodb.database=sessions",
-    "--spring.data.mongodb.username=root",
-    "--spring.data.mongodb.password=secret",
-    "--spring.data.mongodb.authentication-database=admin"
+    "--cas.monitor.mongo[1].database-name=service-registry"
   ],
   "initScript": "${PWD}/ci/tests/puppeteer/scenarios/${SCENARIO}/init.sh"
 }

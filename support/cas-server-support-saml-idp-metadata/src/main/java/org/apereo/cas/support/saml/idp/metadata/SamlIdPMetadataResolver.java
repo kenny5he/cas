@@ -1,5 +1,6 @@
 package org.apereo.cas.support.saml.idp.metadata;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.support.Beans;
 import org.apereo.cas.support.saml.OpenSamlConfigBean;
@@ -9,7 +10,6 @@ import org.apereo.cas.support.saml.idp.metadata.locator.SamlIdPMetadataLocator;
 import org.apereo.cas.support.saml.idp.metadata.locator.SamlIdPSamlRegisteredServiceCriterion;
 import org.apereo.cas.support.saml.services.SamlRegisteredService;
 import org.apereo.cas.util.function.FunctionUtils;
-
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.Iterables;
@@ -17,16 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.shibboleth.shared.resolver.CriteriaSet;
 import net.shibboleth.shared.resolver.ResolverException;
+import org.jspecify.annotations.NonNull;
 import org.opensaml.core.criterion.EntityIdCriterion;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
-
-import jakarta.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import org.springframework.resilience.annotation.Retryable;
 
 /**
  * This is {@link SamlIdPMetadataResolver}.
@@ -44,7 +38,7 @@ public class SamlIdPMetadataResolver extends BaseElementMetadataResolver {
 
     private final CasConfigurationProperties casProperties;
 
-    private final Cache<String, Iterable<EntityDescriptor>> metadataCache;
+    private final Cache<@NonNull String, Iterable<EntityDescriptor>> metadataCache;
 
     public SamlIdPMetadataResolver(final SamlIdPMetadataLocator locator,
                                    final SamlIdPMetadataGenerator generator,
@@ -85,9 +79,9 @@ public class SamlIdPMetadataResolver extends BaseElementMetadataResolver {
         return results;
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    @Retryable(retryFor = ResolverException.class, maxAttempts = 3, backoff = @Backoff(delay = 1000, maxDelay = 5000))
+    @Retryable(value = ResolverException.class, maxRetries = 3, delay = 1000)
     public Iterable<EntityDescriptor> resolve(final CriteriaSet criteria) {
         val filteringCriteria = determineFilteringCriteria(criteria);
         for (val filter : filteringCriteria) {

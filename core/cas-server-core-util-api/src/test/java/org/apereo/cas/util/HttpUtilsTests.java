@@ -1,5 +1,6 @@
 package org.apereo.cas.util;
 
+import module java.base;
 import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.http.SimpleHttpClientFactoryBean;
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -48,7 +48,8 @@ class HttpUtilsTests {
                 .entity("entity")
                 .url("http://localhost:%s".formatted(webServer.getPort()))
                 .httpClient(new SimpleHttpClientFactoryBean().getObject())
-                .build();
+                .build()
+                .withoutRetry();
             assertNotNull(HttpUtils.execute(exec));
         }
     }
@@ -62,8 +63,11 @@ class HttpUtilsTests {
             .entity("entity")
             .url("http://localhost:8081")
             .proxyUrl("http://localhost:8080")
-            .build();
-        assertNull(HttpUtils.execute(exec));
+            .build()
+            .withoutRetry();
+        val result = HttpUtils.execute(exec);
+        assertNotNull(result);
+        assertTrue(HttpStatus.resolve(result.getCode()).isError());
     }
 
     @Test
@@ -74,9 +78,12 @@ class HttpUtilsTests {
             .entity("entity")
             .url("http://localhost:8081")
             .proxyUrl("http://localhost:8080")
-            .build();
+            .build()
+            .withoutRetry();
 
-        assertNull(HttpUtils.execute(exec));
+        val result = HttpUtils.execute(exec);
+        assertNotNull(result);
+        assertTrue(HttpStatus.resolve(result.getCode()).isError());
     }
 
     @Test
@@ -94,7 +101,8 @@ class HttpUtilsTests {
         val exec = HttpExecutionRequest.builder()
             .method(HttpMethod.GET)
             .url("https://untrusted-root.badssl.com/endpoint?secret=sensitiveinfo")
-            .build();
+            .build()
+            .withoutRetry();
         val response = HttpUtils.execute(exec);
         assertNotNull(response);
 

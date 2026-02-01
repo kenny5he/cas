@@ -1,17 +1,15 @@
 package org.apereo.cas.services;
 
-import org.apereo.cas.config.CasCoreMultifactorAuthenticationAutoConfiguration;
-import org.apereo.cas.config.CasCoreMultifactorAuthenticationWebflowAutoConfiguration;
-import org.apereo.cas.config.CasCoreWebflowAutoConfiguration;
+import module java.base;
 import org.apereo.cas.config.CasPersonDirectoryAutoConfiguration;
 import org.apereo.cas.config.CasRestServiceRegistryAutoConfiguration;
+import org.apereo.cas.config.CasThemesAutoConfiguration;
 import org.apereo.cas.config.CasWebAppAutoConfiguration;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.test.CasTestExtension;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.boot.SpringBootTestAutoConfigurations;
 import org.apereo.cas.web.CasWebSecurityConfigurer;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.val;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -35,7 +33,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import java.util.List;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link RestfulServiceRegistryTests}.
@@ -48,10 +46,8 @@ import java.util.List;
     AbstractServiceRegistryTests.SharedTestConfiguration.class,
     RestfulServiceRegistryTests.RestfulServiceRegistryTestConfiguration.class,
     CasRestServiceRegistryAutoConfiguration.class,
-    CasCoreMultifactorAuthenticationAutoConfiguration.class,
-    CasCoreMultifactorAuthenticationWebflowAutoConfiguration.class,
     CasPersonDirectoryAutoConfiguration.class,
-    CasCoreWebflowAutoConfiguration.class,
+    CasThemesAutoConfiguration.class,
     CasWebAppAutoConfiguration.class
 },
     properties = {

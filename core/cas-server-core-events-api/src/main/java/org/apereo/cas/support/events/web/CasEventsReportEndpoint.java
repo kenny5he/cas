@@ -1,5 +1,6 @@
 package org.apereo.cas.support.events.web;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.support.events.CasEventRepository;
 import org.apereo.cas.support.events.dao.CasEvent;
@@ -25,13 +26,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Comparator;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.zip.ZipInputStream;
 
 /**
  * This is {@link CasEventsReportEndpoint}.
@@ -87,23 +81,22 @@ public class CasEventsReportEndpoint extends BaseCasRestActuatorEndpoint {
         final HttpServletResponse response,
         @RequestParam(required = false, defaultValue = "1000")
         final int limit) throws Exception {
-        response.setContentType(MediaType.APPLICATION_NDJSON_VALUE);
         val emitter = new ResponseBodyEmitter();
 
         executor.submit(() ->
-            eventRepositoryProvider.getObject().withTransaction(__ -> {
+            eventRepositoryProvider.getObject().withTransaction(_ -> {
                 try (val stream = eventRepositoryProvider.getObject().load()
                     .sorted(Comparator.comparingLong(CasEvent::getTimestamp).reversed())
                     .limit(limit)) {
-                    emitter.send("[", MediaType.APPLICATION_JSON);
+                    emitter.send("[".getBytes(StandardCharsets.UTF_8), MediaType.APPLICATION_JSON);
                     val first = new AtomicBoolean(true);
                     stream.forEach(Unchecked.consumer(pojo -> {
                         if (!first.getAndSet(false)) {
-                            emitter.send(",");
+                            emitter.send(",".getBytes(StandardCharsets.UTF_8), MediaType.APPLICATION_JSON);
                         }
-                        emitter.send(MAPPER.writeValueAsString(pojo), MediaType.APPLICATION_JSON);
+                        emitter.send(MAPPER.writeValueAsBytes(pojo), MediaType.APPLICATION_JSON);
                     }));
-                    emitter.send("]", MediaType.APPLICATION_JSON);
+                    emitter.send("]".getBytes(StandardCharsets.UTF_8), MediaType.APPLICATION_JSON);
                     emitter.complete();
                 } catch (final Exception e) {
                     emitter.completeWithError(e);

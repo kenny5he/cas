@@ -1,5 +1,6 @@
 package org.apereo.cas.authentication;
 
+import module java.base;
 import org.apereo.cas.authentication.attribute.AttributeDefinitionStore;
 import org.apereo.cas.authentication.attribute.AttributeRepositoryResolver;
 import org.apereo.cas.authentication.credential.UsernamePasswordCredential;
@@ -42,9 +43,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -265,6 +263,20 @@ class DefaultAuthenticationEventExecutionPlanTests {
             assertEquals(2, handlers.size());
             assertTrue(handlers.stream().anyMatch(h -> "Handler1".equalsIgnoreCase(h.getName())));
             assertTrue(handlers.stream().anyMatch(h -> "Handler3".equalsIgnoreCase(h.getName())));
+        }
+    }
+
+    @Nested
+    class OrderingTests extends BaseTests {
+        @Test
+        void verifyOrderIsCorrect() {
+            authenticationEventExecutionPlan.registerAuthenticationHandler(new SimpleTestUsernamePasswordAuthenticationHandler("o3", 3));
+            authenticationEventExecutionPlan.registerAuthenticationHandler(new SimpleTestUsernamePasswordAuthenticationHandler("o2", 2));
+            authenticationEventExecutionPlan.registerAuthenticationHandler(new SimpleTestUsernamePasswordAuthenticationHandler("o1", 1));
+            var sortedHandlers = authenticationEventExecutionPlan.resolveAuthenticationHandlers().stream().toList();
+            assertEquals("o1", sortedHandlers.get(0).getName());
+            assertEquals("o2", sortedHandlers.get(1).getName());
+            assertEquals("o3", sortedHandlers.get(2).getName());
         }
     }
 

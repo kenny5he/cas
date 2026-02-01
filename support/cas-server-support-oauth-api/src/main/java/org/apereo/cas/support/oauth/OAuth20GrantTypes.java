@@ -1,5 +1,6 @@
 package org.apereo.cas.support.oauth;
 
+import module java.base;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +26,10 @@ public enum OAuth20GrantTypes {
      * For the authorization grant type.
      */
     AUTHORIZATION_CODE("authorization_code"),
+    /**
+     * For the JWT bearer grant type.
+     */
+    JWT_BEARER("urn:ietf:params:oauth:grant-type:jwt-bearer"),
     /**
      * For the resource owner password grant type.
      */

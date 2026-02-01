@@ -1,5 +1,6 @@
 package org.apereo.cas.multitenancy;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.support.ConfigurationPropertiesBindingContext;
 import org.apereo.cas.util.serialization.DecodableCipherMap;
@@ -12,10 +13,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * This is {@link TenantDefinition}.
@@ -31,6 +28,7 @@ import java.util.Map;
 @NoArgsConstructor
 @Accessors(chain = true)
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@SuppressWarnings("NullAway.Init")
 public class TenantDefinition implements Serializable {
     @Serial
     private static final long serialVersionUID = -9012299259747093234L;
@@ -69,5 +67,5 @@ public class TenantDefinition implements Serializable {
     public ConfigurationPropertiesBindingContext<CasConfigurationProperties> bindProperties() {
         return CasConfigurationProperties.bindFrom(properties);
     }
-    
+
 }

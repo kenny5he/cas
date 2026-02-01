@@ -6,10 +6,11 @@ import java.util.Arrays;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
+import module java.base;
 
 public class CheckDuplicateTestConfiguration {
 
-    public static void main(final String[] args) throws Exception {
+    void main(final String[] args) throws Exception {
         checkPattern(args[0],
             Pattern.compile("@SpringBootTest\\(classes\\s*=\\s*\\{(.*?)\\}", Pattern.DOTALL),
             Pattern.compile("\\s*@ImportAutoConfiguration\\(\\{(.+?)\\}\\)", Pattern.DOTALL),

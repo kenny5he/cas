@@ -1,11 +1,14 @@
 package org.apereo.cas.permit;
 
+import module java.base;
 import org.apereo.cas.configuration.support.ExpressionLanguageCapable;
 import org.apereo.cas.services.BaseRegisteredServiceAccessStrategy;
 import org.apereo.cas.services.RegisteredServiceAccessStrategyRequest;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.spring.SpringExpressionLanguageValueResolver;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import io.permit.sdk.Permit;
 import io.permit.sdk.PermitConfig;
 import io.permit.sdk.enforcement.Resource;
@@ -20,9 +23,6 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import java.io.Serial;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This is {@link PermitRegisteredServiceAccessStrategy}.
@@ -48,6 +48,7 @@ public class PermitRegisteredServiceAccessStrategy extends BaseRegisteredService
 
     private String resource;
 
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private Map<String, Object> context = new HashMap<>();
 
     @ExpressionLanguageCapable

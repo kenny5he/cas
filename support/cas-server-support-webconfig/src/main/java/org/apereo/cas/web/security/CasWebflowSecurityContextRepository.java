@@ -1,5 +1,6 @@
 package org.apereo.cas.web.security;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.util.spring.SecurityContextUtils;
 import org.apereo.cas.web.flow.executor.CasFlowExecutor;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,8 +19,6 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.webflow.executor.FlowExecutor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link CasWebflowSecurityContextRepository}.
@@ -34,7 +34,7 @@ public class CasWebflowSecurityContextRepository implements SecurityContextRepos
     private final ConfigurableApplicationContext applicationContext;
 
     @Override
-    public SecurityContext loadContext(final HttpRequestResponseHolder requestResponseHolder) {
+    public @NonNull SecurityContext loadContext(final HttpRequestResponseHolder requestResponseHolder) {
         val request = requestResponseHolder.getRequest();
         if (containsContext(request)) {
             val authentication = Objects.requireNonNull(getInProgressAuthentication(request));
@@ -45,15 +45,15 @@ public class CasWebflowSecurityContextRepository implements SecurityContextRepos
     }
 
     @Override
-    public void saveContext(final SecurityContext context, final HttpServletRequest request, final HttpServletResponse response) {
+    public void saveContext(final @NonNull SecurityContext context, final @NonNull HttpServletRequest request, final @NonNull HttpServletResponse response) {
     }
 
     @Override
-    public boolean containsContext(final HttpServletRequest request) {
+    public boolean containsContext(final @NonNull HttpServletRequest request) {
         return getInProgressAuthentication(request) != null;
     }
 
-    private Authentication getInProgressAuthentication(final HttpServletRequest request) {
+    private @NonNull Authentication getInProgressAuthentication(final HttpServletRequest request) {
         val flowExecutors = applicationContext.getBeansOfType(FlowExecutor.class)
             .values()
             .stream()

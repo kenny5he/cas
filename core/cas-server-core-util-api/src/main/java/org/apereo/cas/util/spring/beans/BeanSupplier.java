@@ -1,28 +1,15 @@
 package org.apereo.cas.util.spring.beans;
 
+import module java.base;
 import org.apereo.cas.util.ResourceUtils;
-
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jooq.lambda.Unchecked;
 import org.jooq.lambda.fi.util.function.CheckedSupplier;
-
-import jakarta.annotation.Nonnull;
-
+import org.jspecify.annotations.NonNull;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * This is {@link BeanSupplier}.
@@ -190,7 +177,7 @@ public interface BeanSupplier<T> extends Supplier<T> {
 
     @RequiredArgsConstructor
     class DefaultBeanSupplier<T> implements BeanSupplier<T> {
-        @Nonnull
+        @NonNull
         private final Class<T> clazz;
 
         private final List<Supplier<Boolean>> conditionSuppliers = new ArrayList<>();
@@ -303,7 +290,6 @@ public interface BeanSupplier<T> extends Supplier<T> {
         private final Class<T> clazz;
 
         @Override
-        @SuppressWarnings("unchecked")
         public T get() {
             if (!clazz.isInterface()) {
                 throw new IllegalArgumentException("Cannot create bean supplier proxy for non-interface type " + clazz.getSimpleName());

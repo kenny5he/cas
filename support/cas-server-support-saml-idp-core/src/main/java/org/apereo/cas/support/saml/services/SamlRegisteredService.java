@@ -1,26 +1,19 @@
 package org.apereo.cas.support.saml.services;
 
+import module java.base;
 import org.apereo.cas.configuration.support.ExpressionLanguageCapable;
 import org.apereo.cas.configuration.support.TriStateBoolean;
 import org.apereo.cas.services.BaseWebBasedRegisteredService;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.OptBoolean;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
-import java.io.Serial;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * The {@link SamlRegisteredService} is responsible for managing the SAML metadata for a given SP.
@@ -73,7 +66,7 @@ public class SamlRegisteredService extends BaseWebBasedRegisteredService {
     @ExpressionLanguageCapable
     private String metadataSignatureLocation;
 
-    @JacksonInject(value = "logoutResponseEnabled", optional = OptBoolean.TRUE)
+    @JacksonInject(value = "logoutResponseEnabled", optional = OptBoolean.TRUE, useInput = OptBoolean.TRUE)
     private boolean logoutResponseEnabled = true;
 
     private String logoutResponseBinding;
@@ -95,7 +88,7 @@ public class SamlRegisteredService extends BaseWebBasedRegisteredService {
     private String signingKeyAlgorithm;
 
     @JsonDeserialize(using = TriStateBoolean.Deserializer.class)
-    @JacksonInject(value = "signAssertions", optional = OptBoolean.TRUE)
+    @JacksonInject(value = "signAssertions", optional = OptBoolean.TRUE, useInput = OptBoolean.FALSE)
     private TriStateBoolean signAssertions = TriStateBoolean.FALSE;
 
     @JacksonInject(value = "signUnsolicitedAuthnRequest", optional = OptBoolean.TRUE)

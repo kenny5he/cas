@@ -1,5 +1,6 @@
 package org.apereo.cas.syncope;
 
+import module java.base;
 import org.apereo.cas.authentication.Credential;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.authentication.principal.PrincipalProvisioner;
@@ -10,7 +11,6 @@ import org.apereo.cas.util.http.HttpExecutionRequest;
 import org.apereo.cas.util.http.HttpUtils;
 import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.SpringExpressionLanguageValueResolver;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import java.util.Objects;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * This is {@link SyncopePrincipalProvisioner}.
@@ -50,11 +50,11 @@ public class SyncopePrincipalProvisioner implements PrincipalProvisioner {
             }
             return userList
                 .stream()
-                .allMatch(Unchecked.predicate(__ -> updateUserResource(principal)));
+                .allMatch(Unchecked.predicate(_ -> updateUserResource(principal)));
         });
     }
 
-    protected boolean updateUserResource(final Principal principal) throws Exception {
+    protected boolean updateUserResource(final Principal principal) {
         return Splitter.on(",").splitToList(properties.getDomain())
             .stream()
             .allMatch(Unchecked.predicate(domain -> {
@@ -93,7 +93,7 @@ public class SyncopePrincipalProvisioner implements PrincipalProvisioner {
             .orElseGet(properties::getRealm);
     }
 
-    protected boolean createUserResource(final Principal principal, final Credential credential) throws Exception {
+    protected boolean createUserResource(final Principal principal, final Credential credential) {
         return Splitter.on(",").splitToList(properties.getDomain())
             .stream()
             .allMatch(Unchecked.predicate(domain -> {

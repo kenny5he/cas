@@ -1,5 +1,6 @@
 package org.apereo.cas.support.oauth.authenticator;
 
+import module java.base;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.DefaultAuthenticationBuilder;
 import org.apereo.cas.authentication.DefaultAuthenticationHandlerExecutionResult;
@@ -24,12 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.profile.BasicUserProfile;
 import org.pac4j.core.profile.UserProfile;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
 
 /**
  * This is {@link OAuth20DefaultCasAuthenticationBuilder}.
@@ -108,8 +103,8 @@ public class OAuth20DefaultCasAuthenticationBuilder implements OAuth20CasAuthent
         if (!scopes.isEmpty()) {
             builder.addAttribute(OAuth20Constants.SCOPE, scopes);
         }
-        FunctionUtils.doIfNotBlank(state, __ -> builder.addAttribute(OAuth20Constants.STATE, state));
-        FunctionUtils.doIfNotBlank(nonce, __ -> builder.addAttribute(OAuth20Constants.NONCE, nonce));
+        FunctionUtils.doIfNotBlank(state, _ -> builder.addAttribute(OAuth20Constants.STATE, state));
+        FunctionUtils.doIfNotBlank(nonce, _ -> builder.addAttribute(OAuth20Constants.NONCE, nonce));
         builder
             .addAttribute(OAuth20Constants.CLIENT_ID, registeredService.getClientId())
             .addCredential(credential)

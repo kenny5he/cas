@@ -1,5 +1,6 @@
 package org.apereo.cas.web.security.authentication;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.model.core.monitor.ActuatorEndpointProperties;
 import org.apereo.cas.util.RegexUtils;
@@ -7,10 +8,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.authorization.AuthorizationResult;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
-import java.util.function.Supplier;
 
 /**
  * This is {@link IpAddressAuthorizationManager}.
@@ -26,7 +30,8 @@ public class IpAddressAuthorizationManager implements AuthorizationManager<Reque
     private final ActuatorEndpointProperties properties;
 
     @Override
-    public AuthorizationDecision check(final Supplier authentication, final RequestAuthorizationContext context) {
+    public @Nullable AuthorizationResult authorize(final @NonNull Supplier<? extends Authentication> authentication,
+                                                   final RequestAuthorizationContext context) {
         val remoteAddr = StringUtils.defaultIfBlank(
             context.getRequest().getHeader(casProperties.getAudit().getEngine().getAlternateClientAddrHeaderName()),
             context.getRequest().getRemoteAddr());
@@ -39,6 +44,5 @@ public class IpAddressAuthorizationManager implements AuthorizationManager<Reque
                 properties.getRequiredIpAddresses(), remoteAddr);
         }
         return new AuthorizationDecision(granted);
-
     }
 }

@@ -1,5 +1,6 @@
 package org.apereo.cas.oidc.audit;
 
+import module java.base;
 import org.apereo.cas.configuration.model.core.audit.AuditEngineProperties;
 import org.apereo.cas.oidc.OidcConstants;
 import org.apereo.cas.support.oauth.OAuth20Constants;
@@ -11,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apereo.inspektr.audit.spi.support.ReturnValueAsStringResourceResolver;
 import org.aspectj.lang.JoinPoint;
-import java.util.HashMap;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This is {@link OidcIdTokenAuditResourceResolver}.
@@ -24,15 +25,15 @@ public class OidcIdTokenAuditResourceResolver extends ReturnValueAsStringResourc
     private final AuditEngineProperties properties;
 
     @Override
-    public String[] resolveFrom(final JoinPoint auditableTarget, final Object returnValue) {
+    public String[] resolveFrom(final JoinPoint auditableTarget, @Nullable final Object returnValue) {
         val values = new HashMap<>();
 
         val idTokenContext = (IdTokenGenerationContext) auditableTarget.getArgs()[0];
         val accessToken = idTokenContext.getAccessToken();
-        if (returnValue instanceof OidcIdToken(var token, var claims, var deviceSecret)) {
+        if (returnValue instanceof OidcIdToken(var token, var claims, _)) {
             if (claims.hasClaim(OidcConstants.TXN)) {
                 val txn = FunctionUtils.doUnchecked(() -> claims.getStringClaimValue(OidcConstants.TXN));
-                FunctionUtils.doIfNotNull(txn, __ -> values.put(OidcConstants.TXN, txn));
+                FunctionUtils.doIfNotNull(txn, _ -> values.put(OidcConstants.TXN, txn));
                 values.put("authn_methods", accessToken.getAuthentication().getSuccesses().keySet());
             }
             values.put(OidcConstants.ID_TOKEN, DigestUtils.abbreviate(token, properties.getAbbreviationLength()));
@@ -42,7 +43,7 @@ public class OidcIdTokenAuditResourceResolver extends ReturnValueAsStringResourc
         if (!accessToken.getScopes().isEmpty()) {
             values.put(OAuth20Constants.SCOPE, accessToken.getScopes());
         }
-        FunctionUtils.doIfNotNull(userProfile, __ -> values.put("username", userProfile.getId()));
+        FunctionUtils.doIfNotNull(userProfile, _ -> values.put("username", userProfile.getId()));
         FunctionUtils.doIfNotNull(accessToken.getService(), svc -> values.put("service", svc));
         return new String[]{auditFormat.serialize(values)};
     }

@@ -1,16 +1,14 @@
 package org.apereo.cas;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.spring.boot.DefaultCasBanner;
-
 import lombok.NoArgsConstructor;
 import lombok.val;
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.groovy.template.GroovyTemplateAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -22,10 +20,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
  * @author Dmitriy Kopylenko
  * @since 5.2.0
  */
-@SpringBootApplication(exclude = {
-    HibernateJpaAutoConfiguration.class,
-    GroovyTemplateAutoConfiguration.class
-}, proxyBeanMethods = false)
+@SpringBootApplication(proxyBeanMethods = false)
 @EnableConfigurationProperties(CasConfigurationProperties.class)
 @EnableAsync(proxyTargetClass = false)
 @NoArgsConstructor

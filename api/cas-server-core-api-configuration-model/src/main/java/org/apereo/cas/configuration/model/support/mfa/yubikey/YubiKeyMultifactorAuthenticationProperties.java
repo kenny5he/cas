@@ -1,5 +1,6 @@
 package org.apereo.cas.configuration.model.support.mfa.yubikey;
 
+import module java.base;
 import org.apereo.cas.configuration.model.core.util.EncryptionJwtCryptoProperties;
 import org.apereo.cas.configuration.model.core.util.EncryptionJwtSigningJwtCryptographyProperties;
 import org.apereo.cas.configuration.model.core.util.SigningJwtCryptoProperties;
@@ -11,13 +12,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import jakarta.annotation.Nonnull;
-import java.io.Serial;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * This is {@link YubiKeyMultifactorAuthenticationProperties}.
@@ -49,7 +45,7 @@ public class YubiKeyMultifactorAuthenticationProperties extends BaseMultifactorA
      * Yubikey secret key.
      */
     @RequiredProperty
-    @Nonnull
+    @NonNull
     private String secretKey = StringUtils.EMPTY;
 
     /**

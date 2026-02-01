@@ -1,12 +1,12 @@
 package org.apereo.cas.util.serialization;
 
+import module java.base;
 import org.apereo.cas.util.RegexUtils;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import lombok.val;
-import java.io.IOException;
-import java.util.regex.Pattern;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
 /**
  * This is {@link PatternJsonDeserializer}.
@@ -14,10 +14,10 @@ import java.util.regex.Pattern;
  * @author Misagh Moayyed
  * @since 7.2.0
  */
-public class PatternJsonDeserializer extends JsonDeserializer<Pattern> {
+public class PatternJsonDeserializer extends ValueDeserializer<Pattern> {
     @Override
-    public Pattern deserialize(final JsonParser parser, final DeserializationContext context) throws IOException {
-        val patternString = parser.getText();
+    public Pattern deserialize(final JsonParser parser, final DeserializationContext context) throws JacksonException {
+        val patternString = parser.getString();
         return RegexUtils.createPattern(patternString);
     }
 }

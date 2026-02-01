@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.CentralAuthenticationService;
 import org.apereo.cas.authentication.principal.PrincipalResolver;
 import org.apereo.cas.configuration.CasConfigurationProperties;
@@ -61,6 +62,7 @@ import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import org.apereo.cas.validation.AuthenticationAttributeReleasePolicy;
 import org.apereo.cas.web.SecurityLogicInterceptor;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.credentials.authenticator.Authenticator;
@@ -81,11 +83,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import jakarta.annotation.Nonnull;
-import java.io.Serial;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This is {@link CasOAuthUmaAutoConfiguration}.
@@ -107,7 +104,7 @@ public class CasOAuthUmaAutoConfiguration {
         @ConditionalOnMissingBean(name = "umaRequestingPartyTokenGenerator")
         public IdTokenGeneratorService umaRequestingPartyTokenGenerator(
             @Qualifier(UmaConfigurationContext.BEAN_NAME)
-            final ObjectProvider<UmaConfigurationContext> context) {
+            final ObjectProvider<@NonNull UmaConfigurationContext> context) {
             return new UmaIdTokenGeneratorService(context);
         }
     }
@@ -266,7 +263,7 @@ public class CasOAuthUmaAutoConfiguration {
         @Bean
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         @ConditionalOnMissingBean(name = "umaServerDiscoverySettingsFactory")
-        public FactoryBean<UmaServerDiscoverySettings> umaServerDiscoverySettingsFactory(
+        public FactoryBean<@NonNull UmaServerDiscoverySettings> umaServerDiscoverySettingsFactory(
             final CasConfigurationProperties casProperties) {
             return new UmaServerDiscoverySettingsFactory(casProperties);
         }
@@ -280,13 +277,13 @@ public class CasOAuthUmaAutoConfiguration {
         @ConditionalOnMissingBean(name = "umaWebMvcConfigurer")
         public WebMvcConfigurer umaWebMvcConfigurer(
             @Qualifier("umaAuthorizationApiTokenSecurityInterceptor")
-            final ObjectProvider<SecurityLogicInterceptor> umaAuthorizationApiTokenSecurityInterceptor,
+            final ObjectProvider<@NonNull SecurityLogicInterceptor> umaAuthorizationApiTokenSecurityInterceptor,
             @Qualifier("umaRequestingPartyTokenSecurityInterceptor")
-            final ObjectProvider<SecurityLogicInterceptor> umaRequestingPartyTokenSecurityInterceptor) {
+            final ObjectProvider<@NonNull SecurityLogicInterceptor> umaRequestingPartyTokenSecurityInterceptor) {
             return new WebMvcConfigurer() {
                 @Override
                 public void addInterceptors(
-                    @Nonnull
+                    @NonNull
                     final InterceptorRegistry registry) {
                     registry.addInterceptor(new RefreshableHandlerInterceptor(umaRequestingPartyTokenSecurityInterceptor)).order(100)
                         .addPathPatterns(OAuth20Constants.BASE_OAUTH20_URL.concat("/").concat(OAuth20Constants.UMA_PERMISSION_URL).concat("*"))

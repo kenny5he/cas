@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.authentication.CasSSLContext;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
@@ -20,6 +21,7 @@ import org.apereo.cas.web.flow.CasWebflowConstants;
 import org.apereo.cas.web.flow.CasWebflowExecutionPlanConfigurer;
 import org.apereo.cas.web.flow.DelegatedClientAuthenticationConfigurationContext;
 import org.apereo.cas.web.flow.actions.WebflowActionBeanSupplier;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -65,7 +67,7 @@ class DelegatedAuthenticationOidcConfiguration {
     @ConditionalOnMissingBean(name = "delegatedClientOidcSessionManager")
     public DelegatedClientSessionManager delegatedClientOidcSessionManager(
         @Qualifier(DelegatedClientAuthenticationConfigurationContext.BEAN_NAME)
-        final ObjectProvider<DelegatedClientAuthenticationConfigurationContext> contextProvider) {
+        final ObjectProvider<@NonNull DelegatedClientAuthenticationConfigurationContext> contextProvider) {
         return new DelegatedClientOidcSessionManager(contextProvider);
     }
 

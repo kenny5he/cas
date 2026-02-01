@@ -61,7 +61,7 @@ at reproducing scenarios related to an issue or possible defect, and can be very
 
 To test the functionality provided by a given CAS module, execute the following steps:
 
-- For the Apache Tomcat, undertow or Jetty web applications, add the module reference to the `webapp-dependencies.gradle` build script of web application you intend to run:
+- For the Apache Tomcat, Jetty, etc, add the module reference to the `webapp-dependencies.gradle` build script of web application you intend to run:
 
 ```gradle
 implementation project(":support:cas-server-support-modulename")
@@ -139,7 +139,7 @@ npm install
 
 <div class="alert alert-info">:information_source: <strong>Usage</strong><p>
 The above step is not strictly necessary. CAS will automatically attempt to install 
-Puppeteer when necessary when you run test scenarios. See the parameger list below for details. </p></div>
+Puppeteer when necessary when you run test scenarios. See the parameter list below for details. </p></div>
 
 To help simplify the testing process, you may use the following bash function in your `~/.profile`:
 
@@ -165,7 +165,7 @@ To see the list of available test scenarios:
 ```
 
 Remote debugging may be available on port `5000`. To successfully run tests, 
-you also need to make sure [jq](https://stedolan.github.io/jq/) is installed.
+you also need to make sure [jq](https://stedolan.github.io/jq/) and [gum](https://github.com/charmbracelet/gum) are installed.
    
 The following command-line options are supported for test execution:
 
@@ -248,6 +248,9 @@ A basic modest outline of the test configuration may be:
     "NAME=VALUE"
   ],
   "requirements": {
+    "aot": {
+      "enabled": false
+    }
     "graalvm": {
       "build": false
     },

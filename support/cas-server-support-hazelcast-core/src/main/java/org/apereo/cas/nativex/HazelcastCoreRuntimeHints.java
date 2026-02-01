@@ -1,5 +1,6 @@
 package org.apereo.cas.nativex;
 
+import module java.base;
 import org.apereo.cas.util.nativex.CasRuntimeHintsRegistrar;
 import com.hazelcast.instance.GeneratedBuildProperties;
 import com.hazelcast.internal.cluster.Versions;
@@ -76,9 +77,9 @@ import com.hazelcast.spi.properties.HazelcastProperty;
 import com.hazelcast.sql.SqlService;
 import com.hazelcast.sql.impl.type.converter.Converter;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.aot.hint.RuntimeHints;
-import java.util.AbstractQueue;
-import java.util.List;
 
 /**
  * This is {@link HazelcastCoreRuntimeHints}.
@@ -88,7 +89,7 @@ import java.util.List;
  */
 public class HazelcastCoreRuntimeHints implements CasRuntimeHintsRegistrar {
     @Override
-    public void registerHints(final RuntimeHints hints, final ClassLoader classLoader) {
+    public void registerHints(final @NonNull RuntimeHints hints, final @Nullable ClassLoader classLoader) {
         registerReflectionHints(hints,
             List.of(
                 HazelcastProperty.class,

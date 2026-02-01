@@ -1,13 +1,12 @@
 package org.apereo.cas.notifications.mail;
 
+import module java.base;
 import org.apereo.cas.util.RegexUtils;
 import org.apereo.cas.util.spring.SpringExpressionLanguageValueResolver;
 import lombok.val;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.context.MessageSource;
-import java.util.ArrayList;
-import java.util.Locale;
 
 /**
  * This is {@link EmailSender}.
@@ -60,8 +59,8 @@ public interface EmailSender {
             if (emailRequest.getPrincipal() != null) {
                 args.add(emailRequest.getPrincipal().getId());
             }
-            return messageSource.getMessage(matcher.group(1), args.toArray(),
-                "Email Subject", ObjectUtils.getIfNull(emailRequest.getLocale(), Locale.getDefault()));
+            return Objects.requireNonNull(messageSource.getMessage(matcher.group(1), args.toArray(),
+                "Email Subject", ObjectUtils.getIfNull(emailRequest.getLocale(), Locale.getDefault())));
         }
         return SpringExpressionLanguageValueResolver.getInstance().resolve(subject);
     }

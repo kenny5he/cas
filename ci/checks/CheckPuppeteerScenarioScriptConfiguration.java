@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import module java.base;
 
 /**
  * This is {@link CheckPuppeteerScenarioScriptConfiguration}.
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
  * @since 6.6.0
  */
 public class CheckPuppeteerScenarioScriptConfiguration {
-    public static void main(final String[] args) throws Exception {
+    void main(final String[] args) throws Exception {
         checkPattern(args[0]);
     }
 

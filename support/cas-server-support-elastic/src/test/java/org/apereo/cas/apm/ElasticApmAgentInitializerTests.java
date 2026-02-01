@@ -1,5 +1,6 @@
 package org.apereo.cas.apm;
 
+import module java.base;
 import org.apereo.cas.config.CasElasticApmAutoConfiguration;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.test.CasTestExtension;
@@ -14,12 +15,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
+import org.springframework.boot.micrometer.metrics.test.autoconfigure.AutoConfigureMetrics;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import java.util.ServiceLoader;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -38,7 +39,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @EnableAspectJAutoProxy
 @Tag("Elastic")
 @ExtendWith(CasTestExtension.class)
-@AutoConfigureObservability
+@AutoConfigureMetrics
+@AutoConfigureTracing
 class ElasticApmAgentInitializerTests {
     static {
         System.setProperty(ElasticApmAgentInitializer.SETTING_ELASTIC_APM_AGENT_ENABLED, "yes");

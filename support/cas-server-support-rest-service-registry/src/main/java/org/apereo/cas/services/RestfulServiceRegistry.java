@@ -1,5 +1,6 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.configuration.model.core.services.RestfulServiceRegistryProperties;
 import org.apereo.cas.services.util.RegisteredServiceJsonSerializer;
 import org.apereo.cas.support.events.service.CasRegisteredServiceLoadedEvent;
@@ -20,12 +21,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * This is {@link RestfulServiceRegistry}.
@@ -68,10 +63,11 @@ public class RestfulServiceRegistry extends AbstractServiceRegistry {
                 .method(HttpMethod.POST)
                 .url(SpringExpressionLanguageValueResolver.getInstance().resolve(properties.getUrl()))
                 .headers(getRequestHeaders(properties))
+                .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                 .entity(entity)
                 .build();
             response = HttpUtils.execute(exec);
-            if (response.getCode() == HttpStatus.OK.value()) {
+            if (response != null && response.getCode() == HttpStatus.OK.value()) {
                 try (val content = ((HttpEntityContainer) response).getEntity().getContent()) {
                     val result = IOUtils.toString(content, StandardCharsets.UTF_8);
                     return this.serializer.from(result);
@@ -96,12 +92,13 @@ public class RestfulServiceRegistry extends AbstractServiceRegistry {
             val exec = HttpExecutionRequest.builder()
                 .basicAuthPassword(properties.getBasicAuthPassword())
                 .basicAuthUsername(properties.getBasicAuthUsername())
+                .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                 .method(HttpMethod.DELETE)
                 .url(completeUrl)
                 .headers(getRequestHeaders(properties))
                 .build();
             response = HttpUtils.execute(exec);
-            return response.getCode() == HttpStatus.OK.value();
+            return response != null && response.getCode() == HttpStatus.OK.value();
         } catch (final Exception e) {
             LoggingUtils.error(LOGGER, e);
         } finally {
@@ -120,6 +117,7 @@ public class RestfulServiceRegistry extends AbstractServiceRegistry {
                 .method(HttpMethod.DELETE)
                 .url(SpringExpressionLanguageValueResolver.getInstance().resolve(properties.getUrl()))
                 .headers(getRequestHeaders(properties))
+                .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                 .build();
             response = HttpUtils.execute(exec);
         } finally {
@@ -138,6 +136,7 @@ public class RestfulServiceRegistry extends AbstractServiceRegistry {
                 .method(HttpMethod.GET)
                 .url(SpringExpressionLanguageValueResolver.getInstance().resolve(properties.getUrl()))
                 .headers(getRequestHeaders(properties))
+                .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                 .build();
             response = HttpUtils.execute(exec);
             if (response != null && response.getCode() == HttpStatus.OK.value()) {
@@ -172,9 +171,10 @@ public class RestfulServiceRegistry extends AbstractServiceRegistry {
                 .method(HttpMethod.GET)
                 .url(completeUrl)
                 .headers(getRequestHeaders(properties))
+                .maximumRetryAttempts(properties.getMaximumRetryAttempts())
                 .build();
             response = HttpUtils.execute(exec);
-            if (response.getCode() == HttpStatus.OK.value()) {
+            if (response != null && response.getCode() == HttpStatus.OK.value()) {
                 try (val content = ((HttpEntityContainer) response).getEntity().getContent()) {
                     val result = IOUtils.toString(content, StandardCharsets.UTF_8);
                     return serializer.from(result);

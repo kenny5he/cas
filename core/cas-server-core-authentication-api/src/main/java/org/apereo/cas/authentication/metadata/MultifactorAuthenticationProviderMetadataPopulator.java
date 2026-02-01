@@ -1,5 +1,6 @@
 package org.apereo.cas.authentication.metadata;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationBuilder;
 import org.apereo.cas.authentication.AuthenticationTransaction;
 import org.apereo.cas.authentication.Credential;
@@ -7,7 +8,6 @@ import org.apereo.cas.authentication.MultifactorAuthenticationProvider;
 import org.apereo.cas.configuration.model.support.mfa.BaseMultifactorAuthenticationProviderProperties.MultifactorAuthenticationProviderFailureModes;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.util.function.FunctionUtils;
-
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.val;
@@ -37,7 +37,7 @@ public class MultifactorAuthenticationProviderMetadataPopulator extends BaseAuth
         val bypass = failureEval != null
                      && failureEval.evaluate(registeredService, provider.getObject()) == MultifactorAuthenticationProviderFailureModes.PHANTOM
                      && !provider.getObject().isAvailable(registeredService);
-        FunctionUtils.doIf(bypass, __ ->
+        FunctionUtils.doIf(bypass, _ ->
             StringUtils.commaDelimitedListToSet(authenticationContextAttribute).forEach(attribute ->
                 builder.mergeAttribute(attribute, provider.getObject().getId()))).accept(provider);
     }

@@ -1,5 +1,6 @@
 package org.apereo.cas.pm.web.flow.actions;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.pm.PasswordManagementQuery;
 import org.apereo.cas.pm.PasswordManagementService;
@@ -17,10 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * This is {@link VerifyPasswordResetRequestAction}.
@@ -38,7 +38,7 @@ public class VerifyPasswordResetRequestAction extends BasePasswordManagementActi
     private final TicketRegistrySupport ticketRegistrySupport;
 
     @Override
-    protected Event doExecuteInternal(final RequestContext requestContext) {
+    protected @Nullable Event doExecuteInternal(final RequestContext requestContext) {
         val request = WebUtils.getHttpServletRequestFromExternalWebflowContext(requestContext);
         var transientTicket = request.getParameter(PasswordManagementService.PARAMETER_PASSWORD_RESET_TOKEN);
         var resetRequest = PasswordManagementWebflowUtils.getPasswordResetRequest(requestContext);
@@ -92,10 +92,10 @@ public class VerifyPasswordResetRequestAction extends BasePasswordManagementActi
             .filter(TicketGrantingTicketAwareTicket.class::isInstance)
             .map(TicketGrantingTicketAwareTicket.class::cast)
             .filter(r -> r.getExpirationPolicy().isExpired(r))
-            .ifPresent(token -> FunctionUtils.doAndHandle(__ -> ticketRegistrySupport.getTicketRegistry().deleteTicket(token)));
+            .ifPresent(token -> FunctionUtils.doAndHandle(_ -> ticketRegistrySupport.getTicketRegistry().deleteTicket(token)));
     }
 
-    private PasswordResetRequest getPasswordResetRequestFrom(final String tgt) {
+    protected PasswordResetRequest getPasswordResetRequestFrom(final String tgt) {
         val principal = ticketRegistrySupport.getAuthenticatedPrincipalFrom(tgt);
         return PasswordResetRequest.builder().username(principal.getId()).build();
     }
@@ -103,7 +103,7 @@ public class VerifyPasswordResetRequestAction extends BasePasswordManagementActi
     private Optional<PasswordResetRequest> getPasswordResetRequestFrom(final RequestContext requestContext,
                                                                        final String transientTicket) {
         return Optional.ofNullable(transientTicket)
-            .map(Unchecked.function(__ -> {
+            .map(Unchecked.function(_ -> {
                 val ticketRegistry = ticketRegistrySupport.getTicketRegistry();
                 val passwordResetTicket = ticketRegistry.getTicket(transientTicket, TransientSessionTicket.class);
                 passwordResetTicket.update();

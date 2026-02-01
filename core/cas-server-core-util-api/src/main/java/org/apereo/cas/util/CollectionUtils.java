@@ -1,5 +1,6 @@
 package org.apereo.cas.util;
 
+import module java.base;
 import org.apereo.cas.util.function.FunctionUtils;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Multimap;
@@ -8,27 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jspecify.annotations.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link CollectionUtils}.
@@ -141,7 +124,7 @@ public class CollectionUtils {
      * @param clazz the clazz
      * @return the t
      */
-    public static <T extends Collection> T toCollection(final Object obj, final Class<T> clazz) {
+    public static <T extends Collection> T toCollection(@Nullable final Object obj, final Class<T> clazz) {
         return FunctionUtils.doUnchecked(() -> {
             val results = toCollection(obj);
             if (clazz.isInterface()) {
@@ -255,11 +238,11 @@ public class CollectionUtils {
      */
     public static <K extends String, V> Map<K, V> wrap(final String key, final Object value,
                                                        final String key2, final Object value2) {
-        val m = wrap(key, value);
+        val map = wrap(key, value);
         if (value2 != null && StringUtils.isNotBlank(key2)) {
-            m.put(key2, value2);
+            map.put(key2, value2);
         }
-        return (Map) m;
+        return (Map) map;
     }
 
     /**
@@ -278,11 +261,11 @@ public class CollectionUtils {
     public static <K, V> Map<K, V> wrap(final String key, final Object value,
                                         final String key2, final Object value2,
                                         final String key3, final Object value3) {
-        val m = wrap(key, value, key2, value2);
+        val map = wrap(key, value, key2, value2);
         if (value3 != null && StringUtils.isNotBlank(key3)) {
-            m.put(key3, value3);
+            map.put(key3, value3);
         }
-        return (Map) m;
+        return (Map) map;
     }
 
     /**
@@ -304,11 +287,11 @@ public class CollectionUtils {
                                         final String key2, final Object value2,
                                         final String key3, final Object value3,
                                         final String key4, final Object value4) {
-        val m = wrap(key, value, key2, value2, key3, value3);
+        val map = wrap(key, value, key2, value2, key3, value3);
         if (value4 != null && StringUtils.isNotBlank(key4)) {
-            m.put(key4, value4);
+            map.put(key4, value4);
         }
-        return (Map) m;
+        return (Map) map;
     }
 
     /**
@@ -333,11 +316,11 @@ public class CollectionUtils {
                                         final String key3, final Object value3,
                                         final String key4, final Object value4,
                                         final String key5, final Object value5) {
-        val m = wrap(key, value, key2, value2, key3, value3, key4, value4);
+        val map = wrap(key, value, key2, value2, key3, value3, key4, value4);
         if (value5 != null && StringUtils.isNotBlank(key5)) {
-            m.put(key5, value5);
+            map.put(key5, value5);
         }
-        return (Map) m;
+        return (Map) map;
     }
 
     /**
@@ -365,11 +348,11 @@ public class CollectionUtils {
                                         final String key4, final Object value4,
                                         final String key5, final Object value5,
                                         final String key6, final Object value6) {
-        val m = wrap(key, value, key2, value2, key3, value3, key4, value4, key5, value5);
+        val map = wrap(key, value, key2, value2, key3, value3, key4, value4, key5, value5);
         if (value6 != null && StringUtils.isNotBlank(key6)) {
-            m.put(key6, value6);
+            map.put(key6, value6);
         }
-        return (Map) m;
+        return (Map) map;
     }
 
     /**
@@ -400,11 +383,11 @@ public class CollectionUtils {
                                         final String key5, final Object value5,
                                         final String key6, final Object value6,
                                         final String key7, final Object value7) {
-        val m = wrap(key, value, key2, value2, key3, value3, key4, value4, key5, value5, key6, value6);
+        val map = wrap(key, value, key2, value2, key3, value3, key4, value4, key5, value5, key6, value6);
         if (value7 != null && StringUtils.isNotBlank(key7)) {
-            m.put(key7, value7);
+            map.put(key7, value7);
         }
-        return (Map) m;
+        return (Map) map;
     }
 
     /**

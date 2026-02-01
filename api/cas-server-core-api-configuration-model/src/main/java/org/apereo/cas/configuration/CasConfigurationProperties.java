@@ -1,5 +1,6 @@
 package org.apereo.cas.configuration;
 
+import module java.base;
 import org.apereo.cas.configuration.model.core.CasServerCoreProperties;
 import org.apereo.cas.configuration.model.core.CasServerHostProperties;
 import org.apereo.cas.configuration.model.core.CasServerProperties;
@@ -61,6 +62,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.boot.context.properties.bind.BindContext;
@@ -71,15 +73,6 @@ import org.springframework.boot.context.properties.source.ConfigurationPropertyN
 import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.util.ReflectionUtils;
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.Clock;
-import java.time.Instant;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * This is {@link CasConfigurationProperties}.
@@ -87,7 +80,7 @@ import java.util.Objects;
  * @author Misagh Moayyed
  * @since 5.0.0
  */
-@ConfigurationProperties(prefix = "cas")
+@ConfigurationProperties(prefix = "cas", ignoreUnknownFields = false)
 @Getter
 @Setter
 @Accessors(chain = true)
@@ -449,8 +442,8 @@ public class CasConfigurationProperties implements Serializable {
         private final Map<String, ConfigurationPropertyBindingResult> bindingResults;
         
         @Override
-        public void onFinish(final ConfigurationPropertyName name, final Bindable<?> target,
-                             final BindContext context, final Object result) {
+        public void onFinish(final @NonNull ConfigurationPropertyName name, final @NonNull Bindable<?> target,
+                             final @NonNull BindContext context, final Object result) {
             if (result != null) {
                 val field = ReflectionUtils.findField(context.getClass(), "dataObjectBindings");
                 Objects.requireNonNull(field).trySetAccessible();

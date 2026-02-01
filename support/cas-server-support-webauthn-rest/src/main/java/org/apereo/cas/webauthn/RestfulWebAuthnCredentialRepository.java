@@ -1,5 +1,6 @@
 package org.apereo.cas.webauthn;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.LoggingUtils;
@@ -19,12 +20,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
 
 /**
  * This is {@link RestfulWebAuthnCredentialRepository}.
@@ -52,6 +47,7 @@ public class RestfulWebAuthnCredentialRepository extends BaseWebAuthnCredentialR
                 .url(restProperties.getUrl())
                 .parameters(parameters)
                 .headers(restProperties.getHeaders())
+                .maximumRetryAttempts(restProperties.getMaximumRetryAttempts())
                 .build();
             response = HttpUtils.execute(exec);
             if (Objects.requireNonNull(response).getCode() == HttpStatus.OK.value()) {
@@ -80,6 +76,7 @@ public class RestfulWebAuthnCredentialRepository extends BaseWebAuthnCredentialR
                 .method(HttpMethod.GET)
                 .url(restProperties.getUrl())
                 .headers(restProperties.getHeaders())
+                .maximumRetryAttempts(restProperties.getMaximumRetryAttempts())
                 .build();
             response = HttpUtils.execute(exec);
             if (Objects.requireNonNull(response).getCode() == HttpStatus.OK.value()) {
@@ -115,6 +112,7 @@ public class RestfulWebAuthnCredentialRepository extends BaseWebAuthnCredentialR
                 .entity(jsonRecords)
                 .headers(headers)
                 .parameters(parameters)
+                .maximumRetryAttempts(restProperties.getMaximumRetryAttempts())
                 .build();
             response = HttpUtils.execute(exec);
         } finally {

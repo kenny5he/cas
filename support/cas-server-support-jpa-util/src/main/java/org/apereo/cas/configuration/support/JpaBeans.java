@@ -1,5 +1,7 @@
 package org.apereo.cas.configuration.support;
 
+import module java.base;
+import module java.sql;
 import org.apereo.cas.configuration.model.support.jpa.AbstractJpaProperties;
 import org.apereo.cas.jpa.JpaConfigurationContext;
 import org.apereo.cas.util.LoggingUtils;
@@ -15,10 +17,6 @@ import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookupFailureException;
 import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import javax.sql.DataSource;
-import java.sql.Driver;
-import java.util.Properties;
-import java.util.UUID;
 
 /**
  * This is {@link JpaBeans}.
@@ -87,7 +85,7 @@ public class JpaBeans {
         }
 
         val bean = new HikariDataSource();
-        FunctionUtils.doIfNotBlank(jpaProperties.getDriverClass(), __ -> bean.setDriverClassName(jpaProperties.getDriverClass()));
+        FunctionUtils.doIfNotBlank(jpaProperties.getDriverClass(), _ -> bean.setDriverClassName(jpaProperties.getDriverClass()));
 
         val url = SpringExpressionLanguageValueResolver.getInstance().resolve(jpaProperties.getUrl());
         bean.setJdbcUrl(url);
@@ -95,7 +93,7 @@ public class JpaBeans {
         bean.setPassword(jpaProperties.getPassword());
 
         val poolSettings = jpaProperties.getPool();
-        FunctionUtils.doUnchecked(__ -> bean.setLoginTimeout((int) Beans.newDuration(poolSettings.getMaxWait()).toSeconds()));
+        FunctionUtils.doUnchecked(_ -> bean.setLoginTimeout((int) Beans.newDuration(poolSettings.getMaxWait()).toSeconds()));
         bean.setMaximumPoolSize(poolSettings.getMaxSize());
         bean.setMinimumIdle(poolSettings.getMinSize());
         bean.setIdleTimeout(Beans.newDuration(jpaProperties.getIdleTimeout()).toMillis());
@@ -134,7 +132,7 @@ public class JpaBeans {
             bean.setPersistenceProvider(config.getPersistenceProvider());
         }
 
-        FunctionUtils.doIfNotBlank(config.getPersistenceUnitName(), __ -> bean.setPersistenceUnitName(config.getPersistenceUnitName()));
+        FunctionUtils.doIfNotBlank(config.getPersistenceUnitName(), _ -> bean.setPersistenceUnitName(config.getPersistenceUnitName()));
         if (!config.getPackagesToScan().isEmpty()) {
             bean.setPackagesToScan(config.getPackagesToScan().toArray(ArrayUtils.EMPTY_STRING_ARRAY));
         }

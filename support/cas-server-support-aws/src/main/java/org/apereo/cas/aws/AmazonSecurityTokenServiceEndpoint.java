@@ -1,5 +1,6 @@
 package org.apereo.cas.aws;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationException;
 import org.apereo.cas.authentication.AuthenticationResult;
 import org.apereo.cas.authentication.principal.Principal;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.endpoint.Access;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
@@ -33,9 +35,6 @@ import software.amazon.awssdk.services.sts.model.Credentials;
 import software.amazon.awssdk.services.sts.model.GetSessionTokenRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.LinkedHashMap;
-import java.util.Optional;
-import java.util.UUID;
 
 /**
  * This is {@link AmazonSecurityTokenServiceEndpoint}.
@@ -46,17 +45,17 @@ import java.util.UUID;
 @Endpoint(id = "awsSts", defaultAccess = Access.NONE)
 @Slf4j
 public class AmazonSecurityTokenServiceEndpoint extends BaseCasRestActuatorEndpoint {
-    private final ObjectProvider<RestAuthenticationService> restAuthenticationService;
+    private final ObjectProvider<@NonNull RestAuthenticationService> restAuthenticationService;
 
-    public AmazonSecurityTokenServiceEndpoint(final ObjectProvider<CasConfigurationProperties> casProperties,
+    public AmazonSecurityTokenServiceEndpoint(final ObjectProvider<@NonNull CasConfigurationProperties> casProperties,
                                               final ConfigurableApplicationContext applicationContext,
-                                              final ObjectProvider<RestAuthenticationService> restAuthenticationService) {
+                                              final ObjectProvider<@NonNull RestAuthenticationService> restAuthenticationService) {
         super(casProperties.getObject(), applicationContext);
         this.restAuthenticationService = restAuthenticationService;
     }
 
-    private static ResponseEntity<String> createOutputResponse(final AmazonSecurityTokenServiceProperties amz,
-                                                               final Credentials stsCredentials) {
+    private static ResponseEntity<@NonNull String> createOutputResponse(final AmazonSecurityTokenServiceProperties amz,
+                                                                        final Credentials stsCredentials) {
         val properties = new LinkedHashMap<String, String>();
         properties.put(ProfileProperty.AWS_ACCESS_KEY_ID, stsCredentials.accessKeyId());
         properties.put(ProfileProperty.AWS_SECRET_ACCESS_KEY, stsCredentials.secretAccessKey());
@@ -68,8 +67,8 @@ public class AmazonSecurityTokenServiceEndpoint extends BaseCasRestActuatorEndpo
         return ResponseEntity.ok(output.toString());
     }
 
-    private static Optional<ResponseEntity<String>> authorizePrincipal(final AmazonSecurityTokenServiceProperties amz,
-                                                                       final Principal principal) {
+    private static Optional<ResponseEntity<@NonNull String>> authorizePrincipal(final AmazonSecurityTokenServiceProperties amz,
+                                                                                final Principal principal) {
         if (StringUtils.isNotBlank(amz.getPrincipalAttributeName())) {
             if (!principal.getAttributes().containsKey(amz.getPrincipalAttributeName())) {
                 LOGGER.error("Failed to locate authorization attribute for principal [{}]", principal);
@@ -108,13 +107,13 @@ public class AmazonSecurityTokenServiceEndpoint extends BaseCasRestActuatorEndpo
         @Parameter(name = "request", description = "Request"),
         @Parameter(name = "response", description = "Response")
     })
-    public ResponseEntity<String> fetchCredentials(@RequestParam(value = "token", required = false) final String tokenCode,
-                                                   @RequestParam(required = false) final String profile,
-                                                   @RequestParam(required = false) final String serialNumber,
-                                                   @RequestParam(required = false) final String roleArn,
-                                                   @RequestBody final MultiValueMap<String, String> requestBody,
-                                                   final HttpServletRequest request,
-                                                   final HttpServletResponse response) throws Throwable {
+    public ResponseEntity<@NonNull String> fetchCredentials(@RequestParam(value = "token", required = false) final String tokenCode,
+                                                            @RequestParam(required = false) final String profile,
+                                                            @RequestParam(required = false) final String serialNumber,
+                                                            @RequestParam(required = false) final String roleArn,
+                                                            @RequestBody final MultiValueMap<@NonNull String, String> requestBody,
+                                                            final HttpServletRequest request,
+                                                            final HttpServletResponse response) throws Throwable {
 
         var authenticationResult = (AuthenticationResult) null;
         try {

@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.registry.sub;
 
+import module java.base;
 import org.apereo.cas.ticket.Ticket;
 import org.apereo.cas.ticket.registry.key.RedisKeyGeneratorFactory;
 import org.apereo.cas.ticket.registry.pub.RedisMessagePayload;
@@ -8,6 +9,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This is {@link DefaultRedisTicketRegistryMessageListener}.
@@ -20,7 +22,7 @@ import lombok.val;
 public class DefaultRedisTicketRegistryMessageListener implements RedisTicketRegistryMessageListener {
     private final PublisherIdentifier publisherIdentifier;
     private final RedisKeyGeneratorFactory redisKeyGeneratorFactory;
-    private final Cache<String, Ticket> ticketCache;
+    private final Cache<@NonNull String, Ticket> ticketCache;
 
     @Override
     public void handleMessage(final RedisMessagePayload command, final String topic) {

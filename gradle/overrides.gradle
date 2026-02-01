@@ -1,8 +1,18 @@
 configurations.configureEach {
     resolutionStrategy {
+        dependencySubstitution {
+            substitute module("org.lz4:lz4-java") using module("at.yawk.lz4:lz4-java:${libs.lz4.get().version}")
+        }
+        
         capabilitiesResolution {
             withCapability("com.google.collections:google-collections") {
                 selectHighestVersion()
+            }
+            withCapability("org.lz4:lz4-java") { details ->
+                def preferred = details.candidates.find { it.id.group == "at.yawk.lz4" }
+                if (preferred != null) {
+                    details.select(preferred)
+                }
             }
         }
 
@@ -45,6 +55,9 @@ configurations.configureEach {
                 if (requested.group == "com.google.code.gson") {
                     details.useVersion(libs.gson.get().version)
                 }
+                if (requested.group == "org.apache.pulsar") {
+                    details.useVersion(libs.pulsar.client.api.get().version)
+                }
                 if (requested.name == "hibernate-validator") {
                     details.useVersion(libs.hibernate.validator.get().version)
                 }
@@ -76,11 +89,7 @@ configurations.configureEach {
                     details.useVersion(libs.jakarta.mail.get().version)
                 }
                 if (requested.group == "org.springframework.session") {
-                    if (requested.name == "spring-session-data-mongodb") {
-                        details.useVersion(libs.spring.session.data.mongodb.get().version)
-                    } else {
-                        details.useVersion(libs.spring.session.core.get().version)
-                    }
+                    details.useVersion(libs.spring.session.core.get().version)
                 }
                 if (requested.group.startsWith("org.eclipse.jetty")) {
                     details.useVersion(libs.versions.jetty.get())
@@ -112,7 +121,11 @@ configurations.configureEach {
                     details.useVersion(libs.kafka.clients.get().version)
                 }
                 if (requested.group == "org.mongodb") {
-                    details.useVersion(libs.mongodb.driver.core.get().version)
+                    if (requested.name == "mongodb-spring-session") {
+                        details.useVersion(libs.mongodb.spring.session.get().version)
+                    } else {
+                        details.useVersion(libs.mongodb.driver.core.get().version)
+                    }
                 }
                 if (requested.group == "mysql") {
                     details.useVersion(libs.mysql.connectorj.get().version)
@@ -122,9 +135,6 @@ configurations.configureEach {
                 }
                 if (requested.group == "com.github.ben-manes.caffeine") {
                     details.useVersion(libs.caffeine.get().version)
-                }
-                if (requested.group == "org.apache.logging.log4j") {
-                    details.useVersion(libs.log4j.core.get().version)
                 }
                 if (requested.group == "org.apache.groovy") {
                     details.useVersion(libs.apachegroovy.core.get().version)
@@ -169,9 +179,13 @@ configurations.configureEach {
                     if (requested.name.equals("jackson-annotations")) {
                         details.useVersion(libs.jackson.annotations.get().version)
                     } else {
-                        details.useVersion(libs.jackson.core.lib.get().version)
+                        details.useVersion(libs.versions.jackson2.get())
                     }
                 }
+                if (requested.group.startsWith("tools.jackson.core")) {
+                    details.useVersion(libs.jackson.core.lib.get().version)
+                }
+
                 if (requested.group == "io.micrometer" && requested.name.startsWith("micrometer-")) {
                     if (requested.name.contains("tracing")) {
                         details.useVersion(libs.micrometer.tracing.bridge.otel.get().version)
@@ -208,4 +222,5 @@ configurations.configureEach {
     exclude(group: "org.bouncycastle", module: "bcprov-jdk15on")
     exclude(group: "org.bouncycastle", module: "bcpkix-jdk15on")
     exclude(group: "io.netty", module: "netty-transport-native-kqueue")
+    exclude(group: "org.springframework", module: "spring-jcl")
 }

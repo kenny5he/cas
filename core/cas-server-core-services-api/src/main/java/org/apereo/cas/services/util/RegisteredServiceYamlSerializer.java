@@ -1,17 +1,13 @@
 package org.apereo.cas.services.util;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import module java.base;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.MediaType;
-
-import java.io.File;
-import java.io.Serial;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
+import tools.jackson.core.TokenStreamFactory;
+import tools.jackson.dataformat.yaml.YAMLFactory;
 
 /**
  * This is {@link RegisteredServiceYamlSerializer}.
@@ -50,7 +46,7 @@ public class RegisteredServiceYamlSerializer extends RegisteredServiceJsonSerial
     }
 
     @Override
-    protected JsonFactory getJsonFactory() {
+    protected TokenStreamFactory getJsonFactory() {
         return new YAMLFactory();
     }
 }

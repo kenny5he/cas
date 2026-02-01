@@ -1,5 +1,6 @@
 package org.apereo.cas.aws.authz;
 
+import module java.base;
 import org.apereo.cas.aws.ChainingAWSCredentialsProvider;
 import org.apereo.cas.configuration.support.ExpressionLanguageCapable;
 import org.apereo.cas.services.BaseRegisteredServiceAccessStrategy;
@@ -8,6 +9,8 @@ import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.spring.SpringExpressionLanguageValueResolver;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,12 +31,6 @@ import software.amazon.awssdk.services.verifiedpermissions.model.ContextDefiniti
 import software.amazon.awssdk.services.verifiedpermissions.model.Decision;
 import software.amazon.awssdk.services.verifiedpermissions.model.EntityIdentifier;
 import software.amazon.awssdk.services.verifiedpermissions.model.IsAuthorizedRequest;
-import java.io.Serial;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link AmazonVerifiedPermissionsRegisteredServiceAccessStrategy}.
@@ -68,6 +65,7 @@ public class AmazonVerifiedPermissionsRegisteredServiceAccessStrategy extends Ba
     @ExpressionLanguageCapable
     private String actionId;
 
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private Map<String, Object> context = new TreeMap<>();
 
     @Override

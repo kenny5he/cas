@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.ticket.registry.GoogleCloudPubSubMessageContext;
@@ -30,11 +31,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * This is {@link CasGoogleCloudPubSubTicketRegistryAutoConfiguration}.
@@ -65,7 +61,7 @@ public class CasGoogleCloudPubSubTicketRegistryAutoConfiguration {
     public QueueableTicketRegistryMessagePublisher messageQueueTicketRegistryPublisher(
         @Qualifier("pubSubMessageConverter")
         final PubSubMessageConverter pubSubMessageConverter,
-        @Qualifier("messageQueueTicketRegistryIdentifier")
+        @Qualifier(PublisherIdentifier.DEFAULT_BEAN_NAME)
         final PublisherIdentifier messageQueueTicketRegistryIdentifier,
         final PubSubTemplate pubSubTemplate) {
         LOGGER.debug("Configuring Google Cloud ticket registry with identifier [{}]", messageQueueTicketRegistryIdentifier);

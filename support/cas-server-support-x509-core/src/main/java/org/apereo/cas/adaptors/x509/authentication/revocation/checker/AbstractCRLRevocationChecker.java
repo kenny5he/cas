@@ -1,22 +1,16 @@
 package org.apereo.cas.adaptors.x509.authentication.revocation.checker;
 
+import module java.base;
 import org.apereo.cas.adaptors.x509.authentication.revocation.RevokedCertificateException;
 import org.apereo.cas.adaptors.x509.authentication.revocation.policy.DenyRevocationPolicy;
 import org.apereo.cas.adaptors.x509.authentication.revocation.policy.RevocationPolicy;
 import org.apereo.cas.adaptors.x509.authentication.revocation.policy.ThresholdExpiredCRLRevocationPolicy;
 import org.apereo.cas.util.crypto.CertUtils;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
-import jakarta.annotation.Nonnull;
-import java.security.GeneralSecurityException;
-import java.security.cert.X509CRL;
+import org.jspecify.annotations.NonNull;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
 
 /**
  * Base class for all CRL-based revocation checkers.
@@ -63,7 +57,7 @@ public abstract class AbstractCRLRevocationChecker implements RevocationChecker 
     }
 
     @Override
-    public void check(@Nonnull final X509Certificate cert) throws GeneralSecurityException {
+    public void check(@NonNull final X509Certificate cert) throws GeneralSecurityException {
         LOGGER.debug("Evaluating certificate revocation status for [{}]", CertUtils.toString(cert));
         val crls = getCRLs(cert);
 

@@ -1,10 +1,13 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.configuration.support.RegularExpressionCapable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -12,17 +15,8 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.annotation.Id;
-import jakarta.annotation.Nonnull;
-import java.io.Serial;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Base class for mutable, persistable registered services.
@@ -39,6 +33,13 @@ import java.util.Set;
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @Accessors(chain = true)
 public abstract class BaseRegisteredService implements RegisteredService {
+
+    private static final Comparator<RegisteredService> INTERNAL_COMPARATOR = Comparator
+            .comparingInt(RegisteredService::getEvaluationPriority)
+            .thenComparingInt(RegisteredService::getEvaluationOrder)
+            .thenComparing(service -> StringUtils.defaultString(service.getName()), String.CASE_INSENSITIVE_ORDER)
+            .thenComparing(RegisteredService::getServiceId)
+            .thenComparingLong(RegisteredService::getId);
 
     @Serial
     private static final long serialVersionUID = 7645279151115635245L;
@@ -69,7 +70,7 @@ public abstract class BaseRegisteredService implements RegisteredService {
     private RegisteredServiceExpirationPolicy expirationPolicy = new DefaultRegisteredServiceExpirationPolicy();
 
     private RegisteredServiceTicketGrantingTicketExpirationPolicy ticketGrantingTicketExpirationPolicy;
-    
+
     private int evaluationOrder;
 
     private RegisteredServiceUsernameAttributeProvider usernameAttributeProvider = new DefaultRegisteredServiceUsernameProvider();
@@ -95,19 +96,15 @@ public abstract class BaseRegisteredService implements RegisteredService {
 
     private RegisteredServiceAuthenticationPolicy authenticationPolicy = new DefaultRegisteredServiceAuthenticationPolicy();
 
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private Map<String, RegisteredServiceProperty> properties = new HashMap<>();
 
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private List<RegisteredServiceContact> contacts = new ArrayList<>();
 
     @Override
-    public int compareTo(@Nonnull final RegisteredService other) {
-        return Comparator
-            .comparingInt(RegisteredService::getEvaluationPriority)
-            .thenComparingInt(RegisteredService::getEvaluationOrder)
-            .thenComparing(service -> StringUtils.defaultString(service.getName()).toLowerCase(Locale.ENGLISH))
-            .thenComparing(RegisteredService::getServiceId)
-            .thenComparingLong(RegisteredService::getId)
-            .compare(this, other);
+    public int compareTo(@NonNull final RegisteredService other) {
+        return INTERNAL_COMPARATOR.compare(this, other);
     }
 
     @Override

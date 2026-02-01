@@ -1,5 +1,6 @@
 package org.apereo.cas.authentication.principal;
 
+import module java.base;
 import org.apereo.cas.CasProtocolConstants;
 import org.apereo.cas.config.BaseAutoConfigurationTests;
 import org.apereo.cas.test.CasTestExtension;
@@ -15,7 +16,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -44,17 +44,13 @@ class WebApplicationServiceFactoryTests {
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request, new MockHttpServletResponse()));
         val service = serviceFactory.createService(request);
         assertNotNull(service);
-        assertEquals(6, service.getAttributes().size());
-
+        assertEquals(7, service.getAttributes().size());
         assertTrue(service.getAttributes().containsKey("p1"));
         assertTrue(service.getAttributes().containsKey("p2"));
         assertTrue(service.getAttributes().containsKey("p3"));
         assertTrue(service.getAttributes().containsKey("p4"));
-
-        val httpRequest = (Map) service.getAttributes().get("httpRequest");
-        assertTrue(httpRequest.containsKey("%s.requestURL".formatted(HttpServletRequest.class.getName())));
-        assertTrue(httpRequest.containsKey("%s.localeName".formatted(HttpServletRequest.class.getName())));
-        
+        assertTrue(service.getAttributes().containsKey("%s.requestURL".formatted(HttpServletRequest.class.getName())));
+        assertTrue(service.getAttributes().containsKey("%s.localeName".formatted(HttpServletRequest.class.getName())));
         assertFalse(service.getAttributes().containsKey(CasProtocolConstants.PARAMETER_PASSWORD));
     }
 

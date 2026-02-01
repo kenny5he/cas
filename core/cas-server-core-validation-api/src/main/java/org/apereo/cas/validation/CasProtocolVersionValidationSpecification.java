@@ -1,15 +1,12 @@
 package org.apereo.cas.validation;
 
+import module java.base;
 import org.apereo.cas.multitenancy.TenantExtractor;
 import org.apereo.cas.services.CasModelRegisteredService;
 import org.apereo.cas.services.CasProtocolVersions;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * This is {@link CasProtocolVersionValidationSpecification}.
@@ -27,8 +24,10 @@ public class CasProtocolVersionValidationSpecification implements CasProtocolVal
         val tenantSupported = tenantExtractor.extract(request)
             .stream()
             .filter(tenant -> Objects.nonNull(tenant.getAuthenticationPolicy().getAuthenticationProtocolPolicy()))
-            .map(tenant -> {
-                val supportedProtocols = tenant.getAuthenticationPolicy().getAuthenticationProtocolPolicy().getSupportedProtocols()
+            .map(tenant -> tenant.getAuthenticationPolicy().getAuthenticationProtocolPolicy())
+            .filter(policy -> Objects.nonNull(policy.getSupportedProtocols()))
+            .map(policy -> {
+                val supportedProtocols = policy.getSupportedProtocols()
                     .stream()
                     .map(version -> CasProtocolVersions.valueOf(version.toUpperCase(Locale.ROOT)))
                     .collect(Collectors.toSet());

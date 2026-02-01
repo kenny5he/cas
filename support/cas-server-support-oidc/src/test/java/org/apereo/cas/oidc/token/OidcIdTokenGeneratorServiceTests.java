@@ -1,5 +1,6 @@
 package org.apereo.cas.oidc.token;
 
+import module java.base;
 import org.apereo.cas.authentication.AuthenticationHandler;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.mock.MockTicketGrantingTicket;
@@ -32,12 +33,10 @@ import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.util.Pac4jConstants;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.TestPropertySource;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import static org.apereo.cas.oidc.OidcConstants.StandardScopes.*;
+import static org.apereo.cas.oidc.OidcConstants.StandardScopes.EMAIL;
+import static org.apereo.cas.oidc.OidcConstants.StandardScopes.OPENID;
+import static org.apereo.cas.oidc.OidcConstants.StandardScopes.PHONE;
+import static org.apereo.cas.oidc.OidcConstants.StandardScopes.PROFILE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -301,13 +300,35 @@ class OidcIdTokenGeneratorServiceTests {
             val profile = new CommonProfile();
             profile.setClientName("OIDC");
             profile.setId(authentication.getPrincipal().getId());
-
-
+            
             val idTokenContext = IdTokenGenerationContext.builder()
                 .accessToken(accessToken)
                 .userProfile(profile)
                 .responseType(OAuth20ResponseTypes.ID_TOKEN)
                 .grantType(OAuth20GrantTypes.NONE)
+                .registeredService(registeredService)
+                .build();
+            val idToken = oidcIdTokenGenerator.generate(idTokenContext);
+            assertNull(idToken);
+        }
+
+        @Test
+        void verifyNoIdTokenForJwtBearer() throws Throwable {
+            val authentication = CoreAuthenticationTestUtils.getAuthentication(UUID.randomUUID().toString());
+            val tgt = new MockTicketGrantingTicket(authentication);
+            val accessToken = buildAccessToken(tgt, Set.of(EMAIL.getScope(), OPENID.getScope()));
+
+            val registeredService = getOidcRegisteredService(UUID.randomUUID().toString(), randomServiceUrl());
+            servicesManager.save(registeredService);
+            val profile = new CommonProfile();
+            profile.setClientName("OIDC");
+            profile.setId(authentication.getPrincipal().getId());
+
+            val idTokenContext = IdTokenGenerationContext.builder()
+                .accessToken(accessToken)
+                .userProfile(profile)
+                .responseType(OAuth20ResponseTypes.NONE)
+                .grantType(OAuth20GrantTypes.JWT_BEARER)
                 .registeredService(registeredService)
                 .build();
             val idToken = oidcIdTokenGenerator.generate(idTokenContext);
@@ -349,7 +370,6 @@ class OidcIdTokenGeneratorServiceTests {
             registeredService.setIdTokenIssuer(UUID.randomUUID().toString());
             registeredService.setScopes(CollectionUtils.wrapSet(EMAIL.getScope(), PROFILE.getScope(), PHONE.getScope()));
             servicesManager.save(registeredService);
-
 
             val idTokenContext = IdTokenGenerationContext.builder()
                 .accessToken(accessToken)

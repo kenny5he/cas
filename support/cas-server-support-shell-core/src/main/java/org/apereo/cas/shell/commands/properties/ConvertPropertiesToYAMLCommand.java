@@ -1,21 +1,15 @@
 package org.apereo.cas.shell.commands.properties;
 
+import module java.base;
+import org.apereo.cas.shell.commands.CasShellCommand;
 import com.google.common.base.Splitter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.io.FilenameUtils;
-import org.springframework.shell.standard.ShellCommandGroup;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellOption;
+import org.springframework.shell.core.command.annotation.Command;
+import org.springframework.shell.core.command.annotation.Option;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TreeMap;
 
 /**
  * This is {@link ConvertPropertiesToYAMLCommand}.
@@ -23,21 +17,21 @@ import java.util.TreeMap;
  * @author Misagh Moayyed
  * @since 7.1.0
  */
-@ShellCommandGroup("CAS Properties")
-@ShellComponent
 @Slf4j
-public class ConvertPropertiesToYAMLCommand {
+public class ConvertPropertiesToYAMLCommand implements CasShellCommand {
     /**
      * Convert properties to YAML.
      *
      * @param propertiesFile the properties file
      * @throws Exception the exception
      */
-    @ShellMethod(key = "convert-props", value = "Convert CAS properties to YAML file at the same location.")
+    @Command(group = "CAS Properties", name = "convert-props", description = "Convert CAS properties to YAML file at the same location.")
     public void convertProperties(
-        @ShellOption(value = {"properties", "--properties"},
-            help = "Path to a properties file that contains CAS settings",
-            defaultValue = "/etc/cas/config/cas.properties") final String propertiesFile) throws Exception {
+        @Option(
+            longName = "properties",
+            description = "Path to a properties file that contains CAS settings",
+            defaultValue = "/etc/cas/config/cas.properties")
+        final String propertiesFile) throws Exception {
         val output = FilenameUtils.removeExtension(propertiesFile) + ".yml";
         convertAndSaveToYaml(loadProperties(propertiesFile), output);
         LOGGER.info("Converted configuration properties to [{}]", output);
@@ -67,7 +61,7 @@ public class ConvertPropertiesToYAMLCommand {
     }
 
     private static Map<String, Object> getOrCreateSubMap(final Map<String, Object> map, final String key) {
-        return (Map<String, Object>) map.computeIfAbsent(key, __ -> new TreeMap<>());
+        return (Map<String, Object>) map.computeIfAbsent(key, _ -> new TreeMap<>());
     }
 
     private static void convertAndSaveToYaml(final Map<String, Object> properties,

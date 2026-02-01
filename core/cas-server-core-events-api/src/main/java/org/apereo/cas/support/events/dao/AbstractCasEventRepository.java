@@ -1,5 +1,6 @@
 package org.apereo.cas.support.events.dao;
 
+import module java.base;
 import org.apereo.cas.support.events.CasEventRepository;
 import org.apereo.cas.support.events.CasEventRepositoryFilter;
 import org.apereo.cas.util.DateTimeUtils;
@@ -8,14 +9,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.val;
+import org.jspecify.annotations.Nullable;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.actuate.audit.listener.AuditApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
-import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * This is {@link AbstractCasEventRepository}.
@@ -45,6 +43,7 @@ public abstract class AbstractCasEventRepository implements CasEventRepository, 
     private final CasEventRepositoryFilter eventRepositoryFilter;
 
     @Setter
+    @Nullable
     private ApplicationEventPublisher applicationEventPublisher;
 
     private static ZonedDateTime convertEventCreationTime(final CasEvent event) {
@@ -119,12 +118,5 @@ public abstract class AbstractCasEventRepository implements CasEventRepository, 
             });
     }
     
-    /**
-     * Save internal.
-     *
-     * @param event the event
-     * @return saved cas event
-     * @throws Exception the exception
-     */
-    public abstract CasEvent saveInternal(CasEvent event) throws Exception;
+    protected abstract CasEvent saveInternal(CasEvent event) throws Exception;
 }

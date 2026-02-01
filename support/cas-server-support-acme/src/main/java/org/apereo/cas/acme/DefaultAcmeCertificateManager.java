@@ -1,8 +1,8 @@
 package org.apereo.cas.acme;
 
+import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.support.Beans;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -18,16 +18,6 @@ import org.shredzone.acme4j.challenge.Challenge;
 import org.shredzone.acme4j.exception.AcmeException;
 import org.shredzone.acme4j.util.CSRBuilder;
 import org.shredzone.acme4j.util.KeyPairUtils;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyPair;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.function.Supplier;
 
 /**
  * This is {@link DefaultAcmeCertificateManager}.
@@ -110,14 +100,14 @@ public class DefaultAcmeCertificateManager implements AcmeCertificateManager {
                                       final Supplier<Status> statusSupplier) throws Exception {
         val acme = casProperties.getAcme();
         var attempts = acme.getRetryAttempts();
+        val timeout = Beans.newDuration(acme.getRetryInternal()).toMillis();
 
         while (statusSupplier.get() != Status.VALID && attempts-- > 0) {
             if (statusSupplier.get() == Status.INVALID) {
                 throw new AcmeException("Order failed");
             }
-            val timeout = Beans.newDuration(acme.getRetryInternal()).toMillis();
             Thread.sleep(timeout);
-            resource.update();
+            resource.fetch();
         }
     }
 

@@ -1,18 +1,21 @@
 package org.apereo.cas.support.oauth.web;
 
+import module java.base;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.support.oauth.OAuth20Constants;
+import org.apereo.cas.support.oauth.OAuth20GrantTypes;
 import org.apereo.cas.support.oauth.OAuth20ResponseTypes;
 import org.apereo.cas.support.oauth.util.OAuth20Utils;
 import org.apereo.cas.support.oauth.validator.authorization.OAuth20AuthorizationRequestValidator;
 import org.apereo.cas.support.oauth.web.response.accesstoken.ext.AccessTokenGrantRequestExtractor;
 import org.apereo.cas.util.CollectionUtils;
+import org.apereo.cas.util.RegexUtils;
 import org.apereo.cas.util.function.FunctionUtils;
 import org.apereo.cas.util.spring.beans.BeanSupplier;
-
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.pac4j.core.context.CallContext;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
@@ -20,12 +23,8 @@ import org.pac4j.jee.context.JEEContext;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Pattern;
 
 
 /**
@@ -39,28 +38,28 @@ public class OAuth20HandlerInterceptorAdapter implements AsyncHandlerInterceptor
     /**
      * Access token interceptor.
      */
-    protected final ObjectProvider<HandlerInterceptor> requiresAuthenticationAccessTokenInterceptor;
+    protected final ObjectProvider<@NonNull HandlerInterceptor> requiresAuthenticationAccessTokenInterceptor;
 
     /**
      * Authorization interceptor.
      */
-    protected final ObjectProvider<HandlerInterceptor> requiresAuthenticationAuthorizeInterceptor;
+    protected final ObjectProvider<@NonNull HandlerInterceptor> requiresAuthenticationAuthorizeInterceptor;
 
-    private final ObjectProvider<List<AccessTokenGrantRequestExtractor>> accessTokenGrantRequestExtractors;
+    private final ObjectProvider<@NonNull List<AccessTokenGrantRequestExtractor>> accessTokenGrantRequestExtractors;
 
-    private final ObjectProvider<ServicesManager> servicesManager;
+    private final ObjectProvider<@NonNull ServicesManager> servicesManager;
 
-    private final ObjectProvider<SessionStore> sessionStore;
+    private final ObjectProvider<@NonNull SessionStore> sessionStore;
 
-    private final ObjectProvider<List<OAuth20AuthorizationRequestValidator>> oauthAuthorizationRequestValidators;
+    private final ObjectProvider<@NonNull List<OAuth20AuthorizationRequestValidator>> oauthAuthorizationRequestValidators;
 
-    private final ObjectProvider<OAuth20RequestParameterResolver> requestParameterResolver;
+    private final ObjectProvider<@NonNull OAuth20RequestParameterResolver> requestParameterResolver;
 
     @Override
     public boolean preHandle(
-        final HttpServletRequest request,
-        final HttpServletResponse response,
-        final Object handler) throws Exception {
+        final @NonNull HttpServletRequest request,
+        final @NonNull HttpServletResponse response,
+        final @NonNull Object handler) throws Exception {
         if (requestRequiresAuthentication(request, response)) {
             return requiresAuthenticationAccessTokenInterceptor.getObject().preHandle(request, response, handler);
         }
@@ -130,7 +129,8 @@ public class OAuth20HandlerInterceptorAdapter implements AsyncHandlerInterceptor
             request.setAttribute(OAuth20Constants.REQUEST_ATTRIBUTE_ACCESS_TOKEN_REQUEST, Boolean.TRUE);
             if (extractor.isPresent()) {
                 val ext = extractor.get();
-                return ext.getResponseType() != OAuth20ResponseTypes.DEVICE_CODE;
+                return ext.getResponseType() != OAuth20ResponseTypes.DEVICE_CODE
+                    && ext.getGrantType() != OAuth20GrantTypes.JWT_BEARER;
             }
             return true;
         }
@@ -162,7 +162,7 @@ public class OAuth20HandlerInterceptorAdapter implements AsyncHandlerInterceptor
      */
     protected boolean doesUriMatchPattern(final String requestPath, final List<String> patternUrls) {
         return patternUrls.stream().anyMatch(patternUrl -> {
-            val pattern = Pattern.compile('/' + patternUrl + "(/)*$");
+            val pattern = RegexUtils.createPattern('/' + patternUrl + "(/)*$");
             return pattern.matcher(requestPath).find();
         });
     }

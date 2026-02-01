@@ -1,5 +1,6 @@
 package org.apereo.cas.services;
 
+import module java.base;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.LoggingUtils;
 import org.apereo.cas.util.http.HttpExecutionRequest;
@@ -8,8 +9,6 @@ import org.apereo.cas.util.serialization.JacksonObjectMapperFactory;
 import org.apereo.cas.util.spring.SpringExpressionLanguageValueResolver;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.util.MinimalPrettyPrinter;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,11 +22,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import java.io.Serial;
-import java.io.StringWriter;
-import java.net.URL;
-import java.util.Map;
-import java.util.TreeMap;
+import tools.jackson.core.util.MinimalPrettyPrinter;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * A proxy policy that only allows proxying to pgt urls
@@ -66,7 +62,7 @@ public class RestfulRegisteredServiceProxyPolicy implements RegisteredServicePro
     public boolean isAllowedProxyCallbackUrl(final RegisteredService registeredService, final URL pgtUrl) {
         HttpResponse response = null;
         try (val writer = new StringWriter()) {
-            MAPPER.writer(new MinimalPrettyPrinter()).writeValue(writer, registeredService);
+            MAPPER.writer().with(new MinimalPrettyPrinter()).writeValue(writer, registeredService);
             val exec = HttpExecutionRequest.builder()
                 .method(HttpMethod.GET)
                 .headers(headers)
@@ -76,7 +72,7 @@ public class RestfulRegisteredServiceProxyPolicy implements RegisteredServicePro
                 .headers(CollectionUtils.wrap(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .build();
             response = HttpUtils.execute(exec);
-            return HttpStatus.valueOf(response.getCode()).is2xxSuccessful();
+            return response != null && HttpStatus.valueOf(response.getCode()).is2xxSuccessful();
         } catch (final Exception e) {
             LoggingUtils.error(LOGGER, e);
         } finally {

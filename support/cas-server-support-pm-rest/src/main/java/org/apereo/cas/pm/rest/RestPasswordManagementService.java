@@ -1,5 +1,6 @@
 package org.apereo.cas.pm.rest;
 
+import module java.base;
 import org.apereo.cas.authentication.Credential;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.pm.PasswordChangeRequest;
@@ -17,11 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import java.io.Serializable;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * This is {@link RestPasswordManagementService}.
@@ -118,7 +114,7 @@ public class RestPasswordManagementService extends BasePasswordManagementService
     public Map<String, String> getSecurityQuestions(final PasswordManagementQuery query) {
         val rest = casProperties.getAuthn().getPm().getRest();
         if (StringUtils.isBlank(rest.getEndpointUrlSecurityQuestions())) {
-            return null;
+            return Map.of();
         }
 
         val url = UriComponentsBuilder.fromUriString(rest.getEndpointUrlSecurityQuestions())
@@ -129,7 +125,7 @@ public class RestPasswordManagementService extends BasePasswordManagementService
         if (result.getStatusCode().value() == HttpStatus.OK.value() && result.hasBody()) {
             return result.getBody();
         }
-        return null;
+        return Map.of();
     }
 
     @Override
@@ -138,7 +134,7 @@ public class RestPasswordManagementService extends BasePasswordManagementService
         if (StringUtils.isNotBlank(rest.getEndpointUrlSecurityQuestions())) {
             val url = UriComponentsBuilder.fromUriString(rest.getEndpointUrlSecurityQuestions())
                 .queryParam("username", query.getUsername()).build().toUriString();
-            val entity = new HttpEntity<>(query.getSecurityQuestions());
+            val entity = new HttpEntity<>(new HttpHeaders(query.getSecurityQuestions()));
             restTemplate.exchange(url, HttpMethod.POST, entity, Boolean.class);
         }
     }

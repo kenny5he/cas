@@ -1,5 +1,6 @@
 package org.apereo.cas.config;
 
+import module java.base;
 import org.apereo.cas.adaptors.ldap.services.DefaultLdapRegisteredServiceMapper;
 import org.apereo.cas.adaptors.ldap.services.LdapRegisteredServiceMapper;
 import org.apereo.cas.adaptors.ldap.services.LdapServiceRegistry;
@@ -15,6 +16,7 @@ import org.apereo.cas.util.spring.beans.BeanSupplier;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -24,9 +26,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * This is {@link CasLdapServiceRegistryAutoConfiguration}.
@@ -63,7 +62,7 @@ public class CasLdapServiceRegistryAutoConfiguration {
         final LdapRegisteredServiceMapper ldapServiceRegistryMapper,
         final CasConfigurationProperties casProperties,
         final ConfigurableApplicationContext applicationContext,
-        final ObjectProvider<List<ServiceRegistryListener>> serviceRegistryListeners) {
+        final ObjectProvider<@NonNull List<ServiceRegistryListener>> serviceRegistryListeners) {
         return BeanSupplier.of(ServiceRegistry.class)
             .when(CONDITION.given(applicationContext.getEnvironment()))
             .supply(() -> {
