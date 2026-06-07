@@ -49,7 +49,7 @@
     "name" : "country",
     "label" : "cas.screen.acct.label.country",
     "title" : "cas.screen.acct.title.country",
-    "values" : [ "java.util.ArrayList", [ "USA", "Canada" ] ],
+    "values" : [ "java.util.ArrayList", [ "USA", "Canada", "China" ] ],
     "type": "select",
     "order": 5
   }

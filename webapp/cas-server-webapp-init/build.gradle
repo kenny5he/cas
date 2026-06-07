@@ -6,6 +6,17 @@ dependencies {
     implementation project(":core:cas-server-core-util-api")
     implementation project(":core:cas-server-core-configuration")
 
+    /**
+     * 1. 添加jdbc support jar包
+     * 2. 添加 mysql/postgresql 数据库驱动jar包
+     */
+    implementation project(":support:cas-server-support-jdbc")
+
+    /**
+     * 1. 添加账号管理包
+     */
+    implementation project(":support:cas-server-support-account-mgmt")
+
     testImplementation project(":support:cas-server-support-person-directory")
     testImplementation project(":support:cas-server-support-themes")
 

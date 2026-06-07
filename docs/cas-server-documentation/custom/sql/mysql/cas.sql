@@ -30,7 +30,7 @@ CREATE TABLE `cas_user_env` (
     `ipv6` varchar(20) DEFAULT NULL COMMENT '用户IP6信息',
     `mac` varchar(20) DEFAULT NULL COMMENT '用户MAC地址',
     `device` varchar(20) DEFAULT NULL COMMENT '用户使用设备',
-    `app_type` varchar(5) DEFAULT NULL COMMENT '登录程序类别(APP,WEB,WECHAT)',
+    `app_type` varchar(5) DEFAULT NULL COMMENT '登录程序类别(APP,WEB,WECHAT,MINI)',
     `accredit` varchar(5) DEFAULT NULL COMMENT '环境认证',
     PRIMARY KEY (`env_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COMMENT='用户使用环境表';
