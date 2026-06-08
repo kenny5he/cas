@@ -114,7 +114,12 @@ if (project.ext.forceBootifulArtifact || (!rootProject.publishFlag && !rootProje
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
             dependsOn pathingJar
             doFirst {
-                classpath = files("$project.layout.buildDirectory.getAsFile().get().path/classes/main", "$project.layout.buildDirectory.getAsFile().get().path/resources/main", "${project(":webapp").getProjectDir()}/cas-server-webapp-resources/src/main/resources/", pathingJar.archivePath)
+                classpath = files(
+                        project.layout.buildDirectory.file("classes/java/main").get().asFile,
+                        project.layout.buildDirectory.file("resources/main").get().asFile,
+                        "${project(":webapp").getProjectDir()}/cas-server-webapp-resources/src/main/resources/",
+                        pathingJar
+                )
             }
         }
 

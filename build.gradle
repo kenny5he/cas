@@ -12,6 +12,22 @@ buildscript {
             url = "https://repo.spring.io/milestone"
             mavenContent { releasesOnly() }
         }
+        maven {
+            url "https://maven.aliyun.com/repository/public/"
+            mavenContent { releasesOnly() }
+        }
+        maven {
+            url "https://maven.aliyun.com/repository/spring/"
+            mavenContent { releasesOnly() }
+        }
+        maven {
+            credentials {
+                username = System.getProperty("repositoryUsername", "")
+                password = System.getProperty("repositoryPassword", "")
+            }
+            mavenContent { snapshotsOnly() }
+            url 'https://packages.aliyun.com/69319767876b90de1aacdb6e/maven/2628060-snapshot-x0npm3'
+        }
     }
 
     dependencies {
