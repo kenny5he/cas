@@ -58,17 +58,20 @@ to build and verify Graal VM native images and we plan to extend the coverage to
 ### Testing Strategy
 
 The collection of end-to-end [browser tests based on Puppeteer](../../developer/Test-Process.html) continue to grow to cover more use cases
-and scenarios. At the moment, total number of jobs stands at approximately `532` distinct scenarios. The overall
-test coverage of the CAS codebase is approximately `94%`. Furthermore, a large number of test categories that group internal unit tests
-are now configured to run with parallelism enabled.
+and scenarios. At the moment, total number of jobs stands at approximately `536` distinct scenarios. The overall
+test coverage of the CAS codebase is approximately `94%`.
+
+Furthermore the test scenario construction logic is given the ability to limit its run to a pre-specified 
+time window, which is specially useful when when the test requires external resources and APIs that may 
+not be available at all times. 
                                                                                                                             
-### Session Replication
+### Session Replication (Deprecated)
 
 Crypto operations that support generating cookies for *deprecated session replication capabilities* are now turned off by default
 to avoid generating keys. Furthermore, the session replication capabilities that are not based on the
 [ticket registry](../webflow/Webflow-Customization-Sessions-ServerSide-TicketRegistry.html) are now turned off 
 by default. If you are using the deprecated legacy session replication features, you MUST explicitly 
-turn on these features by setting the following properties:
+turn on the following settings:
 
 ```properties
 cas.x.y.z.session-replication.replicate-sessions=true
@@ -76,15 +79,36 @@ cas.x.y.z.session-replication.cookie.crypto.enabled=true
 ```
 
 Remember to substitute `x.y.z` with the appropriate session replication 
-module version you are using (i.e. `oauth`, `saml-idp`, etc).
+module version you are using (i.e. `oauth`, `saml-idp`, etc):
+                                                             
+```properties
+cas.authn.pac4j.core.session-replication.replicate-sessions=true
+cas.authn.pac4j.core.session-replication.cookie.crypto.enabled=true
+          
+cas.authn.oauth.session-replication.replicate-sessions=true
+cas.authn.oauth.session-replication.cookie.crypto.enabled=true
+                
+cas.authn.saml-idp.core.session-replication.replicate-sessions=true
+cas.authn.saml-idp.core.session-replication.cookie.crypto.enabled=true
+```
 
 ### Palantir Admin Dashboard
 
-[Palantir Admin Console](../installation/Admin-Dashboard.html) received significant changes across the board
+[Palantir Admin Console](../installation/Admin-Dashboard.html) receives significant changes across the board
 to handle and support more actuator endpoints, when it comes to adding external identity providers, retrieving
-user sessions, listing multifactor authentication providers, etc.
+user sessions, listing multifactor authentication providers, rendering metrics, etc.
 
-### Spring Boot 4
+Notably, Palantir now supports editing application definitions using a wizard-based interface
+in addition to using a plain JSON editor. Note that this functionality is brand new, and somewhat fragile
+and may not work for all service definitions, specially if advanced or complex constructions are used. 
+We will continue to polish this feature in future releases.
+
+### Gradle 9.4
+
+CAS is now built with Gradle `9.4` and the build process has been updated to use the latest Gradle
+features and capabilities. This also prepares future CAS versions to build and run against JDK `26`.
+
+### Spring Boot 4.1
 
 CAS is now built with Spring Boot `4.1.x`. This is a major platform upgrade that affects almost all aspects of the codebase
 including many of the third-party core libraries used by CAS as well as some CAS functionality.
@@ -106,9 +130,23 @@ during compile time.
 
 Support for [SpringBoot Admin](../monitoring/Configuring-SpringBootAdmin.html) is now compatible with Spring Boot `4.x`.
 
+### ADFS Delegated Authentication (Deprecated)
+
+[Delegating authentication requests to ADFS](../integration/ADFS-Integration.html) is now **deprecated** 
+and scheduled for removal in a future CAS version.
+
 ## Other Stuff
   
 - Compiled valid regular expressions are now cached to improve performance across the board.
 - Continued efforts using advanced code analysis techniques to remove potential memory leaks and improve system performance.
+- Continued efforts using advanced code analysis techniques to fix potential thread safety issues.
 - CAS is now upgraded to use `jQuery` version `4.0.0`.
 - Integration tests have switched to use MySQL `9.6.x`.
+- Integration tests have switched to use Redis `8.6.x`.
+- Better log data sanitization to avoid logging sensitive information, particularly when `DEBUG` logs are enabled.
+- Minor bug fixes to improve [OpenID Token Exchange](../authentication/OAuth-ProtocolFlow-TokenExchange.html) to ensure the `act` claim is correctly processed in the right flows.
+- Small corrections to how disabled security questions with [Apache Syncope](../authentication/Syncope-Authentication.html) are handled.
+- Sorting operations and locating service definitions registered with CAS is now optimized to improve performance for a large numbers of applications.
+- Bug fixes to remove URL decoding issues with client secret validation in OAuth and OpenID Connect flows.
+- [FIDO2 WebAuthn](../mfa/FIDO2-WebAuthn-Authentication.html) capabilities can be functional when CAS is deployed at the root context path.
+- [Passwordless Authentication via LDAP](../authentication/Passwordless-Authentication-Storage-LDAP.html) is given a few more configuration options to control attributes that drive the passwordless account.

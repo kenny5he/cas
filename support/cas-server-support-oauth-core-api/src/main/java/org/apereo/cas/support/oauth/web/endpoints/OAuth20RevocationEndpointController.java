@@ -2,6 +2,7 @@ package org.apereo.cas.support.oauth.web.endpoints;
 
 import module java.base;
 import org.apereo.cas.audit.AuditableContext;
+import org.apereo.cas.services.RegisteredServiceAccessStrategyUtils;
 import org.apereo.cas.support.oauth.OAuth20Constants;
 import org.apereo.cas.support.oauth.util.OAuth20Utils;
 import org.apereo.cas.ticket.OAuth20Token;
@@ -65,8 +66,9 @@ public class OAuth20RevocationEndpointController<T extends OAuth20ConfigurationC
         val clientId = getConfigurationContext().getRequestParameterResolver()
             .resolveClientIdAndClientSecret(callContext).getLeft();
         val registeredService = getRegisteredServiceByClientId(clientId);
-
-        if (OAuth20Utils.doesServiceNeedAuthentication(registeredService)) {
+        RegisteredServiceAccessStrategyUtils.ensureServiceAccessIsAllowed(registeredService);
+        
+        if (OAuth20Utils.doesServiceNeedAuthentication(Objects.requireNonNull(registeredService))) {
             if (manager.getProfile().isEmpty()) {
                 LOGGER.warn("Service [{}] requests authentication", clientId);
                 return OAuth20Utils.writeError(response, OAuth20Constants.ACCESS_DENIED);
@@ -98,32 +100,35 @@ public class OAuth20RevocationEndpointController<T extends OAuth20ConfigurationC
         });
         if (registryToken == null) {
             LOGGER.error("Provided token [{}] has not been found in the ticket registry", token);
-        } else if (isRefreshToken(registryToken) || isAccessToken(registryToken)) {
+            val mv = new ModelAndView(new JacksonJsonView());
+            mv.setStatus(HttpStatus.NOT_FOUND);
+            return mv;
+        }
+        
+        if (isRefreshToken(registryToken) || isAccessToken(registryToken)) {
             if (!Strings.CI.equals(clientId, registryToken.getClientId())) {
                 LOGGER.warn("Provided token [{}] has not been issued for the service [{}]", token, clientId);
                 return OAuth20Utils.writeError(response, OAuth20Constants.INVALID_REQUEST);
             }
-
             if (isRefreshToken(registryToken)) {
                 revokeToken((OAuth20RefreshToken) registryToken);
             } else {
                 revokeToken(registryToken.getId());
             }
-        } else {
-            LOGGER.error("Provided token [{}] is either not a refresh token or not an access token", token);
-            return OAuth20Utils.writeError(response, OAuth20Constants.INVALID_REQUEST);
+            val mv = new ModelAndView(new JacksonJsonView());
+            mv.setStatus(HttpStatus.OK);
+            return mv;
         }
+        LOGGER.error("Provided token [{}] is either not a refresh token or an access token", token);
+        return OAuth20Utils.writeError(response, OAuth20Constants.INVALID_REQUEST);
 
-        val mv = new ModelAndView(new JacksonJsonView());
-        mv.setStatus(HttpStatus.OK);
-        return mv;
     }
 
     private boolean verifyRevocationRequest(final WebContext context) throws Throwable {
         val validator = getConfigurationContext().getAccessTokenGrantRequestValidators().getObject()
             .stream()
             .filter(BeanSupplier::isNotProxy)
-            .filter(Unchecked.predicate(b -> b.supports(context)))
+            .filter(Unchecked.predicate(requestValidator -> requestValidator.supports(context)))
             .findFirst()
             .orElse(null);
         if (validator == null) {

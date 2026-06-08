@@ -31,6 +31,10 @@ class CasActuatorEndpoints {
         return actuatorEndpoints.metrics;
     }
 
+    static prometheus() {
+        return actuatorEndpoints.prometheus;
+    }
+
     static auditEvents() {
         return actuatorEndpoints.auditevents || actuatorEndpoints.auditEvents;
     }
@@ -187,12 +191,24 @@ class CasActuatorEndpoints {
         return actuatorEndpoints.entityhistory || actuatorEndpoints.entityHistory;
     }
 
+    static samlIdpRegisteredServiceMetadata() {
+        return actuatorEndpoints.samlidpregisteredservicemetadata || actuatorEndpoints.samlIdpRegisteredServiceMetadata;
+    }
+
     static samlIdpRegisteredServiceMetadataCache() {
         return actuatorEndpoints.samlidpregisteredservicemetadatacache || actuatorEndpoints.samlIdpRegisteredServiceMetadataCache;
     }
 
     static threadDump() {
         return actuatorEndpoints.threaddump || actuatorEndpoints.threadDump;
+    }
+
+    static passwordManagement() {
+        return actuatorEndpoints.passwordmanagement || actuatorEndpoints.passwordManagement;
+    }
+
+    static impersonation() {
+        return actuatorEndpoints.impersonation;
     }
 
     static all() {

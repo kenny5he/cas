@@ -11,9 +11,12 @@ import org.apereo.cas.util.RandomUtils;
 import org.apereo.cas.util.junit.EnabledIfListeningOnPort;
 import lombok.val;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
     BaseSamlIdPMetadataTests.SharedTestConfiguration.class
 }, properties = {
     "cas.authn.saml-idp.metadata.file-system.location=${#systemProperties['java.io.tmpdir']}/saml22",
-    
+
     "cas.authn.saml-idp.metadata.amazon-s3.bucket-name=cassamlmetadata",
     "cas.authn.saml-idp.metadata.amazon-s3.endpoint=http://127.0.0.1:4566",
     "cas.authn.saml-idp.metadata.amazon-s3.region=us-east-1",
@@ -42,10 +45,17 @@ import static org.junit.jupiter.api.Assertions.*;
 @EnabledIfListeningOnPort(port = 4566)
 @Tag("AmazonWebServices")
 @ExtendWith(CasTestExtension.class)
+@Execution(ExecutionMode.SAME_THREAD)
 class AmazonS3SamlRegisteredServiceMetadataResolverTests {
     @Autowired
     @Qualifier("amazonS3SamlRegisteredServiceMetadataResolver")
-    private SamlRegisteredServiceMetadataResolver amazonS3SamlRegisteredServiceMetadataResolver;
+    private SamlRegisteredServiceMetadataResolver resolver;
+
+    @BeforeEach
+    void setup() {
+        val metadataManager = resolver.getMetadataManager().orElseThrow();
+        metadataManager.removeAll();
+    }
 
     @Test
     void verifyAction() throws Throwable {
@@ -53,31 +63,105 @@ class AmazonS3SamlRegisteredServiceMetadataResolverTests {
         service.setName("SAML");
         service.setId(100);
         service.setMetadataLocation("awss3://");
-        assertTrue(amazonS3SamlRegisteredServiceMetadataResolver.resolve(service).isEmpty());
-        assertFalse(amazonS3SamlRegisteredServiceMetadataResolver.supports(null));
-        assertTrue(amazonS3SamlRegisteredServiceMetadataResolver.supports(service));
-        assertTrue(amazonS3SamlRegisteredServiceMetadataResolver.isAvailable(service));
+        assertTrue(resolver.resolve(service).isEmpty());
+        assertFalse(resolver.supports(null));
+        assertTrue(resolver.supports(service));
+        assertTrue(resolver.isAvailable(service));
 
         val signature =
-            "MIICNTCCAZ6gAwIBAgIES343gjANBgkqhkiG9w0BAQUFADBVMQswCQYDVQQGEwJVUzELMAkGA1UE"
-            + "CAwCQ0ExFjAUBgNVBAcMDU1vdW50YWluIFZpZXcxDTALBgNVBAoMBFdTTzIxEjAQBgNVBAMMCWxv"
-            + "Y2FsaG9zdDAeFw0xMDAyMTkwNzAyMjZaFw0zNTAyMTMwNzAyMjZaMFUxCzAJBgNVBAYTAlVTMQsw"
-            + "CQYDVQQIDAJDQTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzENMAsGA1UECgwEV1NPMjESMBAGA1UE"
-            + "AwwJbG9jYWxob3N0MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCUp/oV1vWc8/TkQSiAvTou"
-            + "sMzOM4asB2iltr2QKozni5aVFu818MpOLZIr8LMnTzWllJvvaA5RAAdpbECb+48FjbBe0hseUdN5"
-            + "HpwvnH/DW8ZccGvk53I6Orq7hLCv1ZHtuOCokghz/ATrhyPq+QktMfXnRS4HrKGJTzxaCcU7OQID"
-            + "AQABoxIwEDAOBgNVHQ8BAf8EBAMCBPAwDQYJKoZIhvcNAQEFBQADgYEAW5wPR7cr1LAdq+IrR44i"
-            + "QlRG5ITCZXY9hI0PygLP2rHANh+PYfTmxbuOnykNGyhM6FjFLbW2uZHQTY1jMrPprjOrmyK5sjJR"
-            + "O4d1DeGHT/YnIjs9JogRKv4XHECwLtIVdAbIdWHEtVZJyMSktcyysFcvuhPQK8Qc/E/Wq8uHSCo=";
+            """
+                MIICNTCCAZ6gAwIBAgIES343gjANBgkqhkiG9w0BAQUFADBVMQswCQYDVQQGEwJVUzELMAkGA1UE\
+                CAwCQ0ExFjAUBgNVBAcMDU1vdW50YWluIFZpZXcxDTALBgNVBAoMBFdTTzIxEjAQBgNVBAMMCWxv\
+                Y2FsaG9zdDAeFw0xMDAyMTkwNzAyMjZaFw0zNTAyMTMwNzAyMjZaMFUxCzAJBgNVBAYTAlVTMQsw\
+                CQYDVQQIDAJDQTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzENMAsGA1UECgwEV1NPMjESMBAGA1UE\
+                AwwJbG9jYWxob3N0MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCUp/oV1vWc8/TkQSiAvTou\
+                sMzOM4asB2iltr2QKozni5aVFu818MpOLZIr8LMnTzWllJvvaA5RAAdpbECb+48FjbBe0hseUdN5\
+                HpwvnH/DW8ZccGvk53I6Orq7hLCv1ZHtuOCokghz/ATrhyPq+QktMfXnRS4HrKGJTzxaCcU7OQID\
+                AQABoxIwEDAOBgNVHQ8BAf8EBAMCBPAwDQYJKoZIhvcNAQEFBQADgYEAW5wPR7cr1LAdq+IrR44i\
+                QlRG5ITCZXY9hI0PygLP2rHANh+PYfTmxbuOnykNGyhM6FjFLbW2uZHQTY1jMrPprjOrmyK5sjJR\
+                O4d1DeGHT/YnIjs9JogRKv4XHECwLtIVdAbIdWHEtVZJyMSktcyysFcvuhPQK8Qc/E/Wq8uHSCo=""";
+        val doc = buildDocument(signature);
+        val metadataManager = resolver.getMetadataManager().orElseThrow();
+        metadataManager.store(doc);
+        assertFalse(resolver.resolve(service).isEmpty());
+    }
 
-        val doc = SamlMetadataDocument.builder()
+    @Test
+    void verifyLoad() throws Throwable {
+        val metadataManager = resolver.getMetadataManager().orElseThrow();
+        val doc = buildDocument();
+        metadataManager.store(doc);
+
+        val documents = metadataManager.load();
+        assertFalse(documents.isEmpty());
+        assertEquals(doc.getName(), documents.getFirst().getName());
+    }
+
+    @Test
+    void verifyFindById() throws Throwable {
+        val metadataManager = resolver.getMetadataManager().orElseThrow();
+        val doc = buildDocument();
+        val storedDocument = metadataManager.store(doc);
+
+        val found = metadataManager.findById(storedDocument.getId());
+        assertTrue(found.isPresent());
+        assertEquals(storedDocument.getName(), found.get().getName());
+        assertTrue(metadataManager.findById(-999).isEmpty());
+    }
+
+    @Test
+    void verifyFindByName() throws Throwable {
+        val metadataManager = resolver.getMetadataManager().orElseThrow();
+        val doc = buildDocument();
+        metadataManager.store(doc);
+
+        val found = metadataManager.findByName(doc.getName());
+        assertTrue(found.isPresent());
+        assertEquals(doc.getName(), found.get().getName());
+        assertTrue(metadataManager.findByName("Unknown").isEmpty());
+    }
+
+    @Test
+    void verifyRemoveById() throws Throwable {
+        val metadataManager = resolver.getMetadataManager().orElseThrow();
+        val doc = buildDocument();
+        val storedDocument = metadataManager.store(doc);
+
+        metadataManager.removeById(storedDocument.getId());
+        assertTrue(metadataManager.findById(storedDocument.getId()).isEmpty());
+    }
+
+    @Test
+    void verifyRemoveByName() throws Throwable {
+        val metadataManager = resolver.getMetadataManager().orElseThrow();
+        val doc = buildDocument();
+        metadataManager.store(doc);
+        metadataManager.removeByName(doc.getName());
+        assertTrue(metadataManager.findByName(doc.getName()).isEmpty());
+    }
+
+    private static SamlMetadataDocument buildDocument() throws Exception {
+        val signature =
+            """
+                MIICNTCCAZ6gAwIBAgIES343gjANBgkqhkiG9w0BAQUFADBVMQswCQYDVQQGEwJVUzELMAkGA1UE\
+                CAwCQ0ExFjAUBgNVBAcMDU1vdW50YWluIFZpZXcxDTALBgNVBAoMBFdTTzIxEjAQBgNVBAMMCWxv\
+                Y2FsaG9zdDAeFw0xMDAyMTkwNzAyMjZaFw0zNTAyMTMwNzAyMjZaMFUxCzAJBgNVBAYTAlVTMQsw\
+                CQYDVQQIDAJDQTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzENMAsGA1UECgwEV1NPMjESMBAGA1UE\
+                AwwJbG9jYWxob3N0MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCUp/oV1vWc8/TkQSiAvTou\
+                sMzOM4asB2iltr2QKozni5aVFu818MpOLZIr8LMnTzWllJvvaA5RAAdpbECb+48FjbBe0hseUdN5\
+                HpwvnH/DW8ZccGvk53I6Orq7hLCv1ZHtuOCokghz/ATrhyPq+QktMfXnRS4HrKGJTzxaCcU7OQID\
+                AQABoxIwEDAOBgNVHQ8BAf8EBAMCBPAwDQYJKoZIhvcNAQEFBQADgYEAW5wPR7cr1LAdq+IrR44i\
+                QlRG5ITCZXY9hI0PygLP2rHANh+PYfTmxbuOnykNGyhM6FjFLbW2uZHQTY1jMrPprjOrmyK5sjJR\
+                O4d1DeGHT/YnIjs9JogRKv4XHECwLtIVdAbIdWHEtVZJyMSktcyysFcvuhPQK8Qc/E/Wq8uHSCo=""";
+        return buildDocument(signature);
+    }
+
+    private static SamlMetadataDocument buildDocument(final String signature) throws Exception {
+        return SamlMetadataDocument.builder()
             .id(RandomUtils.nextInt())
-            .name("SAMLDocument")
+            .name("SAMLDocument-%s".formatted(RandomUtils.nextInt()))
             .signature(signature)
             .value(IOUtils.toString(new ClassPathResource("sp-metadata.xml").getInputStream(), StandardCharsets.UTF_8))
             .build();
-
-        amazonS3SamlRegisteredServiceMetadataResolver.saveOrUpdate(doc);
-        assertFalse(amazonS3SamlRegisteredServiceMetadataResolver.resolve(service).isEmpty());
     }
 }

@@ -2,7 +2,6 @@ package org.apereo.cas.support.oauth.validator;
 
 import module java.base;
 import org.apereo.cas.support.oauth.services.OAuthRegisteredService;
-import org.apereo.cas.util.EncodingUtils;
 import org.apereo.cas.util.crypto.CipherExecutor;
 import org.apereo.cas.util.spring.SpringExpressionLanguageValueResolver;
 import lombok.Getter;
@@ -30,10 +29,10 @@ public class DefaultOAuth20ClientSecretValidator implements OAuth20ClientSecretV
             LOGGER.debug("The client secret is not defined for the registered service [{}]", registeredService.getName());
             return true;
         }
-        val clientSecretDecoded = EncodingUtils.urlDecode(clientSecret);
+
         val clientSecretAssigned = SpringExpressionLanguageValueResolver.getInstance().resolve(registeredService.getClientSecret());
         val definedSecret = cipherExecutor.decode(clientSecretAssigned, new Object[]{registeredService});
-        if (!Strings.CI.equals(definedSecret, clientSecretDecoded)) {
+        if (!isClientSecretCorrect(definedSecret, clientSecret)) {
             LOGGER.error("Wrong client secret for service: [{}]. If you intend to use PKCE, note that it does not require a client secret and "
                        + "requests generally must not specify a client secret to CAS.\nFurthermore, you must make sure "
                        + "no client secret is assigned to this registered service in the CAS service registry.",
@@ -50,5 +49,9 @@ public class DefaultOAuth20ClientSecretValidator implements OAuth20ClientSecretV
     
     protected boolean isClientSecretUndefined(final OAuthRegisteredService registeredService) {
         return registeredService != null && StringUtils.isBlank(registeredService.getClientSecret());
+    }
+
+    protected boolean isClientSecretCorrect(final String definedSecret, final String clientSecret) {
+        return Strings.CI.equals(definedSecret, clientSecret);
     }
 }

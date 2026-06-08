@@ -20,6 +20,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.keys.AesKey;
 import org.jose4j.keys.RsaKeyUtil;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Abstract cipher to provide common operations around signing objects.
@@ -33,7 +34,7 @@ import org.jose4j.keys.RsaKeyUtil;
 @Getter
 @Accessors(chain = true)
 public abstract class AbstractCipherExecutor<T, R> implements CipherExecutor<T, R> {
-    private static final BigInteger RSA_PUBLIC_KEY_EXPONENT = BigInteger.valueOf(65537);
+
 
     static {
         Security.addProvider(new BouncyCastleProvider());
@@ -95,7 +96,7 @@ public abstract class AbstractCipherExecutor<T, R> implements CipherExecutor<T, 
      * @param signingKey the signing key
      * @return the byte [ ]
      */
-    protected byte[] sign(final byte[] value, final Key signingKey) {
+    protected byte[] sign(final byte[] value, @Nullable final Key signingKey) {
         if (signingKey == null) {
             return value;
         }
@@ -159,18 +160,15 @@ public abstract class AbstractCipherExecutor<T, R> implements CipherExecutor<T, 
         setSigningKey(object);
     }
 
-    protected byte[] verifySignature(final byte[] value, final Key givenKey) {
+    protected byte @Nullable [] verifySignature(final byte[] value, final Key givenKey) {
         if (givenKey == null) {
             return value;
         }
         try {
             val activeSigningKey = givenKey instanceof final IdentifiableKey idk ? idk.getKey() : givenKey;
-            if (activeSigningKey instanceof final RSAPrivateKey privKey) {
-                val keySpec = new RSAPublicKeySpec(privKey.getModulus(), RSA_PUBLIC_KEY_EXPONENT);
-                val pubKey = KeyFactory.getInstance("RSA").generatePublic(keySpec);
-                return EncodingUtils.verifyJwsSignature(pubKey, value);
-            }
-            return EncodingUtils.verifyJwsSignature(activeSigningKey, value);
+            return EncodingUtils.extractPublicKeyFrom(activeSigningKey)
+                .map(publicKey -> EncodingUtils.verifyJwsSignature(publicKey, value))
+                .orElseGet(() -> EncodingUtils.verifyJwsSignature(activeSigningKey, value));
         } catch (final Exception e) {
             throw new IllegalArgumentException(e);
         }

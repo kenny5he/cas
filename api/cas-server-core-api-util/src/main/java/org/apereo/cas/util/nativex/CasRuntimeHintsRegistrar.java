@@ -8,12 +8,14 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.NonNull;
 import org.springframework.aop.SpringProxy;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.DecoratingProxy;
 import org.springframework.util.ClassUtils;
@@ -123,7 +125,7 @@ public interface CasRuntimeHintsRegistrar extends RuntimeHintsRegistrar {
      * @param entries the entries
      */
     default void registerSerializationHints(final RuntimeHints hints, final Collection<Class> entries) {
-        entries.forEach(el -> hints.serialization().registerType(el));
+        entries.forEach(el -> hints.reflection().registerJavaSerialization(el));
     }
 
     /**
@@ -135,10 +137,10 @@ public interface CasRuntimeHintsRegistrar extends RuntimeHintsRegistrar {
     default void registerSerializationHints(final RuntimeHints hints, final Object... entries) {
         Arrays.stream(entries).forEach(el -> {
             if (el instanceof final TypeReference tr) {
-                hints.serialization().registerType(tr);
+                hints.reflection().registerType(tr, hint -> hint.withJavaSerialization(true));
             }
             if (el instanceof final Class clazz) {
-                hints.serialization().registerType(clazz);
+                hints.reflection().registerJavaSerialization(clazz);
             }
         });
     }
@@ -219,6 +221,22 @@ public interface CasRuntimeHintsRegistrar extends RuntimeHintsRegistrar {
             MemberCategory.ACCESS_PUBLIC_FIELDS
         };
         registerReflectionHints(hints, entries, memberCategories);
+        return this;
+    }
+
+    /**
+     * Register reflection hints with type hint.
+     *
+     * @param hints          the hints
+     * @param clazz          the clazz
+     * @param consumer the attr on mismatch
+     * @return the cas runtime hints registrar
+     */
+    @CanIgnoreReturnValue
+    default CasRuntimeHintsRegistrar registerReflectionHintsWith(final @NonNull RuntimeHints hints,
+                                             final @NonNull Class<?> clazz,
+                                             final Consumer<TypeHint.Builder> consumer) {
+        hints.reflection().registerType(clazz, consumer);
         return this;
     }
 

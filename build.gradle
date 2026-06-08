@@ -52,6 +52,7 @@ ext {
     skipArtifactSigning = providers.systemProperty("skipArtifactSigning").present
     terminateCompilerOnWarning = providers.systemProperty("terminateCompilerOnWarning").getOrElse("true") == "true"
     skipNullAway = providers.systemProperty("skipNullAway").getOrElse("false") == "true"
+    skipHotSwapAgent = providers.systemProperty("skipHotSwapAgent").getOrElse("false") == "true"
 
     enableRemoteDebugging = providers.systemProperty("enableRemoteDebugging").present
     remoteDebuggingSuspend = providers.systemProperty("remoteDebuggingSuspend").getOrElse("false") == "true" ? "y" : "n"
@@ -92,7 +93,17 @@ if (publishReleases || publishSnapshots) {
             publishingTimeout.set(Duration.ZERO)
             uploadSnapshotsParallelism.set(4)
         }
-        publishAllProjectsProbablyBreakingProjectIsolation()
+    }
+
+    subprojects { subproject ->
+        if (projectShouldBePublished(subproject)) {
+            subproject.apply plugin: "com.gradleup.nmcp"
+            dependencies {
+                rootProject.dependencies {
+                    add("nmcpAggregation", rootProject.project(subproject.path))
+                }
+            }
+        }
     }
 }
 
@@ -181,7 +192,7 @@ allprojects {
 
     idea {
         module {
-            downloadSources = false
+            downloadSources = true
             downloadJavadoc = false
             jdkName = project.targetCompatibility
             excludeDirs += file(".gradle")
@@ -446,6 +457,7 @@ subprojects {
         api libraries.jspecify
         
         compileOnly libraries.jakartapersistence
+        compileOnly libraries.checkerqual
 
         annotationProcessor libraries.springindexer
 
@@ -522,51 +534,48 @@ if (rootProject.publishFlag && !rootProject.publishMinimalArtifacts) {
 }
 
 if (gradle.startParameter.taskNames.any { task -> task.startsWith("jacoco") }) {
-    tasks.register('jacocoRootReport', JacocoReport) {
+    tasks.register('jacocoRootReport', JacocoReport) { reportTask ->
         outputs.cacheIf { true }
 
-        subprojects.each { subproject ->
-            {
-                if (!subproject.path.contains(":docs")) {
-                    subproject.tasks.withType(Test).each { task ->
-                        dependsOn(task)
-                        mustRunAfter(task)
-                    }
-                }
+        def coveredSubprojects = subprojects.findAll { subproject ->
+            !subproject.path.contains(":docs")
+        }
+
+        def testTasks = coveredSubprojects.collect { subproject ->
+            subproject.tasks.withType(Test)
+        }
+
+        dependsOn(testTasks)
+
+        def executionDataTrees = coveredSubprojects.collect { subproject ->
+            subproject.fileTree(subproject.layout.buildDirectory) {
+                include "jacoco/*.exec"
+                include "**/jacoco/*.exec"
             }
         }
 
-        def executions = subprojects.collect { subproject ->
-            def execFiles = subproject.layout.buildDirectory.asFileTree.matching { include "**/jacoco/jacoco-*.exec" }
-            execFiles.each {
-                logger.info "${subproject.name} with execution file ${it}"
-                inputs.file(it).withPropertyName("${subproject.name}-jacoco").withPathSensitivity(PathSensitivity.RELATIVE)
+        executionData.from(executionDataTrees)
 
-            }
-            execFiles.files
-        }.flatten()
-
-        ansi.green("Coverage execution data files: ${executions}")
-        executionData.from(executions)
-        inputs.files(executions)
+        inputs.files(executionDataTrees)
                 .withPropertyName('jacocoRootReport')
                 .withPathSensitivity(PathSensitivity.RELATIVE)
-        outputs.files(rootProject.layout.buildDirectory.file('reports/jacoco/jacocoRootReport/jacocoRootReport.xml').get().asFile)
 
         reports {
             html.required.set(true)
             xml.required.set(true)
             csv.required.set(true)
         }
-        additionalSourceDirs.setFrom(files(subprojects.sourceSets.main.allSource.srcDirs))
-        sourceDirectories.setFrom(files(subprojects.sourceSets.main.allSource.srcDirs))
+
+        additionalSourceDirs.setFrom(files(coveredSubprojects.sourceSets.main.allSource.srcDirs))
+        sourceDirectories.setFrom(files(coveredSubprojects.sourceSets.main.allSource.srcDirs))
+
         classDirectories.setFrom(
-                files(subprojects.sourceSets.main.output).collect {
+                files(coveredSubprojects.sourceSets.main.output).collect {
                     fileTree(dir: it,
                             include: ['**/*.*'],
-                            exclude: rootProject.excludedFilesFromTestCoverage
-                    )
-                })
+                            exclude: rootProject.excludedFilesFromTestCoverage)
+                }
+        )
     }
 }
 
@@ -648,12 +657,25 @@ tasks.register('verifyDependencyVersions') { t ->
     }
 }
 
+tasks.named("clean") {
+    delete rootProject.file(".gradle/cas-test-tags")
+}
 
 boolean projectShouldBePublished(Project project) {
-    def publishable = project.hasProperty("publishable") ? project.publishable : true
-    project.ext.publishable = publishable
-    logger.info "Project ${project.name} is publishable: ${publishable}"
-    return publishable
+    def excluded = [
+            "api",
+            "core",
+            "docs",
+            "support",
+            "webapp",
+            "cas-server-documentation",
+            "cas-server-documentation-processor",
+            "cas-server-support-shell"
+    ]
+    logger.info "Checking if project ${project.name} should be published"
+    def result = !excluded.contains(project.name)
+    logger.info "Project ${project.name} should${result ? '' : ' not'} be published"
+    return result
 }
 
 boolean projectRequiresLombok(Project project) {

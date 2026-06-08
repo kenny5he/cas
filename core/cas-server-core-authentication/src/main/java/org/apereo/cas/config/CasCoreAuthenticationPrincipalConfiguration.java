@@ -6,7 +6,7 @@ import org.apereo.cas.authentication.PrincipalElectionStrategy;
 import org.apereo.cas.authentication.PrincipalElectionStrategyConflictResolver;
 import org.apereo.cas.authentication.attribute.AttributeDefinitionStore;
 import org.apereo.cas.authentication.attribute.AttributeDefinitionStoreConfigurer;
-import org.apereo.cas.authentication.attribute.DefaultAttributeDefinitionStore;
+import org.apereo.cas.authentication.attribute.JsonAttributeDefinitionStore;
 import org.apereo.cas.authentication.principal.ChainingPrincipalElectionStrategy;
 import org.apereo.cas.authentication.principal.DefaultPrincipalAttributesRepository;
 import org.apereo.cas.authentication.principal.DefaultPrincipalElectionStrategy;
@@ -169,18 +169,20 @@ class CasCoreAuthenticationPrincipalConfiguration {
         public AttributeDefinitionStore attributeDefinitionStore(
             final ConfigurableApplicationContext applicationContext,
             final CasConfigurationProperties casProperties) throws Exception {
+            
             val builders = applicationContext.getBeansOfType(AttributeDefinitionStoreConfigurer.class).values();
-            val store = new DefaultAttributeDefinitionStore();
-            store.setScope(casProperties.getServer().getScope());
-            builders
+            val loadedDefinitions = builders
                 .stream()
                 .filter(BeanSupplier::isNotProxy)
                 .sorted(AnnotationAwareOrderComparator.INSTANCE)
                 .map(AttributeDefinitionStoreConfigurer::load)
-                .forEach(store::registerAttributeDefinitions);
+                .flatMap(map -> map.entrySet().stream())
+                .map(Map.Entry::getValue)
+                .toList();
+
             val resource = casProperties.getAuthn().getAttributeRepository().getAttributeDefinitionStore().getJson().getLocation();
-            store.importStore(resource);
-            store.watchStore(resource);
+            val store = new JsonAttributeDefinitionStore(resource, loadedDefinitions);
+            store.setScope(casProperties.getServer().getScope());
             return store;
         }
     }

@@ -79,7 +79,7 @@ class SamlIdPDynamoDbIdPMetadataConfiguration {
         final CasConfigurationProperties casProperties,
         @Qualifier("amazonDynamoDbSamlIdPMetadataClient")
         final DynamoDbClient amazonDynamoDBClient,
-        @Qualifier("samlIdPMetadataGeneratorConfigurationContext")
+        @Qualifier(SamlIdPMetadataGeneratorConfigurationContext.DEFAULT_BEAN_NAME)
         final SamlIdPMetadataGeneratorConfigurationContext samlIdPMetadataGeneratorConfigurationContext) {
         return BeanSupplier.of(SamlIdPMetadataGenerator.class)
             .when(CONDITION.given(applicationContext.getEnvironment()))
@@ -112,7 +112,7 @@ class SamlIdPDynamoDbIdPMetadataConfiguration {
     @ConditionalOnMissingBean(name = "amazonDynamoDbSamlIdPMetadataClient")
     public DynamoDbClient amazonDynamoDbSamlIdPMetadataClient(
         final ConfigurableApplicationContext applicationContext,
-        final CasConfigurationProperties casProperties) throws Exception {
+        final CasConfigurationProperties casProperties) {
         return BeanSupplier.of(DynamoDbClient.class)
             .when(CONDITION.given(applicationContext.getEnvironment()))
             .supplyUnchecked(() -> {

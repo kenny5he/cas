@@ -48,6 +48,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Determine JDKs
         id: determine-jdk
         run: |
@@ -62,7 +64,7 @@ jobs:
           java-version: ${{ env.JDK_CURRENT }}
           distribution: ${{ env.JDK_DISTRIBUTION }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Initialize
         run: ls ./ci && find ./ci -type f -name "*.sh" -exec chmod +x "{}" \; && ./ci/init-build.sh
 
@@ -75,17 +77,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Set up JDK ${{ env.JDK_CURRENT }}
         uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JDK_CURRENT }}
           distribution: ${{ env.JDK_DISTRIBUTION }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Initialize
         run: find ./ci -type f -name "*.sh" -exec chmod +x "{}" \; && ./ci/init-build.sh
       - name: Validate Javadocs
-        run: ./gradlew --build-cache --configure-on-demand --no-daemon --parallel javadoc -x test -x check -DskipNestedConfigMetadataGen=true --parallel --max-workers=8 --no-configuration-cache
+        run: ./gradlew -q --build-cache --configure-on-demand --no-daemon --parallel javadoc -x test -x check -DskipNestedConfigMetadataGen=true --parallel --max-workers=8 --no-configuration-cache
 
 ##########################################################################
 
@@ -101,13 +105,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Set up JDK ${{ matrix.jdk }}
         uses: actions/setup-java@v5
         with:
           java-version: ${{ matrix.jdk }}
           distribution: ${{ env.JDK_DISTRIBUTION }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Initialize
         run: find ./ci -type f -name "*.sh" -exec chmod +x "{}" \; && ./ci/init-build.sh
       - name: Validate CAS Command-line Shell - JDK ${{ matrix.jdk }}
@@ -132,22 +138,23 @@ jobs:
         category:
           - tomcat
           - jetty
-#          - undertow
     name: embedded - JDK ${{ matrix.jdk }} - ${{ matrix.category }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Set up JDK ${{ matrix.jdk }}
         uses: actions/setup-java@v5
         with:
           java-version: ${{ matrix.jdk }}
           distribution: ${{ env.JDK_DISTRIBUTION }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Initialize
         run: find ./ci -type f -name "*.sh" -exec chmod +x "{}" \; && ./ci/init-build.sh
       - name: Validate ${{ matrix.category }}
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           max_attempts: ${{ env.RETRY_ATTEMPTS }}
           retry_on: error
@@ -172,17 +179,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Set up JDK ${{ matrix.jdk }}
         uses: actions/setup-java@v5
         with:
           java-version: ${{ matrix.jdk }}
           distribution: ${{ env.JDK_DISTRIBUTION }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Initialize
         run: find ./ci -type f -name "*.sh" -exec chmod +x "{}" \; && ./ci/init-build.sh
       - name: Validate ${{ matrix.category }}
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           max_attempts: ${{ env.RETRY_ATTEMPTS }}
           retry_on: error
@@ -204,17 +213,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Set up JDK ${{ matrix.jdk }}
         uses: actions/setup-java@v5
         with:
           java-version: ${{ matrix.jdk }}
           distribution: ${{ env.JDK_DISTRIBUTION }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Initialize
         run: find ./ci -type f -name "*.sh" -exec chmod +x "{}" \; && ./ci/init-build.sh
       - name: Validate Spring Cloud Config Server - JDK ${{ matrix.jdk }}
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           max_attempts: ${{ env.RETRY_ATTEMPTS }}
           retry_on: error

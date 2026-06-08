@@ -21,6 +21,7 @@ import org.jooq.lambda.Unchecked;
 import org.jose4j.json.JsonUtil;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jwk.PublicJsonWebKey;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The {@link BaseStringCipherExecutor} is the default
@@ -50,7 +51,7 @@ public abstract class BaseStringCipherExecutor extends AbstractCipherExecutor<Se
 
     private int signingKeySize = SigningJwtCryptoProperties.DEFAULT_STRINGABLE_SIGNING_KEY_SIZE;
 
-    private String secretKeyEncryption;
+    private @Nullable String secretKeyEncryption;
 
     private String secretKeySigning;
 
@@ -80,16 +81,17 @@ public abstract class BaseStringCipherExecutor extends AbstractCipherExecutor<Se
             true, true, signingKeySize, encryptionKeySize);
     }
 
-    protected BaseStringCipherExecutor(final String secretKeyEncryption, final String secretKeySigning,
+    protected BaseStringCipherExecutor(final @Nullable String secretKeyEncryption,
+                                       final @Nullable String secretKeySigning,
                                        final int signingKeySize, final int encryptionKeySize) {
         this(secretKeyEncryption, secretKeySigning, EncryptionJwtCryptoProperties.DEFAULT_CONTENT_ENCRYPTION_ALGORITHM,
             true, true, signingKeySize, encryptionKeySize);
     }
 
 
-    protected BaseStringCipherExecutor(final String secretKeyEncryption,
-                                       final String secretKeySigning,
-                                       final String contentEncryptionAlgorithmIdentifier,
+    protected BaseStringCipherExecutor(@Nullable final String secretKeyEncryption,
+                                       @Nullable final String secretKeySigning,
+                                       @Nullable final String contentEncryptionAlgorithmIdentifier,
                                        final boolean encryptionEnabled,
                                        final boolean signingEnabled,
                                        final int signingKeyLength,
@@ -119,8 +121,8 @@ public abstract class BaseStringCipherExecutor extends AbstractCipherExecutor<Se
         return decode(value, parameters, getEncryptionKey(), getSigningKey());
     }
 
-    protected String decode(final Serializable value, final Object[] parameters,
-                            final Key encKey, final Key signingKey) {
+    protected @Nullable String decode(final Serializable value, final Object[] parameters,
+                                      final Key encKey, final Key signingKey) {
         if (strategyType == CipherOperationsStrategyType.ENCRYPT_AND_SIGN) {
             return verifyAndDecrypt(value, encKey, signingKey);
         }
@@ -306,7 +308,7 @@ public abstract class BaseStringCipherExecutor extends AbstractCipherExecutor<Se
         return encoded;
     }
 
-    private String signAndEncrypt(final Serializable value, final Key encryptionKey, final Key signingKey) {
+    private String signAndEncrypt(final Serializable value, final Key encryptionKey, @Nullable final Key signingKey) {
         val encoded = FunctionUtils.doIf(this.signingEnabled,
             () -> {
                 LOGGER.trace("Attempting to sign value based on signing key defined by [{}]", getSigningKeySetting());

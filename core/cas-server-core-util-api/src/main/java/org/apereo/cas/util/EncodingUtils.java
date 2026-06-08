@@ -13,6 +13,11 @@ import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
+import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory;
+import org.bouncycastle.jcajce.provider.asymmetric.util.EC5Util;
+import org.bouncycastle.math.ec.FixedPointCombMultiplier;
 import org.jooq.lambda.Unchecked;
 import org.jose4j.json.JsonUtil;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
@@ -23,6 +28,7 @@ import org.jose4j.jwk.OctJwkGenerator;
 import org.jose4j.jwk.RsaJwkGenerator;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This is {@link EncodingUtils} that encapsulates common base64,
@@ -35,7 +41,6 @@ import org.jose4j.jws.JsonWebSignature;
 @Slf4j
 @UtilityClass
 public class EncodingUtils {
-
     /**
      * JSON web key parameter that identifies the key..
      */
@@ -48,6 +53,8 @@ public class EncodingUtils {
     private static final Base64 BASE64_CHUNKED_ENCODER = new Base64(76, new byte[]{10});
 
     private static final Base64 BASE64_UNCHUNKED_ENCODER = new Base64(0, new byte[]{10});
+
+    private static final BigInteger RSA_PUBLIC_KEY_EXPONENT = BigInteger.valueOf(65537);
 
     /**
      * Hex decode string.
@@ -250,7 +257,7 @@ public class EncodingUtils {
      * @return the encoded value
      */
     public static String urlEncode(final String value, final String encoding) {
-        return Unchecked.supplier(() -> URLEncoder.encode(value, encoding)).get();
+        return Unchecked.supplier(() -> URLEncoder.encode(value, Charset.forName(encoding))).get();
     }
 
     /**
@@ -279,13 +286,13 @@ public class EncodingUtils {
      * Verify jws signature byte [ ].
      *
      * @param signingKey the signing key
-     * @param asString   the as string
+     * @param value      the as string
      * @return the byte [ ]
      */
-    public static byte[] verifyJwsSignature(final Key signingKey, final String asString) {
+    public static byte @Nullable [] verifyJwsSignature(final Key signingKey, final String value) {
         return Unchecked.supplier(() -> {
             val jws = new JsonWebSignature();
-            jws.setCompactSerialization(asString);
+            jws.setCompactSerialization(value);
             jws.setKey(signingKey);
 
             val verified = jws.verifySignature();
@@ -305,7 +312,7 @@ public class EncodingUtils {
      * @param signingKey the signing key
      * @return the byte [ ]
      */
-    public static byte[] verifyJwsSignature(final Key signingKey, final byte[] value) {
+    public static byte @Nullable [] verifyJwsSignature(final Key signingKey, final byte[] value) {
         val asString = new String(value, StandardCharsets.UTF_8);
         return verifyJwsSignature(signingKey, asString);
     }
@@ -395,12 +402,7 @@ public class EncodingUtils {
      * @return the byte []
      */
     public static byte[] signJwsHMACSha512(final Key key, final byte[] value, final Map<String, Object> headers) {
-        return JsonWebTokenSigner.builder()
-            .key(key)
-            .headers(headers)
-            .algorithm(AlgorithmIdentifiers.HMAC_SHA512)
-            .build()
-            .sign(value);
+        return signJws(key, value, headers, AlgorithmIdentifiers.HMAC_SHA512);
     }
 
     /**
@@ -412,10 +414,26 @@ public class EncodingUtils {
      * @return the byte []
      */
     public static byte[] signJwsRSASha512(final Key key, final byte[] value, final Map<String, Object> headers) {
+        return signJws(key, value, headers, AlgorithmIdentifiers.RSA_USING_SHA512);
+    }
+
+    /**
+     * Sign jws byte [].
+     *
+     * @param key       the key
+     * @param value     the value
+     * @param headers   the headers
+     * @param algorithm the algorithm
+     * @return the byte [ ]
+     */
+    public static byte[] signJws(final Key key,
+                                 final byte[] value,
+                                 final Map<String, Object> headers,
+                                 final String algorithm) {
         return JsonWebTokenSigner.builder()
             .key(key)
             .headers(headers)
-            .algorithm(AlgorithmIdentifiers.RSA_USING_SHA512)
+            .algorithm(algorithm)
             .build()
             .sign(value);
     }
@@ -484,5 +502,49 @@ public class EncodingUtils {
      */
     public static Map<String, Object> parseJsonWebKey(final String key) throws Exception {
         return JsonUtil.parseJson(key);
+    }
+
+    /**
+     * Extract public key from key.
+     *
+     * @param key the key
+     * @return the optional
+     * @throws Exception the exception
+     */
+    public Optional<PublicKey> extractPublicKeyFrom(final Key key) throws Exception {
+        if (key instanceof final RSAPrivateKey privKey) {
+            val keySpec = new RSAPublicKeySpec(privKey.getModulus(), RSA_PUBLIC_KEY_EXPONENT);
+            return Optional.of(KeyFactory.getInstance("RSA").generatePublic(keySpec));
+        }
+        if (key instanceof final ECPrivateKey privKey) {
+            val jceParams = privKey.getParams();
+            val bcCurve = EC5Util.convertCurve(jceParams.getCurve());
+            val bcG = EC5Util.convertPoint(bcCurve, jceParams.getGenerator());
+
+            val domainParameters = new ECDomainParameters(
+                bcCurve,
+                bcG,
+                jceParams.getOrder(),
+                BigInteger.valueOf(jceParams.getCofactor())
+            );
+
+            val point = new FixedPointCombMultiplier().multiply(domainParameters.getG(), privKey.getS()).normalize();
+            val ecPoint = new ECPoint(
+                point.getAffineXCoord().toBigInteger(),
+                point.getAffineYCoord().toBigInteger()
+            );
+
+            val pubSpec = new ECPublicKeySpec(ecPoint, jceParams);
+            return Optional.of(KeyFactory.getInstance("EC").generatePublic(pubSpec));
+        }
+        if (key instanceof final EdECPrivateKey edec) {
+            val seed = edec.getBytes().orElseThrow();
+            val privParams = new Ed25519PrivateKeyParameters(seed, 0);
+            val pubParams = privParams.generatePublicKey();
+            val spki = SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(pubParams).getEncoded();
+            val kf = KeyFactory.getInstance("Ed25519");
+            return Optional.of(kf.generatePublic(new X509EncodedKeySpec(spki)));
+        }
+        return Optional.empty();
     }
 }

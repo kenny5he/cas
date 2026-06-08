@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -66,7 +66,6 @@ public class RegisteredServiceResource {
      * @param request  the request
      * @param response the response
      * @return {@link ResponseEntity} representing RESTful response
-     * @throws Throwable the throwable
      */
     @PostMapping(value = "/v1/services", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create registered service",
@@ -78,11 +77,14 @@ public class RegisteredServiceResource {
                 schema = @Schema(implementation = RegisteredService.class)
             )
         ))
-    public ResponseEntity<@NonNull String> createService(@RequestBody final RegisteredService service,
-                                                         final HttpServletRequest request,
-                                                         final HttpServletResponse response) throws Throwable {
+    public ResponseEntity<String> createService(@RequestBody final RegisteredService service,
+                                                final HttpServletRequest request,
+                                                final HttpServletResponse response) {
         try {
             val auth = authenticateRequest(request);
+            if (auth == null) {
+                throw new AuthenticationException("Unable to authenticate request to register service " + service.getName());
+            }
             if (isAuthenticatedPrincipalAuthorized(auth)) {
                 this.servicesManager.save(service);
                 return new ResponseEntity<>(HttpStatus.OK);
@@ -96,8 +98,7 @@ public class RegisteredServiceResource {
         }
     }
 
-    private boolean isAuthenticatedPrincipalAuthorized(final Authentication auth) throws Throwable {
-        FunctionUtils.throwIfNull(auth, () -> new AuthenticationException("Unable to determine or verify authentication attempt"));
+    private boolean isAuthenticatedPrincipalAuthorized(final Authentication auth) {
         val attributes = auth.getPrincipal().getAttributes();
         LOGGER.debug("Evaluating principal attributes [{}]", attributes.keySet());
         if (StringUtils.isBlank(this.attributeName) || StringUtils.isBlank(this.attributeValue)) {
@@ -112,12 +113,13 @@ public class RegisteredServiceResource {
         return false;
     }
 
-    private Authentication authenticateRequest(final HttpServletRequest request) {
+    private @Nullable Authentication authenticateRequest(final HttpServletRequest request) {
         val converter = new BasicAuthenticationConverter();
         val token = converter.convert(request);
         return FunctionUtils.doIfNotNull(token, () -> {
-            LOGGER.debug("Received basic authentication ECP request from credentials [{}]", token.getPrincipal());
-            val upc = new UsernamePasswordCredential(token.getPrincipal().toString(), token.getCredentials().toString());
+            val principal = Objects.requireNonNull(Objects.requireNonNull(token).getPrincipal());
+            LOGGER.debug("Received basic authentication ECP request from credentials [{}]", principal);
+            val upc = new UsernamePasswordCredential(principal.toString(), Objects.requireNonNull(token.getCredentials()).toString());
             val serviceRequest = this.serviceFactory.createService(request);
             val result = authenticationSystemSupport.finalizeAuthenticationTransaction(serviceRequest, upc);
             if (result == null) {

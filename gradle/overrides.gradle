@@ -52,6 +52,9 @@ configurations.configureEach {
                 if (requested.group == "com.h2database") {
                     details.useVersion(libs.h2.get().version)
                 }
+                if (requested.group == "io.prometheus" && requested.name.startsWith("prometheus-")) {
+                    details.useVersion(libs.prometheus.get().version)
+                }
                 if (requested.group == "com.google.code.gson") {
                     details.useVersion(libs.gson.get().version)
                 }
@@ -93,9 +96,6 @@ configurations.configureEach {
                 }
                 if (requested.group.startsWith("org.eclipse.jetty")) {
                     details.useVersion(libs.versions.jetty.get())
-                }
-                if (requested.group.startsWith("io.undertow")) {
-                    details.useVersion(libs.versions.undertow.get())
                 }
                 if (requested.group.startsWith("org.apache.tomcat")) {
                     details.useVersion(libs.versions.tomcat.get())

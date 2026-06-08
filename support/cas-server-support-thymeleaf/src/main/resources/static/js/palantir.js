@@ -24,6 +24,7 @@ async function initializePalantir() {
 
                     Promise.all([
                         initializeAllCharts(),
+                        initializePrometheusCharts(),
                         initializeScheduledTasksOperations(),
                         initializeServicesOperations(),
                         initializeAccessStrategyOperations(),
@@ -49,14 +50,15 @@ async function initializePalantir() {
                         initializeCasSpringWebflowOperations(),
                         initializeHotKeyOperations(),
                         restoreActiveTabs(),
-                        initializePalantirSession()
+                        initializePalantirSession(),
+                        initializePalantirActuatorsTable()
                     ]);
 
                     window.addEventListener("resize", updateNavigationSidebar, {passive: true});
                 }
             });
         }, 2);
-        $("#dashboard").removeClass("d-none");
+        showElements("#dashboard");
     } catch (error) {
         console.error("An error occurred:", error);
     }

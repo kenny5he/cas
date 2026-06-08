@@ -3,7 +3,7 @@ package org.apereo.cas.support.oauth.web.response.accesstoken.ext;
 import module java.base;
 import org.apereo.cas.audit.AuditableContext;
 import org.apereo.cas.authentication.DefaultAuthenticationResult;
-import org.apereo.cas.services.UnauthorizedServiceException;
+import org.apereo.cas.services.RegisteredServiceAccessStrategyUtils;
 import org.apereo.cas.support.oauth.OAuth20Constants;
 import org.apereo.cas.support.oauth.OAuth20GrantTypes;
 import org.apereo.cas.support.oauth.OAuth20ResponseTypes;
@@ -15,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.NonNull;
 import org.pac4j.core.context.CallContext;
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.profile.ProfileManager;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
@@ -33,15 +32,15 @@ public class AccessTokenPasswordGrantRequestExtractor extends BaseAccessTokenGra
     public AccessTokenRequestContext extractRequest(final WebContext context) throws Throwable {
         val configurationContext = getConfigurationContext().getObject();
         val callContext = new CallContext(context, configurationContext.getSessionStore());
-        val clientId = configurationContext.getRequestParameterResolver()
-            .resolveClientIdAndClientSecret(callContext).getKey();
+        val profile = OAuth20Utils.getAuthenticatedUserProfile(context, configurationContext.getSessionStore());
+        val clientId = StringUtils.defaultIfBlank(configurationContext.getRequestParameterResolver()
+            .resolveClientIdAndClientSecret(callContext).getKey(), (String) profile.getAttribute(OAuth20Constants.CLIENT_ID));
 
         LOGGER.debug("Locating OAuth registered service by client id [{}]", clientId);
         val registeredService = OAuth20Utils.getRegisteredOAuthServiceByClientId(configurationContext.getServicesManager(), clientId);
+        RegisteredServiceAccessStrategyUtils.ensureServiceAccessIsAllowed(registeredService);
         LOGGER.debug("Located OAuth registered service [{}]", registeredService);
 
-        val manager = new ProfileManager(context, configurationContext.getSessionStore());
-        val profile = manager.getProfile().orElseThrow(() -> UnauthorizedServiceException.denied("OAuth user profile cannot be determined"));
         LOGGER.debug("Creating matching service request based on [{}]", registeredService);
         val requireServiceHeader = configurationContext.getCasProperties().getAuthn()
             .getOauth().getGrants().getResourceOwner().isRequireServiceHeader();

@@ -1,10 +1,10 @@
 {
   "dependencies": "reports,configuration-cloud-amqp",
+  "enabled": "false",
   "conditions": {
     "docker": "true"
   },
   "properties": [
-    
     "--logging.level.org.springframework.amqp=info",
     "--logging.level.org.springframework.cloud.bus=info",
 

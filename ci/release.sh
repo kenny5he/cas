@@ -7,6 +7,7 @@ ENDCOLOR="\e[0m"
 
 casVersion=(`cat ./gradle.properties | grep "version" | cut -d= -f2`)
 nextVersion="${casVersion}"
+privateRelease="false"
 
 while (("$#")); do
   case "$1" in
@@ -17,6 +18,10 @@ while (("$#")); do
   --next-version)
     nextVersion=$2
     shift 2
+    ;;
+  --private)
+    privateRelease="true"
+    shift 1
     ;;
   esac
 done
@@ -89,6 +94,11 @@ function publish {
         exit 1
     fi
 
+    if [[ "${privateRelease}" == "true" ]]; then
+        printgreen "This is a private release. Skipping Git tagging and GitHub Release creation."
+        return 0
+    fi
+    
     if [[ "$CI" == "true" ]]; then
         git config --global user.email "cas@apereo.org"
         git config --global user.name "Apereo CAS"
@@ -142,12 +152,24 @@ function publish {
     currentCommit=$(git rev-parse HEAD)
     printgreen "Current commit is ${currentCommit}"
 
-    previousTag=$(git describe --tags --abbrev=0 "${releaseTag}^")
-    echo "Looking at commits in range: $previousTag..$releaseTag" 2>/dev/null
+    printgreen "Checking release tag ${releaseTag} against the previous tag to identify contributors..."
+    git fetch --force --tags origin
+    git cat-file -t "$releaseTag"
+    previousTag=$(git describe --tags --abbrev=0 "${releaseTag}^{}^" 2>/dev/null)
+    if [[ -z $previousTag ]]; then
+      previousTag=$(
+        git tag --sort=-version:refname \
+        | awk -v tag="$releaseTag" '
+            found { print; exit }
+            $0 == tag { found=1 }
+          '
+      )
+    fi
+    echo "Previous tag: ${previousTag}. Now looking at commits in range: $previousTag..$releaseTag"
       
     if [[ -n "${previousTag}" && -n "${releaseTag}" ]]; then
-      contributors=$(gh api repos/apereo/cas/compare/$previousTag...$releaseTag \
-        --jq '.commits[].author.login // .commits[].commit.author.name' \
+      contributors=$(gh api "repos/apereo/cas/compare/$previousTag...$releaseTag" \
+        --jq '.commits[] | (.author.login // .commit.author.name)' \
         | sort -u \
         | sed 's/.*/- @&/')
       printgreen "Contributors: ${contributors}"
@@ -158,7 +180,7 @@ function publish {
       contributors="- No contributors found."
     fi
     
-    notes='
+    releaseNotes=$(cat <<EOF
 # :star: Release Notes
 
 - [Documentation](https://apereo.github.io/cas/${documentationBranch})
@@ -170,12 +192,11 @@ ${changelog}
 
 # :couple: Contributions
 
-Special thanks to the following individuals for their excellent contributions:	
+Special thanks to the following individuals for their excellent contributions:
 
 ${contributors}
-    '
-
-    releaseNotes=$(eval "cat <<EOF $notes")
+EOF
+    )
     echo -e "\nRelease Notes:\n${releaseNotes}\n"
     
     gh release create "${releaseTag}" --notes "${releaseNotes}" \
@@ -213,7 +234,7 @@ ${contributors}
 }
 
 function finished {
-    printgreen "Done! The release is now automatically published. There is nothing more for you to do. Thank you!"
+    printgreen "Done! The release is now automatically published. There is nothing more for you to do!"
 }
 
 function init {

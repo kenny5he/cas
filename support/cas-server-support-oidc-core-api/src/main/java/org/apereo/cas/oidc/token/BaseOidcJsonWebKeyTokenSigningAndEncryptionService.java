@@ -25,7 +25,7 @@ import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.JsonWebKeySet;
 import org.jose4j.jwk.PublicJsonWebKey;
 import org.jose4j.jwt.JwtClaims;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This is {@link BaseOidcJsonWebKeyTokenSigningAndEncryptionService}.
@@ -36,9 +36,9 @@ import org.jspecify.annotations.NonNull;
 @Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class BaseOidcJsonWebKeyTokenSigningAndEncryptionService extends BaseTokenSigningAndEncryptionService {
-    protected final LoadingCache<@NonNull OidcJsonWebKeyCacheKey, JsonWebKeySet> defaultJsonWebKeystoreCache;
+    protected final LoadingCache<OidcJsonWebKeyCacheKey, JsonWebKeySet> defaultJsonWebKeystoreCache;
 
-    protected final LoadingCache<@NonNull OidcJsonWebKeyCacheKey, Optional<JsonWebKeySet>> serviceJsonWebKeystoreCache;
+    protected final LoadingCache<OidcJsonWebKeyCacheKey, Optional<JsonWebKeySet>> serviceJsonWebKeystoreCache;
 
     protected final OidcIssuerService issuerService;
 
@@ -123,7 +123,7 @@ public abstract class BaseOidcJsonWebKeyTokenSigningAndEncryptionService extends
         return finalKey.orElseGet(() -> (PublicJsonWebKey) jsonWebKeys.getFirst());
     }
 
-    protected PublicJsonWebKey getJsonWebKeyForEncryption(final OAuthRegisteredService registeredService) {
+    protected @Nullable PublicJsonWebKey getJsonWebKeyForEncryption(final OAuthRegisteredService registeredService) {
         LOGGER.debug("Service [{}] is set to encrypt tokens", registeredService);
         val oidcService = (OidcRegisteredService) registeredService;
         val jwks = serviceJsonWebKeystoreCache.get(new OidcJsonWebKeyCacheKey(registeredService, OidcJsonWebKeyUsage.ENCRYPTION));

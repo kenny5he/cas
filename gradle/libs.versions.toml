@@ -1,108 +1,110 @@
 [versions]
-aceEditor = "1.41.0"
-acmeClient = "4.0.0"
-amazonDax = "2.0.7"
-amazonSdk = "2.41.19"
-azureInsights = "3.7.7"
+aceEditor = "1.43.6"
+acmeClient = "5.1.0"
+amazonDax = "2.0.9"
+amazonSdk = "2.45.0"
+azureInsights = "3.7.8"
 azureKustoLog4j = "1.0.0"
 animateCss = "4.1.1"
-apacheCassandra = "4.19.2"
-apacheCxf = "4.1.4"
-apacheFediz = "1.7.1"
+apacheCassandra = "4.19.3"
+apacheCxf = "4.2.1"
+apacheFediz = "1.7.2"
 apacheIgnite = "3.1.0"
 apacheVelocityEngine = "2.4.1"
 apiGuardian = "1.1.2"
-arrow = "18.3.0"
+arrow = "19.0.0"
 aspectj = "1.9.25.1"
 awaitility = "4.3.0"
 awsmemcached = "1.2.3"
-azureIdentity = "1.18.2"
+azureIdentity = "1.18.3"
 azureMapsGeoLocation = "1.0.0-beta.3"
 azureMapsSearch = "2.0.0-beta.2"
-azuread = "1.23.1"
+azuread = "1.25.0"
 base64Js = "1.5.1"
 bootstrap = "5.3.8"
 bootstrapSelect = "1.13.18"
-bouncyCastle = "1.83"
+bouncyCastle = "1.84"
 bucket4j = "8.10.1"
-caffeine = "3.2.3"
-casClient = "4.0.4"
+caffeine = "3.2.4"
+casClient = "4.1.1"
 cbor = "4.5.6"
-chartJs = "4.5.1"
-checkstyle = "13.0.0"
+chartJsCore = "4.5.1"
+checkstyle = "13.4.2"
+checkerQual = "4.1.0"
 classgraph = "4.8.184"
 commonsBeans = "1.11.0"
 commonsCli = "1.11.0"
-commonsCodec = "1.20.0"
+commonsCodec = "1.22.0"
 commonsCollections = "4.5.0"
 commonsCollections3 = "3.2.2"
 commonsCompress = "1.28.0"
-commonsIo = "2.21.0"
-commonsJexl = "3.6.1"
+commonsIo = "2.22.0"
+commonsJexl = "3.6.2"
 commonsLang = "3.20.0"
 commonsLang2 = "2.6"
 commonsPool = "2.13.1"
 commonsText = "1.15.0"
 commonsValidator = "1.10.1"
-cosmosdb = "4.77.0"
+cosmosdb = "4.80.0"
 cqEngine = "3.6.0"
 cryptacular = "1.3.0"
 curator = "5.9.0"
-datatables = "2.3.6"
+datatables = "2.3.8"
+dexie = "4.4.2"
 disruptor = "4.0.0"
 dom4j = "2.2.0"
-dropwizard = "4.2.38"
-duoClient = "0.7.1"
+dropwizard = "4.2.39"
+duoClient = "0.8.0"
 duoUniversalSdk = "1.3.1"
 eclipseAngusMail = "2.0.5"
-eclipseLink = "4.0.9"
-elasticApm = "1.55.4"
-errorprone = "2.46.0"
-eurekaClient = "2.0.5"
+eclipseLink = "5.0.0"
+errorprone = "2.49.0"
+elasticApm = "1.55.6"
+eurekaClient = "2.0.6"
 fingerprintJs = "5.0.1"
-firebaseAdmin = "9.7.1"
+firebaseAdmin = "9.9.0"
 fluentd = "0.3.4"
 fluentdLog4j = "1.0.0"
-fontAwesome = "7.1.0"
-geode = "2.0.0"
-googleApiClient = "2.8.1"
+fontAwesome = "7.2.0"
+geode = "2.0.2"
+googleApiClient = "2.9.0"
 googleAuth = "1.5.0"
-googleCloudLogging = "3.24.0"
-googleCloudMonitor = "3.83.0"
-googleCloudSdk = "7.4.3"
+googleCloudMonitor = "3.93.0"
+googleCloudLogging = "3.33.0"
+googleCloudSdk = "8.0.4"
 googleMapsGeoCoding = "2.2.0"
 googleZxing = "3.5.4"
-graalVm = "25.0.2"
-graalVmMetadataRepository = "0.3.32"
-groovy = "5.0.4"
-grouper = "5.22.3"
-gson = "2.13.2"
-guava = "33.5.0-jre"
+graalVm = "25.0.3"
+graalVmMetadataRepository = "1.0.2"
+groovy = "5.0.6"
+grouper = "7.2.1"
+gson = "2.14.0"
+guava = "33.6.0-jre"
 h2 = "1.4.197"
-hazelcast = "5.6.0"
-hazelcastSession = "4.0.0-RC1"
+hazelcast = "5.7.0"
+hazelcastSession = "4.0.0"
 hazelcastJClouds = "3.7.2"
 hazelcastZooKeeper = "4.0.2"
-hibernate = "7.3.0.CR1"
+hibernate = "7.4.0.Final"
 hibernateValidator = "9.1.0.Final"
 highlightJs = "11.11.1"
 hikari = "7.0.2"
-hotkeysJs = "4.0.0"
+hotkeysJs = "4.0.1"
 hjson = "3.1.0"
 hsql = "2.7.4"
-httpCore = "5.4"
+httpCore = "5.4.2"
 httpCore4 = "4.4.16"
-httpclient = "5.6"
+httpclient = "5.6.1"
 httpclient4 = "4.5.14"
-hypersistence = "3.15.1"
-influxDb = "1.7.0"
-ipGeoLocation = "2.0.1"
-jackson2 = "2.21.0"
-jackson = "3.0.4"
+hypersistence = "3.15.3"
+influxDb = "1.9.0"
+ipGeoLocation = "3.0.0"
+jackson2 = "2.21.4"
+jackson = "3.1.4"
 jacksonAnnotations = "2.21"
 jacksonAsl = "1.9.13"
-jacksonDataBind = "3.0.4"
-jacoco = "0.8.14"
+jacksonDataBind = "3.1.4"
+jacoco = "0.8.15"
 jakartaActivation = "2.1.4"
 jakartaAnnotationApi = "3.0.0"
 jakartaEl = "6.0.1"
@@ -112,169 +114,172 @@ jakartaJstl = "3.0.2"
 jakartaServlet = "6.1.0"
 jakartaSoapApi = "3.0.2"
 jakartaValidation = "3.1.1"
-jansi = "2.4.2"
+jansi = "2.4.3"
 jasypt = "1.9.3"
-javaMelody = "2.6.0"
-javaParser = "3.28.0"
-javers = "7.10.0"
-jaxbApi = "4.0.4"
-jaxbImpl = "4.0.6"
-jaxbRuntime = "4.0.3"
+javaMelody = "2.8.0"
+javaParser = "3.28.2"
+javers = "7.11.1"
+jaxbApi = "4.0.5"
+jaxbImpl = "4.0.9"
+jaxbRuntime = "4.0.5"
 jcifs = "1.3.17"
 jclouds = "2.7.0"
 jcloudsGoogleEngine = "1.9.3"
 jcpiAnnotations = "1.0-1"
 jdom = "2.0.6.1"
-jetty = "12.1.6"
-jgit = "7.5.0.202512021534-r"
-jodaTime = "2.14.0"
+jetcd = "0.8.6"
+jetty = "12.1.10"
+jgit = "7.6.0.202603022253-r"
+jodaTime = "2.14.2"
 jool = "0.9.15"
 jose4j = "0.9.6"
 jpaPersistenceApi = "3.2.0"
 jquery = "4.0.0"
-jqueryUi = "1.14.1"
+jqueryUi = "1.14.2"
 jradius = "1.1.5"
-json = "20251224"
+json = "20260522"
 jsonSmart = "2.6.0"
 jsonassert = "1.5.3"
-jsoup = "1.22.1"
+jsoup = "1.22.2"
 jspecify = "1.0.0"
 jsr305 = "3.0.2"
 jsYaml = "4.1.1"
 jta = "2.0.1"
 jtds = "1.3.1"
-junit = "6.0.2"
+junit = "6.1.0"
 junitPioneer = "2.3.0"
-junitPlatform = "6.0.2"
-kafka = "4.1.1"
+junitPlatform = "6.1.0"
+kafka = "4.3.0"
 kryo = "5.6.2"
 kryoSerializers = "0.45"
 ldaptive = "2.5.0"
 lettuceMod = "4.5.0"
-log4j = "2.25.3"
-logback = "1.5.27"
-logbackAccess = "2.0.9"
-loki = "0.9.41"
-lombok = "1.18.42"
-lucene = "10.3.2"
-lz4 = "1.10.3"
-mailgun = "2.3"
+log4j = "2.26.0"
+logback = "1.5.34"
+logbackAccess = "2.0.12"
+loki = "0.9.42"
+lombok = "1.18.46"
+lucene = "10.4.0"
+lz4 = "1.11.0"
+mailgun = "2.4.1"
 mailjet = "6.0.1"
-mariaDb = "3.5.7"
+mariaDb = "3.5.8"
 material = "14.0.0"
-maxmind = "5.0.2"
+maxmind = "5.1.0"
 mdiFont = "7.4.47"
-mermaid = "11.6.0"
-micrometer = "1.17.0-M1"
-micrometerTracing = "1.7.0-M2"
-mockito = "5.21.0"
+mermaid = "11.15.0"
+micrometer = "1.17.0-RC1"
+micrometerTracing = "1.7.0-RC1"
+mockito = "5.23.0"
 mockitoInline = "5.2.0"
-mongoDriver = "5.6.2"
+mongoDriver = "5.7.1"
 mongoSpringSession = "4.0.0"
-mssqlServer = "13.3.1.jre11-preview"
+mssqlServer = "13.4.0.jre11"
 mustache = "1.16"
-mysql = "9.5.0"
+mysql = "9.7.0"
 netflixEventBus = "0.3.0"
-netty = "4.2.9.Final"
+netty = "4.2.15.Final"
 nexmo = "5.6.0"
-nimbusJose = "10.7"
-nimbusOidc = "11.31.1"
+nimbusJose = "10.9.1"
+nimbusOidc = "11.37.2"
 normalize = "8.0.1"
 notyf = "3.10.0"
-nullaway = "0.13.1"
+nullaway = "0.13.6"
 okhttp3 = "5.3.2"
-okio = "3.16.4"
+okio = "3.17.0"
 okioHttp = "2.7.5"
 oktaHttpClient = "8.2.5"
 oktaSdk = "3.0.0"
-opensaml = "5.1.6"
-oracleJdbc = "23.26.0.0.0"
-oshi = "6.9.3"
-otel = "1.58.0"
-pac4j = "6.3.1"
+opensaml = "5.2.2"
+oracleJdbc = "23.26.2.0.0"
+oshi = "7.2.1"
+otel = "1.62.0"
+pac4j = "6.5.3"
 permitio = "2.2.5"
-postgresql = "42.7.9"
-pulsar = "4.1.2"
-pushy = "0.15.4"
+postgresql = "42.7.11"
+prometheus = "1.6.1"
+pulsar = "4.2.1"
+pushy = "0.15.6"
 quartz = "2.5.2"
-redisLettuce = "6.8.2.RELEASE"
+redisLettuce = "7.5.2.RELEASE"
 retrofit = "3.0.0"
-saajImpl = "3.0.4"
-scimSdkClient = "1.29.0"
+saajImpl = "3.0.6"
+scimSdkClient = "1.32.0"
 semver = "3.1.0"
 sendGrid = "4.10.3"
-sentry = "8.31.0"
-shibbolethUtilJavaSupport = "9.1.6"
-slackClient = "1.46.0"
-slf4j = "2.0.17"
-snakeYaml = "2.5"
+sentry = "8.43.1"
+shibbolethUtilJavaSupport = "9.2.2"
+slackClient = "1.49.0"
+slf4j = "2.0.18"
+snakeYaml = "2.6"
 socketJsClient = "1.5.1"
-splunkLogging = "1.11.8"
-spring = "7.0.3"
-springBoot = "4.1.0-M1"
-springBootAdmin = "4.0.0-M1"
-springCloudAzure = "6.1.0"
+splunkLogging = "1.11.10"
+spring = "7.0.7"
+springBoot = "4.1.0-RC1"
+springBootAdmin = "4.0.4"
+springCloudAzure = "7.3.0"
 springCloudBus = "5.0.1"
 springCloudCommons = "5.0.1"
-springCloudConfig = "5.0.1"
+springCloudConfig = "5.0.3"
 springCloudConsul = "5.0.1"
 springCloudEureka = "5.0.1"
 springCloudKubernetes = "5.0.1"
 springCloudVault = "5.0.1"
 springCloudZookeeper = "5.0.1"
-springDataCassandra = "5.0.2"
-springDataCommons = "4.0.2"
-springDataCosmosDb = "6.1.0"
-springDataMongoDb = "5.0.2"
-springDataRedis = "4.0.2"
-springDoc = "3.0.1"
-springIntegration = "7.1.0-M1"
-springKafka = "4.0.2"
-springRabbit = "4.1.0-M1"
-springSecurity = "7.1.0-M1"
+springDataCassandra = "5.1.0-RC1"
+springDataCommons = "4.1.0-RC1"
+springDataCosmosDb = "7.3.0"
+springDataMongoDb = "5.1.0-RC1"
+springDataRedis = "4.1.0-RC1"
+springDoc = "3.0.3"
+springIntegration = "7.1.0-RC1"
+springKafka = "4.1.0-RC1"
+springRabbit = "4.1.0-RC1"
+springSecurity = "7.1.0-RC1"
 springSecurityRsa = "1.1.5"
-springSession = "4.0.1"
-springShell = "4.0.1"
+springSession = "4.1.0-RC1"
+springShell = "4.0.2"
 springWebflow = "4.0.0"
-springWs = "5.0.0"
+springWs = "5.0.1"
 spymemcached = "2.12.3"
 stompWebSocket = "2.3.4"
 streamBuffer = "2.1.0"
-swagger = "2.2.42"
-sweetAlert = "11.26.17"
+swagger = "2.2.50"
+sweetAlert = "11.26.25"
+trumbowyg = "2.31.0"
 textEncoding = "0.7.0"
-textMagic = "3.0.43863"
-thymeleaf = "3.1.3.RELEASE"
+textMagic = "3.0.50038"
+thymeleaf = "3.1.5.RELEASE"
 thymeleafDialect = "3.2.0"
-tomcat = "11.0.18"
-twilio = "11.3.2"
+googleTink = "1.21.0"
+tomcat = "11.0.22"
+tomSelect = "2.6.1"
+twilio = "12.1.1"
 unboundid = "7.0.4"
-undertow = "2.3.22.Final"
 whatWgFetch = "3.6.20"
-wsApi = "4.0.2"
+wsApi = "4.0.3"
 wsdl4j = "1.6.3"
 wss4j = "4.0.1"
-xerces = "2.12.2"
 xmlSec = "4.0.4"
 yubico = "3.1.0"
-yubicoWebauthn = "2.8.1"
+yubicoWebauthn = "2.9.0"
 yugabytedb = "42.7.3-yb-4"
-zipkinBrave = "3.5.1"
-zookeeper = "3.9.4"
+zipkinBrave = "3.5.3"
+zookeeper = "3.9.5"
 zxcvbn = "4.4.2"
 
 #################################################################
 # This section handles Gradle build classpath dependency versions
 #################################################################
 gradleGit = "1.0.0"
-gradleLombok = "9.2.0"
-gradleDependencyVersions = "0.53.0"
-gradleErrorProne = "4.4.0"
-gradleNullAway = "2.4.1"
-gradleGraalVmNative = "0.11.4"
-gradleSonarqube = "7.2.2.6593"
-gradleNmcpPublishing = "1.4.4"
-gradleJib = "3.5.2"
+gradleLombok = "9.5.0"
+gradleDependencyVersions = "0.54.0"
+gradleErrorProne = "5.1.0"
+gradleNullAway = "3.0.0"
+gradleGraalVmNative = "1.1.1"
+gradleSonarqube = "7.3.1.8318"
+gradleNmcpPublishing = "1.5.0"
+gradleJib = "3.5.3"
 
 [libraries]
 ace-builds = { module = "org.webjars.npm:ace-builds", version.ref = "aceEditor" }
@@ -318,7 +323,8 @@ bucket4j-core = { module = "com.bucket4j:bucket4j-core", version.ref = "bucket4j
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 cas-client-core = { module = "org.apereo.cas.client:cas-client-core", version.ref = "casClient" }
 cbor = { module = "com.upokecenter:cbor", version.ref = "cbor" }
-chart-js = { module = "org.webjars.npm:chart.js", version.ref = "chartJs" }
+chart-js-core = { module = "org.webjars.npm:chart.js", version.ref = "chartJsCore" }
+checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checkerQual" }
 classgraph = { module = "io.github.classgraph:classgraph", version.ref = "classgraph" }
 client = { module = "com.nexmo:client", version.ref = "nexmo" }
 clouddirectory = { module = "software.amazon.awssdk:clouddirectory", version.ref = "amazonSdk" }
@@ -359,6 +365,7 @@ cxf-rt-ws-policy = { module = "org.apache.cxf:cxf-rt-ws-policy", version.ref = "
 cxf-rt-ws-security = { module = "org.apache.cxf:cxf-rt-ws-security", version.ref = "apacheCxf" }
 cxf-services-sts-core = { module = "org.apache.cxf.services.sts:cxf-services-sts-core", version.ref = "apacheCxf" }
 datatables = { module = "org.webjars:datatables", version.ref = "datatables" }
+dexie = { module = "org.webjars.npm:dexie", version.ref = "dexie" }
 disruptor = { module = "com.lmax:disruptor", version.ref = "disruptor" }
 dom4j = { module = "org.dom4j:dom4j", version.ref = "dom4j" }
 duo-client = { module = "com.duosecurity:duo-client", version.ref = "duoClient" }
@@ -384,6 +391,7 @@ google-api-client = { module = "com.google.api-client:google-api-client", versio
 google-cloud-logging = { module = "com.google.cloud:google-cloud-logging", version.ref = "googleCloudLogging" }
 google-cloud-monitoring = { module = "com.google.cloud:google-cloud-monitoring", version.ref = "googleCloudMonitor" }
 google-compute-engine = { module = "org.apache.jclouds.labs:google-compute-engine", version.ref = "jcloudsGoogleEngine" }
+google-crypto-tink = { module = "com.google.crypto.tink:tink", version.ref = "googleTink" }
 google-maps-services = { module = "com.google.maps:google-maps-services", version.ref = "googleMapsGeoCoding" }
 googleauth = { module = "com.warrenstrange:googleauth", version.ref = "googleAuth" }
 graal-sdk = { module = "org.graalvm.sdk:graal-sdk", version.ref = "graalVm" }
@@ -464,6 +472,7 @@ jclouds-allcompute = { module = "org.apache.jclouds:jclouds-allcompute", version
 jclouds-compute = { module = "org.apache.jclouds:jclouds-compute", version.ref = "jclouds" }
 jdbc-yugabytedb = { module = "com.yugabyte:jdbc-yugabytedb", version.ref = "yugabytedb" }
 jdom2 = { module = "org.jdom:jdom2", version.ref = "jdom" }
+jetcd-core = { module = "io.etcd:jetcd-core", version.ref = "jetcd" }
 jetty-alpn-java-server = { module = "org.eclipse.jetty:jetty-alpn-java-server", version.ref = "jetty" }
 jetty-http2-server = { module = "org.eclipse.jetty.http2:jetty-http2-server", version.ref = "jetty" }
 jmustache = { module = "com.samskivert:jmustache", version.ref = "mustache" }
@@ -590,7 +599,6 @@ opentelemetry-sdk-autoconfigure = { module = "io.opentelemetry:opentelemetry-sdk
 orgjson = { module = "org.json:json", version.ref = "json" }
 oshi-core = { module = "com.github.oshi:oshi-core", version.ref = "oshi" }
 pac4j-cas = { module = "org.pac4j:pac4j-cas", version.ref = "pac4j" }
-pac4j-config = { module = "org.pac4j:pac4j-config", version.ref = "pac4j" }
 pac4j-core = { module = "org.pac4j:pac4j-core", version.ref = "pac4j" }
 pac4j-http = { module = "org.pac4j:pac4j-http", version.ref = "pac4j" }
 pac4j-jakartaee = { module = "org.pac4j:pac4j-jakartaee", version.ref = "pac4j" }
@@ -601,6 +609,7 @@ pac4j-saml = { module = "org.pac4j:pac4j-saml", version.ref = "pac4j" }
 permit-sdk-java = { module = "io.permit:permit-sdk-java", version.ref = "permitio" }
 polyglot = { module = "org.graalvm.polyglot:polyglot", version.ref = "graalVm" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+prometheus = { module = "io.prometheus:prometheus-metrics-exposition-formats", version.ref = "prometheus" }
 pulsar-client-api = { module = "org.apache.pulsar:pulsar-client-api", version.ref = "pulsar" }
 pushy = { module = "com.eatthepath:pushy", version.ref = "pushy" }
 quartz = { module = "org.quartz-scheduler:quartz", version.ref = "quartz" }
@@ -626,7 +635,7 @@ spring-beans = { module = "org.springframework:spring-beans", version.ref = "spr
 spring-binding = { module = "org.springframework.webflow:spring-binding", version.ref = "springWebflow" }
 spring-boot-core = { module = "org.springframework.boot:spring-boot", version.ref = "springBoot" }
 spring-boot-actuator = { module = "org.springframework.boot:spring-boot-actuator", version.ref = "springBoot" }
-spring-boot-amqp = { module = "org.springframework.boot:spring-boot-amqp", version.ref = "springBoot" }
+spring-boot-rabbitmq = { module = "org.springframework.boot:spring-boot-amqp", version.ref = "springBoot" }
 spring-boot-health = { module = "org.springframework.boot:spring-boot-health", version.ref = "springBoot" }
 spring-boot-integration = { module = "org.springframework.boot:spring-boot-integration", version.ref = "springBoot" }
 spring-boot-jackson = { module = "org.springframework.boot:spring-boot-jackson", version.ref = "springBoot" }
@@ -661,7 +670,7 @@ spring-boot-cache = { module = "org.springframework.boot:spring-boot-cache", ver
 spring-boot-devtools = { module = "org.springframework.boot:spring-boot-devtools", version.ref = "springBoot" }
 spring-boot-properties-migrator = { module = "org.springframework.boot:spring-boot-properties-migrator", version.ref = "springBoot" }
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "springBoot" }
-spring-boot-starter-amqp = { module = "org.springframework.boot:spring-boot-starter-amqp", version.ref = "springBoot" }
+spring-boot-starter-rabbitmq = { module = "org.springframework.boot:spring-boot-starter-amqp", version.ref = "springBoot" }
 spring-boot-starter-aspectj = { module = "org.springframework.boot:spring-boot-starter-aspectj", version.ref = "springBoot" }
 spring-boot-starter-data-jdbc = { module = "org.springframework.boot:spring-boot-starter-data-jdbc", version.ref = "springBoot" }
 spring-boot-starter-data-mongodb = { module = "org.springframework.boot:spring-boot-starter-data-mongodb", version.ref = "springBoot" }
@@ -678,7 +687,6 @@ spring-boot-starter-pulsar-test = { module = "org.springframework.boot:spring-bo
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "springBoot" }
 spring-boot-starter-thymeleaf = { module = "org.springframework.boot:spring-boot-starter-thymeleaf", version.ref = "springBoot" }
 spring-boot-starter-tomcat = { module = "org.springframework.boot:spring-boot-starter-tomcat", version.ref = "springBoot" }
-spring-boot-starter-undertow = { module = "org.springframework.boot:spring-boot-starter-undertow", version.ref = "springBoot" }
 spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "springBoot" }
 spring-boot-starter-web-sdk = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "springBoot" }
 spring-boot-starter-web-services = { module = "org.springframework.boot:spring-boot-starter-web-services", version.ref = "springBoot" }
@@ -739,6 +747,7 @@ spring-security-crypto = { module = "org.springframework.security:spring-securit
 spring-security-rsa = { module = "org.springframework.security:spring-security-rsa", version.ref = "springSecurityRsa" }
 spring-security-test = { module = "org.springframework.security:spring-security-test", version.ref = "springSecurity" }
 spring-security-web = { module = "org.springframework.security:spring-security-web", version.ref = "springSecurity" }
+spring-security-cas = { module = "org.springframework.security:spring-security-cas", version.ref = "springSecurity" }
 spring-session-core = { module = "org.springframework.session:spring-session-core", version.ref = "springSession" }
 spring-session-data-redis = { module = "org.springframework.session:spring-session-data-redis", version.ref = "springSession" }
 spring-session-jdbc = { module = "org.springframework.session:spring-session-jdbc", version.ref = "springSession" }
@@ -763,6 +772,7 @@ swagger-core-jakarta = { module = "io.swagger.core.v3:swagger-core-jakarta", ver
 swagger-jaxrs2-jakarta = { module = "io.swagger.core.v3:swagger-jaxrs2-jakarta", version.ref = "swagger" }
 swagger-models = { module = "io.swagger.core.v3:swagger-models", version.ref = "swagger" }
 sweetalert2 = { module = "org.webjars.npm:sweetalert2", version.ref = "sweetAlert" }
+trumbowyg = { module = "org.webjars.npm:trumbowyg", version.ref = "trumbowyg" }
 text-encoding = { module = "org.webjars.npm:text-encoding", version.ref = "textEncoding" }
 textmagic-java-sdk = { module = "com.textmagic.sdk:textmagic-java-sdk", version.ref = "textMagic" }
 thymeleafsdk = { module = "org.thymeleaf:thymeleaf", version.ref = "thymeleaf" }
@@ -772,9 +782,9 @@ tomcat-catalina-ha = { module = "org.apache.tomcat:tomcat-catalina-ha", version.
 tomcat-embed-core = { module = "org.apache.tomcat.embed:tomcat-embed-core", version.ref = "tomcat" }
 tomcat-embed-el = { module = "org.apache.tomcat.embed:tomcat-embed-el", version.ref = "tomcat" }
 tomcat-embed-websocket = { module = "org.apache.tomcat.embed:tomcat-embed-websocket", version.ref = "tomcat" }
+tom-select = { module = "org.webjars.npm:tom-select", version.ref = "tomSelect" }
 twilio = { module = "com.twilio.sdk:twilio", version.ref = "twilio" }
 unboundid-ldapsdk = { module = "com.unboundid:unboundid-ldapsdk", version.ref = "unboundid" }
-undertow-servlet = { module = "io.undertow:undertow-servlet", version.ref = "undertow" }
 velocity-engine-core = { module = "org.apache.velocity:velocity-engine-core", version.ref = "apacheVelocityEngine" }
 verifiedpermissions = { module = "software.amazon.awssdk:verifiedpermissions", version.ref = "amazonSdk" }
 webauthn-server-attestation = { module = "com.yubico:webauthn-server-attestation", version.ref = "yubicoWebauthn" }
@@ -787,7 +797,6 @@ wss4j-ws-security-common = { module = "org.apache.wss4j:wss4j-ws-security-common
 wss4j-ws-security-dom = { module = "org.apache.wss4j:wss4j-ws-security-dom", version.ref = "wss4j" }
 wss4j-ws-security-policy-stax = { module = "org.apache.wss4j:wss4j-ws-security-policy-stax", version.ref = "wss4j" }
 wss4j-ws-security-stax = { module = "org.apache.wss4j:wss4j-ws-security-stax", version.ref = "wss4j" }
-xercesimpl = { module = "xerces:xercesImpl", version.ref = "xerces" }
 xmlsec = { module = "org.apache.santuario:xmlsec", version.ref = "xmlSec" }
 yubico-util = { module = "com.yubico:yubico-util", version.ref = "yubicoWebauthn" }
 yubico-validation-client2 = { module = "com.yubico:yubico-validation-client2", version.ref = "yubico" }

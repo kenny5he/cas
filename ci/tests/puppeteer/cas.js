@@ -21,13 +21,14 @@ const pino = require("pino");
 const xml2js = require("xml2js");
 const {Docker} = require("node-docker-api");
 const docker = new Docker({socketPath: "/var/run/docker.sock"});
-const archiver = require("archiver");
+const {ZipArchive} = require("archiver");
 const unzipper = require("unzipper");
 const puppeteer = require("puppeteer");
 const speakeasy = require("speakeasy");
 const {createCanvas, loadImage} = require("@napi-rs/canvas");
 const jsQR = require("jsqr");
 const YAML = require("yaml");
+const PuppeteerHar = require("puppeteer-har");
 
 const USED_OTPS = [];
 
@@ -96,6 +97,10 @@ function inspect(text) {
 exports.assertElementDoesNotExist = async (page, s) => {
     const element = await page.$(s);
     assert(element === null);
+};
+
+exports.refreshPage = async (page, url = "https://localhost:8443/cas/login") => {
+    await page.reload(url);
 };
 
 exports.newBrowser = async (options) => {
@@ -221,6 +226,17 @@ exports.elementValue = async (page, selector, valueToSet = undefined) => {
         await this.log(`Value for selector [${selector}] is: [${text}]`);
     }
     return text;
+};
+
+exports.clearValue = async(page, selector) => {
+    await page.locator(selector).fill("");
+}
+
+exports.selectValue = async(page, selector) => {
+    await page.$eval(selector, input => {
+        input.focus();
+        input.select();
+    });
 };
 
 exports.innerTexts = async (page, selector) =>
@@ -430,6 +446,16 @@ exports.attributeValue = async (page, selector, attribute, expectedValue = undef
         assert.equal(value, expectedValue);
     }
     return value;
+};
+
+exports.startHar = async (page, harPath = "network.har") => {
+    const har = new PuppeteerHar(page);
+    await har.start({path: harPath});
+    return har;
+};
+
+exports.stopHar = async (har) => {
+    await har.stop();
 };
 
 exports.newPage = async (browser) => {
@@ -656,12 +682,15 @@ exports.doDelete = async (url, statusCode = 0, successHandler = undefined,
 };
 
 exports.doPost = async (url, params = "", headers = {},
-    successHandler, failureHandler, verbose = true) => {
+    successHandler, failureHandler, verbose = true, httpsAgent = undefined) => {
+    if (httpsAgent === undefined || httpsAgent === null) {
+        httpsAgent = new https.Agent({
+            rejectUnauthorized: false
+        });
+    }
     const instance = axios.create({
         timeout: 12000,
-        httpsAgent: new https.Agent({
-            rejectUnauthorized: false
-        })
+        httpsAgent: httpsAgent
     });
     const urlParams = params instanceof URLSearchParams ? params : new URLSearchParams(params);
     if (verbose) {
@@ -722,35 +751,41 @@ exports.assertInnerTextStartsWith = async (page, selector, value) => {
     const header = await this.innerText(page, selector);
     await this.log(`Checking ${header} to start with ${value}`);
     assert(header.startsWith(value));
+    return header;
 };
 
 exports.assertInnerTextContains = async (page, selector, value) => {
     const header = await this.innerText(page, selector);
     await this.log(`Checking [${header}] to contain [${value}]`);
     assert(header.includes(value));
+    return header;
 };
 
 exports.assertInnerTextDoesNotContain = async (page, selector, value) => {
     const header = await this.innerText(page, selector);
     await this.log(`Checking ${header} to contain ${value}`);
     assert(!header.includes(value));
+    return header;
 };
 
 exports.assertInnerText = async (page, selector, value) => {
     const header = await this.innerText(page, selector);
     assert.equal(header, value);
+    return header;
 };
 
 exports.assertPageTitle = async (page, value) => {
     const title = await page.title();
     await this.log(`Page Title: ${title}`);
     assert.equal(title, value);
+    return title;
 };
 
 exports.assertPageTitleContains = async (page, value) => {
     const title = await page.title();
     await this.log(`Page Title: ${title}`);
     assert(title.includes(value));
+    return title;
 };
 
 exports.substring = async (text, word1, word2) => {
@@ -965,14 +1000,24 @@ exports.httpServer = async (root,
 exports.randomNumber = async (min = 1, max = 100) =>
     Math.floor(Math.random() * (max - min + 1)) + min;
 
-exports.randomWord = async (length = 12) => {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*[]{};:<>|";
+exports.randomWord = async (length = 12, specialChars = true, numbers = true) => {
+    let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    if (numbers) {
+        chars += "0123456789";
+    }
+    if (specialChars) {
+        chars += "!@#$%^&*[]{};:<>|";
+    }
     let result = "";
     for (let i = 0; i < length; i++) {
         const idx = Math.floor(Math.random() * chars.length);
         result += chars.charAt(idx);
     }
     return result;
+};
+
+exports.uuid = async() => {
+    return crypto.randomUUID();
 };
 
 exports.killProcess = async (command, args) =>
@@ -1051,11 +1096,16 @@ exports.goto = async (page, url, retryCount = 5) => {
 
 exports.gotoLoginWithLocale = async (page, service, locale = "en") => this.gotoLoginWithAuthnMethod(page, service, undefined, locale);
 
-exports.gotoLoginWithAuthnMethod = async (page, service, authnMethod = undefined, locale = undefined) => {
+exports.gotoLoginWithAuthnMethod = async (page, service,
+    authnMethod = undefined, locale = undefined,
+    contextPath = "/cas") => {
     let queryString = (service === undefined ? "" : `service=${service}&`);
     queryString += (authnMethod === undefined ? "" : `authn_method=${authnMethod}&`);
     queryString += (locale === undefined ? "" : `locale=${locale}&`);
-    const url = `https://localhost:8443/cas/login?${queryString}`;
+    if (contextPath === "/" || contextPath === "" || contextPath === undefined) {
+        contextPath = "";
+    }
+    const url = `https://localhost:8443${contextPath}/login?${queryString}`;
     return this.goto(page, url);
 };
 
@@ -1257,7 +1307,7 @@ exports.updateYamlConfigurationSource = async(configDirectory, config) => {
 
 exports.createZipFile = async (file, callback) => {
     const zip = fs.createWriteStream(file);
-    const archive = archiver("zip", {
+    const archive = new ZipArchive({
         zlib: {level: 9}
     });
     archive.pipe(zip);

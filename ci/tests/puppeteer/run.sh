@@ -388,7 +388,7 @@ function validateScenario() {
 
   dockerRequired=$(jq -j '.conditions.docker // empty' "${config}")
   if [[ "${dockerRequired}" == "true" ]]; then
-    echo "Checking if Docker is available..."
+    printgreen "Checking if Docker is available..."
     if [[ "$CI" == "true" && "${RUNNER_OS}" != "Linux" ]]; then
       printyellow "Not running test in CI that requires Docker, because non-linux GitHub runner can't run Docker."
       exit 0
@@ -401,6 +401,84 @@ function validateScenario() {
     if [[ "$CI" == "true" ]]; then
       printgreen "Docker engine is available"
       docker --version
+    fi
+  fi
+
+  runsOn=$(jq -r '.conditions.runsOn // empty' "${config}")
+  if [[ -n "${runsOn}" ]]; then
+    read -r runsOnDay runsOnStart runsOnEnd <<< "${runsOn}"
+
+    allowedDayNum=""
+    for (( i=0; i<${#runsOnDay}; i++ )); do
+      case "${runsOnDay:i:1}" in
+        M) allowedDayNum+="1 " ;;
+        T) allowedDayNum+="2 " ;;
+        W) allowedDayNum+="3 " ;;
+        R) allowedDayNum+="4 " ;;
+        F) allowedDayNum+="5 " ;;
+        S) allowedDayNum+="6 " ;;
+        U) allowedDayNum+="7 " ;;
+      esac
+    done
+    allowedDayNum="${allowedDayNum% }" 
+
+    currentDayNum=$(TZ=UTC date +%u)
+    currentHour=$(TZ=UTC date +%H)
+    currentHour=$((10#$currentHour))
+
+    is_in_list() {
+      local needle="$1"; shift
+      local haystack="$*"
+      [[ " $haystack " == *" $needle "* ]]
+    }
+
+    prev_day() {
+      local d="$1"
+      (( d == 1 )) && echo 7 || echo $((d - 1))
+    }
+
+    to_24h() {
+      local t="$1"
+      local h="${t//[^0-9]/}"
+      h=$((10#$h))
+      if [[ "$t" == *pm* && "$h" -ne 12 ]]; then
+        h=$((h + 12))
+      elif [[ "$t" == *am* && "$h" -eq 12 ]]; then
+        h=0
+      fi
+      echo "$h"
+    }
+
+    startHour="$(to_24h "${runsOnStart}")"
+    endHour="$(to_24h "${runsOnEnd}")"
+
+    printcyan "Current UTC day number is ${currentDayNum} and current hour is ${currentHour}. Allowed day is [${allowedDayNum}] and allowed hours are between ${startHour} and ${endHour}."
+
+    allowed=false
+
+    if (( startHour == endHour )); then
+      if is_in_list "${currentDayNum}" ${allowedDayNum}; then
+        allowed=true
+      fi
+
+    elif (( startHour < endHour )); then
+      if is_in_list "${currentDayNum}" ${allowedDayNum} && (( currentHour >= startHour && currentHour < endHour )); then
+        allowed=true
+      fi
+
+    else
+      if (( currentHour >= startHour )) && is_in_list "${currentDayNum}" ${allowedDayNum}; then
+        allowed=true
+      elif (( currentHour < endHour )) && is_in_list "$(prev_day "${currentDayNum}")" ${allowedDayNum}; then
+        allowed=true
+      fi
+    fi
+
+    if [[ "${allowed}" == true ]]; then
+      printgreen "Current UTC time is within the allowed window (Day: ${runsOnDay}, ${runsOnStart}-${runsOnEnd})."
+    else
+      printyellow "Test scenario ${scenario##*/} is configured to only run on ${runsOnDay} between ${runsOnStart}-${runsOnEnd} UTC."
+      exit 0
     fi
   fi
 
@@ -470,7 +548,9 @@ function prepareScenario() {
   random=$(openssl rand -hex 8)
 
   if [[ ! -d "${PUPPETEER_DIR}/node_modules/puppeteer" || "${INSTALL_PUPPETEER}" == "true" ]]; then
-    printgreen "Installing Puppeteer"
+    printgreen "Installing Puppeteer..."
+    rm -Rf "${PUPPETEER_DIR}/node_modules" >/dev/null 2>&1 || true
+    rm -Rf "${PUPPETEER_DIR}/package-lock.json" >/dev/null 2>&1 || true
     cd "$PUPPETEER_DIR"
     npm install --fetch-timeout 5000 --fetch-retries 3 --fetch-retry-maxtimeout 30000 --no-audit
     cd -
@@ -583,8 +663,6 @@ function buildAndRun() {
   if [[ "${REBUILD}" == "true" && "${RERUN}" != "true" ]]; then
     if [[ "${NATIVE_BUILD}" == "true" || "${NATIVE_RUN}" == "true" ]]; then
       DEFAULT_PUPPETEER_BUILD_CTR=45
-    elif [[ "${CI}" == "true" && ! -z "${GRADLE_BUILDCACHE_PSW}" ]]; then
-      DEFAULT_PUPPETEER_BUILD_CTR=20
     else
       DEFAULT_PUPPETEER_BUILD_CTR=20
     fi
@@ -780,7 +858,7 @@ ${BUILD_SCRIPT:+ $BUILD_SCRIPT}${DAEMON:+ $DAEMON} \
       for script in ${scripts}; do
         printgreen "Running initialization script: ${script}"
         chmod +x "${script}"
-        eval "${script}"
+        eval "source ${script}"
         if [[ $? -ne 0 ]]; then
           printred "Initialization script [${script}] failed."
           exit 1
@@ -804,6 +882,7 @@ ${BUILD_SCRIPT:+ $BUILD_SCRIPT}${DAEMON:+ $DAEMON} \
         runArgs="${runArgs} --add-exports java.base/jdk.internal.ref=ALL-UNNAMED"
         runArgs="${runArgs} --add-opens java.base/java.lang=ALL-UNNAMED"
         runArgs="${runArgs} --add-opens java.base/sun.nio.ch=ALL-UNNAMED"
+        runArgs="${runArgs} --add-opens java.base/java.util.regex=ALL-UNNAMED"
         runArgs="${runArgs} --add-opens java.management/sun.management=ALL-UNNAMED"
         runArgs="${runArgs} --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED"
         runArgs="${runArgs} --add-opens java.base/java.nio=org.apache.arrow.memory.core,ALL-UNNAMED"
@@ -926,7 +1005,13 @@ ${BUILD_SCRIPT:+ $BUILD_SCRIPT}${DAEMON:+ $DAEMON} \
             printcyan "Waiting for CAS instance #${c} under process id ${pid}"
           fi
 
-          casLogin="https://localhost:${serverPort}/cas/login"
+          prefix="/cas"
+          if [[ "$properties" =~ server\.servlet\.context-path=([^[:space:]]*) ]]; then
+              value="${BASH_REMATCH[1]}"
+              prefix="$value"
+          fi
+          printcyan "CAS server prefix is: $prefix"
+          casLogin="https://localhost:${serverPort}${prefix}/login"
           healthCheckUrls=$(jq -r '.healthcheck?.urls[]?' "${config}" 2>/dev/null)
           if [[ -n "$healthCheckUrls" ]]; then
             url_array=()
@@ -1069,6 +1154,7 @@ ${BUILD_SCRIPT:+ $BUILD_SCRIPT}${DAEMON:+ $DAEMON} \
     rm -f "$PWD"/cas.${projectType} >/dev/null 2>&1
     rm -f "${public_cert}" >/dev/null 2>&1
     rm -Rf "${PUPPETEER_DIR}/overlay" >/dev/null 2>&1
+    [ -d "${PUPPETEER_DIR}/screenshots" ] && rm -Rf "${PUPPETEER_DIR}/screenshots"/* >/dev/null 2>&1
 
     if [[ "${CI}" == "true" && $dockerInstalled -eq 0 ]]; then
       printgreen "Stopping Docker containers..."
@@ -1105,6 +1191,9 @@ else
 
   for index in "${!variationsArray[@]}"; do
     element=${variationsArray[index]}
+    variationName=$(jq -c -r '.variations['"${index}"'].name // empty' "${config}")
+    export SCENARIO_VARIATION="${variationName}"
+    
     currentVariationProperties=$(echo "${element}" | jq -j -r -c '. // empty | join(" ")')
     printcyan "Running test scenario ${scenarioName}, variation: ${index}"
     buildAndRun

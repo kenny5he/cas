@@ -1,6 +1,7 @@
 package org.apereo.cas.support.saml.services;
 
 import module java.base;
+import org.apereo.cas.configuration.support.DurationCapable;
 import org.apereo.cas.configuration.support.ExpressionLanguageCapable;
 import org.apereo.cas.configuration.support.TriStateBoolean;
 import org.apereo.cas.services.BaseWebBasedRegisteredService;
@@ -34,7 +35,7 @@ public class SamlRegisteredService extends BaseWebBasedRegisteredService {
     public static final String FRIENDLY_NAME = "SAML2 Service Provider";
 
     @Serial
-    private static final long serialVersionUID = 1218757374062931021L;
+    private static final long serialVersionUID = 1218757374062931022L;
 
     @ExpressionLanguageCapable
     private String metadataLocation;
@@ -172,7 +173,11 @@ public class SamlRegisteredService extends BaseWebBasedRegisteredService {
 
     private String assertionAudiences;
 
-    private int skewAllowance;
+    @DurationCapable
+    private String skewAllowance;
+
+    @DurationCapable
+    private String validityUntil;
 
     private String whiteListBlackListPrecedence;
 

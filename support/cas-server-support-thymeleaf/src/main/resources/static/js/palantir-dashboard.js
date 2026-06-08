@@ -10,18 +10,18 @@ class Tabs {
     static APPLICATIONS = new PalantirDashboardTab("Applications Tab", 0, "a");
     static SYSTEM = new PalantirDashboardTab("System Tab", 1, "s");
     static TICKETS = new PalantirDashboardTab("Tickets Tab", 2, "t");
-    static TASKS = new PalantirDashboardTab("Tasks Tab", 3, "");
+    static TASKS = new PalantirDashboardTab("Tasks Tab", 3, "k");
     static ACCESS_STRATEGY = new PalantirDashboardTab("Access Strategy Tab", 4, "z");
     static LOGGING = new PalantirDashboardTab("Logging Tab", 5, "l");
     static SSO_SESSIONS = new PalantirDashboardTab("SSO Sessions Tab", 6, "o");
     static CONFIGURATION = new PalantirDashboardTab("Configuration Tab", 7, "c");
     static PERSON_DIRECTORY = new PalantirDashboardTab("Person Directory Tab", 8, "d");
     static AUTHENTICATION = new PalantirDashboardTab("Authentication Tab", 9, "h");
-    static CONSENT = new PalantirDashboardTab("Consent Tab", 10, "");
+    static CONSENT = new PalantirDashboardTab("Consent Tab", 10, "e");
     static PROTOCOLS = new PalantirDashboardTab("Protocols Tab", 11, "p");
-    static THROTTLES = new PalantirDashboardTab("Throttles Tab", 12, "");
+    static THROTTLES = new PalantirDashboardTab("Throttles Tab", 12, "r");
     static MFA = new PalantirDashboardTab("MFA Tab", 13, "m");
-    static MULTITENANCY = new PalantirDashboardTab("Multitenancy Tab", 14, "");
+    static MULTITENANCY = new PalantirDashboardTab("Multitenancy Tab", 14, "u");
     static SETTINGS = new PalantirDashboardTab("Settings Dialog", 100, ",");
     static LOGOUT = new PalantirDashboardTab("Logout", 200, "x");
 
@@ -45,7 +45,7 @@ function activateDashboardTab(idx) {
                     },
                     autoOpen: false,
                     modal: true,
-                    width: 600,
+                    width: 850,
                     height: "auto",
                     buttons: {
                         OK: function () {
@@ -81,13 +81,12 @@ function activateDashboardTab(idx) {
                 $("#palantirSettingsDialog").dialog("open");
                 break;
             case Tabs.LOGOUT.index:
-                const url = new URL(location.href);
-                fetch(`${url.pathname}/logout`, {
-                    method: 'GET',
-                    credentials: 'include'
-                }).then((response) => {
-                    window.location.reload();
-                });
+                const url = retrieveDashboardUrl();
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `${url}/logout`;
+                document.body.appendChild(form);
+                form.submit();
                 break;
             default:
                 let tabs = new mdc.tabBar.MDCTabBar(document.querySelector("#dashboardTabBar"));
@@ -99,6 +98,14 @@ function activateDashboardTab(idx) {
     } catch (e) {
         console.error("An error occurred while activating tab:", e);
     }
+}
+
+function retrieveDashboardUrl() {
+    let url = new URL(location.href).pathname;
+    if (!url.endsWith("/dashboard")) {
+        url += "/dashboard";
+    }
+    return url;
 }
 
 function selectSidebarMenuButton(selectedItem) {
@@ -123,6 +130,9 @@ function processNavigationTabs() {
     }
     if (!CasActuatorEndpoints.metrics()) {
         hideElements($("#systemmetricstab").parent());
+    }
+    if (!CasActuatorEndpoints.prometheus()) {
+        hideElements($("#prometheusmetricstab").parent());
     }
     if (!CasActuatorEndpoints.springWebflow()) {
         hideElements($("#caswebflowtab").parent());
@@ -274,10 +284,12 @@ function navigateToApplication(serviceIdToFind) {
 }
 
 async function initializePalantirSession() {
-    setInterval(async () => {
-        const url = new URL(location.href);
-        const result = await fetch(`${url.pathname}/session`, { credentials: "same-origin" });
+    const intervalId = setInterval(async () => {
+        const url = retrieveDashboardUrl();
+        const result = await fetch(`${url}/session`, { credentials: "include" });
         if (result.status !== 200) {
+            clearInterval(intervalId);
+            
             Swal.close();
             Swal.fire({
                 title: "Session Expired",

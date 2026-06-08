@@ -1,6 +1,7 @@
 package org.apereo.cas.support.oauth.web.endpoints;
 
 import module java.base;
+import org.apereo.cas.support.oauth.OAuth20Constants;
 import org.apereo.cas.support.oauth.services.OAuthRegisteredService;
 import org.apereo.cas.support.oauth.util.OAuth20Utils;
 import org.apereo.cas.support.oauth.web.response.accesstoken.response.OAuth20JwtAccessTokenEncoder;
@@ -15,7 +16,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jooq.lambda.Unchecked;
+import org.jspecify.annotations.Nullable;
+import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.profile.ProfileManager;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,23 +38,23 @@ import jakarta.servlet.http.HttpServletRequest;
 public abstract class BaseOAuth20Controller<T extends OAuth20ConfigurationContext> extends AbstractController {
     protected final T configurationContext;
 
-    protected OAuth20AccessToken resolveAccessToken(final Ticket givenAccessToken) {
+    protected @Nullable OAuth20AccessToken resolveAccessToken(final Ticket givenAccessToken) {
         return resolveToken(givenAccessToken, OAuth20AccessToken.class);
     }
 
-    protected <U extends Ticket> U resolveToken(final Ticket token, final Class<U> clazz) {
+    protected @Nullable <U extends Ticket> U resolveToken(final Ticket token, final Class<U> clazz) {
         return token.isStateless()
             ? configurationContext.getTicketRegistry().getTicket(token.getId(), clazz)
             : clazz.cast(token);
     }
 
-    protected String extractAccessTokenFrom(final String token) {
+    protected @Nullable String extractAccessTokenFrom(final String token) {
         val decodableCipher = OAuth20JwtAccessTokenEncoder.toDecodableCipher(getConfigurationContext().getAccessTokenJwtBuilder());
         return decodableCipher.decode(token);
     }
 
     protected void ensureSessionReplicationIsAutoconfiguredIfNeedBe(final HttpServletRequest request) {
-        val replicationProps = getConfigurationContext().getCasProperties().getAuthn().getPac4j().getCore().getSessionReplication();
+        val replicationProps = getConfigurationContext().getCasProperties().getAuthn().getOauth().getSessionReplication();
         val cookieAutoconfigured = replicationProps.getCookie().isAutoConfigureCookiePath();
         if (replicationProps.isReplicateSessions() && cookieAutoconfigured) {
             val cookieBuilder = getConfigurationContext().getOauthDistributedSessionCookieGenerator();
@@ -62,7 +67,7 @@ public abstract class BaseOAuth20Controller<T extends OAuth20ConfigurationContex
         return manager.getProfile().isPresent();
     }
 
-    protected OAuthRegisteredService getRegisteredServiceByClientId(final String clientId) {
+    protected @Nullable OAuthRegisteredService getRegisteredServiceByClientId(final String clientId) {
         return OAuth20Utils.getRegisteredOAuthServiceByClientId(getConfigurationContext().getServicesManager(), clientId);
     }
 
@@ -97,4 +102,18 @@ public abstract class BaseOAuth20Controller<T extends OAuth20ConfigurationContex
         return getConfigurationContext().getTicketRegistry().deleteTicket(token) > 0;
     }
 
+    protected Pair<String, String> getAccessTokenFromRequest(final HttpServletRequest request) {
+        var accessToken = StringUtils.defaultIfBlank(
+            request.getParameter(OAuth20Constants.ACCESS_TOKEN),
+            request.getParameter(OAuth20Constants.TOKEN));
+        if (StringUtils.isBlank(accessToken)) {
+            val authHeader = request.getHeader(HttpConstants.AUTHORIZATION_HEADER);
+            if (StringUtils.isNotBlank(authHeader) && authHeader.toLowerCase(Locale.ENGLISH)
+                .startsWith(OAuth20Constants.TOKEN_TYPE_BEARER.toLowerCase(Locale.ENGLISH) + ' ')) {
+                accessToken = authHeader.substring(OAuth20Constants.TOKEN_TYPE_BEARER.length() + 1);
+            }
+        }
+        LOGGER.debug("[{}]: [{}]", OAuth20Constants.ACCESS_TOKEN, accessToken);
+        return Pair.of(accessToken, extractAccessTokenFrom(accessToken));
+    }
 }

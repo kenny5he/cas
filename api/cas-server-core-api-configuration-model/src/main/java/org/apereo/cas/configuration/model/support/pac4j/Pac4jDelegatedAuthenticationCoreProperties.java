@@ -2,6 +2,7 @@ package org.apereo.cas.configuration.model.support.pac4j;
 
 import module java.base;
 import org.apereo.cas.configuration.model.SpringResourceProperties;
+import org.apereo.cas.configuration.model.core.authentication.PrincipalTransformationProperties;
 import org.apereo.cas.configuration.model.support.replication.CookieSessionReplicationProperties;
 import org.apereo.cas.configuration.model.support.replication.SessionReplicationProperties;
 import org.apereo.cas.configuration.support.DurationCapable;
@@ -54,7 +55,16 @@ public class Pac4jDelegatedAuthenticationCoreProperties implements Serializable 
      */
     private Integer order;
 
-
+    /**
+     * When set to {@code true}, delegated authentication attrmpts
+     * that return to CAS and have successfully completed will be
+     * put through the account selection process of impersonation/surrogacy
+     * flow, assuming the feature is turned on and available to CAS.
+     * By default, this is off which means no externally-authenticated
+     * account is put through the impersonation flow.
+     */
+    private boolean allowImpersonation;
+    
     /**
      * Control the expiration policy of the cache
      * that holds onto the results.
@@ -110,6 +120,12 @@ public class Pac4jDelegatedAuthenticationCoreProperties implements Serializable 
     @NestedConfigurationProperty
     private Pac4jDelegatedAuthenticationDiscoverySelectionProperties discoverySelection = new Pac4jDelegatedAuthenticationDiscoverySelectionProperties();
 
+    /**
+     * This is principal transformation properties.
+     */
+    @NestedConfigurationProperty
+    private PrincipalTransformationProperties principalTransformation = new PrincipalTransformationProperties();
+    
     public Pac4jDelegatedAuthenticationCoreProperties() {
         if (StringUtils.isBlank(getSessionReplication().getCookie().getName())) {
             getSessionReplication().getCookie()

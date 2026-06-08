@@ -14,12 +14,12 @@ function printgreen() {
 }
 
 echo "Running Pulsar docker container..."
-export DOCKER_IMAGE="apachepulsar/pulsar:4.1.2"
+export DOCKER_IMAGE="apachepulsar/pulsar:4.2.1"
 docker stop pulsar-server || true
 
 docker run --rm -d --name "pulsar-server" \
   -p 6650:6650 -p 9988:8080 \
-  ${DOCKER_IMAGE} bin/pulsar standalone
+  ${DOCKER_IMAGE} bin/pulsar standalone -a 127.0.0.1
 sleep 5
 docker ps | grep "pulsar-server"
 retVal=$?

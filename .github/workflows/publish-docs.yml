@@ -12,7 +12,7 @@ env:
   JDK_CURRENT: 25
   JDK_DISTRIBUTION: "corretto"
   DOCS_BRANCH: master
-  RUBY_VERSION: '4.0.1'
+  RUBY_VERSION: '4.0.5'
 
 ##########################################################################
 
@@ -46,13 +46,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JDK_CURRENT }}
           distribution: ${{ env.JDK_DISTRIBUTION }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Initialize
         run: ls ./ci && find ./ci -type f -name "*.sh" -exec chmod +x "{}" \; && ./ci/init-build.sh
 
@@ -65,13 +67,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JDK_CURRENT }}
           distribution: ${{ env.JDK_DISTRIBUTION }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Initialize
         run: find ./ci -type f -name "*.sh" -exec chmod +x "{}" \; && ./ci/init-build.sh
       - name: Set up Ruby
@@ -88,7 +92,7 @@ jobs:
             jekyll/.jekyll-cache
           key: ${{ runner.os }}-${{ github.repository }}
       - name: Publish Documentation
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           timeout_minutes: 55
           max_attempts: 2

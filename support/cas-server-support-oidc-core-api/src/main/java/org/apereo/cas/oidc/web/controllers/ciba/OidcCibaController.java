@@ -42,7 +42,6 @@ import org.apache.hc.core5.net.URIBuilder;
 import org.apereo.inspektr.audit.annotation.Audit;
 import org.jspecify.annotations.Nullable;
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.jee.context.JEEContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -90,10 +89,8 @@ public class OidcCibaController extends BaseOidcController {
             @Parameter(name = "requestId", in = ParameterIn.PATH, description = "Request ID")
         })
     public Object initializeBackchannelVerificationRequest(
-        @PathVariable("clientId")
-        final String clientId,
-        @PathVariable("requestId")
-        final String requestId) {
+        @PathVariable final String clientId,
+        @PathVariable final String requestId) {
         try {
             val registeredService = findRegisteredService(clientId);
             val cibaRequest = fetchOidcCibaRequest(requestId);
@@ -134,10 +131,8 @@ public class OidcCibaController extends BaseOidcController {
     public ResponseEntity verifyBackchannelVerificationRequest(
         @RequestParam(value = "userCode", required = false)
         final String userCode,
-        @PathVariable("clientId")
-        final String clientId,
-        @PathVariable("requestId")
-        final String requestId) throws Throwable {
+        @PathVariable final String clientId,
+        @PathVariable final String requestId) throws Throwable {
         try {
             val registeredService = findRegisteredService(clientId);
             val cibaRequest = fetchOidcCibaRequest(requestId);
@@ -287,9 +282,8 @@ public class OidcCibaController extends BaseOidcController {
     }
 
     protected CibaRequestContext buildCibaRequestContext(final WebContext webContext) {
-        val manager = new ProfileManager(webContext, getConfigurationContext().getSessionStore());
         val requestParameterResolver = getConfigurationContext().getRequestParameterResolver();
-        val userProfile = manager.getProfile().orElseThrow();
+        val userProfile = OAuth20Utils.getAuthenticatedUserProfile(webContext, getConfigurationContext().getSessionStore());
         val clientId = userProfile.getAttribute(OAuth20Constants.CLIENT_ID).toString();
 
         val tenant = getConfigurationContext().getTenantExtractor().extract(webContext.getRequestURL())

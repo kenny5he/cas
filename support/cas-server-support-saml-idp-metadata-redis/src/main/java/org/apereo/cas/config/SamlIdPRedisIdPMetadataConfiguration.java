@@ -108,7 +108,7 @@ class SamlIdPRedisIdPMetadataConfiguration {
         final ConfigurableApplicationContext applicationContext,
         @Qualifier("redisSamlIdPMetadataTemplate")
         final CasRedisTemplate<String, SamlIdPMetadataDocument> redisSamlIdPMetadataTemplate,
-        @Qualifier("samlIdPMetadataGeneratorConfigurationContext")
+        @Qualifier(SamlIdPMetadataGeneratorConfigurationContext.DEFAULT_BEAN_NAME)
         final SamlIdPMetadataGeneratorConfigurationContext samlIdPMetadataGeneratorConfigurationContext) {
         return BeanSupplier.of(SamlIdPMetadataGenerator.class)
             .when(CONDITION.given(applicationContext.getEnvironment()))
@@ -133,8 +133,7 @@ class SamlIdPRedisIdPMetadataConfiguration {
             .supply(() -> new RedisSamlIdPMetadataLocator(samlIdPMetadataGeneratorCipherExecutor,
                 samlIdPMetadataCache,
                 redisSamlIdPMetadataTemplate,
-                applicationContext,
-                casProperties.getAuthn().getSamlIdp().getMetadata().getRedis().getScanCount()))
+                applicationContext))
             .otherwiseProxy()
             .get();
     }

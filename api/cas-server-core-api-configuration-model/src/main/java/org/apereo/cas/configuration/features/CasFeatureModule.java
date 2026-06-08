@@ -134,10 +134,6 @@ public interface CasFeatureModule {
          */
         Jetty,
         /**
-         * Undertow webapp configuration.
-         */
-        Undertow,
-        /**
          * Spring Boot Admin Server.
          */
         SpringBootAdmin,
@@ -412,6 +408,15 @@ public interface CasFeatureModule {
          */
         public String toProperty(final String module) {
             return toFullFeatureName(module) + ".enabled";
+        }
+
+        /**
+         * To property string.
+         *
+         * @return the string
+         */
+        public String toProperty() {
+            return toFullFeatureName(StringUtils.EMPTY) + ".enabled";
         }
 
         private String toFullFeatureName(final String module) {

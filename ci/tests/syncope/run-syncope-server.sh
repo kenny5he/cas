@@ -16,7 +16,7 @@ printgreen "Running Apache Syncope docker container..."
 COMPOSE_FILE=./ci/tests/syncope/docker-compose.yml
 test -f $COMPOSE_FILE || COMPOSE_FILE=docker-compose.yml
 docker compose -f $COMPOSE_FILE down >/dev/null 2>/dev/null || true
-docker compose -f $COMPOSE_FILE up -d
+docker compose -f $COMPOSE_FILE up --quiet-pull -d
 docker logs syncope-syncope-1 -f &
 printgreen "Waiting for Apache Syncope server to come online...\n"
 sleep 35
@@ -227,6 +227,48 @@ curl -X 'POST' \
       "schema": "phoneNumber",
       "values": [
         "2345678901"
+      ]
+    }
+  ],
+  "derAttrs": [
+    {
+      "schema": "description"
+    }
+  ]
+}'
+
+if [ $? -ne 0 ]; then
+  printred "Failed to create sample user"
+  exit 1
+fi
+
+echo -e "\n-----------------\n"
+
+echo "Creating sample user: weakPasswordUser..."
+curl -X 'POST' \
+  'http://localhost:18080/syncope/rest/users?storePassword=true' \
+  -H 'accept: application/json' \
+  -H 'Prefer: return-content' \
+  -H 'X-Syncope-Null-Priority-Async: false' \
+  -H 'Authorization: Basic YWRtaW46cGFzc3dvcmQ=' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "_class": "org.apache.syncope.common.lib.request.UserCR",
+  "realm": "/",
+  "username": "weakPasswordUser",
+  "password": "Test",
+  "mustChangePassword": false,
+  "plainAttrs": [
+    {
+      "schema": "email",
+      "values": [
+        "weakPasswordUser@syncope.org"
+      ]
+    },
+    {
+      "schema": "phoneNumber",
+      "values": [
+        "3456789012"
       ]
     }
   ],

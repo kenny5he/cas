@@ -22,7 +22,6 @@ import org.apereo.cas.pm.event.PasswordChangeSuccessEvent;
 import org.apereo.cas.pm.web.flow.PasswordManagementWebflowConfigurer;
 import org.apereo.cas.pm.web.flow.PasswordManagementWebflowUtils;
 import org.apereo.cas.util.LoggingUtils;
-import org.apereo.cas.web.flow.CasWebflowConfigurer;
 import org.apereo.cas.web.flow.CasWebflowConstants;
 import org.apereo.cas.web.flow.actions.BaseCasWebflowAction;
 import org.apereo.cas.web.support.WebUtils;
@@ -76,17 +75,12 @@ public class PasswordChangeAction extends BaseCasWebflowAction {
     protected @Nullable Event doExecuteInternal(final RequestContext requestContext) {
         val applicationContext = requestContext.getActiveFlow().getApplicationContext();
         val clientInfo = ClientInfoHolder.getClientInfo();
+
         val bean = getPasswordChangeRequest(requestContext);
+        Optional.ofNullable(WebUtils.getCredential(requestContext, UsernamePasswordCredential.class))
+                .ifPresent(credential -> bean.setCurrentPassword(credential.getPassword()));
 
         try {
-            if (CasWebflowConfigurer.FLOW_ID_LOGIN.equals(WebUtils.getActiveFlow(requestContext))) {
-                LOGGER.debug("Attempting to validate current password for username [{}]", bean.getUsername());
-                val credential = WebUtils.getCredential(requestContext, UsernamePasswordCredential.class);
-                if (bean.getCurrentPassword() == null || bean.getCurrentPassword().length == 0 || !Arrays.equals(bean.getCurrentPassword(), credential.getPassword())) {
-                    LOGGER.error("Current password is not correct or is undefined");
-                    return getErrorEvent(requestContext, PASSWORD_VALIDATION_FAILURE_CODE, DEFAULT_MESSAGE);
-                }
-            }
 
             LOGGER.debug("Attempting to validate the password change bean for username [{}]", bean.getUsername());
             if (StringUtils.isBlank(bean.getUsername()) || !passwordValidationService.isValid(bean)) {

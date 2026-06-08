@@ -14,7 +14,6 @@ import com.yubico.core.RegistrationStorage;
 import com.yubico.core.SessionManager;
 import lombok.Getter;
 import lombok.val;
-import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
@@ -30,15 +29,14 @@ public class WebAuthnAuthenticationHandler extends AbstractPreAndPostProcessingA
 
     private final SessionManager sessionManager;
 
-    private final ObjectProvider<@NonNull MultifactorAuthenticationProvider> multifactorAuthenticationProvider;
+    private final ObjectProvider<MultifactorAuthenticationProvider> multifactorAuthenticationProvider;
 
     public WebAuthnAuthenticationHandler(final String name,
-
                                          final PrincipalFactory principalFactory,
                                          final RegistrationStorage webAuthnCredentialRepository,
                                          final SessionManager sessionManager,
                                          final Integer order,
-                                         final ObjectProvider<@NonNull MultifactorAuthenticationProvider> multifactorAuthenticationProvider) {
+                                         final ObjectProvider<MultifactorAuthenticationProvider> multifactorAuthenticationProvider) {
         super(name, principalFactory, order);
         this.webAuthnCredentialRepository = webAuthnCredentialRepository;
         this.sessionManager = sessionManager;
@@ -65,11 +63,6 @@ public class WebAuthnAuthenticationHandler extends AbstractPreAndPostProcessingA
         val credentials = webAuthnCredentialRepository.getCredentialIdsForUsername(principal.getId());
         if (credentials.isEmpty()) {
             throw new AccountNotFoundException("Unable to locate registration record for " + uid);
-        }
-        val token = WebAuthnCredential.from(webAuthnCredential);
-        val request = WebUtils.getHttpServletRequestFromExternalWebflowContext();
-        if (sessionManager.getSession(request, token).isEmpty()) {
-            throw new FailedLoginException("Unable to validate session token " + webAuthnCredential);
         }
         return createHandlerResult(webAuthnCredential, this.principalFactory.createPrincipal(uid));
     }

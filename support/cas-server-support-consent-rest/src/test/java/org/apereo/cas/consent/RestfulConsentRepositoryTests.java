@@ -50,11 +50,11 @@ class RestfulConsentRepositoryTests extends BaseConsentRepositoryTests {
 
     @Autowired
     @Qualifier("restConsentRepositoryStorage")
-    protected RestConsentRepositoryStorage storage;
+    private RestConsentRepositoryStorage storage;
 
     @Autowired
     @Qualifier(ConsentRepository.BEAN_NAME)
-    protected ConsentRepository repository;
+    private ConsentRepository repository;
 
     @BeforeEach
     void initialize() {
@@ -98,7 +98,7 @@ class RestfulConsentRepositoryTests extends BaseConsentRepositoryTests {
                 @RequestParam(required = false)
                 final String principal,
                 @RequestParam(required = false)
-                final String service) throws Exception {
+                final String service) {
 
                 if (StringUtils.isNotBlank(principal)) {
                     val consentDecisions = storage.getRecords().get(principal);

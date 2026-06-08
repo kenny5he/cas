@@ -260,7 +260,6 @@ public abstract class BaseSamlIdPConfigurationTests {
         return AuthenticatedAssertionContext.builder()
             .name(user)
             .authenticationDate(ZonedDateTime.now(Clock.systemUTC()))
-            .validUntilDate(ZonedDateTime.now(Clock.systemUTC()).plusHours(1))
             .validFromDate(ZonedDateTime.now(Clock.systemUTC()))
             .attributes(attributes)
             .build();
@@ -318,7 +317,7 @@ public abstract class BaseSamlIdPConfigurationTests {
     protected AuthnRequest signAuthnRequest(final HttpServletRequest request, final HttpServletResponse response,
                                             final AuthnRequest authnRequest, final SamlRegisteredService samlRegisteredService) throws Exception {
         val adaptor = SamlRegisteredServiceMetadataAdaptor.get(samlRegisteredServiceCachingMetadataResolver,
-            samlRegisteredService, samlRegisteredService.getServiceId()).get();
+            samlRegisteredService, samlRegisteredService.getServiceId()).orElseThrow();
         return samlIdPObjectSigner.encode(authnRequest, samlRegisteredService,
             adaptor, response, request, SAMLConstants.SAML2_POST_BINDING_URI, authnRequest, new MessageContext());
     }

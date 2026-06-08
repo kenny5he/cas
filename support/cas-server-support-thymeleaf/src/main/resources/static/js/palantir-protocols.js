@@ -23,15 +23,15 @@ async function initializeCasProtocolOperations() {
             casProtocolServiceEditor.setValue(JSON.stringify(data.registeredService, null, 2));
             casProtocolServiceEditor.gotoLine(1);
 
-            $("#casProtocolEditorContainer").removeClass("d-none");
-            $("#casProtocolServiceEditorContainer").removeClass("d-none");
+            showElements("#casProtocolEditorContainer");
+            showElements("#casProtocolServiceEditorContainer");
 
             updateNavigationSidebar();
             $("#casProtocolServiceNavigation").off().on("click", () => navigateToApplication(data.registeredService.id));
         }).fail((xhr, status, error) => {
             displayBanner(xhr);
-            $("#casProtocolEditorContainer").addClass("d-none");
-            $("#casProtocolServiceEditorContainer").addClass("d-none");
+            hideElements("#casProtocolEditorContainer");
+            hideElements("#casProtocolServiceEditorContainer");
         });
     }
 
@@ -55,7 +55,7 @@ async function initializeSAML1ProtocolOperations() {
             password: password,
             service: service
         }, data => {
-            $("#saml1ProtocolEditorContainer").removeClass("d-none");
+            showElements("#saml1ProtocolEditorContainer");
             const editor = initializeAceEditor("saml1ProtocolEditor", "xml");
             editor.setReadOnly(true);
             editor.setValue(data.assertion);
@@ -67,7 +67,7 @@ async function initializeSAML1ProtocolOperations() {
             serviceEditor.gotoLine(1);
         }).fail((xhr, status, error) => {
             displayBanner(xhr);
-            $("#saml2ProtocolEditorContainer").addClass("d-none");
+            hideElements("#saml2ProtocolEditorContainer");
         });
     });
 
@@ -246,10 +246,10 @@ async function initializeOidcProtocolOperations() {
                             console.error("Error fetching data:", error);
                             displayBanner(xhr);
                         });
-                        $("#oidcProtocolEditorContainer").removeClass("d-none");
+                        showElements("#oidcProtocolEditorContainer");
                     },
                     error: (xhr, textStatus, errorThrown) => {
-                        $("#oidcProtocolEditorContainer").addClass("d-none");
+                        hideElements("#oidcProtocolEditorContainer");
                         console.error("Error fetching data:", errorThrown);
                         displayBanner(xhr);
                     }
@@ -258,7 +258,7 @@ async function initializeOidcProtocolOperations() {
             }).fail((xhr, status, error) => {
                 console.error("Error fetching data:", error);
                 displayBanner(xhr);
-                $("#oidcProtocolEditorContainer").addClass("d-none");
+                hideElements("#oidcProtocolEditorContainer");
             });
 
 
@@ -286,6 +286,78 @@ async function initializeOidcProtocolOperations() {
             });
         } else {
             hideElements("#oidcConfigurationPropsPanel");
+        }
+
+        if (CasActuatorEndpoints.oidcJwks() && CAS_FEATURES.includes("OpenIDConnect.client-jwks-registration")) {
+            showElements($("#oidcclientjwks-li"));
+
+            const oidcClientJwksTable = $("#oidcClientJwksTable").DataTable({
+                pageLength: 10,
+                autoWidth: false,
+                drawCallback: settings => {
+                    $("#oidcClientJwksTable tr").addClass("mdc-data-table__row");
+                    $("#oidcClientJwksTable td").addClass("mdc-data-table__cell");
+                }
+            });
+
+            $.get(`${CasActuatorEndpoints.oidcJwks()}/clients`, response => {
+                oidcClientJwksTable.clear();
+                for (const entry of response) {
+                    const deleteButton = `
+                        <button type="button" name="deleteOidcClientJwksEntry" href="#"
+                            data-jkt="${entry.jkt}"
+                            title="Delete"
+                            class="mdc-button mdc-button--raised btn btn-link min-width-32x">
+                            <i class="mdi mdi-delete min-width-32x" aria-hidden="true"></i>
+                        </button>
+                    `;
+                    oidcClientJwksTable.row.add({
+                        0: `<code>${entry.jkt}</code>`,
+                        1: `<code>${entry.createdAt}</code>`,
+                        2: `<code>${entry.jwk}</code>`,
+                        3: deleteButton
+                    });
+                }
+                oidcClientJwksTable.draw();
+
+                $("button[name=deleteOidcClientJwksEntry]").off().on("click", function () {
+                    const jkt = $(this).data("jkt");
+                    const row = $(this).closest("tr");
+                    Swal.fire({
+                        title: "Are you sure you want to delete this client JWKS entry?",
+                        text: "Once deleted, the change will take effect immediately.",
+                        icon: "question",
+                        showConfirmButton: true,
+                        showDenyButton: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url: `${CasActuatorEndpoints.oidcJwks()}/clients/${jkt}`,
+                                type: "DELETE",
+                                success: (response, textStatus, jqXHR) => {
+                                    Swal.fire({
+                                        title: "Done!",
+                                        text: "Client JWKS entry has been deleted successfully.",
+                                        showConfirmButton: false,
+                                        icon: "success",
+                                        timer: 1500
+                                    });
+                                    oidcClientJwksTable.row(row).remove().draw();
+                                },
+                                error: (jqXHR, textStatus, errorThrown) => {
+                                    console.error("Error deleting client JWKS entry:", errorThrown);
+                                    displayBanner(jqXHR);
+                                }
+                            });
+                        }
+                    });
+                });
+            }).fail((xhr, status, error) => {
+                console.error("Error fetching data:", error);
+                displayBanner(xhr);
+            });
+        } else {
+            hideElements($("#oidcclientjwks-li"));
         }
     }
 }
@@ -320,11 +392,11 @@ async function initializeSAML2ProtocolOperations() {
                 editor.setReadOnly(true);
                 editor.setValue(new XMLSerializer().serializeToString(data));
                 editor.gotoLine(1);
-                $("#saml2ProtocolEditorContainer").removeClass("d-none");
-                $("#saml2ProtocolLogoutEditor").addClass("d-none");
+                showElements("#saml2ProtocolEditorContainer");
+                hideElements("#saml2ProtocolLogoutEditor");
             }).fail((xhr, status, error) => {
                 displayBanner(xhr);
-                $("#saml2ProtocolEditorContainer").addClass("d-none");
+                hideElements("#saml2ProtocolEditorContainer");
             });
         });
 
@@ -352,20 +424,20 @@ async function initializeSAML2ProtocolOperations() {
                     saml2ProtocolLogoutEditor.setValue(logoutRequest);
                     saml2ProtocolLogoutEditor.gotoLine(1);
 
-                    $("#saml2ProtocolEditorContainer").removeClass("d-none");
-                    $("#saml2ProtocolLogoutEditor").removeClass("d-none");
+                    showElements("#saml2ProtocolEditorContainer");
+                    showElements("#saml2ProtocolLogoutEditor");
                 },
-                error: (jqXHR, textStatus, errorThrown) => {
+                error: (xhr, textStatus, errorThrown) => {
                     displayBanner(xhr);
-                    $("#saml2ProtocolEditorContainer").addClass("d-none");
-                    $("#saml2ProtocolLogoutEditor").addClass("d-none");
+                    hideElements("#saml2ProtocolEditorContainer");
+                    hideElements("#saml2ProtocolLogoutEditor");
                 }
             });
         });
 
         $("button[name=saml2MetadataCacheInvalidateButton]").off().on("click", () => {
             hideBanner();
-            $("#saml2MetadataCacheEditorContainer").addClass("d-none");
+            hideElements("#saml2MetadataCacheEditorContainer");
 
             Swal.fire({
                 title: "Are you sure you want to invalidate the cache entry?",
@@ -416,20 +488,323 @@ async function initializeSAML2ProtocolOperations() {
                         $("#saml2MetadataCacheDetails").html(`<i class="mdc-tab__icon mdi mdi-clock" aria-hidden="true"></i> Cache Instant: <code>${entry.cachedInstant}</code>`);
                     }
                     editor.gotoLine(1);
-                    $("#saml2MetadataCacheEditorContainer").removeClass("d-none");
-                    $("#saml2MetadataCacheDetails").removeClass("d-none");
+                    showElements("#saml2MetadataCacheEditorContainer");
+                    showElements("#saml2MetadataCacheDetails");
                     $(this).prop("disabled", false);
                 },
                 error: (jqXHR, textStatus, errorThrown) => {
                     displayBanner(jqXHR);
-                    $("#saml2MetadataCacheEditorContainer").addClass("d-none");
-                    $("#saml2MetadataCacheDetails").addClass("d-none");
+                    hideElements("#saml2MetadataCacheEditorContainer");
+                    hideElements("#saml2MetadataCacheDetails");
                     $(this).prop("disabled", false);
                 }
             });
 
         });
 
+
+        if (CasActuatorEndpoints.samlIdpRegisteredServiceMetadata()) {
+            showElements($("#saml2metadatamgmt-li"));
+
+            const saml2MetadataManagerEntriesTable = $("#saml2MetadataManagerEntriesTable").DataTable({
+                pageLength: 10,
+                autoWidth: false,
+                drawCallback: settings => {
+                    $("#saml2MetadataManagerEntriesTable tr").addClass("mdc-data-table__row");
+                    $("#saml2MetadataManagerEntriesTable td").addClass("mdc-data-table__cell");
+                }
+            });
+
+            const saml2MetadataManagerEntryEditor = initializeAceEditor("saml2MetadataManagerEntryDialogEditor", "xml");
+            saml2MetadataManagerEntryEditor.setReadOnly(true);
+
+            function parseEntityIdFromMetadata(xmlValue) {
+                try {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(xmlValue, "application/xml");
+                    const entityDescriptor = doc.querySelector("EntityDescriptor") || doc.documentElement;
+                    return entityDescriptor.getAttribute("entityID") || "N/A";
+                } catch (e) {
+                    console.error("Error parsing entity ID from metadata:", e);
+                    return "N/A";
+                }
+            }
+
+            function fetchMetadataManagerEntries(managerName) {
+                saml2MetadataManagerEntriesTable.clear().draw();
+                $.get(`${CasActuatorEndpoints.samlIdpRegisteredServiceMetadata()}/managers/${managerName}`, response => {
+                    for (const entry of response) {
+                        const entityId = parseEntityIdFromMetadata(entry.value);
+                        const buttons = `
+                            <button type="button" name="viewSaml2MetadataManagerEntry" href="#"
+                                data-entry-id="${entry.id}" data-manager-name="${managerName}"
+                                title="View Metadata"
+                                class="mdc-button mdc-button--raised btn btn-link min-width-32x">
+                                <i class="mdi mdi-eye min-width-32x" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" name="copySaml2MetadataEntityId" href="#"
+                                data-entity-id="${entityId}"
+                                title="Copy Entity ID to Clipboard"
+                                class="mdc-button mdc-button--raised btn btn-link min-width-32x">
+                                <i class="mdi mdi-content-copy min-width-32x" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" name="registerSaml2MetadataManagerEntry" href="#"
+                                data-entry-name="${entry.name}" data-entity-id="${entityId}"
+                                title="Register as SAML2 Service Provider"
+                                class="mdc-button mdc-button--raised btn btn-link min-width-32x">
+                                <i class="mdi mdi-plus-circle min-width-32x" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" name="deleteSaml2MetadataManagerEntry" href="#"
+                                data-entry-id="${entry.id}" data-manager-name="${managerName}"
+                                title="Delete Metadata"
+                                class="mdc-button mdc-button--raised btn btn-link min-width-32x">
+                                <i class="mdi mdi-delete min-width-32x" aria-hidden="true"></i>
+                            </button>
+                        `;
+                        saml2MetadataManagerEntriesTable.row.add({
+                            0: `<code>${entry.id}</code>`,
+                            1: `<code>${entry.name}</code>`,
+                            2: `<code>${entityId}</code>`,
+                            3: buttons
+                        });
+                    }
+                    saml2MetadataManagerEntriesTable.draw();
+
+                    $("button[name=viewSaml2MetadataManagerEntry]").off().on("click", function () {
+                        const entryId = $(this).data("entry-id");
+                        const mgrName = $(this).data("manager-name");
+                        $.get(`${CasActuatorEndpoints.samlIdpRegisteredServiceMetadata()}/managers/${mgrName}/${entryId}`, entry => {
+                            saml2MetadataManagerEntryEditor.setValue(entry.value);
+                            saml2MetadataManagerEntryEditor.gotoLine(1);
+                            const dialog = window.mdc.dialog.MDCDialog.attachTo(document.getElementById("saml2MetadataManagerEntryDialog"));
+                            dialog["open"]();
+                        }).fail((xhr, status, error) => {
+                            console.error("Error fetching data:", error);
+                            displayBanner(xhr);
+                        });
+                    });
+
+                    $("button[name=copySaml2MetadataEntityId]").off().on("click", function () {
+                        const entityIdValue = $(this).data("entity-id");
+                        copyToClipboard(entityIdValue).then(() => {
+                            Swal.fire({
+                                title: "Copied",
+                                html: `Entity ID <code>${entityIdValue}</code> has been copied to the clipboard.`,
+                                showConfirmButton: false,
+                                icon: "success",
+                                timer: 2000
+                            });
+                        }).catch(err => {
+                            console.error("Failed to copy entity ID to clipboard:", err);
+                            displayBanner({responseJSON: {message: "Failed to copy entity ID to clipboard."}});
+                        });
+                    });
+
+                    $("button[name=registerSaml2MetadataManagerEntry]").off().on("click", function () {
+                        const saml2ServiceClass = Object.keys(supportedServiceTypes).find(cls => cls.includes("SamlRegisteredService"));
+                        if (saml2ServiceClass) {
+                            const entryName = $(this).data("entry-name");
+                            const entityIdValue = $(this).data("entity-id");
+                            const partialService = {
+                                "@class": saml2ServiceClass,
+                                "name": entryName,
+                                "serviceId": entityIdValue,
+                                "metadataLocation": "mongodb://"
+                            };
+                            activateDashboardTab(Tabs.APPLICATIONS.index);
+                            selectSidebarMenuTab(Tabs.APPLICATIONS.index);
+                            setTimeout(() => openRegisteredServiceWizardDialog(partialService), 150);
+                        } else {
+                            displayBanner("CAS is unable to register this entry as a SAML2 Service Provider");
+                        }
+                    });
+
+                    $("button[name=deleteSaml2MetadataManagerEntry]").off().on("click", function () {
+                        const entryId = $(this).data("entry-id");
+                        const mgrName = $(this).data("manager-name");
+                        Swal.fire({
+                            title: "Are you sure you want to delete this metadata entry?",
+                            text: "Once deleted, the change will take effect immediately.",
+                            icon: "question",
+                            showConfirmButton: true,
+                            showDenyButton: true
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                $.ajax({
+                                    url: `${CasActuatorEndpoints.samlIdpRegisteredServiceMetadata()}/managers/${mgrName}/${entryId}`,
+                                    type: "DELETE",
+                                    contentType: "application/x-www-form-urlencoded",
+                                    success: (response, textStatus, jqXHR) => {
+                                        Swal.fire({
+                                            title: "Done!",
+                                            text: "Metadata entry has been deleted successfully.",
+                                            showConfirmButton: false,
+                                            icon: "success",
+                                            timer: 2000
+                                        });
+                                        fetchMetadataManagerEntries(mgrName);
+                                    },
+                                    error: (jqXHR, textStatus, errorThrown) => {
+                                        console.error("Error deleting metadata entry:", errorThrown);
+                                        displayBanner(jqXHR);
+                                    }
+                                });
+                            }
+                        });
+                    });
+                }).fail((xhr, status, error) => {
+                    console.error("Error fetching data:", error);
+                    displayBanner(xhr);
+                });
+            }
+
+            $("button[name=saml2MetadataUploadButton]").off().on("click", () => {
+                hideBanner();
+                const selectedManagerName = $("#saml2MetadataManagersSelect option:selected").text();
+
+                const metadataXmlEditor = initializeAceEditor("saml2MetadataUploadXmlEditor", "xml");
+                metadataXmlEditor.setReadOnly(true);
+                const signatureEditor = initializeAceEditor("saml2MetadataUploadSignatureEditor", "text");
+                signatureEditor.setReadOnly(true);
+
+                function adjustUploadEditorLayout() {
+                    const xmlVisible = !$("#saml2MetadataUploadXmlEditorContainer").hasClass("d-none");
+                    const sigVisible = !$("#saml2MetadataUploadSignatureEditorContainer").hasClass("d-none");
+                    if (xmlVisible && sigVisible) {
+                        $("#saml2MetadataUploadXmlEditorContainer").css("width", "50%");
+                        $("#saml2MetadataUploadSignatureEditorContainer").css("width", "50%");
+                    } else if (xmlVisible) {
+                        $("#saml2MetadataUploadXmlEditorContainer").css("width", "100%");
+                    } else if (sigVisible) {
+                        $("#saml2MetadataUploadSignatureEditorContainer").css("width", "100%");
+                    }
+                    metadataXmlEditor.resize();
+                    signatureEditor.resize();
+                }
+
+                $("#saml2MetadataUploadXmlFileButton").off().on("click", () => {
+                    $("#saml2MetadataUploadXmlFile").click();
+                });
+                $("#saml2MetadataUploadXmlFile").off().on("change", function () {
+                    if (this.files.length > 0) {
+                        this.files[0].text().then(content => {
+                            metadataXmlEditor.setValue(content);
+                            metadataXmlEditor.gotoLine(1);
+                            showElements($("#saml2MetadataUploadXmlEditorContainer"));
+                            adjustUploadEditorLayout();
+                        });
+                    }
+                });
+                $("#saml2MetadataUploadSignatureFileButton").off().on("click", () => {
+                    $("#saml2MetadataUploadSignatureFile").click();
+                });
+                $("#saml2MetadataUploadSignatureFile").off().on("change", function () {
+                    if (this.files.length > 0) {
+                        this.files[0].text().then(content => {
+                            signatureEditor.setValue(content);
+                            signatureEditor.gotoLine(1);
+                            showElements($("#saml2MetadataUploadSignatureEditorContainer"));
+                            adjustUploadEditorLayout();
+                        });
+                    }
+                });
+
+                $("#saml2MetadataUploadDialog").dialog({
+                    autoOpen: false,
+                    modal: true,
+                    width: 1150,
+                    height: 880,
+                    position: {
+                        my: "center top",
+                        at: "center top+200",
+                        of: window
+                    },
+                    buttons: {
+                        Upload: async function () {
+                            if (!$("#saml2MetadataUploadForm")[0].reportValidity()) {
+                                return;
+                            }
+                            const name = $("#saml2MetadataUploadName").val();
+                            const xmlText = metadataXmlEditor.getValue().trim();
+                            if (!xmlText) {
+                                Swal.fire({
+                                    title: "Missing File",
+                                    text: "Please select a metadata XML file to upload.",
+                                    icon: "warning"
+                                });
+                                return;
+                            }
+                            const sigText = signatureEditor.getValue().trim();
+                            const payload = {name: name, value: xmlText, signature: sigText};
+                            $.ajax({
+                                url: `${CasActuatorEndpoints.samlIdpRegisteredServiceMetadata()}/managers/${selectedManagerName}`,
+                                type: "POST",
+                                contentType: "application/json",
+                                data: JSON.stringify(payload),
+                                success: (response) => {
+                                    $("#saml2MetadataUploadDialog").dialog("close");
+                                    Swal.fire({
+                                        title: "Done!",
+                                        text: "Metadata has been uploaded successfully.",
+                                        icon: "success",
+                                        timer: 2000
+                                    });
+                                    fetchMetadataManagerEntries(selectedManagerName);
+                                },
+                                error: (xhr, status, error) => {
+                                    console.error("Error uploading metadata:", error);
+                                    displayBanner(xhr);
+                                }
+                            });
+                        },
+                        Cancel: function () {
+                            $(this).dialog("close");
+                        }
+                    },
+                    open: function () {
+                        $("#saml2MetadataUploadName").val("");
+                        $("#saml2MetadataUploadXmlFile").val("");
+                        $("#saml2MetadataUploadSignatureFile").val("");
+                        metadataXmlEditor.setValue("");
+                        signatureEditor.setValue("");
+                        hideElements("#saml2MetadataUploadXmlEditorContainer");
+                        hideElements("#saml2MetadataUploadSignatureEditorContainer");
+                        $("#saml2MetadataUploadName").focus();
+                    },
+                    close: function () {
+                        $(this).dialog("destroy");
+                    }
+                });
+                $("#saml2MetadataUploadDialog").dialog("open");
+            });
+
+            $("#saml2MetadataManagersSelect").empty().selectmenu({
+                width: "500px",
+                change: function (event, ui) {
+                    fetchMetadataManagerEntries(ui.item.label);
+                }
+            });
+            $.get(`${CasActuatorEndpoints.samlIdpRegisteredServiceMetadata()}/managers`, response => {
+                response.forEach((manager, idx) => {
+                    $("#saml2MetadataManagersSelect").append(
+                        $("<option>", {
+                            value: manager.sourceId,
+                            text: manager.name,
+                            selected: idx === 0
+                        })
+                    );
+                });
+                $("#saml2MetadataManagersSelect").selectmenu("refresh");
+                if (response.length > 0) {
+                    fetchMetadataManagerEntries(response[0].name);
+                }
+            }).fail((xhr, status, error) => {
+                console.error("Error fetching data:", error);
+                displayBanner(xhr);
+            });
+        } else {
+            hideElements("#saml2metadatamgmt-li");
+        }
 
         if (CasActuatorEndpoints.env()) {
             const saml2ConfigurationPropsTable = $("#saml2ConfigurationPropsTable").DataTable({

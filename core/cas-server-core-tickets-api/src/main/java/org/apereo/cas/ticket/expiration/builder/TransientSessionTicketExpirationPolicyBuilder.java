@@ -2,11 +2,13 @@ package org.apereo.cas.ticket.expiration.builder;
 
 import module java.base;
 import org.apereo.cas.configuration.CasConfigurationProperties;
+import org.apereo.cas.configuration.support.Beans;
 import org.apereo.cas.ticket.ExpirationPolicy;
 import org.apereo.cas.ticket.ExpirationPolicyBuilder;
 import org.apereo.cas.ticket.TransientSessionTicket;
 import org.apereo.cas.ticket.expiration.MultiTimeUseOrTimeoutExpirationPolicy;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import lombok.RequiredArgsConstructor;
 import lombok.val;
 
 /**
@@ -16,10 +18,13 @@ import lombok.val;
  * @since 6.1.0
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-public record TransientSessionTicketExpirationPolicyBuilder(CasConfigurationProperties casProperties) implements ExpirationPolicyBuilder<TransientSessionTicket> {
+@RequiredArgsConstructor
+public class TransientSessionTicketExpirationPolicyBuilder implements ExpirationPolicyBuilder<TransientSessionTicket> {
     @Serial
     private static final long serialVersionUID = -1587980180617072826L;
 
+    private final CasConfigurationProperties casProperties;
+    
     @Override
     public ExpirationPolicy buildTicketExpirationPolicy() {
         return toTransientSessionTicketExpirationPolicy();
@@ -32,8 +37,8 @@ public record TransientSessionTicketExpirationPolicyBuilder(CasConfigurationProp
      */
     public ExpirationPolicy toTransientSessionTicketExpirationPolicy() {
         val tst = casProperties.getTicket().getTst();
+        val timeToKillInSeconds = Beans.newDuration(tst.getTimeToKillInSeconds()).toSeconds();
         return new MultiTimeUseOrTimeoutExpirationPolicy.TransientSessionTicketExpirationPolicy(
-            tst.getNumberOfUses(),
-            tst.getTimeToKillInSeconds());
+            tst.getNumberOfUses(), timeToKillInSeconds);
     }
 }

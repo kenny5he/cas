@@ -1,7 +1,7 @@
 async function initializeHeimdallOperations() {
 
     if (!CAS_FEATURES.includes("Authorization")) {
-        $("#heimdall").addClass("d-none");
+        hideElements("#heimdall");
         return;
     }
 
@@ -38,7 +38,7 @@ async function initializeHeimdallOperations() {
         const heimdallViewResourceEditor = initializeAceEditor("heimdallViewResourceEditor", "json");
         heimdallViewResourceEditor.setReadOnly(true);
 
-        function fetchHeimdallResources(heimdallViewResourceEditor) {
+        function fetchHeimdallResources() {
             $.get(`${CasActuatorEndpoints.heimdall()}/resources`, response => {
                 heimdallResourcesTable.clear();
                 for (const [key, value] of Object.entries(response)) {
@@ -87,7 +87,7 @@ async function initializeHeimdallOperations() {
             });
         }
 
-        fetchHeimdallResources(heimdallViewResourceEditor);
+        fetchHeimdallResources();
 
         setInterval(() => {
             if (currentActiveTab === Tabs.ACCESS_STRATEGY.index) {
@@ -101,10 +101,10 @@ async function initializeHeimdallOperations() {
 async function initializeAccessStrategyOperations() {
 
     if (!CAS_FEATURES.includes("SAMLIdentityProvider")) {
-        $("#accessEntityIdLabel").addClass("d-none");
+        hideElements("#accessEntityIdLabel");
     }
     if (!CAS_FEATURES.includes("OpenIDConnect") && !CAS_FEATURES.includes("OAuth")) {
-        $("#accessClientIdLabel").addClass("d-none");
+        hideElements("#accessClientIdLabel");
     }
 
     const accessStrategyEditor = initializeAceEditor("accessStrategyEditor");
@@ -141,8 +141,8 @@ async function initializeAccessStrategyOperations() {
                 contentType: "application/x-www-form-urlencoded",
                 data: $.param(renamedData),
                 success: (response, status, xhr) => {
-                    $("#accessStrategyEditorContainer").removeClass("d-none");
-                    $("#accessStrategyAttributesContainer").removeClass("d-none");
+                    showElements("#accessStrategyEditorContainer");
+                    showElements("#accessStrategyAttributesContainer");
 
                     accessStrategyEditor.setValue(JSON.stringify(response.registeredService, null, 2));
                     accessStrategyEditor.gotoLine(1);
@@ -158,8 +158,8 @@ async function initializeAccessStrategyOperations() {
                     $("#authorizedServiceNavigation").off().on("click", () => navigateToApplication(response.registeredService.id));
                 },
                 error: (xhr, status, error) => {
-                    $("#accessStrategyEditorContainer").addClass("d-none");
-                    $("#accessStrategyAttributesContainer").addClass("d-none");
+                    hideElements("#accessStrategyEditorContainer");
+                    hideElements("#accessStrategyAttributesContainer");
                     displayBanner(`Status ${xhr.status}: Service is unauthorized.`);
                 }
             });

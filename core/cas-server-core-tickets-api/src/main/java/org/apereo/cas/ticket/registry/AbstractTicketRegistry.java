@@ -237,15 +237,14 @@ public abstract class AbstractTicketRegistry implements TicketRegistry {
     }
 
     @Override
-    public long countTicketsFor(final Service service) {
+    public Stream<? extends Ticket> getTicketsFor(final Service service) {
         return stream()
             .map(this::decodeTicket)
             .filter(ServiceAwareTicket.class::isInstance)
             .filter(ticket -> !ticket.isExpired())
             .map(ServiceAwareTicket.class::cast)
             .filter(ticket -> Objects.nonNull(ticket.getService()))
-            .filter(ticket -> ticket.getService().getId().equals(service.getId()))
-            .count();
+            .filter(ticket -> ticket.getService().getId().equals(service.getId()));
     }
 
     @Override
@@ -384,11 +383,11 @@ public abstract class AbstractTicketRegistry implements TicketRegistry {
 
     protected Ticket createEncodedTicket(final Ticket ticket) throws Exception {
         LOGGER.debug("Encoding ticket [{}]", ticket);
-        val encodedTicketObject = getSerializeAndEncode(ticket);
+        val encodedTicketObject = serializeAndEncodeTicket(ticket);
         return toEncodedTicket(ticket, encodedTicketObject);
     }
 
-    protected byte[] getSerializeAndEncode(final Ticket ticket) {
+    protected byte[] serializeAndEncodeTicket(final Ticket ticket) {
         return SerializationUtils.serializeAndEncodeObject(cipherExecutor, ticket);
     }
 

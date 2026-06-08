@@ -239,7 +239,9 @@ A basic modest outline of the test configuration may be:
 {
   "dependencies": "module1,module2,module3,...",
   "conditions": {
-    "docker": "true"
+    "env": "ENV_VAR_MUST_BE_SET",
+    "docker": "true",
+    "runsOn": "MTWRFSU 9am 5pm"
   },
   "environmentVariables": [
     "NAME=VALUE"
@@ -250,7 +252,7 @@ A basic modest outline of the test configuration may be:
   "requirements": {
     "aot": {
       "enabled": false
-    }
+    },
     "graalvm": {
       "build": false
     },
@@ -268,7 +270,7 @@ A basic modest outline of the test configuration may be:
     "urls": ["https://localhost:8443/cas/actuator/health"]
   },
   "jvmArgs": "...",
-  "server": "tomcat|jetty|undertow|external|starter...",
+  "server": "tomcat|jetty|external|starter...",
   "SPRING_APPLICATION_JSON": {},
   "bootstrapScript": "${PWD}/ci/tests/puppeteer/scenarios/${SCENARIO}/bootstrap.sh",
   "initScript": "${PWD}/ci/tests/puppeteer/scenarios/${SCENARIO}/init.sh",
@@ -283,6 +285,7 @@ A basic modest outline of the test configuration may be:
   },
   "variations": [
     {
+      "name": "...",
       "properties": [
       ]
     }

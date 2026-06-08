@@ -69,7 +69,8 @@ public class DuoSecurityUniversalPromptValidateLoginAction extends DuoSecurityAu
     }
 
     protected @Nullable Event handleDuoSecurityUniversalPromptResponse(final RequestContext requestContext) throws Throwable {
-        val duoState = WebUtils.getRequestParameterOrAttribute(requestContext, REQUEST_PARAMETER_STATE).orElseThrow();
+        val duoState = WebUtils.getRequestParameterOrAttribute(requestContext, REQUEST_PARAMETER_STATE)
+            .orElseThrow(() -> new IllegalArgumentException("Missing required parameter: " + REQUEST_PARAMETER_STATE));
         LOGGER.trace("Received Duo Security state [{}]", duoState);
 
         val resultingEvent = processStateFromTicketRegistry(requestContext, duoState);
@@ -88,7 +89,7 @@ public class DuoSecurityUniversalPromptValidateLoginAction extends DuoSecurityAu
         return processStateFromBrowserStorage(requestContext);
     }
 
-    private @Nullable Event processStateFromBrowserStorage(final RequestContext requestContext) throws Exception {
+    private @Nullable Event processStateFromBrowserStorage(final RequestContext requestContext) {
         val browserStorage = WebUtils.getBrowserStoragePayload(requestContext);
         if (browserStorage.isEmpty()) {
             WebUtils.putTargetTransition(requestContext, CasWebflowConstants.TRANSITION_ID_SWITCH);

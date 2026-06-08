@@ -344,7 +344,17 @@ function openNewConfigurationPropertyDialog(config) {
 
             $("#newConfigPropertyName").val(config.name ?? "");
             $("#newConfigPropertyValue").val(config.value ?? "");
-            $("#propertySourcesSelect").val(config.propertySource ?? "");
+
+            if (config.propertySource) {
+                $("#propertySourcesSelect").val(config.propertySource ?? "");
+            } else {
+                const ts = $("#propertySourcesSelect")[0].tomselect;
+                const options = Object.keys(ts.options);
+                if (options.length === 1) {
+                    ts.setValue(options[0], true);
+                }
+            }
+
             if (config.updateEntry) {
                 $("#newConfigPropertyName").parent().hide();
                 $("#propertySourcesSection").hide();
@@ -394,6 +404,7 @@ function refreshCasServerConfiguration(title) {
                     const endpoint = CasActuatorEndpoints.refresh();
                     $.post(endpoint)
                         .done(() => {
+                            reloadAuthenticationHandlersTable();
                             loadExternalIdentityProvidersTable().then(r => {
                                 Swal.close();
                                 Swal.fire({
@@ -633,7 +644,7 @@ async function initializeConfigurationOperations() {
 
     function encryptOrDecryptConfig(op) {
         hideBanner();
-        $("#configEncryptionResult").addClass("d-none");
+        hideElements("#configEncryptionResult");
 
         const form = document.getElementById("fmConfigEncryption");
         if (!form.reportValidity()) {
@@ -648,10 +659,10 @@ async function initializeConfigurationOperations() {
             }, data => {
                 $("#configEncryptionResult pre code").text(data);
                 highlightElements();
-                $("#configEncryptionResult").removeClass("d-none");
+                showElements("#configEncryptionResult");
             }).fail((xhr, status, error) => {
                 displayBanner(xhr);
-                $("#configEncryptionResult").addClass("d-none");
+                hideElements("#configEncryptionResult");
             });
         }
     }

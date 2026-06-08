@@ -2,7 +2,9 @@ package org.apereo.cas.oidc;
 
 import module java.base;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.WordUtils;
+import org.springframework.http.MediaType;
 
 /**
  * This is {@link OidcConstants}.
@@ -16,7 +18,6 @@ public interface OidcConstants {
      * User code parameter in CIBA requests.
      */
     String USER_CODE = "user_code";
-
     /**
      * ACR values specified in CIBA requests.
      */
@@ -45,7 +46,6 @@ public interface OidcConstants {
      * Requested expiry specified in CIBA requests.
      */
     String REQUESTED_EXPIRY = "requested_expiry";
-    
     /**
      * ACR passed in the ID token.
      */
@@ -58,7 +58,22 @@ public interface OidcConstants {
      * Audience claim.
      */
     String AUD = "aud";
-
+    /**
+     * JWKS claim.
+     */
+    String JWKS = "jwks";
+    /**
+     * Keys claim.
+     */
+    String KEYS = "keys";
+    /**
+     * VC pre authorized code parameter.
+     */
+    String PRE_AUTHORIZED_CODE = "pre-authorized_code";
+    /**
+     * VC tx code parameter.
+     */
+    String TX_CODE = "tx_code";
     /**
      * The Authorization Server MUST NOT display any authentication or consent user interface pages.
      */
@@ -71,12 +86,10 @@ public interface OidcConstants {
      * The Authorization Server SHOULD prompt the End-User consent.
      */
     String PROMPT_CONSENT = "consent";
-
     /**
      * Request URI parameter used in PAR requests.
      */
     String REQUEST_URI = "request_uri";
-
     /**
      * The preferred username claim.
      */
@@ -118,7 +131,6 @@ public interface OidcConstants {
      * The issuer parameter.
      */
     String ISS = "iss";
-
     /**
      * The txn claim.
      * The txn Claim is used to build audit trails across the
@@ -130,34 +142,28 @@ public interface OidcConstants {
      * id_token and the issued device_secret.
      */
     String DS_HASH = "ds_hash";
-
     /**
      * The max age.
      */
     String MAX_AGE = "max_age";
-
     /**
      * The authentication request id in CIBA.
      */
     String AUTH_REQ_ID = "auth_req_id";
-
     /**
      * The {@code ui_locales} parameter.
      * End-User's preferred languages and scripts for the user interface, represented
      * as a space-separated list of language tag values, ordered by preference.
      */
     String UI_LOCALES = "ui_locales";
-
     /**
      * Base OIDC URL.
      */
     String BASE_OIDC_URL = "oidc";
-
     /**
      * Logout url.
      */
     String LOGOUT_URL = "oidcLogout";
-
     /**
      * Oidc authorize url path segment url.
      */
@@ -166,27 +172,38 @@ public interface OidcConstants {
      * CIBA backchannel authn endpoint.
      */
     String CIBA_URL = "oidcCiba";
-
     /**
      * Oidc access token url path segment url.
      */
     String ACCESS_TOKEN_URL = "oidcAccessToken";
-
     /**
      * Oidc token url path segment url.
      */
     String TOKEN_URL = "oidcToken";
-
     /**
      * Oidc profile url path segment url.
      */
     String PROFILE_URL = "oidcProfile";
-
+    /**
+     * Oidc VC credential url path segment.
+     */
+    String VC_CREDENTIAL_URL = "oidcVcCredential";
+    /**
+     * Oidc VC credential offer url path segment.
+     */
+    String VC_CREDENTIAL_OFFER_URL = "oidcVcCredentialOffer";
+    /**
+     * Oidc VC credential offer transactions url path segment.
+     */
+    String VC_CREDENTIAL_OFFER_TRANSACTIONS_URL = "oidcVcCredentialOfferTransactions";
+    /**
+     * Oidc VC nonce url path segment.
+     */
+    String VC_NONCE_URL = "oidcVcNonce";
     /**
      * Oidc pushed authorization request url path segment url.
      */
     String PUSHED_AUTHORIZE_URL = "oidcPushAuthorize";
-
     /**
      * JWKS Endpoint url.
      */
@@ -199,18 +216,20 @@ public interface OidcConstants {
      * Registration endpoint URL.
      */
     String REGISTRATION_URL = "register";
-
     /**
      * Registration endpoint URL to issue initial access tokens.
      */
     String REGISTRATION_INITIAL_TOKEN_URL = "initToken";
-
     /**
      * The registration scope assigned to the initial access token,
      * required to register clients.
      */
     String CLIENT_REGISTRATION_SCOPE = "client_registration_scope";
-
+    /**
+     * The registration scope assigned to an access token,
+     * required to register client JWKS.
+     */
+    String CLIENT_JWKS_REGISTRATION_SCOPE = "client_jwks_registration_scope";
     /**
      * Client configuration endpoint URL.
      */
@@ -227,22 +246,18 @@ public interface OidcConstants {
      * The confirm/consent view.
      */
     String CONFIRM_VIEW = "oidcConfirmView";
-
     /**
      * The CIBA verification view.
      */
     String CIBA_VERIFICATION_VIEW = "oidcCibaVerificationView";
-    
     /**
      * Rel value for webfinger protocol.
      */
     String WEBFINGER_REL = "http://openid.net/specs/connect/1.0/issuer";
-
     /**
      * .well-known path url.
      */
     String WELL_KNOWN_URL = ".well-known";
-
     /**
      * .well-known/openid-configuration path url.
      */
@@ -251,18 +266,27 @@ public interface OidcConstants {
      * .well-known/openid-federation path url.
      */
     String WELL_KNOWN_OPENID_FEDERATION_URL = WELL_KNOWN_URL + "/openid-federation";
-
+    /**
+     * .well-known/openid-credential-issuer path url.
+     */
+    String WELL_KNOWN_OPENID_CREDENTIAL_ISSUER_URL = WELL_KNOWN_URL + "/openid-credential-issuer";
     /**
      * .well-known/oauth-authorization-server path url.
      */
     String WELL_KNOWN_OAUTH_AUTHORIZATION_SERVER_URL = WELL_KNOWN_URL + "/oauth-authorization-server";
-
+    /**
+     * /fetch federation URL.
+     */
+    String FETCH_FEDERATION_URL = "/fetch";
+    /**
+     * /list federation URL.
+     */
+    String LIST_FEDERATION_URL = "/list";
     /**
      * Scope assigned to access token internally
      * to access client config urls and look up relying parties.
      */
     String CLIENT_CONFIGURATION_SCOPE = "client_configuration_scope";
-
     /**
      * Authenticator used to verify access to client configuration endpoint.
      */
@@ -271,7 +295,6 @@ public interface OidcConstants {
      * Authenticator used to verify access using private key jwts.
      */
     String CAS_OAUTH_CLIENT_PRIVATE_KEY_JWT_AUTHN = "ClientPrivateKeyJwtClient";
-
     /**
      * This is a standard label for a custom scope which will have a scope name.
      * This should not be added to StandardScopes enumeration because it isn't standard.
@@ -282,14 +305,31 @@ public interface OidcConstants {
      */
     String CONTENT_TYPE_JWT = "application/jwt";
     /**
+     * Entity statement content type.
+     */
+    MediaType ENTITY_STATEMENT_CONTENT_TYPE = new MediaType("application", "entity-statement+jwt");
+    /**
      * The post logout redirect uri.
      */
     String POST_LOGOUT_REDIRECT_URI = "post_logout_redirect_uri";
+    /**
+     * Verifiable credentials nonce.
+     */
+    String C_NONCE = "c_nonce";
+    /**
+     * Verifiable credentials nonce expiration.
+     */
+    String C_NONCE_EXPIRES_AT = "c_nonce_expires_at";
+    /**
+     * Unsupported parameter error.
+     */
+    String UNSUPPORTED_PARAMETER = "unsupported_parameter";
 
     /**
      * Standard openid connect scopes.
      */
     @Getter
+    @RequiredArgsConstructor
     enum StandardScopes {
 
         /**
@@ -330,9 +370,6 @@ public interface OidcConstants {
 
         private final String scope;
 
-        StandardScopes(final String scope) {
-            this.scope = scope;
-        }
 
         public String getFriendlyName() {
             return WordUtils.capitalize(this.scope.replace('_', ' '));

@@ -1,19 +1,23 @@
 function hideElements(elements) {
     $(elements)
-        .hide()
+        .css("display", "none")
         .addClass("hide")
         .addClass("d-none");
 }
 
 function showElements(elements) {
     $(elements)
-        .show()
+        .css("display", "")
         .removeClass("hide")
         .removeClass("d-none");
 }
 
 function hideBanner() {
     notyf.dismissAll();
+}
+
+function closeAllDialogs() {
+    $(".ui-dialog-content:visible").dialog("close");
 }
 
 function displayBanner(error) {

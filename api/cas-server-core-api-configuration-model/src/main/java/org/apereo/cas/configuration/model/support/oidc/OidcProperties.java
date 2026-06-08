@@ -1,6 +1,7 @@
 package org.apereo.cas.configuration.model.support.oidc;
 
 import module java.base;
+import org.apereo.cas.configuration.model.support.oidc.federation.OidcFederationProperties;
 import org.apereo.cas.configuration.model.support.oidc.jwks.OidcJsonWebKeystoreProperties;
 import org.apereo.cas.configuration.support.RequiresModule;
 import lombok.Getter;
@@ -106,4 +107,10 @@ public class OidcProperties implements Serializable {
      */
     @NestedConfigurationProperty
     private OidcFederationProperties federation = new OidcFederationProperties();
+
+    /**
+     * Configuration properties to manage OIDC verifiable credentials.
+     */
+    @NestedConfigurationProperty
+    private OidcVerifiableCredentialsProperties vc = new OidcVerifiableCredentialsProperties();
 }

@@ -32,13 +32,12 @@ There is no need for special ceremony to create separate issues. The pull reques
   <img src="https://contrib.rocks/image?repo=apereo/cas" alt="Contributors"/>
 </a>
 
-## Documentation [![Javadoc](https://img.shields.io/badge/Documentation-Javadoc-ff69b4.svg?style=for-the-badge&logo=readme)][casjavadocs]
+## Documentation
 
 | Version                                                                                    | Reference                                        |
 |--------------------------------------------------------------------------------------------|--------------------------------------------------|
 | ![](https://img.shields.io/badge/Development-WIP-blue.svg?style=for-the-badge&logo=github) | [Link](https://apereo.github.io/cas/development) |
 | ![](https://img.shields.io/badge/7.3.x-Current-green.svg?style=for-the-badge&logo=github)  | [Link](https://apereo.github.io/cas/7.3.x)       |
-| ![](https://img.shields.io/badge/7.2.x-Current-green.svg?style=for-the-badge&logo=github)  | [Link](https://apereo.github.io/cas/7.2.x)       |
 
 Additional resources are available as follows:
 
@@ -79,7 +78,7 @@ The following features are supported by the CAS project:
 * Global and per-application user interface theme and branding.
 * Password management and password policy enforcement.
 * Integration options with Apache Syncope, SCIM, Swagger, Shibboleth IdP, Keycloak, Okta, and more.
-* Deployment options using Apache Tomcat, Jetty, Undertow, packaged and running as Docker containers.
+* Deployment options using Apache Tomcat and Jetty, packaged and running as Docker containers.
 
 The foundations of CAS are built upon: [Spring Boot][springboot] and
 [Spring Cloud][springcloud].
@@ -115,7 +114,6 @@ Commercial support options may be [found here][cassupport].
 [blog]: https://apereo.github.io/
 [casbuildprocess]: https://apereo.github.io/cas/developer/Build-Process.html
 [githubcontributors]: https://github.com/apereo/cas/graphs/contributors
-[casjavadocs]: https://www.javadoc.io/doc/org.apereo.cas
 [apereocas]: https://www.apereo.org/projects/cas
 [springboot]: https://projects.spring.io/spring-boot/
 [springcloud]: https://projects.spring.io/spring-cloud/

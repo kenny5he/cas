@@ -29,7 +29,7 @@ env:
   TERM: xterm-256color
   JDK_CURRENT: 25
   JDK_DISTRIBUTION: "corretto"
-  NODE_CURRENT: '25.5.0'
+  NODE_CURRENT: '25.9.0'
   MAX_ATTEMPTS: 3
   RETRY_MINUTES: 20
   SCENARIO_REGEX: ".*"
@@ -69,13 +69,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JDK_CURRENT }}
           distribution: ${{ env.JDK_DISTRIBUTION }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Initialize
         run: ls ./ci && find ./ci -type f -name "*.sh" -exec chmod +x "{}" \; && ./ci/init-build.sh
 
@@ -92,6 +94,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
@@ -99,9 +103,9 @@ jobs:
           distribution: ${{ env.JDK_DISTRIBUTION }}
           cache: 'gradle'
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Print Scenarios
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           max_attempts: ${{ env.MAX_ATTEMPTS }}
           retry_on: error
@@ -132,13 +136,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JDK_CURRENT }}
           distribution: ${{ env.JDK_DISTRIBUTION }}
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Initialize
         run: find ./ci -type f -name "*.sh" -exec chmod +x "{}" \;
       - name: Configure CI
@@ -154,7 +160,7 @@ jobs:
       - name: Set up Gum
         uses: unfunco/setup-gum@main
       - name: Run Tests
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           max_attempts: ${{ env.MAX_ATTEMPTS }}
           retry_on: error
@@ -164,7 +170,7 @@ jobs:
             export RUNNER_OS=${{ runner.os }}
             ./ci/tests/puppeteer/run.sh --scenario $PWD/ci/tests/puppeteer/scenarios/${{matrix.scenario}}
       - name: Upload screenshots
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         continue-on-error: true
         if: ${{ always() }}
         with:
@@ -187,6 +193,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
@@ -194,7 +202,7 @@ jobs:
           distribution: ${{ env.JDK_DISTRIBUTION }}
           cache: 'gradle'
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Initialize
         run: find ./ci -type f -name "*.sh" -exec chmod +x "{}" \;
       - name: Configure CI
@@ -211,7 +219,7 @@ jobs:
       - name: Set up Gum
         uses: unfunco/setup-gum@main
       - name: Run Tests
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           max_attempts: ${{ env.MAX_ATTEMPTS }}
           retry_on: error
@@ -221,7 +229,7 @@ jobs:
             export RUNNER_OS=${{ runner.os }}
             ./ci/tests/puppeteer/run.sh --scenario $PWD/ci/tests/puppeteer/scenarios/${{matrix.scenario}}
       - name: Upload screenshots
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         continue-on-error: true
         if: ${{ always() }}
         with:
@@ -244,6 +252,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
@@ -251,7 +261,7 @@ jobs:
           distribution: ${{ env.JDK_DISTRIBUTION }}
           cache: 'gradle'
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Initialize
         run: find ./ci -type f -name "*.sh" -exec chmod +x "{}" \;
       - name: Configure CI
@@ -268,7 +278,7 @@ jobs:
       - name: Set up Gum
         uses: unfunco/setup-gum@main
       - name: Run Tests
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           max_attempts: ${{ env.MAX_ATTEMPTS }}
           retry_on: error
@@ -278,7 +288,7 @@ jobs:
             export RUNNER_OS=${{ runner.os }}
             ./ci/tests/puppeteer/run.sh --scenario $PWD/ci/tests/puppeteer/scenarios/${{matrix.scenario}}
       - name: Upload screenshots
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         continue-on-error: true
         if: ${{ always() }}
         with:

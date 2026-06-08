@@ -3,11 +3,15 @@ async function initializeHotKeyOperations() {
         .filter(tab => tab.shortcut)
         .map(tab => tab.shortcut)
         .join(",");
-    shortcuts += ",w,n";
+    shortcuts += ",w,n,esc";
 
     hotkeys(shortcuts, function (event, handler) {
         const key = handler.key.toLowerCase();
         switch (key) {
+        case "esc":
+            event.preventDefault();
+            closeAllDialogs();
+            break;
         case "w":
             event.preventDefault();
             $(`nav.sidebar-navigation ul li[data-tab-index=${Tabs.APPLICATIONS.index}]:visible`).click();
@@ -25,6 +29,19 @@ async function initializeHotKeyOperations() {
             if (currentActiveTab === Tabs.AUTHENTICATION.index && $("#delegatedclients").is(":visible")) {
                 event.preventDefault();
                 $("#newExternalIdentityProvider:visible").click();
+            }
+
+            if (currentActiveTab === Tabs.AUTHENTICATION.index && $("#authenticationhandlers").is(":visible")) {
+                event.preventDefault();
+                $("#newAuthenticationHandlerButton:visible").click();
+            }
+            if (currentActiveTab === Tabs.PERSON_DIRECTORY.index && $("#attributeDefinitionsTab").is(":visible")) {
+                event.preventDefault();
+                $("#newAttributeDefinitionButton:visible").click();
+            }
+            if (currentActiveTab === Tabs.MULTITENANCY.index && $("#registeredTenantsTab").is(":visible")) {
+                event.preventDefault();
+                $("#newTenantButton:visible").click();
             }
             
             break;

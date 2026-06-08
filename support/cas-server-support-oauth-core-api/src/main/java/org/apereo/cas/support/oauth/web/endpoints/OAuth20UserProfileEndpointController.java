@@ -14,9 +14,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.jspecify.annotations.NonNull;
-import org.pac4j.core.context.HttpConstants;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -56,7 +53,7 @@ public class OAuth20UserProfileEndpointController<T extends OAuth20Configuration
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handle user profile request",
         parameters = @Parameter(name = "access_token", in = ParameterIn.QUERY, required = true, description = "Access token"))
-    public ResponseEntity<@NonNull String> handlePostRequest(final HttpServletRequest request,
+    public ResponseEntity<String> handlePostRequest(final HttpServletRequest request,
                                                              final HttpServletResponse response) throws Exception {
         return handleGetRequest(request, response);
     }
@@ -73,7 +70,7 @@ public class OAuth20UserProfileEndpointController<T extends OAuth20Configuration
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handle user profile request",
         parameters = @Parameter(name = "access_token", in = ParameterIn.QUERY, required = true, description = "Access token"))
-    public ResponseEntity<@NonNull String> handleGetRequest(final HttpServletRequest request,
+    public ResponseEntity<String> handleGetRequest(final HttpServletRequest request,
                                                             final HttpServletResponse response) throws Exception {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         val accessTokenResult = FunctionUtils.doAndHandle(() -> getAccessTokenFromRequest(request));
@@ -122,26 +119,12 @@ public class OAuth20UserProfileEndpointController<T extends OAuth20Configuration
                 ticketRegistry.deleteTicket(accessTokenTicket.getId());
             } else {
                 ticketRegistry.updateTicket(accessTokenTicket);
-                FunctionUtils.doAndHandle(_ -> {
-                    val tgt = ticketRegistry.getTicket(accessTokenTicket.getTicketGrantingTicket().getId(), TicketGrantingTicket.class);
+                FunctionUtils.doIfNull(accessTokenTicket.getTicketGrantingTicket(), ticket -> {
+                    val tgt = ticketRegistry.getTicket(ticket.getId(), TicketGrantingTicket.class);
                     ticketRegistry.updateTicket(tgt.update());
                 });
             }
         }
     }
-
-    protected Pair<String, String> getAccessTokenFromRequest(final HttpServletRequest request) {
-        var accessToken = StringUtils.defaultIfBlank(
-            request.getParameter(OAuth20Constants.ACCESS_TOKEN),
-            request.getParameter(OAuth20Constants.TOKEN));
-        if (StringUtils.isBlank(accessToken)) {
-            val authHeader = request.getHeader(HttpConstants.AUTHORIZATION_HEADER);
-            if (StringUtils.isNotBlank(authHeader) && authHeader.toLowerCase(Locale.ENGLISH)
-                .startsWith(OAuth20Constants.TOKEN_TYPE_BEARER.toLowerCase(Locale.ENGLISH) + ' ')) {
-                accessToken = authHeader.substring(OAuth20Constants.TOKEN_TYPE_BEARER.length() + 1);
-            }
-        }
-        LOGGER.debug("[{}]: [{}]", OAuth20Constants.ACCESS_TOKEN, accessToken);
-        return Pair.of(accessToken, extractAccessTokenFrom(accessToken));
-    }
+    
 }

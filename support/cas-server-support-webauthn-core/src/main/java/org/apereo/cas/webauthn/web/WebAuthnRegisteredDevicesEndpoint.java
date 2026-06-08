@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.io.IOUtils;
 import org.jooq.lambda.Unchecked;
-import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.endpoint.Access;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
@@ -44,11 +43,11 @@ import jakarta.servlet.http.HttpServletRequest;
 @Endpoint(id = "webAuthnDevices", defaultAccess = Access.NONE)
 @Slf4j
 public class WebAuthnRegisteredDevicesEndpoint extends BaseCasRestActuatorEndpoint {
-    private final ObjectProvider<@NonNull WebAuthnCredentialRepository> registrationStorage;
+    private final ObjectProvider<WebAuthnCredentialRepository> registrationStorage;
 
     public WebAuthnRegisteredDevicesEndpoint(final CasConfigurationProperties casProperties,
                                              final ConfigurableApplicationContext applicationContext,
-                                             final ObjectProvider<@NonNull WebAuthnCredentialRepository> registrationStorage) {
+                                             final ObjectProvider<WebAuthnCredentialRepository> registrationStorage) {
         super(casProperties, applicationContext);
         this.registrationStorage = registrationStorage;
     }
@@ -122,7 +121,7 @@ public class WebAuthnRegisteredDevicesEndpoint extends BaseCasRestActuatorEndpoi
     @GetMapping(path = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @Operation(summary = "Export device registrations as a zip file")
     @ResponseBody
-    public ResponseEntity<@NonNull Resource> export() {
+    public ResponseEntity<Resource> export() {
         val resource = CompressionUtils.toZipFile(registrationStorage.getObject().stream(),
             Unchecked.function(entry -> {
                 val acct = (CredentialRegistration) entry;

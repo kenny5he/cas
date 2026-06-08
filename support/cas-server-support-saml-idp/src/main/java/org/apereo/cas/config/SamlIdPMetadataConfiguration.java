@@ -40,6 +40,7 @@ import org.apereo.cas.support.saml.services.idp.metadata.plan.SamlRegisteredServ
 import org.apereo.cas.support.saml.util.NonInflatingSaml20ObjectBuilder;
 import org.apereo.cas.support.saml.web.idp.metadata.SamlIdPMetadataController;
 import org.apereo.cas.support.saml.web.idp.metadata.SamlRegisteredServiceCachedMetadataEndpoint;
+import org.apereo.cas.support.saml.web.idp.metadata.SamlRegisteredServiceMetadataEndpoint;
 import org.apereo.cas.support.saml.web.idp.profile.builders.SamlProfileObjectBuilder;
 import org.apereo.cas.support.saml.web.idp.profile.sso.SSOSamlIdPPostProfileHandlerEndpoint;
 import org.apereo.cas.support.saml.web.idp.web.SamlIdPErrorController;
@@ -126,6 +127,15 @@ class SamlIdPMetadataConfiguration {
             @Qualifier(ServicesManager.BEAN_NAME)
             final ServicesManager servicesManager) {
             return new SamlRegisteredServiceMetadataHealthIndicator(samlRegisteredServiceMetadataResolvers, servicesManager);
+        }
+
+        @Bean
+        @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
+        @ConditionalOnAvailableEndpoint
+        public SamlRegisteredServiceMetadataEndpoint samlRegisteredServiceMetadataEndpoint(
+            final CasConfigurationProperties casProperties,
+            final ConfigurableApplicationContext applicationContext) {
+            return new SamlRegisteredServiceMetadataEndpoint(casProperties, applicationContext);
         }
 
         @Bean
@@ -311,7 +321,7 @@ class SamlIdPMetadataConfiguration {
         @Bean(initMethod = "initialize")
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public SamlIdPMetadataGenerator samlIdPMetadataGenerator(
-            @Qualifier("samlIdPMetadataGeneratorConfigurationContext")
+            @Qualifier(SamlIdPMetadataGeneratorConfigurationContext.DEFAULT_BEAN_NAME)
             final SamlIdPMetadataGeneratorConfigurationContext samlIdPMetadataGeneratorConfigurationContext) {
             return new FileSystemSamlIdPMetadataGenerator(samlIdPMetadataGeneratorConfigurationContext);
         }
@@ -412,7 +422,7 @@ class SamlIdPMetadataConfiguration {
     @EnableConfigurationProperties(CasConfigurationProperties.class)
     static class SamlIdPMetadataContextConfiguration {
         @Bean
-        @ConditionalOnMissingBean(name = "samlIdPMetadataGeneratorConfigurationContext")
+        @ConditionalOnMissingBean(name = SamlIdPMetadataGeneratorConfigurationContext.DEFAULT_BEAN_NAME)
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public SamlIdPMetadataGeneratorConfigurationContext samlIdPMetadataGeneratorConfigurationContext(
             final CasConfigurationProperties casProperties,

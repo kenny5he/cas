@@ -9,6 +9,7 @@ import org.apereo.cas.ticket.expiration.BaseDelegatingExpirationPolicy;
 import org.apereo.cas.ticket.expiration.HardTimeoutExpirationPolicy;
 import org.apereo.cas.ticket.expiration.SurrogateSessionExpirationPolicy;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import lombok.RequiredArgsConstructor;
 import lombok.val;
 
 /**
@@ -18,22 +19,19 @@ import lombok.val;
  * @since 6.1.0
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-public record SurrogateAuthenticationExpirationPolicyBuilder(ExpirationPolicyBuilder<TicketGrantingTicket> ticketGrantingTicketExpirationPolicyBuilder,
-                                                             CasConfigurationProperties casProperties) implements ExpirationPolicyBuilder<TicketGrantingTicket> {
+@RequiredArgsConstructor
+public class SurrogateAuthenticationExpirationPolicyBuilder implements ExpirationPolicyBuilder<TicketGrantingTicket> {
     @Serial
     private static final long serialVersionUID = -3597980180617072826L;
+    private final ExpirationPolicyBuilder<TicketGrantingTicket> ticketGrantingTicketExpirationPolicyBuilder;
+    private final CasConfigurationProperties casProperties;
 
     @Override
     public ExpirationPolicy buildTicketExpirationPolicy() {
         return toTicketExpirationPolicy();
     }
 
-    /**
-     * To ticket expiration policy.
-     *
-     * @return the expiration policy
-     */
-    public ExpirationPolicy toTicketExpirationPolicy() {
+    private ExpirationPolicy toTicketExpirationPolicy() {
         val su = casProperties.getAuthn().getSurrogate();
         val surrogatePolicy = new HardTimeoutExpirationPolicy(su.getTgt().getTimeToKillInSeconds());
         val policy = new SurrogateSessionExpirationPolicy();

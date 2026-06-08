@@ -37,7 +37,6 @@ import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.webflow.action.EvaluateAction;
-import org.springframework.webflow.action.ExternalRedirectAction;
 import org.springframework.webflow.action.RenderAction;
 import org.springframework.webflow.action.SetAction;
 import org.springframework.webflow.action.ViewFactoryActionAdapter;
@@ -128,7 +127,7 @@ public abstract class AbstractCasWebflowConfigurer implements CasWebflowConfigur
 
     @Override
     public void initialize() {
-        FunctionUtils.doAndHandle(o -> {
+        FunctionUtils.doAndHandle(_ -> {
             LOGGER.trace("Initializing CAS webflow configuration...");
             if (casProperties.getWebflow().getAutoConfiguration().isEnabled()) {
                 doInitialize();
@@ -700,12 +699,12 @@ public abstract class AbstractCasWebflowConfigurer implements CasWebflowConfigur
     }
 
     @Override
-    public Flow getFlow(final FlowDefinitionRegistry registry, final String id) {
+    public @Nullable Flow getFlow(final FlowDefinitionRegistry registry, final String id) {
         if (registry == null) {
             LOGGER.warn("Flow registry is not configured and/or initialized correctly.");
             return null;
         }
-        val found = List.of(registry.getFlowDefinitionIds()).contains(id);
+        val found = Arrays.stream(registry.getFlowDefinitionIds()).anyMatch(id::equals);
         if (found) {
             return (Flow) registry.getFlowDefinition(id);
         }
@@ -833,7 +832,7 @@ public abstract class AbstractCasWebflowConfigurer implements CasWebflowConfigur
      * @param act the act
      * @return the expression string from action
      */
-    public Expression getExpressionStringFromAction(final EvaluateAction act) {
+    public @Nullable Expression getExpressionStringFromAction(final EvaluateAction act) {
         val field = ReflectionUtils.findField(act.getClass(), "expression");
         Assert.notNull(field, "expression cannot be null");
         ReflectionUtils.makeAccessible(field);

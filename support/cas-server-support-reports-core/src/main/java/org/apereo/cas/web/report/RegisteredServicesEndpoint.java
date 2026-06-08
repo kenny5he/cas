@@ -77,7 +77,6 @@ public class RegisteredServicesEndpoint extends BaseCasRestActuatorEndpoint {
      * Handle and produce a list of services from registry.
      *
      * @return collection of services
-     * @throws Exception the exception
      */
     @Operation(summary = "Handle and produce a list of services from registry")
     @GetMapping(produces = {
@@ -88,7 +87,7 @@ public class RegisteredServicesEndpoint extends BaseCasRestActuatorEndpoint {
         MediaType.APPLICATION_FORM_URLENCODED_VALUE,
         MEDIA_TYPE_CAS_YAML
     })
-    public ResponseEntity<@NonNull String> handle() throws Exception {
+    public ResponseEntity<@NonNull String> handle() {
         return ResponseEntity.ok(MAPPER.writeValueAsString(
             servicesManager.getObject()
                 .load()
@@ -129,7 +128,6 @@ public class RegisteredServicesEndpoint extends BaseCasRestActuatorEndpoint {
      *
      * @param type the simple name of the CAS service type (i.e {@link org.apereo.cas.services.CasRegisteredService}
      * @return the response entity
-     * @throws Exception the exception
      */
     @Operation(summary = "Fetch services by their type")
     @GetMapping(path = "type/{type}", produces = {
@@ -142,7 +140,7 @@ public class RegisteredServicesEndpoint extends BaseCasRestActuatorEndpoint {
     })
     public ResponseEntity<@NonNull String> fetchServicesByType(
         @PathVariable
-        final String type) throws Exception {
+        final String type) {
         val services = servicesManager.getObject().findServiceBy(registeredService ->
             registeredService.getClass().getSimpleName().equalsIgnoreCase(type));
         return ResponseEntity.ok(MAPPER.writeValueAsString(services));
@@ -174,7 +172,6 @@ public class RegisteredServicesEndpoint extends BaseCasRestActuatorEndpoint {
      *
      * @param id the id
      * @return the registered service
-     * @throws Exception the exception
      */
     @Operation(summary = "Delete registered service by id")
     @DeleteMapping(path = "{id}",
@@ -187,7 +184,7 @@ public class RegisteredServicesEndpoint extends BaseCasRestActuatorEndpoint {
         })
     public ResponseEntity<@NonNull String> deleteService(
         @PathVariable
-        final String id) throws Exception {
+        final String id) {
         if (NumberUtils.isDigits(id)) {
             val svc = servicesManager.getObject().findServiceBy(Long.parseLong(id));
             if (svc != null) {
@@ -272,8 +269,7 @@ public class RegisteredServicesEndpoint extends BaseCasRestActuatorEndpoint {
     @Operation(summary = "Export registered services as a single JSON file",
         parameters = @Parameter(name = "id", required = true, description = "The id of the registered service to export", in = ParameterIn.PATH))
     public ResponseEntity<@NonNull Resource> export(
-        @PathVariable("id")
-        final long id) throws Exception {
+        @PathVariable final long id) throws Exception {
         val registeredServiceSerializer = new RegisteredServiceJsonSerializer(applicationContext);
         val registeredService = servicesManager.getObject().findServiceBy(id);
         val fileName = String.format("%s-%s", registeredService.getName(), registeredService.getId());

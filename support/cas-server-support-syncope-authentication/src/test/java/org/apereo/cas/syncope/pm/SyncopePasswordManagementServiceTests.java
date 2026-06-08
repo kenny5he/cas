@@ -44,7 +44,9 @@ import static org.mockito.Mockito.*;
         "cas.authn.pm.syncope.attribute-mappings.syncopeUserAttr_givenName=name",
         "cas.authn.pm.syncope.attribute-mappings.syncopeUserAttr_email=email",
         "cas.authn.pm.syncope.attribute-mappings.syncopeUserAttr_phoneNumber=phoneNumber",
-        "cas.authn.pm.syncope.attribute-mappings.username=username"
+        "cas.authn.pm.syncope.attribute-mappings.username=username",
+
+        "cas.authn.pm.core.password-policy-pattern=^(?=.*[A-Z]).{5,}"
     })
 class SyncopePasswordManagementServiceTests {
 
@@ -76,6 +78,13 @@ class SyncopePasswordManagementServiceTests {
         val question = questions.keySet().stream().toList().getFirst();
         assertEquals("What is your favorite city?", question);
         assertTrue(passwordChangeService.isAnswerValidForSecurityQuestion(query, question, UUID.randomUUID().toString(), "Paris"));
+    }
+
+    @Test
+    void verifyNoSecurityQuestions() throws Throwable {
+        val query = PasswordManagementQuery.builder().username("casuser").build();
+        val questions = passwordChangeService.getSecurityQuestions(query);
+        assertTrue(questions.isEmpty());
     }
 
     @Test
@@ -115,5 +124,27 @@ class SyncopePasswordManagementServiceTests {
             "Password123!".toCharArray()
         );
         assertTrue(passwordChangeService.change(passwordChangeRequest));
+    }
+
+    @Test
+    void verifyWeakPasswordDetection() throws Throwable {
+        assertNotNull(syncopeAuthenticationHandlers);
+        val syncopeAuthenticationHandler = syncopeAuthenticationHandlers.first();
+        val credential = CoreAuthenticationTestUtils.getCredentialsWithDifferentUsernameAndPassword(
+            "weakPasswordUser",
+            "Test");
+        assertDoesNotThrow(() -> syncopeAuthenticationHandler.authenticate(credential, mock(Service.class)));
+
+        val passwordChangeRequest = new PasswordChangeRequest(
+            "weakPasswordUser",
+            "Test".toCharArray(),
+            "Password123!".toCharArray(),
+            "Password123!".toCharArray());
+
+        assertTrue(passwordChangeService.change(passwordChangeRequest));
+        assertThrows(FailedLoginException.class,
+                     () -> syncopeAuthenticationHandler.authenticate(credential, mock(Service.class)));
+        credential.setPassword("Password123!".toCharArray());
+        assertDoesNotThrow(() -> syncopeAuthenticationHandler.authenticate(credential, mock(Service.class)));
     }
 }

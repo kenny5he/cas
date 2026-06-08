@@ -46,6 +46,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import jakarta.servlet.http.HttpServletRequest;
@@ -330,7 +331,8 @@ public class CasDocumentationApplication {
             LOGGER.debug("Unable to create directory");
         }
 
-        var subTypes = ReflectionUtils.findClassesWithAnnotationsInPackage(List.of(ConditionalOnFeatureEnabled.class), CentralAuthenticationService.NAMESPACE);
+        var subTypes = ReflectionUtils.findClassesWithAnnotationsInPackage(List.of(),
+            List.of(ConditionalOnFeatureEnabled.class), CentralAuthenticationService.NAMESPACE);
         var properties = new ArrayList<Map<?, ?>>();
 
         var allToggleProps = new HashSet<String>();
@@ -492,7 +494,11 @@ public class CasDocumentationApplication {
             methods.forEach(Unchecked.consumer(method -> {
                 var get = method.getAnnotation(GetMapping.class);
                 var map = new LinkedHashMap<>();
-                var paths = Arrays.stream(get.path())
+                var initial = get.path();
+                if (initial.length == 0) {
+                    initial = get.value();
+                }
+                var paths = Arrays.stream(initial)
                     .map(path -> StringUtils.isBlank(path)
                         ? endpointId
                         : endpointId + Strings.CI.prependIfMissing(path, "/"))
@@ -527,10 +533,17 @@ public class CasDocumentationApplication {
             methods.forEach(Unchecked.consumer(method -> {
                 var delete = method.getAnnotation(DeleteMapping.class);
                 var map = new LinkedHashMap<>();
-                var paths = Arrays.stream(delete.path())
-                    .map(path -> StringUtils.isBlank(path) ? endpointId : endpointId
-                        + Strings.CI.prependIfMissing(path, "/"))
-                    .findFirst().orElse(null);
+                var initial = delete.path();
+                if (initial.length == 0) {
+                    initial = delete.value();
+                }
+                var paths = Arrays.stream(initial)
+                    .map(path -> StringUtils.isBlank(path)
+                        ? endpointId
+                        : endpointId + Strings.CI.prependIfMissing(path, "/"))
+                    .findFirst()
+                    .orElse(null);
+                
                 map.put("method", RequestMethod.DELETE.name());
                 map.put("path", Optional.ofNullable(paths).orElse(endpointId));
                 map.put("name", endpointId);
@@ -559,11 +572,17 @@ public class CasDocumentationApplication {
             methods.forEach(Unchecked.consumer(method -> {
                 var post = method.getAnnotation(PostMapping.class);
                 var map = new LinkedHashMap<>();
-                var paths = Arrays.stream(post.path())
+
+                var initial = post.path();
+                if (initial.length == 0) {
+                    initial = post.value();
+                }
+                var paths = Arrays.stream(initial)
                     .map(path -> StringUtils.isBlank(path)
                         ? endpointId
                         : endpointId + Strings.CI.prependIfMissing(path, "/"))
-                    .findFirst().orElse(null);
+                    .findFirst()
+                    .orElse(null);
                 map.put("method", RequestMethod.POST.name());
                 map.put("path", Optional.ofNullable(paths).orElse(endpointId));
                 map.put("name", endpointId);
@@ -592,11 +611,16 @@ public class CasDocumentationApplication {
             methods.forEach(Unchecked.consumer(method -> {
                 var patch = method.getAnnotation(PatchMapping.class);
                 var map = new LinkedHashMap<>();
-                var paths = Arrays.stream(patch.path())
+                var initial = patch.path();
+                if (initial.length == 0) {
+                    initial = patch.value();
+                }
+                var paths = Arrays.stream(initial)
                     .map(path -> StringUtils.isBlank(path)
                         ? endpointId
                         : endpointId + Strings.CI.prependIfMissing(path, "/"))
-                    .findFirst().orElse(null);
+                    .findFirst()
+                    .orElse(null);
                 map.put("method", RequestMethod.PATCH.name());
                 map.put("path", Optional.ofNullable(paths).orElse(endpointId));
                 map.put("name", endpointId);
@@ -625,11 +649,16 @@ public class CasDocumentationApplication {
             methods.forEach(Unchecked.consumer(method -> {
                 var put = method.getAnnotation(PutMapping.class);
                 var map = new LinkedHashMap<>();
-                var paths = Arrays.stream(put.path())
+                var initial = put.path();
+                if (initial.length == 0) {
+                    initial = put.value();
+                }
+                var paths = Arrays.stream(initial)
                     .map(path -> StringUtils.isBlank(path)
                         ? endpointId
                         : endpointId + Strings.CI.prependIfMissing(path, "/"))
-                    .findFirst().orElse(null);
+                    .findFirst()
+                    .orElse(null);
                 map.put("method", RequestMethod.PUT.name());
                 map.put("path", Optional.ofNullable(paths).orElse(endpointId));
                 map.put("name", endpointId);
@@ -777,6 +806,18 @@ public class CasDocumentationApplication {
                         paramData.put("description", "Path variable selector");
                         paramData.put("required", true);
                         paramData.put("selector", true);
+                        parameters.add(paramData);
+                    }
+                    var requestHeaderAnn = parameter.getAnnotation(RequestHeader.class);
+                    if (requestHeaderAnn != null) {
+                        var paramData = new LinkedHashMap<String, Object>();
+                        var name = StringUtils.defaultIfBlank(requestHeaderAnn.name(), requestHeaderAnn.value());
+                        name = StringUtils.defaultIfBlank(name, parameter.getName());
+                        paramData.put("name", name);
+                        paramData.put("description", "Request header");
+                        paramData.put("required", requestHeaderAnn.required());
+                        paramData.put("defaultValue", requestHeaderAnn.defaultValue());
+                        paramData.put("header", true);
                         parameters.add(paramData);
                     }
                 }

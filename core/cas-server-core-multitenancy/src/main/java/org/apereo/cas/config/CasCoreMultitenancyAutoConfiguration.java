@@ -5,6 +5,7 @@ import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.multitenancy.DefaultTenantExtractor;
 import org.apereo.cas.multitenancy.DefaultTenantsManager;
+import org.apereo.cas.multitenancy.MultitenancyEndpoint;
 import org.apereo.cas.multitenancy.TenantExtractor;
 import org.apereo.cas.multitenancy.TenantRoutingFilter;
 import org.apereo.cas.multitenancy.TenantWebflowDecorator;
@@ -18,8 +19,9 @@ import org.apereo.cas.web.CasWebSecurityConfigurer;
 import org.apereo.cas.web.flow.decorator.WebflowDecorator;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import lombok.val;
-import org.jspecify.annotations.NonNull;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -85,7 +87,7 @@ public class CasCoreMultitenancyAutoConfiguration {
         return new CasWebSecurityConfigurer<>() {
             @Override
             @CanIgnoreReturnValue
-            public CasWebSecurityConfigurer<HttpSecurity> configure(final HttpSecurity http) throws Exception {
+            public CasWebSecurityConfigurer<HttpSecurity> configure(final HttpSecurity http) {
                 http.authorizeHttpRequests(customizer -> {
                     val authEndpoints = PathPatternRequestMatcher.withDefaults().matcher("/tenants/**");
                     customizer.requestMatchers(authEndpoints).permitAll();
@@ -113,11 +115,11 @@ public class CasCoreMultitenancyAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = "tenantRoutingFilter")
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public FilterRegistrationBean<@NonNull TenantRoutingFilter> tenantRoutingFilter(
+    public FilterRegistrationBean<TenantRoutingFilter> tenantRoutingFilter(
         final ConfigurableApplicationContext applicationContext,
         @Qualifier(TenantExtractor.BEAN_NAME)
         final TenantExtractor tenantExtractor) {
-        val fr = new FilterRegistrationBean<@NonNull TenantRoutingFilter>();
+        val fr = new FilterRegistrationBean<TenantRoutingFilter>();
         fr.setFilter(new TenantRoutingFilter(tenantExtractor));
         fr.addUrlPatterns("/*");
         fr.setOrder(Ordered.HIGHEST_PRECEDENCE + 2);
@@ -125,5 +127,16 @@ public class CasCoreMultitenancyAutoConfiguration {
         fr.setName("tenantRoutingFilter");
         fr.setEnabled(CONDITION.given(applicationContext).get());
         return fr;
+    }
+
+    @Bean
+    @ConditionalOnAvailableEndpoint
+    @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
+    public MultitenancyEndpoint multitenancyEndpoint(
+        final ConfigurableApplicationContext applicationContext,
+        @Qualifier(TenantExtractor.BEAN_NAME)
+        final ObjectProvider<TenantExtractor> tenantExtractor,
+        final CasConfigurationProperties casProperties) {
+        return new MultitenancyEndpoint(casProperties, applicationContext, tenantExtractor);
     }
 }
