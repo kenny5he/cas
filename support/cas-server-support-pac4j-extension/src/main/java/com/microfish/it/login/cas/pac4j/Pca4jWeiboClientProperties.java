@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-package com.microfoolish.it.login.cas.pac4j;
+package com.microfish.it.login.cas.pac4j;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
-import org.pac4j.oauth.client.WechatClient;
 import org.apereo.cas.configuration.model.support.pac4j.Pac4jIdentifiableClientProperties;
 
 /**
- * 微信
+ * 微博
+ *
  * @author kenny.he
- * @since 2022/08/07
+ * @since 2022/08/08
  */
-@Getter
-@Setter
-@Accessors(chain = true)
-public class Pca4jWeChatClientProperties extends Pac4jIdentifiableClientProperties {
-
-    private WechatClient.WechatScope scope;
+public class Pca4jWeiboClientProperties extends Pac4jIdentifiableClientProperties {
 }

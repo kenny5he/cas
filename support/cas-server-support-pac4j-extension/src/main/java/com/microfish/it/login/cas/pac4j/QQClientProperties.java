@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.microfoolish.it.login.cas.pac4j;
+package com.microfish.it.login.cas.pac4j;
 
 import org.apereo.cas.configuration.model.support.pac4j.Pac4jIdentifiableClientProperties;
 

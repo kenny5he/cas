@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.microfoolish.it.login.cas.pac4j.scribe.service;
+package com.microfish.it.login.cas.pac4j.scribe.service;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -31,8 +31,8 @@ import com.github.scribejava.core.model.Response;
 import com.github.scribejava.core.oauth.AccessTokenRequestParams;
 import org.pac4j.scribe.service.WechatService;
 
-import com.microfoolish.it.login.cas.pac4j.scribe.extractors.WorkWechatJsonExtractor;
-import com.microfoolish.it.login.cas.pac4j.scribe.model.WorkWechatConfirmCode;
+import com.microfish.it.login.cas.pac4j.scribe.extractors.WorkWechatJsonExtractor;
+import com.microfish.it.login.cas.pac4j.scribe.model.WorkWechatConfirmCode;
 
 /**
  * @author kenny.he

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.microfoolish.it.login.cas.pac4j.scribe.extractors;
+package com.microfish.it.login.cas.pac4j.scribe.extractors;
 
 import java.io.IOException;
 
@@ -24,8 +24,8 @@ import com.github.scribejava.core.model.OAuth2AccessToken;
 import com.github.scribejava.core.model.OAuthConstants;
 import com.github.scribejava.core.model.Response;
 import com.github.scribejava.core.utils.Preconditions;
-import com.microfoolish.it.login.cas.pac4j.scribe.model.WorkWechatConfirmCode;
-import com.microfoolish.it.login.cas.pac4j.scribe.model.WorkWechatToken;
+import com.microfish.it.login.cas.pac4j.scribe.model.WorkWechatConfirmCode;
+import com.microfish.it.login.cas.pac4j.scribe.model.WorkWechatToken;
 
 /**
  * 企业微信

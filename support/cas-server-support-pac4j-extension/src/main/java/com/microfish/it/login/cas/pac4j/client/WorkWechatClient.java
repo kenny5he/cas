@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.microfoolish.it.login.cas.pac4j.client;
+package com.microfish.it.login.cas.pac4j.client;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +22,9 @@ import java.util.Locale;
 
 import org.pac4j.oauth.client.OAuth20Client;
 
-import com.microfoolish.it.login.cas.pac4j.profile.work.wechat.WorkWechatProfileCreator;
-import com.microfoolish.it.login.cas.pac4j.profile.work.wechat.WorkWechatProfileDefinition;
-import com.microfoolish.it.login.cas.pac4j.scribe.builder.api.WorkWechatApi;
+import com.microfish.it.login.cas.pac4j.profile.work.wechat.WorkWechatProfileCreator;
+import com.microfish.it.login.cas.pac4j.profile.work.wechat.WorkWechatProfileDefinition;
+import com.microfish.it.login.cas.pac4j.scribe.builder.api.WorkWechatApi;
 
 public class WorkWechatClient extends OAuth20Client {
 

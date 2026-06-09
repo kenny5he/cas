@@ -14,15 +14,28 @@
  * limitations under the License.
  */
 
-package com.microfoolish.it.login.cas.pac4j;
+package com.microfish.it.login.cas.pac4j;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apereo.cas.configuration.model.support.pac4j.Pac4jIdentifiableClientProperties;
+import org.pac4j.oauth.client.WechatClient;
+
+import com.microfish.it.login.cas.pac4j.client.WorkWechatClient;
 
 /**
- * 微博
+ * 企业微信
  *
  * @author kenny.he
- * @since 2022/08/08
+ * @since 2022/08/07
  */
-public class Pca4jWeiboClientProperties extends Pac4jIdentifiableClientProperties {
+@Getter
+@Setter
+@Accessors(chain = true)
+public class Pca4jWorkWeChatClientProperties extends Pac4jIdentifiableClientProperties {
+
+    private WorkWechatClient.WorkWechatScope scope;
+
+    private String agentId;
 }

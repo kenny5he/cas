@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.microfoolish.it.login.cas.pac4j;
+package com.microfish.it.login.cas.pac4j;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -24,16 +24,26 @@ import org.apereo.cas.configuration.model.support.pac4j.Pac4jDelegatedAuthentica
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
+import java.io.Serial;
+
 @Getter
 @Setter
 @Accessors(chain = true)
-@ConfigurationProperties(value = "cas.authn.pac4j")
-public class CustomPac4jAuthenticationProperties extends Pac4jDelegatedAuthenticationProperties {
+@ConfigurationProperties(value = "cas.authn.pac4j.ext")
+public class ExtPac4jAuthenticationProperties extends Pac4jDelegatedAuthenticationProperties {
+    @Serial
+    private static final long serialVersionUID = 6580908230560910363L;
+
     @NestedConfigurationProperty
     private Pca4jWorkWeChatClientProperties workWechat = new Pca4jWorkWeChatClientProperties();
 
     @NestedConfigurationProperty
     private Pca4jWeChatClientProperties wechat = new Pca4jWeChatClientProperties();
 
+    @NestedConfigurationProperty
+    private Pca4jWeiboClientProperties weibo = new Pca4jWeiboClientProperties();
+
+    @NestedConfigurationProperty
+    private QQClientProperties qq = new QQClientProperties();
 
 }

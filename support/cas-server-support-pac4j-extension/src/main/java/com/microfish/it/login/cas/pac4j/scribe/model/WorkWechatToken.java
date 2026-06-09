@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.microfoolish.it.login.cas.pac4j.scribe.model;
+package com.microfish.it.login.cas.pac4j.scribe.model;
 
 import com.github.scribejava.core.model.OAuth2AccessToken;
 

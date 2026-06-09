@@ -14,43 +14,26 @@
  * limitations under the License.
  */
 
-package com.microfoolish.it.login.cas.pac4j.scribe.model;
+package com.microfish.it.login.cas.pac4j.scribe.model;
 
 import com.github.scribejava.core.model.Token;
 
-
 /**
- * 用户 Ticket
+ *
  *
  * @author kenny.he
  * @since 2022/08/10
  */
-public class WorkWechatTicketToken extends Token {
+public class WorkWechatConfirmCode extends Token {
 
-    private static final long serialVersionUID = 4924218542566302800L;
+    private String code;
 
-    private String ticket;
-
-    private String userId;
-
-    private String deviceId;
-
-    public WorkWechatTicketToken(String ticket,String userId, String deviceId) {
+    public WorkWechatConfirmCode(String token) {
         super(null);
-        this.ticket = ticket;
-        this.userId = userId;
-        this.deviceId = deviceId;
+        this.code = token;
     }
 
-    public String getTicket() {
-        return ticket;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public String getDeviceId() {
-        return deviceId;
+    public String getCode() {
+        return code;
     }
 }

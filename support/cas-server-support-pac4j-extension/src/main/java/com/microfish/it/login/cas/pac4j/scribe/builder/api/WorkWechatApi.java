@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.microfoolish.it.login.cas.pac4j.scribe.builder.api;
+package com.microfish.it.login.cas.pac4j.scribe.builder.api;
 
 import com.github.scribejava.core.builder.api.DefaultApi20;
 import com.github.scribejava.core.extractors.TokenExtractor;
@@ -30,9 +30,9 @@ import com.github.scribejava.core.oauth2.bearersignature.BearerSignatureURIQuery
 import com.github.scribejava.core.oauth2.clientauthentication.ClientAuthentication;
 import com.github.scribejava.core.oauth2.clientauthentication.RequestBodyAuthenticationScheme;
 
-import com.microfoolish.it.login.cas.pac4j.client.WorkWechatClient;
-import com.microfoolish.it.login.cas.pac4j.scribe.extractors.WorkWechatJsonExtractor;
-import com.microfoolish.it.login.cas.pac4j.scribe.service.WorkWechatService;
+import com.microfish.it.login.cas.pac4j.client.WorkWechatClient;
+import com.microfish.it.login.cas.pac4j.scribe.extractors.WorkWechatJsonExtractor;
+import com.microfish.it.login.cas.pac4j.scribe.service.WorkWechatService;
 
 import java.io.OutputStream;
 import java.util.Map;
