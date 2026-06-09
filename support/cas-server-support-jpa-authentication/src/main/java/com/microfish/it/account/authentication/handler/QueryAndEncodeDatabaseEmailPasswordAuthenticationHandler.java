@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package com.microfish.it.account.cas.acct;
+package com.microfish.it.account.authentication.handler;
 
-import org.apereo.cas.acct.AccountRegistrationProperty;
+import org.apereo.cas.authentication.principal.PrincipalFactory;
+import org.apereo.cas.configuration.model.support.jdbc.authn.QueryEncodeJdbcAuthenticationProperties;
 
-import java.util.List;
-import java.util.Map;
+public class QueryAndEncodeDatabaseEmailPasswordAuthenticationHandler extends AbstractJpaUsernamePasswordAuthenticationHandler<QueryEncodeJdbcAuthenticationProperties> {
 
-public interface RegistrationPropertyService {
-
-    void save(ExtAccountRegistrationProperty accountRegistrationProperty);
-
-    void batch(Map<String, AccountRegistrationProperty> map);
-
-    List<ExtAccountRegistrationProperty> find();
+    protected QueryAndEncodeDatabaseEmailPasswordAuthenticationHandler(String name, PrincipalFactory principalFactory, Integer order) {
+        super(name, principalFactory, order);
+    }
 }

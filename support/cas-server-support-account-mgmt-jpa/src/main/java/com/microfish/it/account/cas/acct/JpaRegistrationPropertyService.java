@@ -16,10 +16,51 @@
 
 package com.microfish.it.account.cas.acct;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
+import org.apereo.cas.acct.AccountRegistrationProperty;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class JpaRegistrationPropertyService implements RegistrationPropertyService {
 
+    public static final String PERSISTENCE_UNIT_NAME = "jpaRegistrationPropertyContext";
 
+    @Getter
+    @PersistenceContext(unitName = PERSISTENCE_UNIT_NAME)
+    private EntityManager entityManager;
+
+    public JpaRegistrationPropertyService() {
+        // this.entityManager = recreateEntityManagerIfNecessary(PERSISTENCE_UNIT_NAME);
+    }
+
+
+    @Override
+    public void save(ExtAccountRegistrationProperty accountRegistrationProperty) {
+
+    }
+
+    @Override
+    public void batch(Map<String, AccountRegistrationProperty> map) {
+        map.forEach((key, value) -> {
+            if (value instanceof ExtAccountRegistrationProperty extValue) {
+                save(extValue);
+            } else {
+                // @TODO
+            }
+        });
+    }
+
+    @Override
+    public List<ExtAccountRegistrationProperty> find() {
+        val query = String.format("SELECT r FROM %s r where category = 'account-registration'", JpaRegistrationPropertyEntity.ENTITY_NAME);
+        val list = entityManager.createQuery(query, JpaRegistrationPropertyEntity.class).getResultList();
+        return null;
+    }
 }

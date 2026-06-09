@@ -20,7 +20,9 @@ import lombok.RequiredArgsConstructor;
 import org.apereo.cas.acct.AccountRegistrationProperty;
 import org.apereo.cas.acct.AccountRegistrationPropertyLoader;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class JpaAccountRegistrationPropertyLoader implements AccountRegistrationPropertyLoader {
@@ -29,11 +31,19 @@ public class JpaAccountRegistrationPropertyLoader implements AccountRegistration
 
     @Override
     public Map<String, AccountRegistrationProperty> load() {
-        return Map.of();
+        List<ExtAccountRegistrationProperty> properties = registeredSelectionService.find();
+        return properties.stream()
+            .collect(Collectors.toMap(ExtAccountRegistrationProperty::getName, property -> {
+                property.setValues(
+                    property.getValues().stream()
+                        .map(AccountRegistrationPropertyValue::getValue).collect(Collectors.toList()));
+                return property;
+            }));
     }
 
     @Override
     public AccountRegistrationPropertyLoader store(Map<String, AccountRegistrationProperty> map) {
-        return null;
+        registeredSelectionService.batch(map);
+        return this;
     }
 }

@@ -21,6 +21,7 @@ dependencies {
     compileOnly project(":support:cas-server-support-scim-core")
     compileOnly project(":support:cas-server-support-ldap-core")
 
+    implementation libraries.pac4joidcoauth
     implementation libraries.pac4jcore
     implementation libraries.pac4jcas
     implementation libraries.nimbus
