@@ -1,9 +1,9 @@
 ## 客制化 注册
 1. 新建模块
-    1. cas-server-support-account-mgmt-custom
+    1. cas-server-support-account-mgmt-jdbc
     2. grade 文件: settings.gradle
        ```
-       include "support:cas-server-support-account-mgmt-custom"
+       include "support:cas-server-support-account-mgmt-jdbc"
        ```
 2. 创建 注册选项 表信息
 ```sql

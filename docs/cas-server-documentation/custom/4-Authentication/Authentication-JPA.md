@@ -13,10 +13,10 @@
 
 ### 客制化 查询认证 SQL
 1. 新建模块
-   1. cas-server-support-jdbc-authentication-custom
+   1. cas-server-support-jpa-authentication
    2. grade 文件: settings.gradle
       ```
-      include "support:cas-server-support-jdbc-authentication-custom"
+      include "support:cas-server-support-jpa-authentication"
       ```
 2. 用户名认证查询处理类
    1. UserNameQueryAuthenticationHandler

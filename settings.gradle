@@ -182,6 +182,7 @@ include "docs:cas-server-documentation"
 include "support:cas-server-support-account-mgmt-api"
 include "support:cas-server-support-account-mgmt-core"
 include "support:cas-server-support-account-mgmt"
+include "support:cas-server-support-account-mgmt-jpa"
 include "support:cas-server-support-acme"
 include "support:cas-server-support-actions-core"
 include "support:cas-server-support-actions"
@@ -314,6 +315,7 @@ include "support:cas-server-support-jdbc-drivers"
 include "support:cas-server-support-jdbc-monitor"
 include "support:cas-server-support-amqp-ticket-registry"
 include "support:cas-server-support-jmx"
+include "support:cas-server-support-jpa-authentication"
 include "support:cas-server-support-jpa-eclipselink"
 include "support:cas-server-support-jpa-hibernate"
 include "support:cas-server-support-jpa-service-registry"
@@ -542,3 +544,5 @@ include "webapp:cas-server-webapp-tomcat"
 include "webapp:cas-server-webapp-undertow"
 
 include 'support:cas-server-support-pac4j-extension'
+include 'support:cas-server-support-account-mgmt-jdbc'
+include 'support:cas-server-support-jpa-authentication'
