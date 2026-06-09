@@ -542,7 +542,3 @@ include "webapp:cas-server-webapp-native"
 include "webapp:cas-server-webapp-jetty"
 include "webapp:cas-server-webapp-tomcat"
 include "webapp:cas-server-webapp-undertow"
-
-include 'support:cas-server-support-pac4j-extension'
-include 'support:cas-server-support-account-mgmt-jdbc'
-include 'support:cas-server-support-jpa-authentication'
