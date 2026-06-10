@@ -38,6 +38,9 @@ public class ExtPac4jAuthenticationProperties extends Pac4jDelegatedAuthenticati
     private Pca4jWorkWeChatClientProperties workWechat = new Pca4jWorkWeChatClientProperties();
 
     @NestedConfigurationProperty
+    private Pca4jFeiShuClientProperties feishu = new Pca4jFeiShuClientProperties();
+
+    @NestedConfigurationProperty
     private Pca4jWeChatClientProperties wechat = new Pca4jWeChatClientProperties();
 
     @NestedConfigurationProperty
@@ -45,5 +48,8 @@ public class ExtPac4jAuthenticationProperties extends Pac4jDelegatedAuthenticati
 
     @NestedConfigurationProperty
     private QQClientProperties qq = new QQClientProperties();
+
+    @NestedConfigurationProperty
+    private Pca4jAlipayClientProperties alipay = new Pca4jAlipayClientProperties();
 
 }

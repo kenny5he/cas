@@ -24,6 +24,8 @@ import org.pac4j.oauth.client.WechatClient;
 
 import com.microfish.it.login.cas.pac4j.client.WorkWechatClient;
 
+import java.io.Serial;
+
 /**
  * 企业微信
  *
@@ -34,6 +36,9 @@ import com.microfish.it.login.cas.pac4j.client.WorkWechatClient;
 @Setter
 @Accessors(chain = true)
 public class Pca4jWorkWeChatClientProperties extends Pac4jIdentifiableClientProperties {
+
+    @Serial
+    private static final long serialVersionUID = -810745011396705233L;
 
     private WorkWechatClient.WorkWechatScope scope;
 

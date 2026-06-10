@@ -19,23 +19,20 @@ package com.microfish.it.login.cas.pac4j;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.pac4j.oauth.client.WechatClient;
 import org.apereo.cas.configuration.model.support.pac4j.Pac4jIdentifiableClientProperties;
 
 import java.io.Serial;
 
 /**
- * 微信
+ * 飞书
  * @author kenny.he
- * @since 2022/08/07
+ * @since 2026/06/10
  */
 @Getter
 @Setter
 @Accessors(chain = true)
-public class Pca4jWeChatClientProperties extends Pac4jIdentifiableClientProperties {
-
+public class Pca4jFeiShuClientProperties extends Pac4jIdentifiableClientProperties {
     @Serial
-    private static final long serialVersionUID = 1203759708921831943L;
+    private static final long serialVersionUID = 5089432545960571401L;
 
-    private WechatClient.WechatScope scope;
 }

@@ -65,7 +65,6 @@ public class WorkWechatClient extends OAuth20Client {
     protected void internalInit(final boolean forceReinit) {
         setProfileCreatorIfUndefined(new WorkWechatProfileCreator(configuration, this));
         // 设置跳转路径 Scope
-        // defaultRedirectionActionBuilder(new Wechat);
         super.internalInit(forceReinit);
         configuration.setScope(getOAuthScope());
         configuration.setApi(new WorkWechatApi(agentId));
