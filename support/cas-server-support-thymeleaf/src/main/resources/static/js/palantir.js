@@ -1,5 +1,51 @@
 let notyf = null;
 
+class PalantirDashboardConfiguration {
+    static all() {
+        return window.palantirDashboardConfiguration || {};
+    }
+
+    static casServerPrefix() {
+        return this.all().casServerPrefix;
+    }
+
+    static actuatorEndpoints() {
+        return this.all().actuatorEndpoints || {};
+    }
+
+    static serviceDefinitions() {
+        return this.all().serviceDefinitions || {};
+    }
+
+    static supportedServiceTypes() {
+        return this.all().supportedServiceTypes || {};
+    }
+
+    static serviceProperties() {
+        return this.all().serviceProperties || {};
+    }
+
+    static availableMultifactorProviders() {
+        return this.all().availableMultifactorProviders || [];
+    }
+
+    static scriptFactoryAvailable() {
+        return this.all().scriptFactoryAvailable || false;
+    }
+
+    static mutablePropertySources() {
+        return this.all().mutablePropertySources || [];
+    }
+
+    static mutablePropertySourcesAvailable() {
+        return this.all().mutablePropertySourcesAvailable || false;
+    }
+
+    static trumbowygIconsPath() {
+        return this.all().trumbowygIconsPath;
+    }
+}
+
 async function initializePalantir() {
     try {
         setTimeout(() => {
@@ -75,6 +121,11 @@ document.addEventListener("DOMContentLoaded", () => {
         hideBanner();
         const index = selectSidebarMenuButton(this);
         activateDashboardTab(index);
+    }).on("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            $(this).trigger("click");
+        }
     });
     Swal.fire({
         icon: "info",

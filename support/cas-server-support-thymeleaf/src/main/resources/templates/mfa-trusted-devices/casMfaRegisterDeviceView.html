@@ -58,6 +58,7 @@
                     </div>
 
                     <select name="timeUnit" id="timeUnit" class="custom-select" th:field="*{timeUnit}"
+                            aria-label="Expiration time unit"
                             onchange="let hide = this.value!=='FOREVER'; $('#expirationField').toggle(hide)">
                         <option value="SECONDS" th:text="#{screen.consent.options.timeunit.seconds}">Seconds</option>
                         <option value="MINUTES" th:text="#{screen.consent.options.timeunit.minutes}">Minutes</option>
@@ -71,11 +72,11 @@
                 </div>
 
                 <div class="d-flex mt-3">
-                    <button class="mdc-button mdc-button--raised btn btn-primary" accesskey="s">
+                    <button class="mdc-button mdc-button--raised btn btn-primary drop-button">
                         <span class="mdc-button__label"
                             th:text="#{cas.mfa.registerdevice.button.register}">Register</span>
                     </button>&nbsp;
-                    <button class="mdc-button mdc-button--raised btn btn-primary" accesskey="k" formnovalidate
+                    <button class="mdc-button mdc-button--raised btn btn-primary drop-button" formnovalidate
                         onclick="$('#eventId').val('skip');">
                         <span class="mdc-button__label" th:text="#{cas.mfa.registerdevice.button.skip}">Skip</span>
                     </button>

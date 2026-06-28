@@ -111,8 +111,8 @@ function retrieveDashboardUrl() {
 function selectSidebarMenuButton(selectedItem) {
     const index = $(selectedItem).data("tab-index");
     if (index !== Tabs.SETTINGS.index && index !== Tabs.LOGOUT.index) {
-        $("nav.sidebar-navigation ul li").removeClass("active");
-        $(selectedItem).addClass("active");
+        $("nav.sidebar-navigation ul li").removeClass("active").removeAttr("aria-current");
+        $(selectedItem).addClass("active").attr("aria-current", "page");
         window.localStorage.setItem("PalantirSelectedTab", index);
     }
     return index;
@@ -123,13 +123,27 @@ function processNavigationTabs() {
         hideElements($("#applicationsTabButton"));
         hideElements($(`#attribute-tab-${Tabs.APPLICATIONS.index}`));
     }
-    if (!CasActuatorEndpoints.metrics() || !CasActuatorEndpoints.httpExchanges() || !CasActuatorEndpoints.auditEvents()
+    if (!CasActuatorEndpoints.metrics() || !CasActuatorEndpoints.auditEvents()
         || !CasActuatorEndpoints.heapDump() || !CasActuatorEndpoints.health() || !CasActuatorEndpoints.statistics()) {
         hideElements($("#systemTabButton"));
         hideElements($(`#attribute-tab-${Tabs.SYSTEM.index}`));
     }
+    if (!CasActuatorEndpoints.httpExchanges()) {
+        hideElements($("#httprequeststab").parent());
+    }
+    if (!CasActuatorEndpoints.startup()) {
+        hideElements($("#casstartuptab").parent());
+    }
+    if (!CasActuatorEndpoints.dependencies()) {
+        hideElements($("#system-info-tabs"));
+        hideElements($("#casdependenciestab").parent());
+        hideElements($("#casvulnerabilitiestab").parent());
+    }
     if (!CasActuatorEndpoints.metrics()) {
         hideElements($("#systemmetricstab").parent());
+    }
+    if (!CasActuatorEndpoints.mappings()) {
+        hideElements($("#httprequestsmappingstab").parent());
     }
     if (!CasActuatorEndpoints.prometheus()) {
         hideElements($("#prometheusmetricstab").parent());
@@ -208,6 +222,12 @@ function processNavigationTabs() {
     if (!CasActuatorEndpoints.configurationMetadata()) {
         hideElements($("#casConfigSearch"));
     }
+    if (!CasActuatorEndpoints.beans()) {
+        hideElements($("#springBeansTabItem"));
+    }
+    if (!CasActuatorEndpoints.conditions()) {
+        hideElements($("#springConditionsTabItem"));
+    }
     if (!CasActuatorEndpoints.oidcJwks() || !CAS_FEATURES.includes("OpenIDConnect")) {
         $("#oidcprotocol").parent().remove();
         hideElements($("#oidcProtocolContainer"));
@@ -221,12 +241,12 @@ function processNavigationTabs() {
         hideElements($("#throttlesTabButton"));
         hideElements($(`#attribute-tab-${Tabs.THROTTLES.index}`));
     }
-    if (!CasActuatorEndpoints.mfaDevices() || availableMultifactorProviders.length === 0) {
+    if (!CasActuatorEndpoints.mfaDevices() || PalantirDashboardConfiguration.availableMultifactorProviders().length === 0) {
         hideElements($("#mfaTabButton"));
         hideElements($("#mfaDevicesTab").parent());
         hideElements($(`#attribute-tab-${Tabs.MFA.index}`));
     }
-    if (!CasActuatorEndpoints.multifactorTrustedDevices() || availableMultifactorProviders.length === 0) {
+    if (!CasActuatorEndpoints.multifactorTrustedDevices() || PalantirDashboardConfiguration.availableMultifactorProviders().length === 0) {
         hideElements($("#trustedMfaDevicesTab").parent());
     }
     if (!CasActuatorEndpoints.multitenancy() || !CAS_FEATURES.includes("Multitenancy")) {
@@ -238,7 +258,7 @@ function processNavigationTabs() {
     if (!CasActuatorEndpoints.shutdown()) {
         hideElements($("#shutdownServerButton"));
     }
-    if (!mutablePropertySourcesAvailable) {
+    if (!PalantirDashboardConfiguration.mutablePropertySourcesAvailable()) {
         hideElements($("#mutableConfigSources"));
     }
     return $("nav.sidebar-navigation ul li:visible").length;

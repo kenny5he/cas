@@ -8,6 +8,7 @@ ENDCOLOR="\e[0m"
 casVersion=(`cat ./gradle.properties | grep "version" | cut -d= -f2`)
 nextVersion="${casVersion}"
 privateRelease="false"
+publishingType="AUTOMATIC"
 
 while (("$#")); do
   case "$1" in
@@ -17,6 +18,10 @@ while (("$#")); do
     ;;
   --next-version)
     nextVersion=$2
+    shift 2
+    ;;
+  --publishing-type)
+    publishingType=$2
     shift 2
     ;;
   --private)
@@ -47,7 +52,7 @@ function printred() {
 }
 
 function clean {
-  ./gradlew clean --parallel --no-configuration-cache --no-daemon
+  ./gradlew clean --parallel  --no-daemon -quiet
   [ $? -ne 0 ] && { printred "Gradle clean task failed"; exit 1; }
 }
 
@@ -58,10 +63,10 @@ function snapshot() {
       exit 1
   fi
   printgreen "Publishing CAS SNAPSHOT artifacts. This might take a while..."
-  ./gradlew assemble publishAggregationToCentralPortalSnapshots \
-    -x test -x javadoc -x check --no-daemon --parallel \
+  ./gradlew assemble publishAggregationToCentralSnapshots \
+    -x test -x javadoc -x check --no-daemon --parallel --quiet \
     -DskipAot=true -DpublishSnapshots=true --stacktrace \
-    --no-configuration-cache --configure-on-demand \
+     --configure-on-demand -DpublishingType="${publishingType}" \
     -DrepositoryUsername="$REPOSITORY_USER" \
     -DrepositoryPassword="$REPOSITORY_PWD"
   if [ $? -ne 0 ]; then
@@ -84,16 +89,18 @@ function publish {
     fi
         
     printgreen "Assembling and publishing CAS release ${casVersion}. This might take a while..."
+    printgreen "Publishing type is ${publishingType}"
     ./gradlew assemble publishAggregationToCentralPortal \
       -Pversion="${casVersion}" -PnextVersion="${nextVersion}" \
-      --parallel --no-daemon --no-configuration-cache -x test -x check \
-      -DskipAot=true -DpublishReleases=true --stacktrace \
+      --parallel --no-daemon  -x test -x check -DprivateRelease=${privateRelease} \
+      -DpublishingType="${publishingType}" -DskipAot=true -DpublishReleases=true --stacktrace --quiet \
       -DrepositoryUsername="$REPOSITORY_USER" -DrepositoryPassword="$REPOSITORY_PWD"
     if [ $? -ne 0 ]; then
         printred "Publishing Apereo CAS failed."
         exit 1
     fi
-
+    printgreen "Uploaded CAS release ${casVersion} successfully."
+    
     if [[ "${privateRelease}" == "true" ]]; then
         printgreen "This is a private release. Skipping Git tagging and GitHub Release creation."
         return 0
@@ -262,9 +269,12 @@ if [[ "${casVersion}" == v* ]]; then
     exit 1
 fi
 
+currentCommit="$(git rev-parse HEAD)"
+
 echo -e "\n"
 echo "***************************************************************"
 printgreen "Welcome to the release process for Apereo CAS ${casVersion}"
+printgreen "Current commit: ${currentCommit}"
 printgreen "Next development version: ${nextVersion}"
 echo -n $(java -version)
 echo -e "***************************************************************\n"

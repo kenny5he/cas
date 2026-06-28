@@ -60,7 +60,8 @@ public class CasCoreUtilRuntimeHints implements CasRuntimeHintsRegistrar {
             Function.class,
             Consumer.class,
             Cleanable.class,
-            CorsConfigurationSource.class
+            CorsConfigurationSource.class,
+            PrivilegedAction.class
         ));
 
         registerSerializationHints(hints);
@@ -129,7 +130,8 @@ public class CasCoreUtilRuntimeHints implements CasRuntimeHintsRegistrar {
 
         registerReflectionHints(hints, List.of(
             ClassUtils.class,
-            LoggerFactory.class
+            LoggerFactory.class,
+            PrivilegedAction.class
         ));
 
         registerReflectionHintsForConstructors(hints,

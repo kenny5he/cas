@@ -1,3 +1,5 @@
+let CAS_CONFIG_METADATA = {}
+
 function overrideConfigPropertyValue(name, value) {
     openNewConfigurationPropertyDialog({
         name: name,
@@ -42,7 +44,7 @@ function effectiveConfigPropertyValue(name) {
 }
 
 function deleteConfigPropertyValue(button, name) {
-    if (mutablePropertySourcesAvailable && CasActuatorEndpoints.casConfig()) {
+    if (PalantirDashboardConfiguration.mutablePropertySourcesAvailable() && CasActuatorEndpoints.casConfig()) {
         const mutableConfigurationTable = $("#mutableConfigurationTable").DataTable();
         const currentRow = mutableConfigurationTable.row($(button).closest("tr"));
         const propertySource = $(button).data("source").replace("bootstrapProperties-", "");
@@ -82,7 +84,7 @@ function deleteConfigPropertyValue(button, name) {
 }
 
 function updateConfigPropertyValue(button, name) {
-    if (mutablePropertySourcesAvailable && CasActuatorEndpoints.casConfig()) {
+    if (PalantirDashboardConfiguration.mutablePropertySourcesAvailable() && CasActuatorEndpoints.casConfig()) {
         const mutableConfigurationTable = $("#mutableConfigurationTable").DataTable();
         const currentRow = mutableConfigurationTable.row($(button).closest("tr"));
         const propertySource = $(button).data("source").replace("bootstrapProperties-", "");
@@ -139,14 +141,14 @@ function deleteAllConfigurationProperties(button) {
 
     }
 
-    if (mutablePropertySources.length === 1) {
-        deletePropertiesFromSource(mutablePropertySources[0]);
+    if (PalantirDashboardConfiguration.mutablePropertySources().length === 1) {
+        deletePropertiesFromSource(PalantirDashboardConfiguration.mutablePropertySources()[0]);
     } else {
         Swal.fire({
             title: "Which property source do you want to clear?",
             input: "select",
             icon: "question",
-            inputOptions: mutablePropertySources,
+            inputOptions: PalantirDashboardConfiguration.mutablePropertySources(),
             inputPlaceholder: "Choose a property source...",
             showCancelButton: true
         }).then((result) => {
@@ -203,7 +205,7 @@ function importConfigurationProperties(button) {
     Swal.fire({
         title: "Are you sure you want to import configuration properties?",
         input: "select",
-        inputOptions: mutablePropertySources,
+        inputOptions: PalantirDashboardConfiguration.mutablePropertySources(),
         html: `
             <p class="text-justify">Properties will be imported and applied to the CAS server configuration. You may import multiple files at once.
             Supported file formats are .properties and .yml/.yaml files. You may choose the target property source to which the properties will be applied.</p>
@@ -213,7 +215,7 @@ function importConfigurationProperties(button) {
         showDenyButton: true
     }).then((result) => {
         if (result.isConfirmed) {
-            const propertySource = mutablePropertySources[Number(result.value)];
+            const propertySource = PalantirDashboardConfiguration.mutablePropertySources()[Number(result.value)];
 
             $("#configurationFilesToImport").click();
             $("#configurationFilesToImport").change(event => {
@@ -285,10 +287,22 @@ function openNewConfigurationPropertyDialog(config) {
     $("#newConfigurationDialog").dialog({
         autoOpen: false,
         modal: true,
-        width: 600,
+        position: {
+            my: "center top",
+            at: "center top+50",
+            of: window
+        },
+        width: 700,
         height: "auto",
         buttons: {
             OK: async function () {
+                const nameElem = $("#newConfigPropertyName")[0];
+                const selectedValue = nameElem.tomselect.getValue();
+                const typedValue = nameElem.tomselect.control_input.value?.trim();
+                if (!selectedValue && typedValue) {
+                    nameElem.tomselect.setValue(typedValue);
+                }
+
                 if (!$("#newConfigurationForm")[0].reportValidity()) {
                     return;
                 }
@@ -339,32 +353,44 @@ function openNewConfigurationPropertyDialog(config) {
                 $(this).dialog("close");
             }
         },
-        open: function () {
-            $(this).css("overflow", "visible");
+            open: function () {
+                $(this).css("overflow", "visible");
 
-            $("#newConfigPropertyName").val(config.name ?? "");
-            $("#newConfigPropertyValue").val(config.value ?? "");
+                const tomselect = $("#newConfigPropertyName")[0].tomselect;
+                if (config.name) {
+                    if (!tomselect.options[config.name]) {
+                        tomselect.addOption({
+                            id: config.name,
+                            name: config.name
+                        });
+                    }
+                    tomselect.setValue(config.name, true);
+                } else {
+                    tomselect.setValue("", true);
+                }
+                
+                $("#newConfigPropertyValue").val(config.value ?? "");
 
-            if (config.propertySource) {
-                $("#propertySourcesSelect").val(config.propertySource ?? "");
-            } else {
-                const ts = $("#propertySourcesSelect")[0].tomselect;
-                const options = Object.keys(ts.options);
-                if (options.length === 1) {
-                    ts.setValue(options[0], true);
+                if (config.propertySource) {
+                    $("#propertySourcesSelect").val(config.propertySource ?? "");
+                } else {
+                    const ts = $("#propertySourcesSelect")[0].tomselect;
+                    const options = Object.keys(ts.options);
+                    if (options.length === 1) {
+                        ts.setValue(options[0], true);
+                    }
+                }
+
+                if (config.updateEntry) {
+                    $("#newConfigPropertyName").parent().hide();
+                    $("#propertySourcesSection").hide();
+                    $("#newConfigPropertyValue").focus().select();
+                } else {
+                    $("#propertySourcesSection").show();
+                    $("#newConfigPropertyName").parent().show();
+                    $("#newConfigPropertyName")[0].tomselect.focus();
                 }
             }
-
-            if (config.updateEntry) {
-                $("#newConfigPropertyName").parent().hide();
-                $("#propertySourcesSection").hide();
-                $("#newConfigPropertyValue").focus().select();
-            } else {
-                $("#propertySourcesSection").show();
-                $("#newConfigPropertyName").parent().show();
-                $("#newConfigPropertyName").focus();
-            }
-        }
     });
     $("#newConfigurationDialog").dialog("open");
 }
@@ -476,7 +502,7 @@ function reloadConfigurationTable(response) {
                     `;
                 }
 
-                if (mutablePropertySourcesAvailable && CasActuatorEndpoints.casConfig()) {
+                if (PalantirDashboardConfiguration.mutablePropertySourcesAvailable() && CasActuatorEndpoints.casConfig()) {
                     buttons += `
                             <button type="button" 
                             name="overrideConfigPropertyValueButton" href="#" 
@@ -497,7 +523,7 @@ function reloadConfigurationTable(response) {
                 });
 
 
-                if (mutablePropertySources.some(entry => source.name.endsWith(entry))) {
+                if (PalantirDashboardConfiguration.mutablePropertySources().some(entry => source.name.endsWith(entry))) {
                     const propertyName = key.replace(".value", "");
                     let buttons = `
                             <button type="button" name="effectiveConfigPropertyValueButton" href="#" 
@@ -552,6 +578,157 @@ function reloadConfigurationTable(response) {
     mutableConfigurationTable.search("").draw();
 }
 
+async function loadConfigurationMetadata() {
+    if (!CasActuatorEndpoints.configurationMetadata() || CAS_CONFIG_METADATA.length === 0) {
+        return;
+    }
+    const response = await fetch(CasActuatorEndpoints.configurationMetadata());
+    if (!response.ok) {
+        throw new Error(`Failed to load configuration metadata: ${response.status}`);
+    }
+    
+    CAS_CONFIG_METADATA = Object.values(await response.json());
+}
+
+async function populateConfigurationNameSelectOptions() {
+    const nameElem = $("#newConfigPropertyName")[0];
+    const ts = nameElem.tomselect;
+    const currentValue = ts.getValue();
+    const entries = [...new Map(
+        CAS_CONFIG_METADATA
+            .filter(entry => entry.id)
+            .map(entry => [
+                entry.id,
+                {
+                    id: entry.id,
+                    name: entry.id,
+                    type: entry.type,
+                    description: entry.description,
+                    defaultValue: entry.defaultValue ?? "",
+                    deprecated: entry.deprecated ?? false
+                }
+            ])
+    ).values()]
+        .sort((a, b) => a.id.localeCompare(b.id));
+    ts.clearOptions();
+    entries.forEach(entry => {
+        if (!ts.options[entry.id]) {
+            ts.addOption(entry);
+        }
+    });
+    ts.refreshOptions(false);
+    if (currentValue) {
+        ts.setValue(currentValue, true);
+    }
+}
+
+function escapeConfigHtml(str) {
+    return String(str ?? "").replace(/[&<>"']/g, s => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[s]));
+}
+
+function classifySpringBean(type) {
+    const beanType = String(type ?? "");
+    if (beanType.startsWith("org.springframework")
+        || beanType.startsWith("jakarta.")
+        || beanType.startsWith("javax.")
+        || beanType.startsWith("com.fasterxml.")
+        || beanType.startsWith("io.micrometer.")) {
+        return "FRAMEWORK";
+    }
+    if (beanType.startsWith("org.apereo.cas")) {
+        return "CAS";
+    }
+    return "APPLICATION";
+}
+
+function normalizeSpringBeans(response) {
+    const entries = [];
+    Object.entries(response.contexts ?? {}).forEach(([contextName, context]) => {
+        Object.entries(context.beans ?? {}).forEach(([name, bean]) => {
+            entries.push({
+                name,
+                context: contextName,
+                type: bean.type ?? "",
+                scope: bean.scope ?? "singleton",
+                classification: classifySpringBean(bean.type),
+                dependencies: bean.dependencies ?? []
+            });
+        });
+    });
+    return entries.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function hideSpringBeansTab() {
+    hideElements($("#springBeansContent"));
+    hideElements($("#springBeansTabItem"));
+}
+
+function setSpringBeansAvailable() {
+    showElements($("#springBeansContent"));
+    showElements($("#springBeansTabItem"));
+}
+
+function collectSpringConditionMatches(source, matches, matchType, contextName) {
+    const entries = [];
+    const addMatch = (match, outcome = matchType) => {
+        if (!match) {
+            return;
+        }
+        entries.push({
+            source,
+            context: contextName,
+            matchType: outcome,
+            condition: match.condition ?? "",
+            message: match.message ?? ""
+        });
+    };
+
+    if (Array.isArray(matches)) {
+        matches.forEach(match => addMatch(match));
+        return entries;
+    }
+
+    if (matches?.condition || matches?.message) {
+        addMatch(matches);
+        return entries;
+    }
+
+    (matches?.notMatched ?? []).forEach(match => addMatch(match, "negative"));
+    (matches?.matched ?? []).forEach(match => addMatch(match, "positive"));
+    return entries;
+}
+
+function normalizeSpringConditions(response) {
+    const entries = {
+        positive: [],
+        negative: []
+    };
+    Object.entries(response.contexts ?? {}).forEach(([contextName, context]) => {
+        Object.entries(context.positiveMatches ?? {}).forEach(([source, matches]) => {
+            entries.positive.push(...collectSpringConditionMatches(source, matches, "positive", contextName));
+        });
+        Object.entries(context.negativeMatches ?? {}).forEach(([source, matches]) => {
+            const collected = collectSpringConditionMatches(source, matches, "negative", contextName);
+            entries.negative.push(...collected.filter(entry => entry.matchType === "negative"));
+        });
+    });
+    entries.positive.sort((a, b) => a.source.localeCompare(b.source));
+    entries.negative.sort((a, b) => a.source.localeCompare(b.source));
+    return entries;
+}
+
+function hideSpringConditionsTab() {
+    hideElements($("#springConditionsContent"));
+    hideElements($("#springConditionsTabItem"));
+}
+
+function setSpringConditionsAvailable() {
+    showElements($("#springConditionsContent"));
+    showElements($("#springConditionsTabItem"));
+}
+
 async function initializeConfigurationOperations() {
     const configurationTable = $("#configurationTable").DataTable({
         pageLength: 10,
@@ -590,7 +767,7 @@ async function initializeConfigurationOperations() {
                 <span class="mdc-button__label"><i class="mdc-tab__icon mdi mdi-database-arrow-down" aria-hidden="true"></i>Reload</span>
             </button>
     `;
-    if (mutablePropertySourcesAvailable) {
+    if (PalantirDashboardConfiguration.mutablePropertySourcesAvailable()) {
         toolbarEntries += `
             <button type="button" title="Create a new configuration property" onclick="createNewConfigurationProperty(this);" id="newConfigPropertyButton" class="mdc-button mdc-button--raised">
                 <span class="mdc-button__label"><i class="mdc-tab__icon mdi mdi-plus" aria-hidden="true"></i>New Property</span>
@@ -692,8 +869,7 @@ async function initializeConfigurationOperations() {
             displayBanner(xhr);
         });
     }
-
-
+    
     const configPropsTable = $("#configPropsTable").DataTable({
         pageLength: 10,
         autoWidth: false,
@@ -759,10 +935,159 @@ async function initializeConfigurationOperations() {
         });
     }
 
+    let springBeansEntries = [];
+    const springBeansTable = $("#springBeansTable").DataTable({
+        pageLength: 10,
+        autoWidth: false,
+        order: [[0, "asc"]],
+        columns: [
+            {
+                data: "name",
+                width: "22%",
+                render: (data, type) => type === "display"
+                    ? `<code class="spring-bean-name">${escapeConfigHtml(data)}</code>`
+                    : data
+            },
+            {
+                data: "type",
+                width: "34%",
+                render: (data, type) => type === "display"
+                    ? `<code class="spring-bean-type">${escapeConfigHtml(data)}</code>`
+                    : data
+            },
+            {
+                data: "scope",
+                width: "10%",
+                render: data => escapeConfigHtml(data)
+            },
+            {
+                data: "classification",
+                width: "12%",
+                render: (data, type) => type === "display"
+                    ? `<span class="spring-bean-classification classification-${escapeConfigHtml(String(data).toLowerCase())}">${escapeConfigHtml(data)}</span>`
+                    : data
+            },
+            {
+                data: "dependencies",
+                render: (data, type) => {
+                    if (type !== "display") {
+                        return Array.isArray(data) ? data.join(", ") : data;
+                    }
+                    const dependencies = Array.isArray(data) ? data : [];
+                    return dependencies.length > 0
+                        ? `<span class="spring-bean-dependencies">${dependencies.map(escapeConfigHtml).join(", ")}</span>`
+                        : `<span class="text-muted">&mdash;</span>`;
+                }
+            }
+        ],
+        drawCallback: settings => {
+            $("#springBeansTable tr").addClass("mdc-data-table__row");
+            $("#springBeansTable td").addClass("mdc-data-table__cell");
+        }
+    });
+
+    function renderSpringBeans() {
+        springBeansTable.clear();
+        springBeansEntries.forEach(entry => springBeansTable.row.add(entry));
+        springBeansTable.draw();
+        springBeansTable.columns.adjust();
+    }
+
+    $("#springBeansFilter").off("input").on("input", renderSpringBeans);
+    if (CasActuatorEndpoints.beans()) {
+        $.get(CasActuatorEndpoints.beans(), response => {
+            setSpringBeansAvailable();
+            springBeansEntries = normalizeSpringBeans(response);
+            renderSpringBeans();
+        }).fail((xhr, status, error) => {
+            console.error("Error fetching Spring beans:", error);
+            hideSpringBeansTab();
+        });
+    } else {
+        hideSpringBeansTab();
+    }
+
+    let springConditionsEntries = {positive: [], negative: []};
+    const createSpringConditionsTable = (selector, positive) => $(selector).DataTable({
+        pageLength: 10,
+        autoWidth: false,
+        order: [[0, "asc"]],
+        columns: [
+            {
+                data: "source",
+                width: "36%",
+                render: (data, type) => {
+                    if (type !== "display") {
+                        return data;
+                    }
+                    const icon = positive ? "mdi-check-circle-outline" : "mdi-close-circle-outline";
+                    const status = positive ? "positive" : "negative";
+                    return `
+                        <span class="spring-condition-source spring-condition-source-${status}">
+                            <i class="mdi ${icon}" aria-hidden="true"></i>
+                            <code>${escapeConfigHtml(data)}</code>
+                        </span>
+                    `.trim();
+                }
+            },
+            {
+                data: "condition",
+                width: "26%",
+                render: (data, type) => type === "display"
+                    ? `<code class="spring-condition-name">${escapeConfigHtml(data)}</code>`
+                    : data
+            },
+            {
+                data: "message",
+                render: (data, type) => type === "display"
+                    ? `<span class="spring-condition-message">${escapeConfigHtml(data || "No condition message provided.")}</span>`
+                    : data
+            }
+        ],
+        drawCallback: settings => {
+            $(`${selector} tr`).addClass("mdc-data-table__row");
+            $(`${selector} td`).addClass("mdc-data-table__cell");
+        }
+    });
+    const springConditionsPositiveTable = createSpringConditionsTable("#springConditionsPositiveTable", true);
+    const springConditionsNegativeTable = createSpringConditionsTable("#springConditionsNegativeTable", false);
+
+    function renderSpringConditions() {
+        springConditionsPositiveTable.clear();
+        springConditionsNegativeTable.clear();
+        springConditionsEntries.positive.forEach(entry => springConditionsPositiveTable.row.add(entry));
+        springConditionsEntries.negative.forEach(entry => springConditionsNegativeTable.row.add(entry));
+        springConditionsPositiveTable.draw();
+        springConditionsNegativeTable.draw();
+        springConditionsPositiveTable.columns.adjust();
+        springConditionsNegativeTable.columns.adjust();
+    }
+
+    $("#springConditionsResultTabs").tabs({
+        activate: () => {
+            springConditionsPositiveTable.columns.adjust();
+            springConditionsNegativeTable.columns.adjust();
+        }
+    });
+    if (CasActuatorEndpoints.conditions()) {
+        $.get(CasActuatorEndpoints.conditions(), response => {
+            setSpringConditionsAvailable();
+            springConditionsEntries = normalizeSpringConditions(response);
+            renderSpringConditions();
+        }).fail((xhr, status, error) => {
+            console.error("Error fetching Spring conditions:", error);
+            hideSpringConditionsTab();
+        });
+    } else {
+        hideSpringConditionsTab();
+    }
+
     $("#encryptConfigButton").off().on("click", () => encryptOrDecryptConfig("encrypt"));
     $("#decryptConfigButton").off().on("click", () => encryptOrDecryptConfig("decrypt"));
 
     if (CasActuatorEndpoints.configurationMetadata()) {
+        await loadConfigurationMetadata();
+        await populateConfigurationNameSelectOptions();
 
         const configSearchResultsTable = $("#configSearchResultsTable").DataTable({
             pageLength: 10,

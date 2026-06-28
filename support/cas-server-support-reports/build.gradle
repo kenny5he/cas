@@ -1,4 +1,6 @@
-description = "Apereo CAS Web Application Reports"
+apply plugin: "org.apereo.cas.project-conventions"
+
+description = "Adds CAS reporting views for reviewing runtime, configuration, and operational information."
 ext {
     publishMetadata = true
     projectMetadata = [
@@ -29,6 +31,8 @@ dependencies {
     implementation project(":core:cas-server-core-authentication-mfa-api")
     implementation project(":core:cas-server-core-services-registry")
 
+    compileOnly project(":core:cas-server-core-tracing")
+    
     testImplementation project(":core:cas-server-core")
     testImplementation project(":core:cas-server-core-logout-api")
     testImplementation project(":core:cas-server-core-logout")
@@ -49,7 +53,8 @@ dependencies {
     testImplementation project(":core:cas-server-core-scripting")
     testImplementation project(":core:cas-server-core-configuration")
     testImplementation project(":core:cas-server-core-events")
-
+    testImplementation project(":core:cas-server-core-tracing")
+    
     testImplementation project(":support:cas-server-support-webconfig")
     testImplementation project(":support:cas-server-support-validation")
     testImplementation project(":support:cas-server-support-themes")

@@ -56,6 +56,7 @@
                 <select class="form-control"
                         th:if="${entry.type == 'select'}"
                         th:id="${entry.name}"
+                        th:aria-label="#{${entry.title}}"
                         th:title="#{${entry.title}}"
                         th:name="${entry.name}"
                         th:classappend="${'custom-select ' + entry.cssClass}">
@@ -78,7 +79,6 @@
                 <button class="mdc-button mdc-button--outlined btn btn-secondary"
                         name="cancel"
                         th:value="#{cas.screen.acct.button.cancel}"
-                        accesskey="c"
                         id="cancel"
                         type="button"
                         onclick="location.href = location.href;">

@@ -40,7 +40,7 @@ jobs:
     outputs:
       is_snapshot: ${{ steps.check.outputs.is_snapshot }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Determine version
@@ -62,14 +62,16 @@ jobs:
     if: needs.check.outputs.is_snapshot == 'false'
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
-          persist-credentials: false
+          persist-credentials: true
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JDK_CURRENT }}
           distribution: ${{ env.JDK_DISTRIBUTION }}
+      - name: Set up Gum
+        uses: unfunco/setup-gum@main
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
       - name: Initialize
