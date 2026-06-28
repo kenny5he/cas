@@ -9,15 +9,15 @@ or override log42.component.properties to turn off async
     <Properties>
         <Property name="baseDir">/tmp/logs</Property>
         
-        <Property name="cas.log.level">${main:\--logging.level.org.apereo.cas:-info}</Property>
-        <Property name="spring.webflow.log.level">${main:\--logging.level.org.springframework.webflow:-info}</Property>
-        <Property name="spring.security.log.level">${main:\--logging.level.org.springframework.security:-warn}</Property>
-        <Property name="thymeleaf.log.level">${main:\--logging.level.org.thymeleaf:-warn}</Property>
-        <Property name="spring.cloud.log.level">${main:\--logging.level.org.springframework.cloud:-warn}</Property>
-        <Property name="spring.web.log.level">${main:\--logging.level.org.springframework.web:-warn}</Property>
-        <Property name="spring.boot.log.level">${main:\--logging.level.org.springframework.boot:-warn}</Property>
-        <Property name="ldap.log.level">${main:\--logging.level.org.ldaptive:-warn}</Property>
-        <Property name="pac4j.log.level">${main:\--logging.level.org.pac4j:-warn}</Property>
+        <Property name="cas.log.level">${main:\--logging.level.org.apereo.cas:-debug}</Property>
+        <Property name="spring.webflow.log.level">${main:\--logging.level.org.springframework.webflow:-debug}</Property>
+        <Property name="spring.security.log.level">${main:\--logging.level.org.springframework.security:-info}</Property>
+        <Property name="thymeleaf.log.level">${main:\--logging.level.org.thymeleaf:-info}</Property>
+        <Property name="spring.cloud.log.level">${main:\--logging.level.org.springframework.cloud:-info}</Property>
+        <Property name="spring.web.log.level">${main:\--logging.level.org.springframework.web:-info}</Property>
+        <Property name="spring.boot.log.level">${main:\--logging.level.org.springframework.boot:-info}</Property>
+        <Property name="ldap.log.level">${main:\--logging.level.org.ldaptive:-info}</Property>
+        <Property name="pac4j.log.level">${main:\--logging.level.org.pac4j:-info}</Property>
         <Property name="opensaml.log.level">${main:\--logging.level.org.opensaml:-warn}</Property>
         <Property name="hazelcast.log.level">${main:\--logging.level.com.hazelcast:-warn}</Property>
         <Property name="jdbc.log.level">${main:\--logging.level.org.hibernate:-error}</Property>
@@ -131,8 +131,8 @@ or override log42.component.properties to turn off async
         <Logger name="org.springframework.boot.autoconfigure.security" level="${sys:spring.security.log.level}" />
         <Logger name="org.springframework.boot.devtools" level="debug" />
 
-        <Logger name="org.springframework" level="warn" />
-        <Logger name="org.springframework.ui" level="warn" />
+        <Logger name="org.springframework" level="info" />
+        <Logger name="org.springframework.ui" level="info" />
         <Logger name="org.springframework.context" level="warn" />
         <Logger name="org.springframework.context.support" level="warn" />
         
@@ -153,11 +153,11 @@ or override log42.component.properties to turn off async
         <Logger name="org.springframework.amqp" level="error" />
         <Logger name="org.springframework.integration" level="warn"/>
         <Logger name="org.springframework.messaging" level="warn"/>
-        <Logger name="org.springframework.beans" level="warn"/>
+        <Logger name="org.springframework.beans" level="info"/>
         <Logger name="org.springframework.web" level="${sys:spring.web.log.level}"/>
         <Logger name="org.springframework.scheduling" level="warn"/>
         <Logger name="org.springframework.context.annotation" level="off"/>
-        <Logger name="org.springframework.web.socket" level="warn"/>
+        <Logger name="org.springframework.web.socket" level="info"/>
         <Logger name="org.springframework.boot.diagnostics.LoggingFailureAnalysisReporter" level="trace"/>
         <Logger name="org.springframework.cloud.netflix.eureka" level="debug" />
 
