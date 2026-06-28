@@ -1,14 +1,15 @@
 /** create database **/
 CREATE DATABASE cas;
 
-/** create user table **/
-drop table if exists `cas_user`;
-CREATE TABLE `cas_user` (
-    `user_id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户ID，非空',
-    `user_name` varchar(255) NOT NULL COMMENT '用户名称，非空',
+/** create account table **/
+drop table if exists `cas_account_t`;
+CREATE TABLE `cas_account_t` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户ID，非空',
+    `code` varchar(50) NOT NULL COMMENT '账号编码，非空，生成',
+    `name` varchar(100) NOT NULL COMMENT '用户名称，非空',
     `nike_name` varchar(255) NULL COMMENT '昵称，非空',
-    `first_name` varchar(60) NOT NULL COMMENT '名，非空',
-    `last_name` varchar(60) NOT NULL COMMENT '姓，非空',
+    `first_name` varchar(50) NOT NULL COMMENT '名，非空',
+    `last_name` varchar(50) NOT NULL COMMENT '姓，非空',
     `gender` int(11) NULL COMMENT '性别，1 Male 男/0 Female 女',
     `phone` varchar(20) DEFAULT NULL COMMENT '手机号码',
     `email` varchar(20) DEFAULT NULL COMMENT 'email 邮箱',
@@ -19,11 +20,11 @@ CREATE TABLE `cas_user` (
     `creation_date` datetime NOT NULL COMMENT '用户创建时间',
     `favicon_id` varchar(50) DEFAULT NULL COMMENT '用户头像',
     `uid` varchar(255) NULL COMMENT '用户 UID 标识',
-    PRIMARY KEY (`user_id`)
+    PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
 /** 用户环境信息 **/
-CREATE TABLE `cas_user_env` (
+CREATE TABLE `cas_user_env_t` (
     `env_id` bigint NOT NULL AUTO_INCREMENT COMMENT '环境Id',
     `user_id` bigint NOT NULL COMMENT '用户ID，非空',
     `ipv4` varchar(20) DEFAULT NULL COMMENT '用户IP4信息',
@@ -36,7 +37,7 @@ CREATE TABLE `cas_user_env` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COMMENT='用户使用环境表';
 
 /** 审计日志信息 **/
-create table cas_audit_trail (
+create table cas_audit_trail_t (
     `id` bigint NOT NULL AUTO_INCREMENT,
     AUD_ACTION varchar(255) NULL COMMENT 'Action',
     AUD_CLIENT_IP varchar(255) NULL COMMENT 'Client Ip',
@@ -48,7 +49,7 @@ create table cas_audit_trail (
     primary key (`id`)
 )ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COMMENT='登录历史记录表';
 
-drop table if exists `cas_questions`;
+drop table if exists `cas_questions_t`;
 create table `cas_questions` (
     `id` bigint NOT NULL AUTO_INCREMENT,
     `question` varchar(255) NULL COMMENT '问题',
@@ -57,7 +58,7 @@ create table `cas_questions` (
     primary key (`id`)
 )ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COMMENT='密保问题';
 
-drop table if exists `cas_question_answers`;
+drop table if exists `cas_question_answers_t`;
 create table `cas_question_answers` (
     `id` bigint NOT NULL AUTO_INCREMENT,
     `username` varchar(255) NOT NULL COMMENT '用户信息',
@@ -66,8 +67,8 @@ create table `cas_question_answers` (
     primary key (`id`)
 )ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COMMENT='密保答案';
 
-drop table if exists `cas_password_history`;
-create table `cas_password_history` (
+drop table if exists `cas_password_history_t`;
+create table `cas_password_history_t` (
     `id` bigint NOT NULL AUTO_INCREMENT,
     `username` varchar(255) NOT NULL COMMENT '用户名称，非空',
     `password` varchar(60) NOT NULL COMMENT ' 用户名称，非空 ',
@@ -75,7 +76,7 @@ create table `cas_password_history` (
     primary key (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COMMENT='历史密码';
 
-create table cas_tickets (
+create table cas_tickets_t (
     `id` varchar(255) not null,
     body text,
     creation_Time datetime not null,
@@ -86,7 +87,7 @@ create table cas_tickets (
 ) ENGINE=MyISAM;
 
 
-create table cas_saml_metadata_document (
+create table cas_saml_metadata_document_t (
     id bigint not null,
     name varchar(255) not null,
     signature longtext,
@@ -94,7 +95,7 @@ create table cas_saml_metadata_document (
     primary key (id)
 ) type=MyISAM;
 
-create table cas_com_audit_trail (
+create table cas_com_audit_trail_t (
     id bigint not null AUTO_INCREMENT,
     AUD_ACTION varchar(255),
     APPLIC_CD varchar(255),
