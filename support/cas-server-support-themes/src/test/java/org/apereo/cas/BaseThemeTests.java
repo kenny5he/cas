@@ -31,7 +31,7 @@ import org.springframework.web.servlet.ThemeResolver;
  */
 public abstract class BaseThemeTests {
     @Autowired
-    @Qualifier("themeResolver")
+    @Qualifier("casThemeResolver")
     protected ThemeResolver themeResolver;
 
     @Autowired

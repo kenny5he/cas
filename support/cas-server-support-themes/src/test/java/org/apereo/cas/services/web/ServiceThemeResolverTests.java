@@ -41,7 +41,7 @@ class ServiceThemeResolverTests {
     private ServicesManager servicesManager;
 
     @Autowired
-    @Qualifier("themeResolver")
+    @Qualifier("casThemeResolver")
     private ThemeResolver themeResolver;
 
     @Autowired

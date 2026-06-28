@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @EnableConfigurationProperties(CasConfigurationProperties.class)
 class AggregateCasThemeSourceTests {
     @Autowired
-    @Qualifier("themeSource")
+    @Qualifier("casThemeSource")
     private ThemeSource themeSource;
 
     @Test

@@ -61,7 +61,7 @@ public class CasThemesAutoConfiguration {
     @ConditionalOnMissingBean(name = "casThemeSource")
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public ThemeSource themeSource(final CasConfigurationProperties casProperties) {
+    public ThemeSource casThemeSource(final CasConfigurationProperties casProperties) {
         if (casProperties.getView().getThemeSourceType() == ViewProperties.ThemeSourceTypes.AGGREGATE) {
             return new AggregateCasThemeSource(casProperties);
         }
@@ -71,7 +71,7 @@ public class CasThemesAutoConfiguration {
     @ConditionalOnMissingBean(name = "casThemeResolver")
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public ThemeResolver themeResolver(
+    public ThemeResolver casThemeResolver(
         final ObjectProvider<CasConfigurationProperties> casProperties,
         @Qualifier(TenantExtractor.BEAN_NAME)
         final ObjectProvider<TenantExtractor> tenantExtractor,

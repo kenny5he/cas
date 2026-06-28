@@ -34,7 +34,7 @@ class DefaultCasThemeSourceTests {
     @EnableConfigurationProperties(CasConfigurationProperties.class)
     abstract static class BaseTests {
         @Autowired
-        @Qualifier("themeSource")
+        @Qualifier("casThemeSource")
         protected ThemeSource themeSource;
     }
 

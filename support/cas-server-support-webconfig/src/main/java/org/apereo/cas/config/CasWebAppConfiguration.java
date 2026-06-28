@@ -50,7 +50,7 @@ class CasWebAppConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = "casThemeChangeInterceptor")
     public HandlerInterceptor themeChangeInterceptor(
-        @Qualifier("themeResolver") final ThemeResolver themeResolver,
+        @Qualifier("casThemeResolver") final ThemeResolver themeResolver,
         final CasConfigurationProperties casProperties) {
         return new ThemeChangeInterceptor(themeResolver, casProperties.getTheme().getParamName());
     }

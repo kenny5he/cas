@@ -35,7 +35,7 @@ class TenantThemeResolverTests {
     private ConfigurableApplicationContext applicationContext;
 
     @Autowired
-    @Qualifier("themeResolver")
+    @Qualifier("casThemeResolver")
     private ThemeResolver themeResolver;
 
     @Test

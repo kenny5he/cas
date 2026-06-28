@@ -140,7 +140,7 @@ public class CasThymeleafAutoConfiguration {
         @Qualifier("themeClassLoaderTemplateResolver") final ITemplateResolver themeClassLoaderTemplateResolver,
         @Qualifier("classLoaderTemplateResolver") final ITemplateResolver classLoaderTemplateResolver,
         final ThymeleafProperties thymeleafProperties,
-        @Qualifier("themeResolver") final ThemeResolver themeResolver,
+        @Qualifier("casThemeResolver") final ThemeResolver themeResolver,
         final List<CasThymeleafViewResolverConfigurer> thymeleafViewResolverConfigurers,
         final CasConfigurationProperties casProperties) {
 
@@ -196,7 +196,7 @@ public class CasThymeleafAutoConfiguration {
     @ConditionalOnMissingBean(name = "themeClassLoaderTemplateResolver")
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     public ITemplateResolver themeClassLoaderTemplateResolver(final ThymeleafProperties thymeleafProperties,
-                                                              @Qualifier("themeResolver") final ThemeResolver themeResolver) {
+                                                              @Qualifier("casThemeResolver") final ThemeResolver themeResolver) {
         val themeCp = new ThemeClassLoaderTemplateResolver(themeResolver);
         configureTemplateViewResolver(themeCp, thymeleafProperties);
         themeCp.setPrefix("templates/%s/");
@@ -229,8 +229,8 @@ public class CasThymeleafAutoConfiguration {
         @Bean
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public CasThymeleafTemplatesDirector casThymeleafTemplatesDirector(
-            @Qualifier("themeSource") final ThemeSource themeSource,
-            @Qualifier("themeResolver") final ThemeResolver themeResolver,
+            @Qualifier("casThemeSource") final ThemeSource themeSource,
+            @Qualifier("casThemeResolver") final ThemeResolver themeResolver,
             @Qualifier(CasWebflowExecutionPlan.BEAN_NAME) final CasWebflowExecutionPlan webflowExecutionPlan) {
             return new CasThymeleafTemplatesDirector(webflowExecutionPlan, themeResolver, themeSource);
         }
@@ -278,7 +278,7 @@ public class CasThymeleafAutoConfiguration {
         @Bean
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
         public ViewResolver registeredServiceViewResolver(
-            @Qualifier("themeResolver") final ThemeResolver themeResolver,
+            @Qualifier("casThemeResolver") final ThemeResolver themeResolver,
             @Qualifier("themeViewResolverFactory") final ThemeViewResolverFactory themeViewResolverFactory) {
             val resolver = new ThemeBasedViewResolver(themeResolver, themeViewResolverFactory);
             resolver.setOrder(THYMELEAF_VIEW_RESOLVER_ORDER - 1);
