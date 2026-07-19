@@ -6,6 +6,11 @@ https://apereo.github.io/cas/development/registration/Account-Registration-Overv
 implementation project(":support:cas-server-support-account-mgmt")
 ```
 
+## 核心实现类
+1. 账号注册实现：DefaultAccountRegistrationService
+2. 账号注册属性配置加载：DefaultAccountRegistrationService
+3. 
+
 ## WebPage 注册页面
 1. 注册页面
    - templates/acct-mgmt/casAccountSignupView.html
@@ -16,7 +21,7 @@ implementation project(":support:cas-server-support-account-mgmt")
 5. 选项属性类: org.apereo.cas.acct.AccountRegistrationProperty
 
 ### Configuration
-1. 自动配置类: CasAccountManagementWebflowConfiguration
+1. 自动配置类: CasAccountManagementWebflowAutoConfiguration
 
 ### WebFlow
 1. 注册信息填写(SubmitAccountRegistrationAction)

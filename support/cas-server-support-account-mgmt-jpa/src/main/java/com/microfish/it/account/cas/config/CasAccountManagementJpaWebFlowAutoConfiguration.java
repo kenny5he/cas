@@ -43,7 +43,8 @@ public class CasAccountManagementJpaWebFlowAutoConfiguration {
 
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public AccountRegistrationPropertyLoader accountMgmtRegistrationPropertyLoader(RegistrationPropertyService registrationSelectionService) {
+    public AccountRegistrationPropertyLoader accountMgmtRegistrationPropertyLoader(
+            RegistrationPropertyService registrationSelectionService) {
         return new JpaAccountRegistrationPropertyLoader(registrationSelectionService);
     }
 

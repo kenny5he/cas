@@ -16,6 +16,11 @@
 
 package com.microfish.it.account.cas.acct.repository;
 
-public interface RegistrationPropertyRepository {
+import com.microfish.it.account.cas.acct.entity.JpaRegistrationPropertyEntity;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface RegistrationPropertyRepository extends CrudRepository<Integer, JpaRegistrationPropertyEntity> {
 
 }

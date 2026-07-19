@@ -284,17 +284,6 @@
                         You agree to the terms of use by logging in.
                     </div>
 
-                    <button
-                            class="mdc-button mdc-button--outlined"
-                            th:if="${accountRegistrationEnabled}"
-                            th:name="${name ?: 'accountSignUpBtn'}"
-                            th:id="${id ?: 'accountSignUpBtn'}"
-                            type="button"
-                            onclick="document.getElementById('accountMgmtSignupForm').submit()">
-                        <span class="mdc-button__ripple"></span>
-                        <span class="mdc-button__focus-ring"></span>
-                        <span class="mdc-button__label" th:text="#{screen.acct.button.signUp}">Sign Up</span>
-                    </button>
                     <div th:replace="~{fragments/submitbutton :: submitButton (messageKey='screen.welcome.button.login')}"/>
                 </div>
             </form>
@@ -370,6 +359,10 @@
                     });
                 });
             </script>
+        </div>
+
+        <div th:if="${loginFormViewable and loginFormEnabled}">
+            <div th:replace="~{fragments/loginsidebar :: loginsidebar}"/>
         </div>
     </div>
 </main>

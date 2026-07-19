@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package com.microfish.it.account.cas.acct;
+package com.microfish.it.account.cas.acct.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
 
+@Getter
+@Setter
 public class JpaRegistrationPropertyValueEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1774317470921051870L;

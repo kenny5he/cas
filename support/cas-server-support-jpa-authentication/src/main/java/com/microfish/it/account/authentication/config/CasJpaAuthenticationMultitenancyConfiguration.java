@@ -16,6 +16,7 @@
 
 package com.microfish.it.account.authentication.config;
 
+import com.microfish.it.account.authentication.handler.TenantJpaAuthenticationHandlerBuilder;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apereo.cas.authentication.AuthenticationEventExecutionPlanConfigurer;
@@ -46,14 +47,14 @@ import org.springframework.context.annotation.ScopedProxyMode;
 @Configuration(value = "CasJdbcMultitenancyConfiguration", proxyBeanMethods = false)
 class CasJpaAuthenticationMultitenancyConfiguration {
 
-    @Configuration(value = "CasJdbcMultitenancyAuthenticationHandlersConfiguration", proxyBeanMethods = false)
+    @Configuration(value = "CasJpaMultitenancyAuthenticationHandlersConfiguration", proxyBeanMethods = false)
     @ConditionalOnFeatureEnabled(feature = CasFeatureModule.FeatureCatalog.Multitenancy)
     @EnableConfigurationProperties(CasConfigurationProperties.class)
     static class CasJdbcMultitenancyAuthenticationHandlersConfiguration {
         @ConditionalOnMissingBean(name = "jdbcMultitenancyAuthenticationPlanConfigurer")
         @Bean
         @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
-        public AuthenticationEventExecutionPlanConfigurer jdbcMultitenancyAuthenticationPlanConfigurer(
+        public AuthenticationEventExecutionPlanConfigurer jpaMultitenancyAuthenticationPlanConfigurer(
             final ConfigurableApplicationContext applicationContext,
             final CasConfigurationProperties casProperties,
             @Qualifier(ServicesManager.BEAN_NAME)
@@ -62,7 +63,7 @@ class CasJpaAuthenticationMultitenancyConfiguration {
                 if (casProperties.getMultitenancy().getCore().isEnabled()) {
                     val passwordPolicyConfiguration = new PasswordPolicyContext();
                     val principalFactory = PrincipalFactoryUtils.newPrincipalFactory();
-                    val builder = new TenantJdbcAuthenticationHandlerBuilder(passwordPolicyConfiguration,
+                    val builder = new TenantJpaAuthenticationHandlerBuilder(passwordPolicyConfiguration,
                         principalFactory, applicationContext);
                     plan.registerTenantAuthenticationHandlerBuilder(builder);
                 }

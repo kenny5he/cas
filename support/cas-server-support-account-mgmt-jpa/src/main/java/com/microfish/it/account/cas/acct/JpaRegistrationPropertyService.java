@@ -16,6 +16,7 @@
 
 package com.microfish.it.account.cas.acct;
 
+import com.microfish.it.account.cas.acct.entity.JpaRegistrationPropertyEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.Getter;
@@ -25,7 +26,6 @@ import org.apereo.cas.acct.AccountRegistrationProperty;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class JpaRegistrationPropertyService implements RegistrationPropertyService {
@@ -51,8 +51,6 @@ public class JpaRegistrationPropertyService implements RegistrationPropertyServi
         map.forEach((key, value) -> {
             if (value instanceof ExtAccountRegistrationProperty extValue) {
                 save(extValue);
-            } else {
-                // @TODO
             }
         });
     }

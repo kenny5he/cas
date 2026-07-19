@@ -15,10 +15,6 @@
         <form th:if="${accountRegistrationEnabled}" method="post" id="accountMgmtSignupForm">
             <input type="hidden" name="execution" th:value="${flowExecutionKey}" />
             <input type="hidden" name="_eventId" value="signup" />
-            <span class="mdi mdi-account-group" aria-hidden="true"></span>
-            <a id="accountSignUpLink" th:utext="#{screen.acct.button.signUp}" href="javascript:void(0)"
-               onclick="document.getElementById('accountMgmtSignupForm').submit()" />
-            <br><br>
         </form>
         <form th:if="${passwordManagementEnabled}" method="post" id="passwordManagementForm">
             <input type="hidden" name="execution" th:value="${flowExecutionKey}" />

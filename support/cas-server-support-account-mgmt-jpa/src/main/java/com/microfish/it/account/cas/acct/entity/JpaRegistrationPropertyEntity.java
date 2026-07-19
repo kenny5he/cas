@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.microfish.it.account.cas.acct;
+package com.microfish.it.account.cas.acct.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
