@@ -8,6 +8,8 @@ ext {
 }
 dependencies {
 
+    implementation libs.postgresql.get()
+
     implementation project(":core:cas-server-core-multitenancy")
     implementation project(":core:cas-server-core-authentication-api")
     implementation project(":core:cas-server-core-configuration-api")
