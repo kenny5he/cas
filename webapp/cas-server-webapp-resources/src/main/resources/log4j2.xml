@@ -7,7 +7,8 @@ or override log42.component.properties to turn off async
 <!-- Specify the refresh internal in seconds. -->
 <Configuration monitorInterval="5">
     <Properties>
-        <Property name="baseDir">/tmp/logs</Property>
+        <!--<Property name="baseDir">/tmp/logs</Property>-->
+        <Property name="baseDir">/Codes/SSO/Cas/cas/logs</Property>
         
         <Property name="cas.log.level">${main:\--logging.level.org.apereo.cas:-debug}</Property>
         <Property name="spring.webflow.log.level">${main:\--logging.level.org.springframework.webflow:-debug}</Property>

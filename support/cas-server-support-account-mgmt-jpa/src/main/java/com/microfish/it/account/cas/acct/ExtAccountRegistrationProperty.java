@@ -38,6 +38,6 @@ public class ExtAccountRegistrationProperty extends AccountRegistrationProperty 
     private static final long serialVersionUID = 4914588762184718634L;
 
     @Builder.Default
-    private List<AccountRegistrationPropertyValue> values = new ArrayList<>();
+    private List<AccountRegistrationPropertyValue> propertyValues = new ArrayList<>();
 
 }

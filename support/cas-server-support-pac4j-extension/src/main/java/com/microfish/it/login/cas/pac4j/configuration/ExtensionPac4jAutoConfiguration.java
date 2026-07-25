@@ -26,7 +26,5 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 @AutoConfiguration
 public class ExtensionPac4jAutoConfiguration {
 
-    @Autowired
-    private ExtPac4jAuthenticationProperties ext;
 
 }

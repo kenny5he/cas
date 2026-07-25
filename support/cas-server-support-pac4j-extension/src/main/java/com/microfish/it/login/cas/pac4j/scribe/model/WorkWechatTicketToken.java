@@ -17,6 +17,9 @@
 package com.microfish.it.login.cas.pac4j.scribe.model;
 
 import com.github.scribejava.core.model.Token;
+import lombok.Getter;
+
+import java.io.Serial;
 
 
 /**
@@ -25,8 +28,10 @@ import com.github.scribejava.core.model.Token;
  * @author kenny.he
  * @since 2022/08/10
  */
+@Getter
 public class WorkWechatTicketToken extends Token {
 
+    @Serial
     private static final long serialVersionUID = 4924218542566302800L;
 
     private String ticket;
@@ -40,17 +45,5 @@ public class WorkWechatTicketToken extends Token {
         this.ticket = ticket;
         this.userId = userId;
         this.deviceId = deviceId;
-    }
-
-    public String getTicket() {
-        return ticket;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public String getDeviceId() {
-        return deviceId;
     }
 }

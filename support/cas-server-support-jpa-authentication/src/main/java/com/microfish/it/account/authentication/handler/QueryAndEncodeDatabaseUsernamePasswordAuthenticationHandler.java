@@ -19,9 +19,11 @@ package com.microfish.it.account.authentication.handler;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.configuration.model.support.jdbc.authn.QueryEncodeJdbcAuthenticationProperties;
 
+import javax.sql.DataSource;
+
 public class QueryAndEncodeDatabaseUsernamePasswordAuthenticationHandler extends AbstractJpaUsernamePasswordAuthenticationHandler<QueryEncodeJdbcAuthenticationProperties> {
 
-    protected QueryAndEncodeDatabaseUsernamePasswordAuthenticationHandler(String name, PrincipalFactory principalFactory, Integer order) {
-        super(name, principalFactory, order);
+    protected QueryAndEncodeDatabaseUsernamePasswordAuthenticationHandler(QueryEncodeJdbcAuthenticationProperties properties, PrincipalFactory principalFactory, DataSource dataSource) {
+        super(properties, principalFactory, dataSource);
     }
 }

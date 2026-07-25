@@ -35,6 +35,8 @@ dependencies {
     compileOnly project(":support:cas-server-support-jpa-util")
 
     implementation project(":support:cas-server-support-account-mgmt")
+    implementation project(":support:cas-server-support-account-mgmt-jpa")
+    implementation project(":support:cas-server-support-account-mgmt-extension")
     implementation project(":support:cas-server-support-qr-authentication")
     implementation project(":support:cas-server-support-actions")
     implementation project(":support:cas-server-support-actions-core")
@@ -46,6 +48,8 @@ dependencies {
     implementation project(":support:cas-server-support-thymeleaf")
     implementation project(":support:cas-server-support-pm-webflow")
     implementation project(":support:cas-server-support-webconfig")
+    implementation project(":support:cas-server-support-pac4j-webflow")
+    implementation project(":support:cas-server-support-pac4j-extension")
 
     implementation project(":webapp:cas-server-webapp-init")
     implementation project(":webapp:cas-server-webapp-resources")

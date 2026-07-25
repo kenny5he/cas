@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.apereo.cas.acct.AccountRegistrationProperty;
 import org.apereo.cas.acct.AccountRegistrationPropertyLoader;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,9 +35,7 @@ public class JpaAccountRegistrationPropertyLoader implements AccountRegistration
         List<ExtAccountRegistrationProperty> properties = registeredSelectionService.find();
         return properties.stream()
             .collect(Collectors.toMap(ExtAccountRegistrationProperty::getName, property -> {
-                property.setValues(
-                    property.getValues().stream()
-                        .map(AccountRegistrationPropertyValue::getValue).collect(Collectors.toList()));
+                property.setValues(Collections.emptyList());
                 return property;
             }));
     }
