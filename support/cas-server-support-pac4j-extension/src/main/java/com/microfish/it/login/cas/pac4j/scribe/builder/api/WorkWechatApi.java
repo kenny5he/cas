@@ -35,6 +35,7 @@ import com.microfish.it.login.cas.pac4j.scribe.extractors.WorkWechatJsonExtracto
 import com.microfish.it.login.cas.pac4j.scribe.service.WorkWechatService;
 
 import java.io.OutputStream;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -55,7 +56,7 @@ public class WorkWechatApi extends DefaultApi20 {
     public static final String AUTHORIZE_ENDPOINT_URL_2 = "https://open.weixin.qq.com/connect/oauth2/authorize";
     public static final String TOKEN_ENDPOINT_URL = "https://qyapi.weixin.qq.com/cgi-bin/gettoken";
 
-    private String agentid;
+    private final String agentid;
 
     public WorkWechatApi(String agentid) {
         this.agentid = agentid;
@@ -94,12 +95,12 @@ public class WorkWechatApi extends DefaultApi20 {
 
     /**
      * 授权路径
-     * @param scope
-     * @return
+     * @param scope 数据范围
+     * @return 授权地址
      */
-    protected String getAuthorizationBaseUrl(String scope) {
+    protected static String getAuthorizationBaseUrl(String scope) {
         if (scope != null && scope.contains(
-                WorkWechatClient.WorkWechatScope.SNSAPI_LOGIN.toString().toLowerCase())) {
+                WorkWechatClient.WorkWechatScope.SNSAPI_LOGIN.toString().toLowerCase(Locale.ENGLISH))) {
             return AUTHORIZE_ENDPOINT_URL_1;
         } else {
             return AUTHORIZE_ENDPOINT_URL_2;

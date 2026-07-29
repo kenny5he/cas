@@ -35,6 +35,8 @@ import com.microfish.it.login.cas.pac4j.scribe.extractors.WorkWechatJsonExtracto
 import com.microfish.it.login.cas.pac4j.scribe.model.WorkWechatConfirmCode;
 
 /**
+ * 企业微信
+ *
  * @author kenny.he
  * @since 2022/08/09
  */
@@ -106,6 +108,7 @@ public class WorkWechatService extends WechatService {
         return sendAccessTokenRequestAsync(createAccessTokenRequest(params),confirmCode, callback);
     }
 
+    @Override
     public Future<OAuth2AccessToken> getAccessToken(String code,
                                                     OAuthAsyncRequestCallback<OAuth2AccessToken> callback) {
         WorkWechatConfirmCode confirmCode = new WorkWechatConfirmCode(code);

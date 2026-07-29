@@ -24,8 +24,10 @@ implementation project(":support:cas-server-support-account-mgmt")
 1. 自动配置类: CasAccountManagementWebflowAutoConfiguration
 
 ### WebFlow
-1. 注册信息填写(SubmitAccountRegistrationAction)
+1. 修改注册地址 cas/register
+   1. 账号管理Webflow配置类：AccountManagementWebflowConfigurer
+2. 注册信息填写(SubmitAccountRegistrationAction)
    
-2. 验证注册Token(ValidateAccountRegistrationTokenAction)
+3. 验证注册Token(ValidateAccountRegistrationTokenAction)
 
-3. 填写密码、密保问题完成注册(FinalizeAccountRegistrationAction)
+4. 填写密码、密保问题完成注册(FinalizeAccountRegistrationAction)

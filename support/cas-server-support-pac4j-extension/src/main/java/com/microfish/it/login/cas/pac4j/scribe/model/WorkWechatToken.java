@@ -20,6 +20,7 @@ import com.github.scribejava.core.model.OAuth2AccessToken;
 
 
 /**
+ * 企业微信
  *
  * @author kenny.he
  * @since 2022/08/10

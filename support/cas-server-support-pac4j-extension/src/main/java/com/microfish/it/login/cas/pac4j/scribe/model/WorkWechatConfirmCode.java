@@ -17,23 +17,27 @@
 package com.microfish.it.login.cas.pac4j.scribe.model;
 
 import com.github.scribejava.core.model.Token;
+import lombok.Getter;
+
+import java.io.Serial;
 
 /**
- *
+ * 企业微信 - 确认
  *
  * @author kenny.he
  * @since 2022/08/10
  */
+@Getter
 public class WorkWechatConfirmCode extends Token {
 
-    private String code;
+    @Serial
+    private static final long serialVersionUID = -5018651074626720059L;
+
+    private final String code;
 
     public WorkWechatConfirmCode(String token) {
         super(null);
         this.code = token;
     }
 
-    public String getCode() {
-        return code;
-    }
 }
