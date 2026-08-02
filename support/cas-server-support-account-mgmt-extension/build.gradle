@@ -1,4 +1,4 @@
-description = "Apereo CAS Account Management and Registration JDBC Support"
+description = "Apereo CAS Account Management and Registration Extension Support"
 
 dependencies {
     implementation libraries.jose4j
