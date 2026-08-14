@@ -20,7 +20,7 @@ import org.apereo.cas.acct.AccountRegistrationService;
 import org.apereo.cas.configuration.features.CasFeatureModule;
 import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
 
-import com.microfish.it.account.cas.acct.web.AccountRegistrationModelAndViewController;
+import com.microfish.it.account.cas.acct.web.AccountRegistrationController;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -43,9 +43,9 @@ public class CasAccountManagementMvcAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean(name = "accountRegistrationModelAndViewController")
-    public AccountRegistrationModelAndViewController accountRegistrationModelAndViewController(
+    public AccountRegistrationController accountRegistrationModelAndViewController(
         @Qualifier(AccountRegistrationService.BEAN_NAME)
         final AccountRegistrationService accountRegistrationService) {
-        return new AccountRegistrationModelAndViewController(accountRegistrationService);
+        return new AccountRegistrationController(accountRegistrationService);
     }
 }

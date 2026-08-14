@@ -1,1 +1,2 @@
 com.microfish.it.account.cas.config.CasAccountManagementMvcAutoConfiguration
+com.microfish.it.account.cas.config.CasMobileLoginMvcAutoConfiguration

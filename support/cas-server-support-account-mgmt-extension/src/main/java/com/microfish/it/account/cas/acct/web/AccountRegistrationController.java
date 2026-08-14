@@ -28,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,16 +49,10 @@ import java.util.regex.Pattern;
  * @since 7.3.0
  */
 @Controller
-@RequestMapping(path = AccountRegistrationModelAndViewController.BASE_PATH,
-    produces = MediaType.APPLICATION_JSON_VALUE)
-@RequiredArgsConstructor
 @Slf4j
-public class AccountRegistrationModelAndViewController {
-    /**
-     * Base path for account-registration MVC endpoints.
-     */
-    public static final String BASE_PATH = "/api/account-registration";
-
+@RequiredArgsConstructor
+@RequestMapping(path = "register", produces = MediaType.APPLICATION_JSON_VALUE)
+public class AccountRegistrationController {
     private static final String MODEL_ATTRIBUTE_SUCCESS = "success";
 
     private static final MappingJackson2JsonView JSON_VIEW = new MappingJackson2JsonView();
@@ -69,14 +64,13 @@ public class AccountRegistrationModelAndViewController {
      *
      * @return JSON model and view
      */
-    @GetMapping("/properties")
+    @GetMapping("/")
     public ModelAndView getRegistrationProperties() {
         val properties = accountRegistrationService.getAccountRegistrationPropertyLoader()
             .load()
             .values()
             .stream()
             .sorted(Comparator.comparingInt(AccountRegistrationProperty::getOrder))
-            .map(AccountRegistrationModelAndViewController::toPropertyModel)
             .toList();
         return json(HttpStatus.OK, Map.of(
             MODEL_ATTRIBUTE_SUCCESS, Boolean.TRUE,
@@ -133,6 +127,21 @@ public class AccountRegistrationModelAndViewController {
         return provision(registrationRequest);
     }
 
+    /**
+     * Return invalid registration requests as JSON instead of an HTML error page.
+     *
+     * @param exception request failure
+     * @return JSON model and view
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ModelAndView handleInvalidRequest(final IllegalArgumentException exception) {
+        LOGGER.debug("Invalid account registration request", exception);
+        return json(HttpStatus.BAD_REQUEST, Map.of(
+            MODEL_ATTRIBUTE_SUCCESS, Boolean.FALSE,
+            "error", "invalid_request",
+            "message", Objects.toString(exception.getMessage(), "Invalid request")));
+    }
+
     private AccountRegistrationRequest buildRegistrationRequest(final Map<String, Object> properties) {
         if (properties == null || properties.isEmpty()) {
             throw new IllegalArgumentException("Registration properties are required");
@@ -168,5 +177,11 @@ public class AccountRegistrationModelAndViewController {
             && !Pattern.matches(property.getPattern(), text)) {
             throw new IllegalArgumentException("Registration property has an invalid value: " + property.getName());
         }
+    }
+
+    private static ModelAndView json(final HttpStatus status, final Map<String, ?> model) {
+        val modelAndView = new ModelAndView(JSON_VIEW, new LinkedHashMap<>(model));
+        modelAndView.setStatus(status);
+        return modelAndView;
     }
 }
