@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Bean;
  */
 @AutoConfiguration
 @ConditionalOnFeatureEnabled(feature = CasFeatureModule.FeatureCatalog.AccountRegistration)
-public class CasAccountManagementMvcAutoConfiguration {
+public class CasAccountManagementAutoConfiguration {
     /**
      * Create the account-registration MVC controller.
      *
