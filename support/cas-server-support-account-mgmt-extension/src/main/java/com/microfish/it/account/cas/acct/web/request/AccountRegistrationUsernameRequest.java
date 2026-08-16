@@ -1,12 +1,12 @@
 /**
  * Copyright 2026 - Ren Jian Yan Huo
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-package com.microfish.it.account.cas.config;
-
-import org.apereo.cas.configuration.features.CasFeatureModule;
-import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
-
-import org.springframework.boot.autoconfigure.AutoConfiguration;
+package com.microfish.it.account.cas.acct.web.request;
 
 /**
- * Auto-configuration for account-registration MVC endpoints.
- *
- * @author kenny
- * @since 7.3.0
+ * @author kenny.he
+ * @since 2026/08/16
  */
-@AutoConfiguration
-@ConditionalOnFeatureEnabled(feature = CasFeatureModule.FeatureCatalog.AccountRegistration)
-public class CasAccountManagementAutoConfiguration {
-
+public class AccountRegistrationUsernameRequest {
 }

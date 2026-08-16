@@ -14,21 +14,28 @@
  * limitations under the License.
  */
 
-package com.microfish.it.account.cas.config;
+package com.microfish.it.account.cas.acct.web.request;
 
-import org.apereo.cas.configuration.features.CasFeatureModule;
-import org.apereo.cas.util.spring.boot.ConditionalOnFeatureEnabled;
+import jakarta.validation.constraints.NotEmpty;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import org.springframework.boot.autoconfigure.AutoConfiguration;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
- * Auto-configuration for account-registration MVC endpoints.
+ * Request used to complete an account registration using a registration token.
  *
  * @author kenny
  * @since 7.3.0
  */
-@AutoConfiguration
-@ConditionalOnFeatureEnabled(feature = CasFeatureModule.FeatureCatalog.AccountRegistration)
-public class CasAccountManagementAutoConfiguration {
+@Getter
+@Setter
+@NoArgsConstructor
+public class AccountRegistrationCodeRequest {
 
+    private String registrationType;
+
+    private final Map<String, Object> properties = new LinkedHashMap<>();
 }

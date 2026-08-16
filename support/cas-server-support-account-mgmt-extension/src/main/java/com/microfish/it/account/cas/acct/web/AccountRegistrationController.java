@@ -16,6 +16,7 @@
 
 package com.microfish.it.account.cas.acct.web;
 
+import com.microfish.it.account.cas.enumate.AccountRegistrationType;
 import org.apereo.cas.acct.AccountRegistrationProperty;
 import org.apereo.cas.acct.AccountRegistrationRequest;
 import org.apereo.cas.acct.AccountRegistrationService;
@@ -23,23 +24,22 @@ import org.apereo.cas.acct.AccountRegistrationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.regex.Pattern;
+
+import com.microfish.it.account.cas.acct.web.request.AccountRegistrationCodeRequest;
+import com.microfish.it.account.cas.acct.web.request.AccountRegistrationSignUpRequest;
+import com.microfish.it.account.cas.acct.web.response.AccountRegistrationTokenResponse;
 
 /**
  * Spring MVC endpoints that expose the existing CAS account-registration service
@@ -48,140 +48,72 @@ import java.util.regex.Pattern;
  * @author kenny
  * @since 7.3.0
  */
-@Controller
+@RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping(path = "register", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
 public class AccountRegistrationController {
-    private static final String MODEL_ATTRIBUTE_SUCCESS = "success";
-
-    private static final MappingJackson2JsonView JSON_VIEW = new MappingJackson2JsonView();
-
+    @Autowired
     private final AccountRegistrationService accountRegistrationService;
 
     /**
-     * Return the configured registration fields in display order.
-     *
-     * @return JSON model and view
+     * 注册页面
+     * @param model 页面模型
+     * @return 页面访问地址
      */
     @GetMapping("/")
-    public ModelAndView getRegistrationProperties() {
-        val properties = accountRegistrationService.getAccountRegistrationPropertyLoader()
-            .load()
-            .values()
-            .stream()
-            .sorted(Comparator.comparingInt(AccountRegistrationProperty::getOrder))
-            .toList();
-        return json(HttpStatus.OK, Map.of(
-            MODEL_ATTRIBUTE_SUCCESS, Boolean.TRUE,
-            "registrationProperties", properties));
+    public String registration(Model model) {
+        var registrationProperties = accountRegistrationService.getAccountRegistrationPropertyLoader()
+                .load()
+                .values()
+                .stream()
+                .sorted(Comparator.comparingInt(AccountRegistrationProperty::getOrder))
+                .toList();
+        model.addAttribute("registrationProperties", registrationProperties);
+        return "acc-mgmt/casAccountSignupView";
     }
 
     /**
-     * Directly provision an account. This endpoint is intended for a trusted
-     * middle-platform service that has already verified the registrant.
-     *
-     * @param properties account properties
-     * @return JSON model and view
-     */
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ModelAndView register(@RequestBody final Map<String, Object> properties) {
-        return provision(buildRegistrationRequest(properties));
-    }
-
-    /**
-     * Validate initial account properties and create an activation token.
+     * 校验用户名
      *
      * @param properties account properties
      * @return JSON model and view containing the activation token
      */
-    @PostMapping(path = "/token", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ModelAndView createRegistrationToken(@RequestBody final Map<String, Object> properties) {
-        val registrationRequest = buildRegistrationRequest(properties);
-        val username = accountRegistrationService.getAccountRegistrationUsernameBuilder().build(registrationRequest);
-        val token = accountRegistrationService.createToken(registrationRequest);
-        return json(HttpStatus.CREATED, Map.of(
-            MODEL_ATTRIBUTE_SUCCESS, Boolean.TRUE,
-            "username", Objects.toString(username, StringUtils.EMPTY),
-            "token", token));
-    }
-
-    /**
-     * Validate an activation token, merge final account properties such as a
-     * password, and provision the account.
-     *
-     * @param activationRequest activation request
-     * @return JSON model and view
-     */
-    @PostMapping(path = "/activate", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ModelAndView activate(@RequestBody final AccountRegistrationActivationRequest activationRequest) {
-        if (activationRequest == null || StringUtils.isBlank(activationRequest.getToken())) {
-            throw new IllegalArgumentException("Registration token is required");
-        }
-        val registrationRequest = accountRegistrationService.validateToken(activationRequest.getToken());
-        if (registrationRequest == null) {
-            throw new IllegalArgumentException("Registration token is invalid or has expired");
-        }
-        registrationRequest.putProperties(activationRequest.getProperties());
-        accountRegistrationService.getAccountRegistrationRequestValidator().validate(registrationRequest);
-        return provision(registrationRequest);
-    }
-
-    /**
-     * Return invalid registration requests as JSON instead of an HTML error page.
-     *
-     * @param exception request failure
-     * @return JSON model and view
-     */
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ModelAndView handleInvalidRequest(final IllegalArgumentException exception) {
-        LOGGER.debug("Invalid account registration request", exception);
-        return json(HttpStatus.BAD_REQUEST, Map.of(
-            MODEL_ATTRIBUTE_SUCCESS, Boolean.FALSE,
-            "error", "invalid_request",
-            "message", Objects.toString(exception.getMessage(), "Invalid request")));
-    }
-
-    private AccountRegistrationRequest buildRegistrationRequest(final Map<String, Object> properties) {
-        if (properties == null || properties.isEmpty()) {
-            throw new IllegalArgumentException("Registration properties are required");
-        }
-        val configuredProperties = accountRegistrationService.getAccountRegistrationPropertyLoader().load().values();
-        configuredProperties.forEach(property -> validateProperty(property, properties.get(property.getName())));
-
+    @PostMapping(path = "/validate/username", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public AccountRegistrationTokenResponse validUsername(@RequestBody final Map<String, Object> properties) {
         val registrationRequest = new AccountRegistrationRequest(properties);
-        accountRegistrationService.getAccountRegistrationRequestValidator().validate(registrationRequest);
-        return registrationRequest;
-    }
-
-    private ModelAndView provision(final AccountRegistrationRequest registrationRequest) throws Throwable {
-        val response = accountRegistrationService.getAccountRegistrationProvisioner().provision(registrationRequest);
-
-        val model = new LinkedHashMap<String, Object>(response.getProperties());
-        model.putIfAbsent(MODEL_ATTRIBUTE_SUCCESS, response.isSuccess());
         val username = accountRegistrationService.getAccountRegistrationUsernameBuilder().build(registrationRequest);
-        if (StringUtils.isNotBlank(username)) {
-            model.putIfAbsent("username", username);
-        }
-        return json(response.isSuccess() ? HttpStatus.CREATED : HttpStatus.UNPROCESSABLE_ENTITY, model);
+        return accountRegistrationService.validateUsername(username);;
     }
 
-    private static void validateProperty(final AccountRegistrationProperty property, final Object value) {
-        val text = Objects.toString(value, StringUtils.EMPTY);
-        if (property.isRequired() && StringUtils.isBlank(text)) {
-            throw new IllegalArgumentException("Required registration property is missing: " + property.getName());
-        }
-        if (StringUtils.isNotBlank(text)
-            && !"select".equalsIgnoreCase(property.getType())
-            && StringUtils.isNotBlank(property.getPattern())
-            && !Pattern.matches(property.getPattern(), text)) {
-            throw new IllegalArgumentException("Registration property has an invalid value: " + property.getName());
-        }
+    /**
+     * 给邮箱/手机发送验证码
+     *
+     * @param codeRequest code request
+     * @return JSON model and view
+     */
+    @PostMapping(path = "/{type}/code", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void getCodeByRegistrationType(@RequestBody final AccountRegistrationCodeRequest codeRequest) throws Exception {
+        val registrationRequest = new AccountRegistrationRequest(codeRequest.getProperties());
+        accountRegistrationService.createCode(registrationRequest, AccountRegistrationType.valueOf(codeRequest.getRegistrationType()));
     }
 
-    private static ModelAndView json(final HttpStatus status, final Map<String, ?> model) {
-        val modelAndView = new ModelAndView(JSON_VIEW, new LinkedHashMap<>(model));
-        modelAndView.setStatus(status);
-        return modelAndView;
+    /**
+     * 创建账号
+     *    1. 校验参数，获取配置的必填字段、校验规则等，逐一解析参数校验
+     *    2. 校验Code
+     *    3. 创建账号，保存在数据库中
+     *    4. 将新注册的账户信息自动配置到指定的外部系统或目标平台中
+     * @param signUpRequest signup
+     * @return model and view
+     */
+    @PostMapping(path = "/")
+    public String register(@RequestBody final AccountRegistrationSignUpRequest signUpRequest) throws Throwable {
+        var registrationRequest = new AccountRegistrationRequest(signUpRequest.getProperties());
+        accountRegistrationService.getAccountRegistrationRequestValidator().validate(registrationRequest);
+        accountRegistrationService.validateCode(registrationRequest, AccountRegistrationType.valueOf(signUpRequest.getRegistrationType()));
+        accountRegistrationService.createAccount(registrationRequest);
+        accountRegistrationService.getAccountRegistrationProvisioner().provision(registrationRequest);
+        return "/login/casAccountSignupViewCompleted";
     }
 }
