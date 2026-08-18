@@ -35,8 +35,8 @@ dependencies {
     compileOnly project(":support:cas-server-support-jpa-util")
 
     implementation project(":support:cas-server-support-account-mgmt")
-    implementation project(":support:cas-server-support-account-mgmt-jpa")
-    implementation project(":support:cas-server-support-account-mgmt-extension")
+    implementation project(":support:cas-server-support-account-registration-jpa")
+    implementation project(":support:cas-server-support-account-registration")
     // implementation project(":support:cas-server-support-jpa-authentication")
     // implementation project(":support:cas-server-support-passwordless-authentication")
     implementation project(":support:cas-server-support-qr-authentication")

@@ -184,6 +184,7 @@ include "support:cas-server-support-account-mgmt-core"
 include "support:cas-server-support-account-mgmt"
 include 'support:cas-server-support-account-registration-api'
 include "support:cas-server-support-account-registration-jpa"
+include 'support:cas-server-support-account-registration-core'
 include 'support:cas-server-support-account-registration'
 include "support:cas-server-support-acme"
 include "support:cas-server-support-actions-core"
