@@ -593,8 +593,6 @@ ext.libraries = [
                 },
                 dependencies.create(libs.commons.lang3.get()) {
                 },
-                dependencies.create(libs.commons.lang.get()) {
-                },
                 dependencies.create(libs.jool.get()) {
                 },
                 dependencies.create(libs.commons.collections.get()) {
@@ -2510,6 +2508,13 @@ ext.libraries = [
                     exclude(group: "org.projectlombok", module: "lombok")
                 }
         ],
+        authlete                     : [
+                dependencies.create(libs.authlete.sd.jwt.get()) {
+                    exclude(group: "com.google.code.gson", module: "gson")
+                },
+                dependencies.create(libs.gson.get()) {
+                }
+        ],
         nimbus                     : [
                 dependencies.create(libs.nimbus.jose.jwt.get()) {
                     exclude(group: "net.minidev", module: "json-smart")
@@ -4163,6 +4168,9 @@ ext.libraries = [
                 }
         ],
         webjarspalantir : [
+                dependencies.create(libs.jquery.contextmenu.get()) {
+                    exclude(group: "org.webjars", module: "jquery")
+                },
                 dependencies.create(libs.chart.js.core.get()) {
                     exclude(group: "org.webjars", module: "popper.js")
                     exclude(group: "org.webjars", module: "jquery")
@@ -4187,6 +4195,19 @@ ext.libraries = [
                     exclude(group: "org.webjars", module: "jquery")
                     exclude(group: "org.webjars.npm", module: "mermaid-js__parser")
                     exclude(group: "org.webjars.npm", module: "uuid")
+                    exclude(group: "org.webjars.npm", module: "cytoscape-cose-bilkent")
+                    exclude(group: "org.webjars.npm", module: "d3-sankey")
+                    exclude(group: "org.webjars.npm", module: "d3-dsv")
+                },
+                dependencies.create(libs.cytoscape.cose.bilkent.get()) {
+                    exclude(group: "org.webjars.npm", module: "cose-base")
+                },
+                dependencies.create(libs.d3.sankey.get()) {
+                    exclude(group: "org.webjars.npm", module: "d3-array")
+                    exclude(group: "org.webjars.npm", module: "d3-shape")
+                },
+                dependencies.create(libs.d3.dsv.get()) {
+                    exclude(group: "org.webjars.npm", module: "commander")
                 },
                 dependencies.create(libs.trumbowyg.get()) {
                     exclude(group: "org.webjars", module: "jquery")

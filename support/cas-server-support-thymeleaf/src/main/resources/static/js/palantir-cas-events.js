@@ -9,55 +9,45 @@ async function initializeCasEventsOperations() {
             }
         });
 
-        function fetchCasEvents() {
-            return setInterval(() => {
-                if (currentActiveTab === Tabs.LOGGING.index) {
-                    $.ajax({
-                        url: `${CasActuatorEndpoints.events()}`,
-                        type: "GET",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        },
-                        success: (response, textStatus, xhr) => {
-                            casEventsTable.clear();
-                            const jsonEvents = JSON.parse(response);
-                            if (jsonEvents.length > 0) {
-                                for (const entry of jsonEvents) {
-                                    const geoLocation = `${entry?.properties?.geoLatitude ?? ""} ${entry?.properties?.geoLongitude ?? ""} ${entry?.properties?.geoAccuracy ?? ""}`.trim();
-                                    casEventsTable.row.add({
-                                        0: `<code>${entry?.creationTime ?? "N/A"}</code>`,
-                                        1: `<code>${getLastWord(entry?.type) ?? "N/A"}</code>`,
-                                        2: `<code>${entry?.properties?.eventId ?? "N/A"}</code>`,
-                                        3: `<code>${entry?.principalId ?? "N/A"}</code>`,
-                                        4: `<code>${entry?.properties?.clientip ?? "N/A"}</code>`,
-                                        5: `<code>${entry?.properties?.serverip ?? "N/A"}</code>`,
-                                        6: `<code>${entry?.properties?.agent ?? "N/A"}</code>`,
-                                        7: `<code>${entry?.properties?.tenant ?? "N/A"}</code>`,
-                                        8: `<code>${entry?.properties?.deviceFingerprint ?? "N/A"}</code>`,
-                                        9: `<code>${geoLocation.length === 0 ? "N/A" : geoLocation}</code>`
-                                    });
-                                }
-                            }
-                            casEventsTable.draw();
-                        },
-                        error: (xhr, textStatus, errorThrown) => console.error("Error fetching data:", errorThrown)
-                    });
-                }
-            }, $("#casEventsRefreshFilter").val());
+        function updateCasEventsTable() {
+            if (!isPalantirPollingContextActive(Tabs.LOGGING, "#casEvents-tab")) {
+                return;
+            }
+            $.ajax({
+                url: `${CasActuatorEndpoints.events()}`,
+                type: "GET",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                success: (response, textStatus, xhr) => {
+                    casEventsTable.clear();
+                    const jsonEvents = typeof response === "string" ? JSON.parse(response) : response;
+                    if (jsonEvents.length > 0) {
+                        for (const entry of jsonEvents) {
+                            const geoLocation = `${entry?.properties?.geoLatitude ?? ""} ${entry?.properties?.geoLongitude ?? ""} ${entry?.properties?.geoAccuracy ?? ""}`.trim();
+                            casEventsTable.row.add({
+                                0: `<code>${entry?.creationTime ?? "N/A"}</code>`,
+                                1: `<code>${getLastWord(entry?.type) ?? "N/A"}</code>`,
+                                2: `<code>${entry?.properties?.eventId ?? "N/A"}</code>`,
+                                3: `<code>${entry?.principalId ?? "N/A"}</code>`,
+                                4: `<code>${entry?.properties?.clientip ?? "N/A"}</code>`,
+                                5: `<code>${entry?.properties?.serverip ?? "N/A"}</code>`,
+                                6: `<code>${entry?.properties?.agent ?? "N/A"}</code>`,
+                                7: `<code>${entry?.properties?.tenant ?? "N/A"}</code>`,
+                                8: `<code>${entry?.properties?.deviceFingerprint ?? "N/A"}</code>`,
+                                9: `<code>${geoLocation.length === 0 ? "N/A" : geoLocation}</code>`
+                            });
+                        }
+                    }
+                    casEventsTable.draw();
+                },
+                error: (xhr, textStatus, errorThrown) => console.error("Error fetching data:", errorThrown)
+            });
         }
 
-        let refreshInterval = undefined;
-        if (CasActuatorEndpoints.events()) {
-            refreshInterval = fetchCasEvents();
-        }
-        $("#casEventsRefreshFilter").selectmenu({
-            change: (event, data) => {
-                if (refreshInterval) {
-                    clearInterval(refreshInterval);
-                    refreshInterval = fetchCasEvents();
-                }
-            }
-        });
+        setInterval(updateCasEventsTable, palantirSettings().refreshInterval);
+        window.addEventListener(palantirPollingContextEvent, updateCasEventsTable);
+        updateCasEventsTable();
     }
 }
 
@@ -185,6 +175,25 @@ async function initializeAuditEventsOperations() {
             return null;
         }
 
+        function parseJsonAuditResource(value) {
+            if (value && typeof value === "object") {
+                return value;
+            }
+            if (typeof value !== "string") {
+                return null;
+            }
+            const trimmed = value.trim();
+            if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+                return null;
+            }
+            try {
+                const parsed = JSON.parse(trimmed);
+                return parsed && typeof parsed === "object" ? parsed : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
         function auditActionType(action) {
             const value = String(action ?? "").toLowerCase();
             if (/(fail|failure|failed|deny|denied|error|exception|unauthori[sz]ed|invalid)/i.test(value)) {
@@ -202,30 +211,25 @@ async function initializeAuditEventsOperations() {
         }
 
         function renderAuditResourceSummary(data, row) {
-            if (row.resourceDetails) {
+            if (row.resourceDetails && typeof row.resourceDetails === "object") {
                 return `
-                    <button type="button"
-                            class="mdc-button mdc-button--raised audit-resource-details-button"
-                            data-audit-event-id="${escapeHtml(row.id)}"
-                            aria-label="View audit resource JSON">
-                        <span class="mdc-button__ripple"></span>
-                        <span class="mdc-button__label">
-                            <i class="mdi mdi-code-json" aria-hidden="true"></i>
-                            <span class="audit-resource-details-button-text">Expand to view details</span>
-                        </span>
-                    </button>`;
+                    <div class="audit-resource-json-summary">
+                        ${renderAuditJsonValue(row.resourceDetails)}
+                    </div>`;
             }
             return `<code class="audit-resource-value">${escapeHtml(data)}</code>`;
         }
 
         function normalizeAuditEvent(entry, index) {
             const resource = entry?.auditableResource ?? entry?.resourceOperatedUpon ?? "";
-            const resourceDetails = parseAuditResource(resource);
+            const jsonResource = parseJsonAuditResource(resource);
+            const resourceText = typeof resource === "string" ? resource : JSON.stringify(resource);
+            const resourceDetails = jsonResource ?? parseAuditResource(resourceText);
             const action = entry?.actionPerformed ?? "N/A";
             return {
                 id: `audit-event-${index}`,
                 principal: entry?.principal ?? "N/A",
-                resource: resource || "N/A",
+                resource: resourceText || "N/A",
                 resourceDetails,
                 action,
                 actionType: auditActionType(action),
@@ -235,17 +239,147 @@ async function initializeAuditEventsOperations() {
             };
         }
 
-        function renderAuditResourceDetails(row) {
-            if (!row.resourceDetails) {
-                return "";
+        function renderAuditJsonValue(value) {
+            if (value && typeof value === "object") {
+                const isArray = Array.isArray(value);
+                const entries = isArray
+                    ? value.map((entry, index) => [index, entry])
+                    : Object.entries(value);
+                if (entries.length === 0) {
+                    return `<code class="audit-resource-json-value audit-resource-json-value-empty">${isArray ? "[]" : "{}"}</code>`;
+                }
+                return `<dl class="audit-resource-fields">${entries.map(([key, entry]) => `
+                    <div class="audit-resource-field">
+                        <dt class="audit-resource-json-key">${escapeHtml(isArray ? `[${key}]` : key)}</dt>
+                        <dd class="audit-resource-field-value">${renderAuditJsonValue(entry)}</dd>
+                    </div>`).join("")}</dl>`;
             }
-            return `
-                <div class="audit-resource-details">
-                    <pre><code class="border-rounded language-json text-wrap">${escapeHtml(JSON.stringify(row.resourceDetails, null, 2))}</code></pre>
-                </div>`;
+            const displayValue = value === null ? "null" : String(value);
+            const valueType = value === null ? "null" : typeof value;
+            return `<code class="audit-resource-json-value audit-resource-json-value-${valueType}">${escapeHtml(displayValue)}</code>`;
         }
 
-        const auditEventsTable = $("#auditEventsTable").DataTable({
+        let auditEventsTable;
+        let auditActionsChart;
+
+        function auditActionChartColors(action) {
+            const type = auditActionType(action);
+            if (type === "success") {
+                return {
+                    background: "rgba(22, 138, 85, .72)",
+                    border: "#168a55"
+                };
+            }
+            if (type === "failure") {
+                return {
+                    background: "rgba(198, 40, 40, .72)",
+                    border: "#c62828"
+                };
+            }
+            return {
+                background: "rgba(79, 143, 217, .72)",
+                border: "#4f8fd9"
+            };
+        }
+
+        function initializeAuditActionsChart() {
+            if (auditActionsChart) {
+                return auditActionsChart;
+            }
+            const canvas = document.getElementById("auditActionsChart");
+            if (!canvas || !$("#auditevents-tab").is(":visible")) {
+                return null;
+            }
+            auditActionsChart = new Chart(canvas.getContext("2d"), {
+                type: "bar",
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: "Audit Events",
+                        data: [],
+                        borderWidth: 2,
+                        borderRadius: 5,
+                        borderSkipped: false,
+                        maxBarThickness: 54
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 250
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: context => `${context.raw} ${context.raw === 1 ? "event" : "events"}`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                maxRotation: 35,
+                                minRotation: 0
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: "Event count"
+                            },
+                            ticks: {
+                                precision: 0,
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+            return auditActionsChart;
+        }
+
+        function updateAuditActionsChart() {
+            if (!auditEventsTable) {
+                return;
+            }
+            const chart = initializeAuditActionsChart();
+            if (!chart) {
+                return;
+            }
+
+            const actionCounts = new Map();
+            auditEventsTable.rows({search: "applied"}).data().each(entry => {
+                const action = String(entry?.action ?? "N/A");
+                actionCounts.set(action, (actionCounts.get(action) ?? 0) + 1);
+            });
+            const groupedActions = [...actionCounts.entries()]
+                .sort(([firstAction, firstCount], [secondAction, secondCount]) =>
+                    secondCount - firstCount || firstAction.localeCompare(secondAction));
+            const colors = groupedActions.map(([action]) => auditActionChartColors(action));
+            const eventCount = groupedActions.reduce((total, [, count]) => total + count, 0);
+            const actionCount = groupedActions.length;
+
+            chart.data.labels = groupedActions.map(([action]) => action);
+            chart.data.datasets[0].data = groupedActions.map(([, count]) => count);
+            chart.data.datasets[0].backgroundColor = colors.map(color => color.background);
+            chart.data.datasets[0].borderColor = colors.map(color => color.border);
+            chart.update();
+
+            $("#auditActionsChartCount").text(
+                `${eventCount} ${eventCount === 1 ? "event" : "events"} across `
+                + `${actionCount} ${actionCount === 1 ? "action" : "actions"}`
+            );
+        }
+
+        auditEventsTable = $("#auditEventsTable").DataTable({
             pageLength: 10,
             autoWidth: false,
             columns: [
@@ -260,59 +394,44 @@ async function initializeAuditEventsOperations() {
                 },
                 {
                     data: "resource",
-                    width: "22rem",
+                    width: "30rem",
                     render: (data, type, row) => type === "display" ? renderAuditResourceSummary(data, row) : data
                 },
                 {
                     data: "action",
-                    width: "10rem",
+                    width: "15rem",
                     render: (data, type) => type === "display" ? renderAuditAction(data) : data
                 },
                 {
                     data: "date",
-                    width: "13rem",
+                    width: "10rem",
                     render: (data, type) => type === "display" ? `<code>${escapeHtml(data)}</code>` : data
                 },
                 {
                     data: "clientIpAddress",
-                    width: "8rem",
+                    width: "6.5rem",
                     render: (data, type) => type === "display" ? `<code>${escapeHtml(data)}</code>` : data
                 },
                 {
                     data: "userAgent",
-                    width: "22rem",
+                    width: "14rem",
                     render: (data, type) => type === "display" ? `<span class="audit-user-agent">${escapeHtml(data)}</span>` : data
                 }
             ],
             drawCallback: settings => {
                 $("#auditEventsTable tr").addClass("mdc-data-table__row");
                 $("#auditEventsTable td").addClass("mdc-data-table__cell");
+                updateAuditActionsChart();
             }
         });
+        updateAuditActionsChart();
 
-        function collapseAuditResourceDetails() {
-            $("#auditEventsTable tbody tr.shown").each(function () {
-                const row = auditEventsTable.row(this);
-                row.child.hide();
-                $(this).removeClass("shown");
-                $(this)
-                    .find("button.audit-resource-details-button")
-                    .removeClass("audit-resource-details-button-active")
-                    .attr("aria-label", "View audit resource JSON")
-                    .find(".mdi")
-                    .removeClass("mdi-chevron-up")
-                    .addClass("mdi-code-json");
-                $(this)
-                    .find(".audit-resource-details-button-text")
-                    .text("Expand to view details");
-            });
-        }
+        let auditEventsRequestInFlight = false;
+        const auditEventsRefreshButton = $("#refreshAuditEventsButton");
 
         function updateAuditEventsTable() {
-            if (currentActiveTab !== Tabs.LOGGING.index) {
-                return;
-            }
-            if ($("#auditEventsTable tbody tr.shown").length > 0) {
+            if (auditEventsRequestInFlight
+                || !isPalantirPollingContextActive(Tabs.LOGGING, "#auditevents-tab")) {
                 return;
             }
 
@@ -320,6 +439,8 @@ async function initializeAuditEventsOperations() {
             const count = $("#auditEventsCountFilter").val();
             const actionFilter = $("#auditEventsActionFilter").val();
 
+            auditEventsRequestInFlight = true;
+            auditEventsRefreshButton.prop("disabled", true);
             $.ajax({
                 url: `${CasActuatorEndpoints.auditLog()}?interval=${interval}&count=${count}`,
                 type: "GET",
@@ -327,49 +448,37 @@ async function initializeAuditEventsOperations() {
                     "Content-Type": "application/x-www-form-urlencoded"
                 },
                 success: (response, textStatus, xhr) => {
+                    let auditEvents;
+                    try {
+                        const parsedResponse = typeof response === "string" ? JSON.parse(response) : response;
+                        auditEvents = Array.isArray(parsedResponse) ? parsedResponse : [];
+                    } catch (e) {
+                        console.error("Unable to parse audit events:", e);
+                        return;
+                    }
                     auditEventsTable.clear();
-                    response
+                    auditEvents
                         .map(normalizeAuditEvent)
                         .filter(entry => actionFilter === "all" || entry.actionType === actionFilter)
                         .forEach(entry => auditEventsTable.row.add(entry));
                     auditEventsTable.draw();
                 },
-                error: (xhr, textStatus, errorThrown) => console.error("Error fetching data:", errorThrown)
+                error: (xhr, textStatus, errorThrown) => console.error("Error fetching data:", errorThrown),
+                complete: () => {
+                    auditEventsRequestInFlight = false;
+                    auditEventsRefreshButton.prop("disabled", false);
+                }
             });
         }
 
-        $("#auditEventsTable tbody")
-            .off("click", "button.audit-resource-details-button")
-            .on("click", "button.audit-resource-details-button", function () {
-                const tableRow = $(this).closest("tr");
-                const row = auditEventsTable.row(tableRow);
-                if (row.child.isShown()) {
-                    row.child.hide();
-                    tableRow.removeClass("shown");
-                    $(this).removeClass("audit-resource-details-button-active");
-                    $(this).attr("aria-label", "View audit resource JSON");
-                    $(this).find(".mdi").removeClass("mdi-chevron-up").addClass("mdi-code-json");
-                    $(this).find(".audit-resource-details-button-text").text("Expand to view details");
-                } else {
-                    row.child(renderAuditResourceDetails(row.data())).show();
-                    tableRow.addClass("shown");
-                    tableRow.next("tr").addClass("audit-resource-details-row");
-                    $(this).addClass("audit-resource-details-button-active");
-                    $(this).attr("aria-label", "Hide audit resource JSON");
-                    $(this).find(".mdi").removeClass("mdi-code-json").addClass("mdi-chevron-up");
-                    $(this).find(".audit-resource-details-button-text").text("Hide details");
-                    highlightElements();
-                }
-            });
-
         $("#auditEventsIntervalFilter, #auditEventsCountFilter, #auditEventsActionFilter").selectmenu({
-            change: () => {
-                collapseAuditResourceDetails();
-                updateAuditEventsTable();
-            }
+            change: updateAuditEventsTable
         });
+        auditEventsRefreshButton.off("click").on("click", updateAuditEventsTable);
 
+        const auditEventsRefreshInterval = palantirSettings().refreshInterval;
+        setInterval(updateAuditEventsTable, auditEventsRefreshInterval);
+        window.addEventListener(palantirPollingContextEvent, updateAuditEventsTable);
         updateAuditEventsTable();
-        setInterval(updateAuditEventsTable, palantirSettings().refreshInterval);
     }
 }

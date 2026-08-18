@@ -2,6 +2,7 @@ package org.apereo.cas.util;
 
 import module java.base;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This is {@link Couplet}.
@@ -9,7 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * @author Misagh Moayyed
  * @since 8.0.0
  */
-public record Couplet<L, R>(L key, R value) implements Serializable {
+public record Couplet<L, R>(@Nullable L key, @Nullable R value) implements Serializable {
 
     /**
      * To pair object.
@@ -25,7 +26,7 @@ public record Couplet<L, R>(L key, R value) implements Serializable {
      *
      * @return the left
      */
-    public L getLeft() {
+    public @Nullable L getLeft() {
         return key;
     }
 
@@ -34,10 +35,10 @@ public record Couplet<L, R>(L key, R value) implements Serializable {
      *
      * @return the right
      */
-    public R getRight() {
+    public @Nullable R getRight() {
         return value;
     }
-    
+
     /**
      * Create a couplet.
      *
@@ -47,5 +48,65 @@ public record Couplet<L, R>(L key, R value) implements Serializable {
      */
     public static <L, R> Couplet of(final L key, final R value) {
         return new Couplet(key, value);
+    }
+
+    /**
+     * Right couplet.
+     *
+     * @param <L>   the type parameter
+     * @param <R>   the type parameter
+     * @param value the value
+     * @return the couplet
+     */
+    public static <L, R> Couplet<L, R> right(final R value) {
+        return new Couplet<>(null, value);
+    }
+
+    /**
+     * Left couplet.
+     *
+     * @param <L> the type parameter
+     * @param <R> the type parameter
+     * @param key the key
+     * @return the couplet
+     */
+    public static <L, R> Couplet<L, R> left(final L key) {
+        return new Couplet<>(key, null);
+    }
+
+    /**
+     * Contains left value?.
+     *
+     * @return the boolean
+     */
+    public boolean hasLeft() {
+        return key != null;
+    }
+
+    /**
+     * Has key been defined?.
+     *
+     * @return true/false
+     */
+    public boolean hasKey() {
+        return hasLeft();
+    }
+    
+    /**
+     * Contains right value?.
+     *
+     * @return true/false
+     */
+    public boolean hasRight() {
+        return value != null;
+    }
+
+    /**
+     * Contains value?.
+     *
+     * @return true/false
+     */
+    public boolean hasValue() {
+        return hasRight();
     }
 }

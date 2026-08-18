@@ -14,7 +14,7 @@ const {Buffer} = require("buffer");
 const ps = require("ps-node");
 const NodeStaticAuth = require("node-static-auth");
 const operativeSystemModule = require("os");
-const figlet = require("figlet");
+const CFonts = require("cfonts");
 const CryptoJS = require("crypto-js");
 const jose = require("jose");
 const pino = require("pino");
@@ -200,11 +200,15 @@ exports.click = async (page, button) =>
     }, button);
 
 exports.asciiart = (text) => {
-    const art = figlet.textSync(text, {
-        font: "Small",
-        horizontalLayout: "fitted"
+    CFonts.say(text, {
+        font: "chrome",
+        colors: ["blue", "blueBright", "yellowBright"],
+        background: "transparent",
+        align: "left",
+        letterSpacing: 0,
+        lineHeight: .5,
+        space: false
     });
-    console.log(colors.blue(art));
     console.log(`🔷 Puppeteer: ${colors.blue(require("puppeteer/package.json").version)}`);
 };
 
@@ -850,6 +854,41 @@ exports.verifyJwt = async (token, secret, options) => {
         await this.logg(decoded);
     }
     return decoded;
+};
+
+exports.createJwk = async (signingAlg = "RS256", encryptionAlg = "RSA-OAEP-256") => {
+    async function createKeyPair(alg, use) {
+        const { publicKey, privateKey } = await jose.generateKeyPair(alg, {
+            extractable: true
+        });
+
+        const publicJwk = await jose.exportJWK(publicKey);
+        publicJwk.use = use;
+        publicJwk.alg = alg;
+        publicJwk.kid = await jose.calculateJwkThumbprint(publicJwk);
+        const privateJwk = await jose.exportJWK(privateKey);
+        privateJwk.use = use;
+        privateJwk.alg = alg;
+        privateJwk.kid = publicJwk.kid;
+        return {
+            publicJwk,
+            privateJwk
+        };
+    }
+
+    const signingKeys = await createKeyPair(signingAlg, "sig");
+    const encryptionKeys = await createKeyPair(encryptionAlg, "enc");
+    const jwks = {
+        keys: [
+            signingKeys.publicJwk,
+            encryptionKeys.publicJwk
+        ]
+    };
+    return {
+        signing: signingKeys,
+        encryption: encryptionKeys,
+        jwks
+    };
 };
 
 exports.verifyJwtWithJwk = async (ticket, keyContent, alg = "RS256") => {

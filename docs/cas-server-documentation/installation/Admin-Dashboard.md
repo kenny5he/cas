@@ -26,15 +26,13 @@ Support is enabled by adding the following module into the overlay:
 
 {% include_cached casmodule.html group="org.apereo.cas" module="cas-server-support-palantir" %}
 
-<div class="alert alert-warning">:warning: <strong>Usage Warning!</strong><p>
-This capability is relatively new. We encourage you to start to experiment and test your CAS deployment 
-with this feature and contribute fixes.</p></div>
-
 Accessing the Palantir dashboard will by default require a form-based user authentication. The credentials
 used to access this feature are those presented by Spring Security configuration:
 
 {% include_cached casproperties.html thirdPartyStartsWith="spring.security.user" %}
-  
+                                   
+You need to make sure the authenticated user is assigned a `ROLE_ADMIN` role/authority to be able to access critical functionality.
+
 Palantir also supports routing authentication requests to the CAS server itself. This feature is 
 disabled by default and needs to be explicitly enabled.
 
@@ -45,6 +43,9 @@ to it to only allow access to authorized users, or you may instruct Palantir to 
 that do not pass the access requirement rules.
 
 {% include_cached casproperties.html properties="cas.palantir.cas-authentication" %}
+        
+By default, authenticated users are assigned a `ROLE_USER` role/authority. To access critical functionality as an admin,
+you will need to resolve and release a `role` attribute to Palantir with a value of `ADMIN` or `ROLE_ADMIN` 
 
 Furthermore, note that Palantir requires a number of actuator endpoints, such as `info`, `env`, etc that are 
 provided by CAS and Spring Boot. It essentially sits on top of actuator endpoints and consumes and renders data. You

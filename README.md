@@ -37,7 +37,7 @@ There is no need for special ceremony to create separate issues. The pull reques
 | Version                                                                                    | Reference                                        |
 |--------------------------------------------------------------------------------------------|--------------------------------------------------|
 | ![](https://img.shields.io/badge/Development-WIP-blue.svg?style=for-the-badge&logo=github) | [Link](https://apereo.github.io/cas/development) |
-| ![](https://img.shields.io/badge/7.3.x-Current-green.svg?style=for-the-badge&logo=github)  | [Link](https://apereo.github.io/cas/7.3.x)       |
+| ![](https://img.shields.io/badge/8.0.x-Current-green.svg?style=for-the-badge&logo=github)  | [Link](https://apereo.github.io/cas/8.0.x)       |
 
 Additional resources are available as follows:
 
@@ -99,7 +99,7 @@ If you (or your employer) benefit from this project, please consider becoming a 
 Commercial support options may be [found here][cassupport].
 
 [cascodecov]: https://codecov.io/gh/apereo/cas
-[devlocity]: https://develocity.apereo.org
+[devlocity]: https://community.develocity.cloud/scans?search.rootProjectNames=cas-server
 [maintenance]: https://apereo.github.io/cas/developer/Maintenance-Policy.html
 [releaseschedule]: https://github.com/apereo/cas/milestones
 [wiki]: https://apereo.github.io/cas

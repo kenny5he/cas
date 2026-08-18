@@ -69,6 +69,7 @@ public class OAuth20DefaultTokenGenerator implements OAuth20TokenGenerator {
             .refreshToken(accessAndRefreshTokens.refreshToken())
             .grantType(tokenRequestContext.getGrantType())
             .responseType(tokenRequestContext.getResponseType())
+            .token(tokenRequestContext.getToken())
             .build();
     }
 
@@ -96,11 +97,11 @@ public class OAuth20DefaultTokenGenerator implements OAuth20TokenGenerator {
                 val deviceResult = AccessTokenRequestContext
                     .builder()
                     .service(tokenRequestContext.getService())
-                    .authentication(tokenRequestContext.getAuthentication())
+                    .authentication(deviceUserCode.getAuthentication())
                     .registeredService(tokenRequestContext.getRegisteredService())
                     .ticketGrantingTicket(tokenRequestContext.getTicketGrantingTicket())
                     .grantType(tokenRequestContext.getGrantType())
-                    .scopes(new LinkedHashSet<>())
+                    .scopes(deviceCodeTicket.getScopes())
                     .responseType(tokenRequestContext.getResponseType())
                     .generateRefreshToken(tokenRequestContext.getRegisteredService() != null && tokenRequestContext.isGenerateRefreshToken())
                     .build();
@@ -208,11 +209,12 @@ public class OAuth20DefaultTokenGenerator implements OAuth20TokenGenerator {
         val ticketGrantingTicket = tokenRequestContext.getTicketGrantingTicket() == null || tokenRequestContext.getTicketGrantingTicket().isExpired()
             ? null : tokenRequestContext.getTicketGrantingTicket();
         LOGGER.debug("Creating access token for client id [{}] and authentication [{}]", clientId, authentication);
-        return accessTokenFactory.create(tokenRequestContext.getService(),
+        return accessTokenFactory.create(
+            tokenRequestContext.getService(),
             authentication,
             ticketGrantingTicket,
             tokenRequestContext.getScopes(),
-            Optional.ofNullable(tokenRequestContext.getToken()).map(Ticket::getId).orElse(null),
+            tokenRequestContext.getToken(),
             clientId,
             tokenRequestContext.getClaims(),
             tokenRequestContext.getResponseType(),
@@ -246,7 +248,7 @@ public class OAuth20DefaultTokenGenerator implements OAuth20TokenGenerator {
             exchangedAuthentication.build(),
             ticketGrantingTicket,
             scopes,
-            accessToken.getId(),
+            accessToken,
             accessToken.getClientId(),
             accessToken.getClaims(),
             accessToken.getResponseType(),
@@ -368,7 +370,8 @@ public class OAuth20DefaultTokenGenerator implements OAuth20TokenGenerator {
         val deviceTokenFactory = (OAuth20DeviceTokenFactory) ticketFactory.get(OAuth20DeviceToken.class);
         val deviceUserCodeFactory = (OAuth20DeviceUserCodeFactory) ticketFactory.get(OAuth20DeviceUserCode.class);
 
-        val deviceToken = deviceTokenFactory.createDeviceCode(tokenRequestContext.getService());
+        val deviceToken = deviceTokenFactory.createDeviceCode(
+            tokenRequestContext.getService(), tokenRequestContext.getScopes());
         LOGGER.debug("Created device code token [{}]", deviceToken.getId());
 
         val deviceUserCode = deviceUserCodeFactory.createDeviceUserCode(deviceToken.getService());

@@ -17,6 +17,8 @@ let prometheusAvailableMetrics = [];
 let prometheusEndpointUrl = null;
 let prometheusRefreshInterval = 10000;
 let prometheusRefreshTimer = null;
+let prometheusInitializationPromise = null;
+let prometheusInitialized = false;
 
 function cloneChartValue(value) {
     const seen = new WeakSet();
@@ -310,6 +312,9 @@ async function initializeAllCharts() {
     makeSystemStatusChartClickable("memoryChart", () => memoryChart, "Memory");
     makeSystemStatusChartClickable("statisticsChart", () => statisticsChart, "Ticket Registry");
     makeSystemStatusChartClickable("systemHealthChart", () => systemHealthChart, "System Health");
+    makeSystemStatusChartClickable("httpRequestResponsesChart", () => httpRequestResponsesChart, "HTTP Requests/Responses (Date)");
+    makeSystemStatusChartClickable("httpRequestsByUrlChart", () => httpRequestsByUrlChart, "HTTP Requests/Responses (URL)");
+    makeSystemStatusChartClickable("auditEventsChart", () => auditEventsChart, "Audit Events");
 
     jvmThreadsChart = new Chart(document.getElementById("jvmThreadsChart").getContext("2d"), {
         type: "bar",
@@ -351,31 +356,44 @@ async function initializePrometheusCharts() {
     if (!prometheusEndpointUrl) {
         return;
     }
+    prometheusRefreshInterval = palantirSettings().refreshInterval;
+    window.addEventListener(palantirPollingContextEvent, refreshPrometheusCharts);
+    startPrometheusRefresh();
+    await refreshPrometheusCharts();
+}
 
-    // Check if the prometheus endpoint is accessible and fetch metrics
-    let metricsText;
-    try {
-        const response = await fetch(prometheusEndpointUrl);
-        if (!response.ok) {
-            displayBanner(response);
-            return;
-        }
-        metricsText = await response.text();
-    } catch (error) {
-        displayBanner(error);
+async function initializePrometheusChartData() {
+    if (prometheusInitialized) {
         return;
     }
-
-    prometheusRefreshInterval = palantirSettings().refreshInterval;
-
-    const parsedMetrics = parsePrometheusMetrics(metricsText);
-    prometheusAvailableMetrics = Object.keys(parsedMetrics).sort();
-
-    for (const metricName of prometheusAvailableMetrics) {
-        createPrometheusChart(metricName, parsedMetrics[metricName]);
+    if (prometheusInitializationPromise) {
+        return prometheusInitializationPromise;
     }
 
-    startPrometheusRefresh();
+    prometheusInitializationPromise = (async () => {
+        try {
+            const response = await fetch(prometheusEndpointUrl);
+            if (!response.ok) {
+                displayBanner(response);
+                return;
+            }
+            const metricsText = await response.text();
+            const parsedMetrics = parsePrometheusMetrics(metricsText);
+            prometheusAvailableMetrics = Object.keys(parsedMetrics).sort();
+
+            for (const metricName of prometheusAvailableMetrics) {
+                createPrometheusChart(metricName, parsedMetrics[metricName]);
+            }
+            prometheusInitialized = true;
+        } catch (error) {
+            displayBanner(error);
+        }
+    })();
+    try {
+        await prometheusInitializationPromise;
+    } finally {
+        prometheusInitializationPromise = null;
+    }
 }
 
 function startPrometheusRefresh() {
@@ -383,11 +401,23 @@ function startPrometheusRefresh() {
         clearInterval(prometheusRefreshTimer);
     }
 
-    prometheusRefreshTimer = setInterval(fetchAndUpdateAllCharts, prometheusRefreshInterval);
+    prometheusRefreshTimer = setInterval(refreshPrometheusCharts, prometheusRefreshInterval);
+}
+
+async function refreshPrometheusCharts() {
+    if (!isPalantirPollingContextActive(Tabs.SYSTEM, "#prometheusmetrics-tab")) {
+        return;
+    }
+    if (!prometheusInitialized) {
+        await initializePrometheusChartData();
+        return;
+    }
+    await fetchAndUpdateAllCharts();
 }
 
 async function fetchAndUpdateAllCharts() {
-    if (Object.keys(prometheusCharts).length === 0) {
+    if (!isPalantirPollingContextActive(Tabs.SYSTEM, "#prometheusmetrics-tab")
+        || Object.keys(prometheusCharts).length === 0) {
         return;
     }
 

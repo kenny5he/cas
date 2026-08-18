@@ -19,10 +19,6 @@ public interface OidcConstants {
      */
     String USER_CODE = "user_code";
     /**
-     * ACR values specified in CIBA requests.
-     */
-    String ACR_VALUES = "acr_values";
-    /**
      * Binding message specified in CIBA requests.
      */
     String BINDING_MESSAGE = "binding_message";
@@ -54,6 +50,19 @@ public interface OidcConstants {
      * Authentication method reference passed in the ID token.
      */
     String AMR = "amr";
+
+    /**
+     * JTI claim.
+     */
+    String JTI = "jti";
+    /**
+     * Issued at claim.
+     */
+    String IAT = "iat";
+    /**
+     * Not before claim.
+     */
+    String NBF = "nbf";
     /**
      * Audience claim.
      */
@@ -189,6 +198,22 @@ public interface OidcConstants {
      */
     String VC_CREDENTIAL_URL = "oidcVcCredential";
     /**
+     * OIDC VC presentation request path segment.
+     */
+    String VC_PRESENTATION_REQUEST_URL = "oidcVcPresentationRequest";
+    /**
+     * OIDC VC presentation response path segment.
+     */
+    String VC_PRESENTATION_RESPONSE_URL = "oidcVcPresentationResponse";
+    /**
+     * Oidc VC batch credential url path segment.
+     */
+    String VC_BATCH_CREDENTIAL_URL = "oidcVcBatchCredential";
+    /**
+     * Oidc VC credential type url path segment.
+     */
+    String VC_CREDENTIAL_TYPE_URL = "oidcVcCredentialType";
+    /**
      * Oidc VC credential offer url path segment.
      */
     String VC_CREDENTIAL_OFFER_URL = "oidcVcCredentialOffer";
@@ -319,7 +344,7 @@ public interface OidcConstants {
     /**
      * Verifiable credentials nonce expiration.
      */
-    String C_NONCE_EXPIRES_AT = "c_nonce_expires_at";
+    String C_NONCE_EXPIRES_IN = "c_nonce_expires_in";
     /**
      * Unsupported parameter error.
      */
@@ -369,10 +394,10 @@ public interface OidcConstants {
         OFFLINE_ACCESS("offline_access");
 
         private final String scope;
-
-
+        
         public String getFriendlyName() {
             return WordUtils.capitalize(this.scope.replace('_', ' '));
         }
     }
+    
 }

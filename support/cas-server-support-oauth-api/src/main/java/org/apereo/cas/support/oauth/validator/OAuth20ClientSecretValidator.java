@@ -2,6 +2,7 @@ package org.apereo.cas.support.oauth.validator;
 
 import module java.base;
 import org.apereo.cas.support.oauth.services.OAuthRegisteredService;
+import org.apereo.cas.support.oauth.services.OAuthRegisteredServiceClientSecret;
 import org.apereo.cas.util.crypto.CipherExecutor;
 
 /**
@@ -33,10 +34,11 @@ public interface OAuth20ClientSecretValidator {
     boolean validate(OAuthRegisteredService registeredService, String clientSecret);
 
     /**
-     * Is client secret expired?
+     * Determines whether the client secret is expired.
      *
+     * @param secret            the secret
      * @param registeredService the registered service
      * @return true/false
      */
-    boolean isClientSecretExpired(OAuthRegisteredService registeredService);
+    boolean isClientSecretExpired(OAuthRegisteredServiceClientSecret secret, OAuthRegisteredService registeredService);
 }

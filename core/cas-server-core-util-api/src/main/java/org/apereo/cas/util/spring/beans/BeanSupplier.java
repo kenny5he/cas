@@ -10,8 +10,6 @@ import org.jooq.lambda.Unchecked;
 import org.jooq.lambda.fi.util.function.CheckedSupplier;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 /**
@@ -39,7 +37,7 @@ public interface BeanSupplier<T> extends Supplier<T> {
     }
 
     /**
-     * Is proxy class?
+     * Determines whether the result is a proxy class.
      *
      * @param result the result
      * @return true/false
@@ -51,7 +49,7 @@ public interface BeanSupplier<T> extends Supplier<T> {
     }
 
     /**
-     * Is not proxy class?
+     * Determines whether the result is not a proxy class.
      *
      * @param result the result
      * @return true/false

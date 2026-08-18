@@ -54,6 +54,7 @@ import org.apereo.cas.support.oauth.OAuth20ResponseTypes;
 import org.apereo.cas.support.oauth.profile.OAuth20ProfileScopeToAttributesFilter;
 import org.apereo.cas.support.oauth.profile.OAuth20UserProfileDataCreator;
 import org.apereo.cas.support.oauth.services.OAuthRegisteredService;
+import org.apereo.cas.support.oauth.services.OAuthRegisteredServiceClientSecret;
 import org.apereo.cas.support.oauth.web.OAuth20RequestParameterResolver;
 import org.apereo.cas.support.oauth.web.response.OAuth20CasClientRedirectActionBuilder;
 import org.apereo.cas.support.oauth.web.response.accesstoken.OAuth20TokenGenerator;
@@ -96,6 +97,7 @@ import org.jose4j.jwt.NumericDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.pac4j.core.context.session.SessionStore;
+import org.pac4j.core.profile.factory.ProfileManagerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringBootConfiguration;
@@ -146,6 +148,10 @@ public abstract class AbstractOidcTests {
     @Qualifier("mockMvc")
     protected MockMvc mockMvc;
 
+    @Autowired
+    @Qualifier("oauthSecProfileManagerFactory")
+    protected ProfileManagerFactory oauthSecProfileManagerFactory;
+    
     @Autowired
     @Qualifier("oauthTokenGenerator")
     protected OAuth20TokenGenerator oauthTokenGenerator;
@@ -336,6 +342,10 @@ public abstract class AbstractOidcTests {
     @Qualifier(CipherExecutor.BEAN_NAME_WEBFLOW_CIPHER_EXECUTOR)
     protected CipherExecutor webflowCipherExecutor;
 
+    @Autowired
+    @Qualifier("oauthRegisteredServiceCipherExecutor")
+    protected CipherExecutor oauthRegisteredServiceCipherExecutor;
+
     protected static OidcRegisteredService getOidcRegisteredService() {
         return getOidcRegisteredService(true, true);
     }
@@ -360,7 +370,7 @@ public abstract class AbstractOidcTests {
         svc.setClientId(clientId);
         svc.setName("oauth-%s".formatted(UUID.randomUUID().toString()));
         svc.setDescription("description");
-        svc.setClientSecret("secret");
+        svc.setClientSecrets(CollectionUtils.wrapList(OAuthRegisteredServiceClientSecret.withoutExpiration("secret")));
         svc.setServiceId(redirectUri);
         svc.setSignIdToken(sign);
         svc.setEncryptIdToken(encrypt);
@@ -384,7 +394,7 @@ public abstract class AbstractOidcTests {
         svc.setClientId(clientId);
         svc.setName("oauth");
         svc.setDescription("description");
-        svc.setClientSecret("secret");
+        svc.setClientSecrets(CollectionUtils.wrapList(OAuthRegisteredServiceClientSecret.withoutExpiration("secret")));
         svc.setServiceId(redirectUri);
         svc.setInformationUrl("info");
         svc.setPrivacyUrl("privacy");
@@ -435,7 +445,7 @@ public abstract class AbstractOidcTests {
     }
 
     protected JwtClaims getClaims(final String subject, final String issuer,
-                                  final String clientId, final String audience) {
+                                  final String clientId, final String... audience) {
         val claims = new JwtClaims();
         claims.setJwtId(RandomUtils.randomAlphanumeric(16));
         claims.setIssuer(issuer);

@@ -240,7 +240,7 @@ function openNewAuthenticationHandlerDialog() {
     }).val(randomWord().replace(/_/g, "-"));
 
     createInputField({
-        labelTitle: "LDAP URL",                                        
+        labelTitle: "LDAP URL",
         name: "authnHandlerLdapUrl",
         required: true,
         containerId: controlsPanel,
@@ -985,6 +985,177 @@ function reloadAuthenticationHandlersTable() {
     }
 }
 
+let passwordlessAccountAttributesTable = null;
+
+function passwordlessAccountDisplayValue(value, fallback = "Not provided") {
+    if (value === null || value === undefined) {
+        return fallback;
+    }
+    if (Array.isArray(value)) {
+        const values = value.map(entry => passwordlessAccountDisplayValue(entry, "")).filter(entry => entry.length > 0);
+        return values.length > 0 ? values.join(", ") : fallback;
+    }
+    if (typeof value === "object") {
+        try {
+            return JSON.stringify(value);
+        } catch (error) {
+            return String(value);
+        }
+    }
+    const text = String(value).trim();
+    return text || fallback;
+}
+
+function passwordlessAccountState(value) {
+    if (value === true || String(value).toUpperCase() === "TRUE") {
+        return "enabled";
+    }
+    if (value === false || String(value).toUpperCase() === "FALSE") {
+        return "disabled";
+    }
+    return "unknown";
+}
+
+function updatePasswordlessAccountState(selector, value, labels) {
+    const state = passwordlessAccountState(value);
+    const icons = {
+        enabled: "mdi-check-circle",
+        disabled: "mdi-minus-circle-outline",
+        unknown: "mdi-help-circle-outline"
+    };
+    const $state = $(selector);
+    $state
+        .removeClass("passwordless-account-state-enabled passwordless-account-state-disabled passwordless-account-state-unknown")
+        .addClass(`passwordless-account-state-${state}`)
+        .empty()
+        .append($("<i>", {class: `mdi ${icons[state]}`, "aria-hidden": "true"}))
+        .append($("<span>").text(labels[state]));
+}
+
+function showPasswordlessAccountMessage(type, message) {
+    const icons = {
+        info: "mdi-information-outline",
+        warning: "mdi-account-question-outline",
+        danger: "mdi-alert-circle-outline"
+    };
+    const $message = $("#passwordlessAccountLookupMessage");
+    $message
+        .removeClass("banner-info banner-warning banner-danger")
+        .addClass(`banner-${type}`);
+    $message.find(".mdi").attr("class", `mdi ${icons[type]}`);
+    $message.find(".passwordless-account-message-text").text(message);
+    showElements($message);
+}
+
+function showPasswordlessAccountProgress(username) {
+    Swal.fire({
+        title: "Passwordless Account Lookup",
+        html: `
+            <div class="passwordless-account-swal-progress">
+                <div class="passwordless-account-swal-progress-message"></div>
+                <div class="passwordless-account-swal-progress-track"
+                     role="progressbar" aria-label="Looking up passwordless account"
+                     aria-valuetext="Lookup in progress">
+                    <span></span>
+                </div>
+            </div>`,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            const container = Swal.getHtmlContainer();
+            container.querySelector(".passwordless-account-swal-progress-message").textContent =
+                `Looking up the passwordless account for ${username}...`;
+        }
+    });
+}
+
+function renderPasswordlessAccount(account) {
+    const username = passwordlessAccountDisplayValue(account.username, "Unknown username");
+    const name = passwordlessAccountDisplayValue(account.name, username);
+    const email = passwordlessAccountDisplayValue(account.email, "");
+    const phone = passwordlessAccountDisplayValue(account.phoneNumber, "");
+    const source = passwordlessAccountDisplayValue(account.source, "");
+
+    $("#passwordlessAccountName").text(name);
+    $("#passwordlessAccountUsername").text(username);
+
+    [
+        ["#passwordlessAccountEmail", email],
+        ["#passwordlessAccountPhone", phone],
+        ["#passwordlessAccountSource", source]
+    ].forEach(([selector, value]) => {
+        $(selector)
+            .text(value || "Not provided")
+            .toggleClass("passwordless-account-empty-value", !value);
+    });
+
+    const hasContactInformation = email.length > 0 || phone.length > 0;
+    const $contactStatus = $("#passwordlessAccountContactStatus");
+    $contactStatus
+        .toggleClass("passwordless-account-contact-missing", !hasContactInformation)
+        .empty()
+        .append($("<i>", {
+            class: `mdi ${hasContactInformation ? "mdi-check-circle-outline" : "mdi-alert-circle-outline"}`,
+            "aria-hidden": "true"
+        }))
+        .append($("<span>").text(hasContactInformation ? "Contact channel available" : "No contact channel"));
+
+    updatePasswordlessAccountState(
+        "#passwordlessAccountMfaEligibility",
+        account.multifactorAuthenticationEligible,
+        {enabled: "Eligible", disabled: "Not eligible", unknown: "Unspecified"}
+    );
+    updatePasswordlessAccountState(
+        "#passwordlessAccountDelegatedEligibility",
+        account.delegatedAuthenticationEligible,
+        {enabled: "Eligible", disabled: "Not eligible", unknown: "Unspecified"}
+    );
+    updatePasswordlessAccountState(
+        "#passwordlessAccountRequestPassword",
+        account.requestPassword,
+        {enabled: "Requested", disabled: "Not requested", unknown: "Unspecified"}
+    );
+    updatePasswordlessAccountState(
+        "#passwordlessAccountSelectionMenu",
+        account.allowSelectionMenu,
+        {enabled: "Enabled", disabled: "Disabled", unknown: "Unspecified"}
+    );
+
+    const $clients = $("#passwordlessAccountDelegatedClients").empty();
+    const delegatedClients = Array.isArray(account.allowedDelegatedClients)
+        ? account.allowedDelegatedClients
+        : account.allowedDelegatedClients
+            ? [account.allowedDelegatedClients]
+            : [];
+    if (delegatedClients.length > 0) {
+        delegatedClients.forEach(client => {
+            const chip = $("<span>", {class: "passwordless-account-chip"});
+            chip.append($("<i>", {class: "mdi mdi-shield-account-outline", "aria-hidden": "true"}));
+            chip.append($("<span>").text(passwordlessAccountDisplayValue(client)));
+            $clients.append(chip);
+        });
+    } else {
+        $clients.append($("<span>", {class: "passwordless-account-empty-value"})
+            .text("No delegated clients are explicitly configured."));
+    }
+
+    const attributeEntries = account.attributes && typeof account.attributes === "object" && !Array.isArray(account.attributes)
+        ? Object.entries(account.attributes)
+        : [];
+    passwordlessAccountAttributesTable.clear();
+    for (const [attributeName, values] of attributeEntries) {
+        passwordlessAccountAttributesTable.row.add([
+            attributeName,
+            passwordlessAccountDisplayValue(values)
+        ]);
+    }
+    passwordlessAccountAttributesTable.draw();
+
+    showElements($("#passwordlessAccountResult"));
+    passwordlessAccountAttributesTable.columns.adjust();
+}
+
 async function initializeAuthenticationOperations() {
     const authnHandlersToolbar = document.createElement("div");
     let authnHandlersToolbarEntries = "";
@@ -1031,38 +1202,201 @@ async function initializeAuthenticationOperations() {
 
     reloadAuthenticationHandlersTable();
 
-    const authenticationPoliciesTable = $("#authenticationPoliciesTable").DataTable({
-        pageLength: 10,
-        order: [0, "asc"],
-        autoWidth: false,
-        drawCallback: settings => {
-            $("#authenticationPoliciesTable tr").addClass("mdc-data-table__row");
-            $("#authenticationPoliciesTable td").addClass("mdc-data-table__cell");
-        }
-    });
+    function authenticationPolicyProperties(policy) {
+        const properties = policy?.properties;
+        return properties && typeof properties === "object" && !Array.isArray(properties)
+            && Object.keys(properties).length > 0
+            ? properties
+            : null;
+    }
 
-    authenticationPoliciesTable.clear();
+    function authenticationPolicyPropertyValue(value) {
+        if (value === null) {
+            return "null";
+        }
+        if (value === undefined) {
+            return "Not available";
+        }
+        if (typeof value === "object") {
+            try {
+                return JSON.stringify(value, null, 2);
+            } catch (e) {
+                return String(value);
+            }
+        }
+        return String(value);
+    }
+
+    function showAuthenticationPolicyDetails(policy) {
+        const properties = authenticationPolicyProperties(policy);
+        if (!properties) {
+            return;
+        }
+
+        const dialog = $("<div>", {class: "authentication-policy-details-dialog"});
+        const detailsTable = $(
+            `<table class="mdc-data-table__table table table-striped noborder authentication-policy-details-table">
+                <thead>
+                    <tr class="mdc-data-table__header-row">
+                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Property</th>
+                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Value</th>
+                    </tr>
+                </thead>
+                <tbody class="mdc-data-table__content"></tbody>
+            </table>`
+        );
+        const detailsBody = detailsTable.find("tbody");
+        for (const [name, value] of Object.entries(properties)) {
+            const row = $("<tr>", {class: "mdc-data-table__row"});
+            row.append($("<td>", {class: "mdc-data-table__cell authentication-policy-property-name"})
+                .append($("<code>").text(name)));
+            row.append($("<td>", {class: "mdc-data-table__cell authentication-policy-property-value"})
+                .append($("<code>").text(authenticationPolicyPropertyValue(value))));
+            detailsBody.append(row);
+        }
+        dialog.append(detailsTable);
+        $("body").append(dialog);
+
+        let detailsDataTable;
+        dialog.dialog({
+            title: `Authentication Policy: ${policy.policyName}`,
+            modal: true,
+            width: Math.min($(window).width() - 40, 760),
+            maxHeight: Math.min($(window).height() - 80, 720),
+            position: {my: "center top", at: "center top+60", of: window},
+            buttons: {
+                Close: function () {
+                    $(this).dialog("close");
+                }
+            },
+            open: function () {
+                dialog.closest(".ui-dialog").addClass("authentication-policy-details-dialog-shell");
+                detailsDataTable = detailsTable.DataTable({
+                    paging: false,
+                    searching: false,
+                    ordering: true,
+                    info: false,
+                    autoWidth: false,
+                    columns: [
+                        {width: "35%"},
+                        {width: "65%"}
+                    ],
+                    drawCallback: () => {
+                        detailsTable.find("tr").addClass("mdc-data-table__row");
+                        detailsTable.find("td").addClass("mdc-data-table__cell");
+                    }
+                });
+                cas.init(".authentication-policy-details-dialog-shell .ui-dialog-buttonpane");
+            },
+            close: function () {
+                detailsDataTable?.destroy();
+                dialog.dialog("destroy").remove();
+            }
+        });
+    }
+
+    function setAuthenticationPoliciesStatus(icon, message) {
+        const status = $("#authenticationPoliciesStatus").empty();
+        if (!message) {
+            status.addClass("d-none");
+            return;
+        }
+        status.append($("<i>", {class: `mdi ${icon}`, "aria-hidden": "true"}));
+        status.append(document.createTextNode(message));
+        status.removeClass("d-none");
+    }
+
+    function createAuthenticationPolicyCard(policy) {
+        const policyName = String(policy?.name ?? "Unnamed policy");
+        const policyOrder = policy?.order ?? "N/A";
+        const cardData = {
+            policyName,
+            order: policyOrder,
+            properties: policy?.properties
+        };
+        const properties = authenticationPolicyProperties(cardData);
+        const propertyCount = properties ? Object.keys(properties).length : 0;
+        const card = $("<article>", {
+            class: "mdc-card ticket-item-card ticket-item-card-catalog authentication-policy-card",
+            "aria-label": `Authentication policy: ${policyName}`
+        });
+        const header = $("<div>", {class: "ticket-item-card-header"});
+        const identity = $("<div>", {class: "ticket-item-identity"});
+        identity.append($("<i>", {class: "mdi mdi-shield-account", "aria-hidden": "true"}));
+        const titleGroup = $("<div>", {class: "ticket-item-title-group"});
+        titleGroup.append($("<code>", {class: "ticket-item-title"}).text(policyName));
+        titleGroup.append($("<p>", {class: "ticket-item-subtitle"}).text("Authentication policy"));
+        identity.append(titleGroup);
+        header.append(identity);
+        header.append($("<span>", {class: "ticket-item-badge ticket-item-badge-catalog"})
+            .append($("<i>", {class: "mdi mdi-numeric", "aria-hidden": "true"}))
+            .append(document.createTextNode(`Order ${policyOrder}`)));
+        card.append(header);
+
+        const fields = $("<section>", {class: "ticket-card-fields"});
+        fields.append($("<div>", {class: "ticket-card-fields-title"})
+            .append($("<i>", {class: "mdi mdi-information-outline", "aria-hidden": "true"}))
+            .append(document.createTextNode(
+                `${propertyCount} ${propertyCount === 1 ? "property" : "properties"}`
+            )));
+        fields.append($("<p>", {class: "ticket-card-no-fields"})
+            .text(properties ? "Policy configuration details are available." : "No policy details are available."));
+        card.append(fields);
+
+        if (properties) {
+            const actions = $("<div>", {class: "authentication-policy-card-actions"});
+            const detailsButton = $("<button>", {
+                type: "button",
+                class: "mdc-button mdc-button--raised authentication-policy-details-button",
+                title: `View details for ${policyName}`
+            });
+            detailsButton.append($("<span>", {class: "mdc-button__label"})
+                .append($("<i>", {
+                    class: "mdc-tab__icon mdi mdi-eye",
+                    "aria-hidden": "true"
+                }))
+                .append(document.createTextNode("View Details")));
+            detailsButton.on("click", () => showAuthenticationPolicyDetails(cardData));
+            actions.append(detailsButton);
+            card.append(actions);
+        }
+        return card;
+    }
+
     if (CasActuatorEndpoints.authenticationPolicies()) {
         $.get(CasActuatorEndpoints.authenticationPolicies(), response => {
-            for (const handler of response) {
-                authenticationPoliciesTable.row.add({
-                    0: `${handler.name}`,
-                    1: `<code>${handler.order}</code>`
-                });
+            const policies = Array.isArray(response)
+                ? [...response].sort((first, second) =>
+                    (first?.order ?? Number.MAX_SAFE_INTEGER) - (second?.order ?? Number.MAX_SAFE_INTEGER)
+                    || String(first?.name ?? "").localeCompare(String(second?.name ?? "")))
+                : [];
+            const cards = $("#authenticationPoliciesCards").empty();
+            $("#authenticationPoliciesCount").text(policies.length);
+            $("#authenticationPoliciesSummary").removeClass("d-none");
+            if (policies.length === 0) {
+                setAuthenticationPoliciesStatus("mdi-shield-off-outline",
+                    "No authentication policies are available.");
+                return;
             }
-            authenticationPoliciesTable.draw();
+            setAuthenticationPoliciesStatus("", "");
+            for (const policy of policies) {
+                cards.append(createAuthenticationPolicyCard(policy));
+            }
+            cas.init("#authenticationPoliciesCards");
         }).fail((xhr, status, error) => {
             console.error("Error fetching data:", error);
+            $("#authenticationPoliciesCards").empty();
+            $("#authenticationPoliciesSummary").addClass("d-none");
+            setAuthenticationPoliciesStatus("mdi-alert-circle", "Unable to load authentication policies.");
             displayBanner(xhr);
         });
     }
 
-    const toolbar = document.createElement("div");
     let toolbarEntries = `
         <button type="button" id="loadExternalIdentityProvidersTableButton"
                 onclick="loadExternalIdentityProvidersTable()"
                 title="Reload external identity providers from sources"
-                class="mdc-button mdc-button--raised">
+                class="mdc-button mdc-button--raised mr-2">
             <span class="mdc-button__label"><i class="mdc-tab__icon mdi mdi-refresh" aria-hidden="true"></i>Reload</span>
         </button>
     `;
@@ -1078,84 +1412,8 @@ async function initializeAuthenticationOperations() {
         `;
     }
 
-    toolbar.innerHTML = toolbarEntries;
-    $("#delegatedClientsTable").DataTable({
-        pageLength: 10,
-        order: [0, "asc"],
-        autoWidth: false,
-        layout: {
-            topStart: toolbar
-        },
-        columnDefs: [
-            {visible: false, targets: 0},
-            {visible: false, targets: 3}
-        ],
-        drawCallback: settings => {
-            $("#delegatedClientsTable tr").addClass("mdc-data-table__row");
-            $("#delegatedClientsTable td").addClass("mdc-data-table__cell");
-            const api = settings.api;
-            const rows = api.rows({page: "current"}).nodes();
-            let last = null;
-            api.column(0, {page: "current"})
-                .data()
-                .each((group, i) => {
-                    if (last !== group) {
-                        let samlButtons = "";
-                        let toolbarButtons = "";
-
-                        rows.data().each(entry => {
-                            if (entry[0] === group) {
-                                if (PalantirDashboardConfiguration.mutablePropertySourcesAvailable() && CasActuatorEndpoints.casConfig()) {
-                                    toolbarButtons = `
-                                        <span class="px-2" style="float: right;">
-                                            <button type="button" 
-                                                    name="removeIdentityProvider" 
-                                                    href="#"
-                                                    title="Remove Identity Provider"
-                                                    onclick="removeIdentityProvider('${group}', '${entry[3]}')" 
-                                                    data-client-name='${group}'
-                                                    data-type='${entry[3]}'
-                                                    class="mdc-button mdc-button--raised toolbar">
-                                                <i class="mdi mdi-delete min-width-32x" aria-hidden="true"></i>
-                                            </button>
-                                        </span>
-                                    `.trim();
-                                }
-
-                                if (entry[3] === "saml2") {
-                                    samlButtons = `
-                                    <span class="px-2"  style="float: right;">
-                                            <button type="button" title="Service Provider Metadata" 
-                                                    title="View Service Provider Metadata"
-                                                    name="saml2ClientSpMetadata" href="#" clientName='${group}'
-                                                    class="mdc-button mdc-button--raised toolbar pr-2">
-                                                <i class="mdi mdi-text-box min-width-32x" aria-hidden="true"></i>
-                                                Service Provider Metadata
-                                            </button>
-                                            <button type="button" title="Identity Provider Metadata" 
-                                                    title="View Identity Provider Metadata"
-                                                    name="saml2ClientIdpMetadata" href="#" clientName='${group}'
-                                                    class="mdc-button mdc-button--raised toolbar pr-2">
-                                                <i class="mdi mdi-file-xml-box min-width-32x" aria-hidden="true"></i>
-                                                Identity Provider Metadata
-                                            </button>
-                                    </span>
-                                    `.trim();
-                                }
-                            }
-                        });
-                        $(rows).eq(i).before(
-                            `<tr style='font-weight: bold; background-color:var(--cas-theme-primary); color:var(--mdc-text-button-label-text-color);'>
-                                <td colspan="2"><span class="idp-group">${group}</span>${toolbarButtons.trim()} ${samlButtons.trim()}</td>
-                            </tr>`.trim()
-                        );
-                        configureSaml2ClientMetadataButtons();
-                        last = group;
-                    }
-                });
-        }
-    });
-
+    $("#delegatedClientsToolbar").html(toolbarEntries);
+    cas.init("#delegatedClientsToolbar");
 
     await loadExternalIdentityProvidersTable();
 
@@ -1252,6 +1510,84 @@ async function initializeAuthenticationOperations() {
                 }
             });
         });
+    }
+
+    const passwordlessEndpoint = CasActuatorEndpoints.passwordless();
+    if (passwordlessEndpoint) {
+        showElements($("#passwordless").parent());
+        passwordlessAccountAttributesTable = $("#passwordlessAccountAttributesTable").DataTable({
+            pageLength: 5,
+            lengthMenu: [5, 10, 25, 50],
+            autoWidth: false,
+            order: [[0, "asc"]],
+            language: {
+                emptyTable: "The account store did not return resolved attributes."
+            },
+            columnDefs: [
+                {
+                    targets: 0,
+                    width: "30%"
+                },
+                {
+                    targets: [0, 1],
+                    render: (data, type) => type === "display"
+                        ? $("<div>").text(data ?? "").html()
+                        : data
+                }
+            ],
+            drawCallback: () => {
+                $("#passwordlessAccountAttributesTable tr").addClass("mdc-data-table__row");
+                $("#passwordlessAccountAttributesTable td").addClass("mdc-data-table__cell");
+            }
+        });
+
+        $("#fmPasswordlessAccount").off("submit.passwordless").on("submit.passwordless", event => {
+            event.preventDefault();
+            const form = document.getElementById("fmPasswordlessAccount");
+            if (!form.reportValidity()) {
+                return;
+            }
+
+            const username = $("#passwordlessUsername").val().trim();
+            const $button = $("#fetchPasswordlessAccountButton");
+            const $buttonLabel = $button.find(".mdc-button__label");
+            $button.prop("disabled", true);
+            $buttonLabel.html('<i class="mdc-tab__icon mdi mdi-loading mdi-spin" aria-hidden="true"></i>Looking Up...');
+            hideElements($("#passwordlessAccountResult"));
+            hideElements($("#passwordlessAccountLookupMessage"));
+            showPasswordlessAccountProgress(username);
+
+            $.ajax({
+                url: passwordlessEndpoint,
+                method: "GET",
+                data: {username: username},
+                dataType: "json",
+                success: account => {
+                    if (account) {
+                        hideElements($("#passwordlessAccountLookupMessage"));
+                        renderPasswordlessAccount(account);
+                    } else {
+                        showPasswordlessAccountMessage("warning", `No passwordless account was found for ${username}.`);
+                    }
+                },
+                error: xhr => {
+                    if (xhr.status === 404) {
+                        showPasswordlessAccountMessage("warning", `No passwordless account was found for ${username}.`);
+                    } else {
+                        console.error("Error fetching passwordless account:", xhr.responseText);
+                        showPasswordlessAccountMessage("danger", `Unable to retrieve the passwordless account for ${username}.`);
+                    }
+                },
+                complete: () => {
+                    Swal.close();
+                    $button.prop("disabled", false);
+                    $buttonLabel.html('<i class="mdc-tab__icon mdi mdi-magnify" aria-hidden="true"></i>Look Up Account');
+                }
+            });
+        });
+    } else {
+        hideElements($("#passwordless").parent());
+        hideElements($("#passwordlessauthn-tab"));
     }
 
 }

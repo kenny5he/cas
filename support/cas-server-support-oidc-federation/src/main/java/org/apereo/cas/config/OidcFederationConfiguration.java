@@ -1,7 +1,11 @@
 package org.apereo.cas.config;
 
 import module java.base;
+import org.apereo.cas.audit.AuditableExecution;
+import org.apereo.cas.authentication.principal.ServiceFactory;
+import org.apereo.cas.authentication.principal.WebApplicationService;
 import org.apereo.cas.configuration.CasConfigurationProperties;
+import org.apereo.cas.configuration.model.support.oidc.federation.OidcFederationRole;
 import org.apereo.cas.multitenancy.TenantExtractor;
 import org.apereo.cas.oidc.discovery.OidcServerDiscoverySettings;
 import org.apereo.cas.oidc.federation.chain.OidcFederationDefaultTrustChainResolver;
@@ -11,11 +15,17 @@ import org.apereo.cas.oidc.federation.signature.OidcFederationDefaultJsonWebKeys
 import org.apereo.cas.oidc.federation.signature.OidcFederationEntityStatementService;
 import org.apereo.cas.oidc.federation.signature.OidcFederationJsonWebKeystoreService;
 import org.apereo.cas.oidc.federation.subordinate.OidcFederationSubordinateRepository;
+import org.apereo.cas.oidc.federation.validator.OpenIdFederationAuthorizationCodeResponseTypeAuthorizationRequestValidator;
 import org.apereo.cas.oidc.federation.web.OidcFetchFederationEndpointController;
 import org.apereo.cas.oidc.federation.web.OidcListFederationEndpointController;
 import org.apereo.cas.oidc.federation.web.OidcWellKnownFederationEndpointController;
 import org.apereo.cas.oidc.issuer.OidcDefaultIssuerService;
 import org.apereo.cas.oidc.issuer.OidcIssuerService;
+import org.apereo.cas.services.ServicesManager;
+import org.apereo.cas.support.oauth.OAuth20ResponseTypes;
+import org.apereo.cas.support.oauth.validator.authorization.OAuth20AuthorizationRequestValidator;
+import org.apereo.cas.support.oauth.web.OAuth20RequestParameterResolver;
+import org.apereo.cas.util.spring.beans.BeanSupplier;
 import org.apereo.cas.web.CasWebSecurityConfigurer;
 import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import com.nimbusds.openid.connect.sdk.federation.trust.TrustChainResolver;
@@ -49,7 +59,8 @@ class OidcFederationConfiguration {
     @Bean
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     @ConditionalOnMissingBean(name = "oidcFederationSubordinateRepository")
-    public OidcFederationSubordinateRepository oidcFederationSubordinateRepository(final CasConfigurationProperties casProperties) {
+    public OidcFederationSubordinateRepository oidcFederationSubordinateRepository(
+        final CasConfigurationProperties casProperties) {
         return new OidcFederationSubordinateRepository(casProperties.getAuthn().getOidc());
     }
 
@@ -145,6 +156,33 @@ class OidcFederationConfiguration {
     }
 
     @Bean
+    @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
+    @ConditionalOnMissingBean(name = "openIdFederationAuthorizationCodeResponseTypeAuthorizationRequestValidator")
+    public OAuth20AuthorizationRequestValidator openIdFederationAuthorizationCodeResponseTypeAuthorizationRequestValidator(
+        final CasConfigurationProperties casProperties,
+        @Qualifier(OAuth20RequestParameterResolver.BEAN_NAME)
+        final ObjectProvider<OAuth20RequestParameterResolver> oauthRequestParameterResolver,
+        @Qualifier(AuditableExecution.AUDITABLE_EXECUTION_REGISTERED_SERVICE_ACCESS)
+        final AuditableExecution registeredServiceAccessStrategyEnforcer,
+        @Qualifier(WebApplicationService.BEAN_NAME_FACTORY)
+        final ServiceFactory<WebApplicationService> webApplicationServiceFactory,
+        @Qualifier(ServicesManager.BEAN_NAME)
+        final ServicesManager servicesManager,
+        @Qualifier(OidcFederationTrustChainResolver.BEAN_NAME)
+        final OidcFederationTrustChainResolver oidcFederationTrustChainResolver) {
+        val responseTypesSupported = casProperties.getAuthn().getOidc().getDiscovery().getResponseTypesSupported();
+        return BeanSupplier.of(OAuth20AuthorizationRequestValidator.class)
+            .when(() -> responseTypesSupported.contains(OAuth20ResponseTypes.CODE.getType())
+                && oauthRequestParameterResolver.getIfAvailable() != null
+                && casProperties.getAuthn().getOidc().getFederation().getRole().isOpenIdProvider())
+            .supply(() -> new OpenIdFederationAuthorizationCodeResponseTypeAuthorizationRequestValidator(servicesManager,
+                webApplicationServiceFactory, registeredServiceAccessStrategyEnforcer, oauthRequestParameterResolver.getObject(),
+                oidcFederationTrustChainResolver))
+            .otherwiseProxy()
+            .get();
+    }
+
+    @Bean
     @ConditionalOnMissingBean(name = "oidcFederationProtocolEndpointConfigurer")
     @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
     public CasWebSecurityConfigurer<HttpSecurity> oidcFederationProtocolEndpointConfigurer(
@@ -152,11 +190,15 @@ class OidcFederationConfiguration {
         final OidcIssuerService oidcIssuerService,
         final CasConfigurationProperties casProperties) {
         
+        val role = casProperties.getAuthn().getOidc().getFederation().getRole();
+        Objects.requireNonNull(role, () -> "Federation role is not defined in CAS configuration. "
+            + "You MUST configure the federation role via cas.authn.oidc.federation.role=... where the value "
+            + "may be one of " + Arrays.toString(OidcFederationRole.values()));
+
         val baseEndpoint = getOidcBaseEndpoint(oidcIssuerService, casProperties);
         val endpoints = new ArrayList<String>();
         endpoints.add(baseEndpoint + '/' + WELL_KNOWN_OPENID_FEDERATION_URL);
 
-        val role = casProperties.getAuthn().getOidc().getFederation().getRole();
         if (role.isTrustAnchorOrIntermediate()) {
             endpoints.add(baseEndpoint + FETCH_FEDERATION_URL);
             endpoints.add(baseEndpoint + LIST_FEDERATION_URL);

@@ -1012,9 +1012,11 @@ class CasOAuth20Configuration {
             @ConditionalOnMissingBean(name = OAuth20ClientSecretValidator.BEAN_NAME)
             @RefreshScope(proxyMode = ScopedProxyMode.DEFAULT)
             public OAuth20ClientSecretValidator oauth20ClientSecretValidator(
+                @Qualifier(OAuth20ConfigurationContext.BEAN_NAME)
+                final ObjectProvider<OAuth20ConfigurationContext> context,
                 @Qualifier("oauthRegisteredServiceCipherExecutor")
                 final CipherExecutor oauthRegisteredServiceCipherExecutor) {
-                return new DefaultOAuth20ClientSecretValidator(oauthRegisteredServiceCipherExecutor);
+                return new DefaultOAuth20ClientSecretValidator(context, oauthRegisteredServiceCipherExecutor);
             }
 
             @Bean
@@ -1146,9 +1148,14 @@ class CasOAuth20Configuration {
                 final ServicesManager servicesManager) {
                 val responseTypesSupported = casProperties.getAuthn().getOidc().getDiscovery().getResponseTypesSupported();
                 return BeanSupplier.of(OAuth20AuthorizationRequestValidator.class)
-                    .when(() -> responseTypesSupported.contains(OAuth20ResponseTypes.CODE.getType()))
+                    .when(() -> {
+                        val federation = casProperties.getAuthn().getOidc().getFederation();
+                        return responseTypesSupported.contains(OAuth20ResponseTypes.CODE.getType())
+                            && (federation.getRole() == null || !federation.getRole().isOpenIdProvider());
+                    })
                     .supply(() -> new OAuth20AuthorizationCodeResponseTypeAuthorizationRequestValidator(servicesManager,
-                        webApplicationServiceFactory, registeredServiceAccessStrategyEnforcer, oauthRequestParameterResolver))
+                        webApplicationServiceFactory, registeredServiceAccessStrategyEnforcer,
+                        oauthRequestParameterResolver))
                     .otherwiseProxy()
                     .get();
             }

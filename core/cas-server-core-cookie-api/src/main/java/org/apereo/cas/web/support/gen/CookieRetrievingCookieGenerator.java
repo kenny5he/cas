@@ -51,7 +51,7 @@ public class CookieRetrievingCookieGenerator implements Serializable, CasCookieB
     private final CookieValueManager casCookieValueManager;
     
     /**
-     * Is remember me authentication ?
+     * Determines whether remember-me authentication is active.
      *
      * @param requestContext the request context
      * @return true/false
@@ -169,7 +169,7 @@ public class CookieRetrievingCookieGenerator implements Serializable, CasCookieB
                     .distinct()
                     .filter(StringUtils::isNotBlank)
                     .forEach(path -> {
-                        val crm = new Cookie(cookie.getName(), cookie.getValue());
+                        val crm = new Cookie(cookie.getName(), StringUtils.EMPTY);
                         crm.setMaxAge(0);
                         crm.setPath(path);
                         crm.setSecure(cookie.getSecure());

@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.endpoint.Access;
@@ -26,11 +25,11 @@ import org.springframework.http.MediaType;
 @Endpoint(id = "authenticationPolicies", defaultAccess = Access.NONE)
 public class RegisteredAuthenticationPoliciesEndpoint extends BaseCasActuatorEndpoint {
 
-    private final ObjectProvider<@NonNull AuthenticationEventExecutionPlan> authenticationEventExecutionPlan;
+    private final ObjectProvider<AuthenticationEventExecutionPlan> authenticationEventExecutionPlan;
 
     public RegisteredAuthenticationPoliciesEndpoint(
         final CasConfigurationProperties casProperties,
-        final ObjectProvider<@NonNull AuthenticationEventExecutionPlan> authenticationEventExecutionPlan) {
+        final ObjectProvider<AuthenticationEventExecutionPlan> authenticationEventExecutionPlan) {
 
         super(casProperties);
         this.authenticationEventExecutionPlan = authenticationEventExecutionPlan;
@@ -47,7 +46,11 @@ public class RegisteredAuthenticationPoliciesEndpoint extends BaseCasActuatorEnd
     public Collection<AuthenticationPolicyDetails> handle() {
         return authenticationEventExecutionPlan.getObject().getAuthenticationPolicies()
             .stream()
-            .map(policy -> AuthenticationPolicyDetails.builder().name(policy.getName()).order(policy.getOrder()).build())
+            .map(policy -> AuthenticationPolicyDetails.builder()
+                .name(policy.getName())
+                .order(policy.getOrder())
+                .properties(policy.toConfiguration())
+                .build())
             .sorted(Comparator.comparingInt(AuthenticationPolicyDetails::getOrder))
             .collect(Collectors.toList());
     }
@@ -60,13 +63,18 @@ public class RegisteredAuthenticationPoliciesEndpoint extends BaseCasActuatorEnd
      */
     @ReadOperation(produces = {
         MediaType.APPLICATION_JSON_VALUE, MEDIA_TYPE_SPRING_BOOT_V2_JSON, MEDIA_TYPE_CAS_YAML})
-    @Operation(summary = "Get available authentication policy by name", parameters = @Parameter(name = "name", required = true, description = "The name of the policy to fetch"))
+    @Operation(summary = "Get available authentication policy by name",
+        parameters = @Parameter(name = "name", required = true, description = "The name of the policy to fetch"))
     public @Nullable AuthenticationPolicyDetails fetchPolicy(@Selector final String name) {
         return this.authenticationEventExecutionPlan.getObject().getAuthenticationPolicies()
             .stream()
             .filter(authnHandler -> authnHandler.getName().equals(name))
             .findFirst()
-            .map(policy -> AuthenticationPolicyDetails.builder().name(policy.getName()).order(policy.getOrder()).build())
+            .map(policy -> AuthenticationPolicyDetails.builder()
+                .name(policy.getName())
+                .order(policy.getOrder())
+                .properties(policy.toConfiguration())
+                .build())
             .orElse(null);
     }
 
@@ -80,5 +88,7 @@ public class RegisteredAuthenticationPoliciesEndpoint extends BaseCasActuatorEnd
         private final String name;
 
         private final Integer order;
+
+        private Map<String, Object> properties;
     }
 }

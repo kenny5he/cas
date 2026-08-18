@@ -10,7 +10,7 @@ services:
   syncope:
     depends_on:
       - db
-    image: apache/syncope:4.1.1
+    image: apache/syncope:4.1.2
     ports:
       - "18080:8080"
     restart: always
@@ -28,10 +28,11 @@ services:
       SERVICE_DISCOVERY_ADDRESS: http://syncope:8080/syncope/rest/
       ANONYMOUS_USER: syncope
       ANONYMOUS_KEY: syncope
+      SECURITY_AUTHENTICATIONERROR_EXPOSEDETAILS: "true"
   syncope-console:
     depends_on:
       - syncope
-    image: apache/syncope-console:5.0.0-SNAPSHOT
+    image: apache/syncope-console:4.1.2
     ports:
       - "28080:8080"
     restart: always

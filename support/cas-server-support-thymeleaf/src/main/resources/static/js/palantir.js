@@ -90,6 +90,7 @@ async function initializePalantir() {
                         initializeThrottlesOperations(),
                         initializeMultifactorOperations(),
                         initializeMultitenancyOperations(),
+                        initializeClusterTopologyOperations(),
                         initializeTrustedMultifactorOperations(),
                         initializeAuditEventsOperations(),
                         initializeCasEventsOperations(),
@@ -111,6 +112,8 @@ async function initializePalantir() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    initializePalantirInputIcons();
+    initializePalantirPollingContext();
     initializeTabs();
     initializeMenus();
     initializeDropDowns();

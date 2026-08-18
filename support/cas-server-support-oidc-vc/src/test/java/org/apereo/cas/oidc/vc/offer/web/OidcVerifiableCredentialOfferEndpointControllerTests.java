@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Tag("OIDCWeb")
 @ImportAutoConfiguration(CasOidcVerifiableCredentialsAutoConfiguration.class)
 @TestPropertySource(properties = {
-    "cas.authn.oidc.vc.issuer.credential-configurations.UniversityDegreeCredential.format=vc+sd-jwt",
+    "cas.authn.oidc.vc.issuer.credential-configurations.UniversityDegreeCredential.format=DC_SD_JWT",
     "cas.authn.oidc.vc.issuer.credential-configurations.UniversityDegreeCredential.scope=UniversityDegree"
 })
 class OidcVerifiableCredentialOfferEndpointControllerTests extends AbstractOidcTests {
@@ -60,7 +60,9 @@ class OidcVerifiableCredentialOfferEndpointControllerTests extends AbstractOidcT
             .andExpect(jsonPath("$.credential_issuer").value(casProperties.getAuthn().getOidc().getCore().getIssuer()))
             .andExpect(jsonPath("$.credential_configuration_ids[0]").value("UniversityDegreeCredential"))
             .andExpect(jsonPath("$.grants").exists())
-            .andExpect(jsonPath("$.grants.['urn:ietf:params:oauth:grant-type:pre-authorized_code'].tx_code").value(ticket.getId()))
+            .andExpect(jsonPath("$.grants.['urn:ietf:params:oauth:grant-type:pre-authorized_code'].tx_code.description").exists())
+            .andExpect(jsonPath("$.grants.['urn:ietf:params:oauth:grant-type:pre-authorized_code'].tx_code.input_mode").exists())
+            .andExpect(jsonPath("$.grants.['urn:ietf:params:oauth:grant-type:pre-authorized_code'].tx_code.length").exists())
             .andExpect(jsonPath("$.grants.['urn:ietf:params:oauth:grant-type:pre-authorized_code'].pre-authorized_code").exists())
             .andExpect(jsonPath("$.grants.['urn:ietf:params:oauth:grant-type:pre-authorized_code'].issuer_state").exists())
             .andReturn()
@@ -77,7 +79,7 @@ class OidcVerifiableCredentialOfferEndpointControllerTests extends AbstractOidcT
                 .secure(true)
                 .with(withHttpRequestProcessor())
                 .param(OAuth20Constants.CLIENT_ID, registeredService.getClientId())
-                .param(OAuth20Constants.CLIENT_SECRET, registeredService.getClientSecret())
+                .param(OAuth20Constants.CLIENT_SECRET, registeredService.getClientSecrets().getFirst().getValue())
                 .queryParam(OAuth20Constants.GRANT_TYPE, OAuth20GrantTypes.PRE_AUTHORIZED_CODE.getType())
                 .queryParam(OidcConstants.PRE_AUTHORIZED_CODE, preAuthorizedCode)
                 .queryParam(OidcConstants.TX_CODE, txCode)
@@ -87,7 +89,7 @@ class OidcVerifiableCredentialOfferEndpointControllerTests extends AbstractOidcT
             .andExpect(jsonPath("$." + OAuth20Constants.TOKEN_TYPE).exists())
             .andExpect(jsonPath("$." + OAuth20Constants.EXPIRES_IN).exists())
             .andExpect(jsonPath("$." + OidcConstants.C_NONCE).exists())
-            .andExpect(jsonPath("$." + OidcConstants.C_NONCE_EXPIRES_AT).exists());
+            .andExpect(jsonPath("$." + OidcConstants.C_NONCE_EXPIRES_IN).exists());
     }
 
     @Test
@@ -111,7 +113,7 @@ class OidcVerifiableCredentialOfferEndpointControllerTests extends AbstractOidcT
                 .content(requestBody)
                 .with(withHttpRequestProcessor())
                 .param(OAuth20Constants.CLIENT_ID, registeredService.getClientId())
-                .param(OAuth20Constants.CLIENT_SECRET, registeredService.getClientSecret())
+                .param(OAuth20Constants.CLIENT_SECRET, registeredService.getClientSecrets().getFirst().getValue())
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.transactionId").exists())
@@ -131,7 +133,7 @@ class OidcVerifiableCredentialOfferEndpointControllerTests extends AbstractOidcT
                 .content(requestBody)
                 .with(withHttpRequestProcessor())
                 .param(OAuth20Constants.CLIENT_ID, registeredService.getClientId())
-                .param(OAuth20Constants.CLIENT_SECRET, registeredService.getClientSecret())
+                .param(OAuth20Constants.CLIENT_SECRET, registeredService.getClientSecrets().getFirst().getValue())
             )
             .andExpect(status().isUnauthorized())
             .andExpect(jsonPath("$.error").exists());
@@ -157,7 +159,7 @@ class OidcVerifiableCredentialOfferEndpointControllerTests extends AbstractOidcT
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(withHttpRequestProcessor())
                 .param(OAuth20Constants.CLIENT_ID, registeredService.getClientId())
-                .param(OAuth20Constants.CLIENT_SECRET, registeredService.getClientSecret())
+                .param(OAuth20Constants.CLIENT_SECRET, registeredService.getClientSecrets().getFirst().getValue())
             )
             .andExpect(status().isBadRequest());
     }

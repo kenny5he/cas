@@ -106,9 +106,8 @@ public class OAuth20Utils {
      * @param clazz           the clazz
      * @return the registered o auth service by client id
      */
-    public static <T extends OAuthRegisteredService> @Nullable T getRegisteredOAuthServiceByClientId(final ServicesManager servicesManager,
-                                                                                                     final String clientId,
-                                                                                                     final Class<T> clazz) {
+    public static <T extends OAuthRegisteredService> @Nullable T getRegisteredOAuthServiceByClientId(
+        final ServicesManager servicesManager, final String clientId, final Class<T> clazz) {
         return FunctionUtils.doIfNotBlank(clientId,
             () -> {
                 val query = RegisteredServiceQuery.of(OAuthRegisteredService.class, "clientId", clientId).withIncludeAssignableTypes(true);
@@ -239,7 +238,7 @@ public class OAuth20Utils {
     }
 
     /**
-     * Is response mode type expected?
+     * Determines whether the response mode type matches the expected type.
      *
      * @param type         the type
      * @param expectedType the expected type
@@ -341,13 +340,15 @@ public class OAuth20Utils {
     }
 
     /**
-     * Is the registered service need authentication?
+     * Determines whether the registered service requires authentication.
      *
      * @param registeredService the registered service
      * @return whether the service need authentication
      */
     public boolean doesServiceNeedAuthentication(final OAuthRegisteredService registeredService) {
-        return StringUtils.isNotBlank(registeredService.getClientSecret());
+        return registeredService.getClientSecrets() != null
+            && !registeredService.getClientSecrets().isEmpty()
+            && registeredService.getClientSecrets().stream().anyMatch(secret -> StringUtils.isNotBlank(secret.getValue()));
     }
 
     /**

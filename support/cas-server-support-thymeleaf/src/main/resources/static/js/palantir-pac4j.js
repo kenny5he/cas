@@ -3,7 +3,7 @@ function removeIdentityProvider(idp, type) {
         Swal.fire({
             title: `Are you sure you want to delete ${idp}?`,
             text: `
-                Removing this identity provider is only possible if it's owned and managed by a dynamic configuration source. 
+                Removing this identity provider is only possible if it's owned and managed by a dynamic configuration source.
                 Once removed, you may not be able to revert this.
             `,
             icon: "question",
@@ -121,20 +121,16 @@ function configureSaml2ClientMetadataButtons() {
         const beautify = ace.require("ace/ext/beautify");
         beautify.beautify(saml2Editor.session);
 
-        const dialog = window.mdc.dialog.MDCDialog.attachTo(document.getElementById("delegatedClientsSaml2Dialog"));
-        dialog["open"]();
+    const dialog = window.mdc.dialog.MDCDialog.attachTo(document.getElementById("delegatedClientsSaml2Dialog"));
+    dialog["open"]();
     }
 
-    $("button[name=saml2ClientSpMetadata]").off().on("click", function () {
-        $(this).prop("disabled", true);
-        const url = `${PalantirDashboardConfiguration.casServerPrefix()}/sp/${$(this).attr("clientName")}/metadata`;
-        $.get(url, payload => showSamlMetadata(payload))
-            .always(() => $(this).prop("disabled", false));
+    function showSaml2ClientSpMetadata(clientName) {
+        const url = `${PalantirDashboardConfiguration.casServerPrefix()}/sp/${clientName}/metadata`;
+        $.get(url, payload => showSamlMetadata(payload));
+    }
 
-    });
-    $("button[name=saml2ClientIdpMetadata]").off().on("click", function () {
-        $(this).prop("disabled", true);
-        const clientName = `${$(this).attr("clientName")}`;
+    function showSaml2ClientIdpMetadata(clientName) {
         const url = `${PalantirDashboardConfiguration.casServerPrefix()}/sp/${clientName}/idp/metadata`;
 
         Swal.fire({
@@ -150,15 +146,122 @@ function configureSaml2ClientMetadataButtons() {
             await showSamlMetadata(payload);
             await updateNavigationSidebar();
             Swal.close();
-        })
-            .always(() => $(this).prop("disabled", false));
+        });
+    }
+
+    initializeContextMenu({
+        selector: "#delegatedClientsCards .external-identity-provider-card",
+        build: $trigger => ({
+            clientName: $trigger.data("client-name"),
+            type: $trigger.data("type")
+        }),
+        items: {
+            remove: {
+                name: "Remove Identity Provider",
+                icon: contextMenuIcon("mdi-delete"),
+                visible: context => PalantirDashboardConfiguration.mutablePropertySourcesAvailable()
+                    && CasActuatorEndpoints.casConfig()
+                    && context.clientName
+                    && context.type
+            },
+            spMetadata: {
+                name: "Service Provider Metadata",
+                icon: contextMenuIcon("mdi-text-box"),
+                visible: context => context.type === "saml2"
+            },
+            idpMetadata: {
+                name: "Identity Provider Metadata",
+                icon: contextMenuIcon("mdi-file-xml-box"),
+                visible: context => context.type === "saml2"
+            }
+        },
+        callback: (key, options) => {
+            const {clientName, type} = options.context;
+            if (key === "remove") {
+                removeIdentityProvider(clientName, type);
+            } else if (key === "spMetadata") {
+                showSaml2ClientSpMetadata(clientName);
+            } else if (key === "idpMetadata") {
+                showSaml2ClientIdpMetadata(clientName);
+            }
+        }
     });
 }
 
+function externalIdentityProviderValue(value) {
+    if (typeof value === "object") {
+        try {
+            return JSON.stringify(value);
+        } catch (e) {
+            return String(value);
+        }
+    }
+    return String(value);
+}
+
+function setExternalIdentityProviderStatus(icon, message) {
+    const status = $("#delegatedClientsStatus").empty();
+    if (!message) {
+        status.addClass("d-none");
+        return;
+    }
+    status.append($("<i>", {class: `mdi ${icon}`, "aria-hidden": "true"}));
+    status.append(document.createTextNode(message));
+    status.removeClass("d-none");
+}
+
+function createExternalIdentityProviderCard(name, identityProvider) {
+    const type = String(identityProvider?.type ?? "Unknown");
+    const flattened = flattenJSON(identityProvider ?? {});
+    const properties = Object.entries(flattened)
+        .filter(([field, value]) => field !== "type"
+            && value !== null
+            && value !== undefined
+            && (typeof value !== "string" || value.trim().length > 0));
+    const card = $("<article>", {
+        class: "mdc-card ticket-item-card ticket-item-card-catalog external-identity-provider-card",
+        "aria-label": `${type} external identity provider: ${name}`,
+        "data-client-name": name,
+        "data-type": identityProvider?.type ?? ""
+    });
+    const header = $("<div>", {class: "ticket-item-card-header"});
+    const identity = $("<div>", {class: "ticket-item-identity"});
+    identity.append($("<i>", {class: "mdi mdi-account-key", "aria-hidden": "true"}));
+    const titleGroup = $("<div>", {class: "ticket-item-title-group"});
+    titleGroup.append($("<code>", {class: "ticket-item-title"}).text(name));
+    titleGroup.append($("<p>", {class: "ticket-item-subtitle"}).text("External identity provider"));
+    identity.append(titleGroup);
+    header.append(identity);
+    header.append($("<span>", {class: "ticket-item-badge ticket-item-badge-catalog"})
+        .append($("<i>", {class: "mdi mdi-shield-key", "aria-hidden": "true"}))
+        .append(document.createTextNode(type)));
+    card.append(header);
+
+    const fields = $("<section>", {class: "ticket-card-fields"});
+    fields.append($("<div>", {class: "ticket-card-fields-title"})
+        .append($("<i>", {class: "mdi mdi-tag-multiple", "aria-hidden": "true"}))
+        .append(document.createTextNode(`${properties.length} ${properties.length === 1 ? "field" : "fields"}`)));
+    if (properties.length === 0) {
+        fields.append($("<p>", {class: "ticket-card-no-fields"}).text("No additional fields"));
+    } else {
+        const fieldList = $("<dl>", {class: "ticket-card-field-list"});
+        for (const [fieldName, value] of properties) {
+            const field = $("<div>", {class: "ticket-card-field"});
+            field.append($("<dt>").text(toKebabCase(fieldName)));
+            field.append($("<dd>").append($("<code>").text(externalIdentityProviderValue(value))));
+            fieldList.append(field);
+        }
+        fields.append(fieldList);
+    }
+    card.append(fields);
+    return card;
+}
+
 async function loadExternalIdentityProvidersTable() {
-    const delegatedClientsTable = $("#delegatedClientsTable").DataTable();
-    delegatedClientsTable.clear();
+    const delegatedClientsCards = $("#delegatedClientsCards").empty();
+    $("#delegatedClientsSummary").addClass("d-none");
     if (CasActuatorEndpoints.delegatedClients()) {
+        setExternalIdentityProviderStatus("mdi-loading mdi-spin", "Loading external identity providers...");
         Swal.fire({
             icon: "info",
             title: `Loading Identity Providers`,
@@ -168,20 +271,20 @@ async function loadExternalIdentityProvidersTable() {
             didOpen: () => Swal.showLoading()
         });
         $.get(CasActuatorEndpoints.delegatedClients(), response => {
-            for (const [key, idp] of Object.entries(response)) {
-                const details = flattenJSON(idp);
-                for (const [k, v] of Object.entries(details)) {
-                    if (Object.keys(v).length > 0 && k !== "type") {
-                        delegatedClientsTable.row.add({
-                            0: `${key}`,
-                            1: `<code>${toKebabCase(k)}</code>`,
-                            2: `<code>${v}</code>`,
-                            3: `${idp.type}`
-                        });
-                    }
+            const identityProviders = response && typeof response === "object" && !Array.isArray(response)
+                ? Object.entries(response).sort(([first], [second]) => first.localeCompare(second))
+                : [];
+            $("#delegatedClientsCount").text(identityProviders.length);
+            $("#delegatedClientsSummary").removeClass("d-none");
+            if (identityProviders.length === 0) {
+                setExternalIdentityProviderStatus("mdi-account-off-outline",
+                    "No external identity providers are available.");
+            } else {
+                setExternalIdentityProviderStatus("", "");
+                for (const [name, identityProvider] of identityProviders) {
+                    delegatedClientsCards.append(createExternalIdentityProviderCard(name, identityProvider));
                 }
             }
-            delegatedClientsTable.draw();
             showElements("#delegatedClientsContainer");
             showElements($("#delegatedclients").parent());
             updateNavigationSidebar();
@@ -189,12 +292,17 @@ async function loadExternalIdentityProvidersTable() {
             Swal.close();
         }).fail((xhr, status, error) => {
             console.error("Error fetching data:", error);
+            delegatedClientsCards.empty();
+            $("#delegatedClientsSummary").addClass("d-none");
+            setExternalIdentityProviderStatus("mdi-alert-circle", "Unable to load external identity providers.");
             hideElements("#delegatedClientsContainer");
             hideElements($("#delegatedclients").parent());
             displayBanner(xhr);
             Swal.close();
         });
     } else {
+        delegatedClientsCards.empty();
+        $("#delegatedClientsSummary").addClass("d-none");
         hideElements("#delegatedClientsContainer");
         hideElements($("#delegatedclients").parent());
     }
@@ -572,8 +680,9 @@ function newExternalIdentityProvider() {
                 $("#newExternalIdentityProviderDialog .jqueryui-selectmenu").selectmenu({
                     width: "330px",
                     change: function (event, ui) {
-                        const type = ui.item.value;
-                        handleExternalIdentityProviderTypeChange(type);
+                        if (this.id === "externalIdPTypeSelect") {
+                            handleExternalIdentityProviderTypeChange(ui.item.value);
+                        }
                     }
                 });
                 const currentType = $("#externalIdPTypeSelect").val();
@@ -587,5 +696,3 @@ function newExternalIdentityProvider() {
         dialogContainer.dialog("open");
     }
 }
-
-

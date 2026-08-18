@@ -56,16 +56,6 @@
                             <option value="500">Last 500 Entries</option>
                         </select>
                     </label>
-                    <label for="logRefreshFilter" class="pl-2">
-                        Refresh:
-                        <select id="logRefreshFilter" class="jqueryui-selectmenu">
-                            <option value="1000">Every 1 Seconds</option>
-                            <option value="5000" selected>Every 5 Seconds</option>
-                            <option value="15000">Every 15 Seconds</option>
-                            <option value="30000">Every 30 Seconds</option>
-                            <option value="60000">Every 60 Seconds</option>
-                        </select>
-                    </label>
                 </div>
                 
                 <div class="d-flex">
@@ -125,6 +115,14 @@
                             <option value="unknown">Unknown</option>
                         </select>
                     </label>
+                    <button type="button" id="refreshAuditEventsButton"
+                            title="Refresh audit events"
+                            class="mdc-button mdc-button--raised ml-2 align-self-center">
+                        <span class="mdc-button__label">
+                            <i class="mdc-tab__icon mdi mdi-refresh" aria-hidden="true"></i>
+                            Refresh
+                        </span>
+                    </button>
                 </div>
                 
                 <div class="audit-events-table-wrap">
@@ -144,22 +142,27 @@
                         </tbody>
                     </table>
                 </div>
+                <section class="mdc-card audit-actions-chart-card" aria-labelledby="auditActionsChartTitle">
+                    <div class="audit-actions-chart-header">
+                        <div>
+                            <h3 id="auditActionsChartTitle">
+                                <i class="mdi mdi-chart-bar" aria-hidden="true"></i>
+                                Audit Actions
+                            </h3>
+                            <p>Event counts grouped by the actions currently displayed in the table.</p>
+                        </div>
+                        <span id="auditActionsChartCount" class="ticket-summary-chip ticket-summary-catalog">
+                            0 events across 0 actions
+                        </span>
+                    </div>
+                    <div class="audit-actions-chart-container">
+                        <canvas id="auditActionsChart" role="img"
+                                aria-label="Bar chart of audit event counts grouped by action"></canvas>
+                    </div>
+                </section>
             </div>
             <div id="casEvents-tab">
               <p>The CAS application events retrieved from the event repository.</p>
-
-                <div class="d-flex">
-                    <label for="casEventsRefreshFilter" class="pl-2">
-                        Refresh:
-                        <select id="casEventsRefreshFilter" class="jqueryui-selectmenu">
-                            <option value="1000">Every 1 Seconds</option>
-                            <option value="5000" selected>Every 5 Seconds</option>
-                            <option value="15000">Every 15 Seconds</option>
-                            <option value="30000">Every 30 Seconds</option>
-                            <option value="60000">Every 60 Seconds</option>
-                        </select>
-                    </label>
-                </div>
                 <table id="casEventsTable" class="mdc-data-table__table table table-striped noborder">
                     <thead>
                     <tr class="mdc-data-table__header-row">
